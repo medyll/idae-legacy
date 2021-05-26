@@ -1,0 +1,50 @@
+button[disabled=disabled] img { opacity: 0.2; }
+fieldset { border: 1px solid #ccc; -moz-background-clip: initial; -moz-border-radius: 2px; padding: 2px; width: auto; }
+.inputLarge, .inputLarge select, .inputLarge { width: 420px!important; }
+.inputFull , .inputFull select{width:100%!important;}
+.inputMedium,input[type=text].inputMedium, select.inputMedium, .inputMedium select, textarea.inputMedium { width: 242px!important; }
+.inputSmall,input[type=text].inputSmall, select.inputSmall, div.inputSmall select { width: 80px!important; }
+.inputTiny,input[type=text].inputTiny, select.inputTiny, div.inputTiny select, input[type=submit].inputTiny { width: 40px; }
+.inputMini,input[type=text].inputMini, select.inputMini, div.inputMini select, input[type=submit].inputMini { width: 20px; }
+input.searchFocus, select.searchFocus, div.searchFocus select { background-image: url(images/inputSearch.png)!important; }
+
+
+
+option { background-color: inherit; height: 23px;  }
+option:hover { background-color: #000;color:#fff; cursor: pointer; }
+select { border:0px none ;background-color:#ededed;height: 23px;box-sizing: border-box; position: static; vertical-align: middle; width: 130px; }
+textarea { font-size:12px;height: 85px; padding: 2px; width: 130px; }
+textarea.inputHyperLarge { height: 200px; width: 580px; }
+textarea:focus, button:focus { -moz-outline-offset: -1px ! important; }
+
+.fauxInput {border: 1px solid #BFBFBF;
+			color: #444444;
+			margin: 1px 0;
+			padding: 0px 3px;
+    line-height: 2em;
+			}
+.fauxInput:hover {
+			border: 1px solid #666666;
+			box-shadow: 0 0 1px #4D90FE inset;
+}
+.fauxInput:focus {
+			border:1px solid #4d90fe;
+			box-shadow:0 0 1px #09F inset;
+}
+.fauxInput input,.fauxInput input:hover,.fauxInput input:focus{border:none!important;}
+
+.fauxInputImportant { color: #CC0066; display: block; height: 21px; line-height: 21px; margin: 0px; padding-left: 16px; }
+
+input[type=text].inputFree , textarea.inputFree, .inputFree select {margin:0;font-size:inherit;box-shadow: none;  border-radius:0px!important;  background-color: transparent; background-image: none!important; background-repeat: repeat!important; border:none!important;position: relative; vertical-align: middle; width: 100%!important;padding:6px 4px }
+input[type=text].inputFree:hover, textarea.inputFree:hover,input[type=text].inputFree:active { background-image: url(images/inputEdit.png)!important; cursor: pointer; cursor: hand;border:none!important; }
+input[type=text].inputFree:focus, textarea.inputFree:focus{ background-image: url(images/inputEdit.png)!important; cursor: auto; text-decoration: none; border:none!important; }
+input[type=text].inputFree[readonly=readonly]:hover,textarea.inputFree[readonly=readonly]:hover  { background-image: url(images/inputDisabled.png)!important; cursor: pointer; cursor: hand; border:none!important;}
+
+
+input[type="button"].pickPickerButton{background-repeat:no-repeat; background-position:center center;background-color:rgba(255,255,255,0);height:100%!important;width:22px!important;min-width:18px!important;position:absolute;top:0px;right:0;margin:0px;right:0px;box-shadow: none!important ;border:none; }
+input[type="button"].pickPickerButton:hover{background-color:rgba(255,255,255,0.4);border:none;border-left:1px solid #ccc;-moz-box-shadow: none;-webkit-box-shadow: none;-box-shadow: none;}
+input[type="button"].calendrierButton{background-image: url(images/date16.png)!important;  }  
+input[type="button"].heureButton{ background-image: url(images/time16.png)!important;  }  
+.default{ background-image: url(images/down.png)!important; }  
+input[type="button"].searchButton{ background-image: url(images/search16.png)!important; } 
+input[type="button"].noButton{ background-image:none!important; } 

@@ -1,0 +1,419 @@
+<html>
+<head>
+	<style type = "text/css">
+		body, td {
+			font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+			font-size: 11px;
+			line-height: 1.42857143;
+			color: #333;
+			margin: 0;
+			padding: 0;
+			}
+
+		.bold { font-weight: bold; }
+
+		.bordert { border-top: 1px solid; }
+
+		.margin { margin: 0.25em !important; }
+
+		.marginb { margin-bottom: 0.25em !important; }
+
+		.mastershow .slaveshow { display: none; }
+
+		.mastershow:hover .slaveshow { display: block; }
+
+		.padding { padding: 0.25em; width: auto; }
+
+		.retrait { margin-left: 2em; }
+
+		table { margin: 0px; padding: 0px; table-layout: fixed; empty-cells: show; border-collapse: collapse; border-spacing: 0; }
+
+		table td { empty-cells: show; padding: 1px; }
+
+		table td.date { width: 75px; }
+
+		table td.ededed, tr.ededed td, .ededed, .ededed { background: #ededed; }
+
+		.tableexcel entete td, table.tablegrille entete td { min-height: 30px; }
+
+		.tableexcel td { border-bottom: 1px solid #ccc; border-right: 1px solid #ccc; font-size: 11px; text-overflow: ellipsis; }
+
+		.tablegrille td { border-bottom: 1px solid #ccc; font-size: 11px; text-overflow: ellipsis; }
+
+		.tablegrilleprestation td { border-bottom: 1px dashed #ededed; vertical-align: middle; }
+
+		.tablegui td { empty-cells: show; padding: 0px; vertical-align: top; }
+
+		.tablemiddle td { vertical-align: middle; }
+
+		.tablepadding td { padding: 3px; }
+
+		.tablevertical td { border-right: 1px solid #cccccc; padding: 5px; text-overflow: ellipsis; }
+
+		.tablevertical .entete td { background-color: none !important; border-top: 1px solid #cccccc; border-bottom: 1px solid #cccccc; min-height: 30px; }
+
+		.tabletop td { empty-cells: show; padding: 2px; vertical-align: top; }
+
+		.tableinput td { empty-cells: show; padding: 0px; margin: 0; vertical-align: top; border: 1px solid #ededed; border-collapse: collapse; }
+
+		.alignright { text-align: right; }
+
+		.aligncenter { text-align: center; }
+
+		.page_header {
+			height: 90px;
+			background-image: url('{HTTPHOST}/images/logo_MAW.png');
+			width: 21cm;
+			background-repeat: no-repeat;
+			position: relative;
+			margin-bottom: 30px;
+			background-color: white;
+			}
+
+		.rubannoir {
+			background-color: blue;
+			color: #fff;
+			padding: 10px;
+			text-transform: uppercase;
+			font-weight: bold;
+			margin-bottom: 10px;
+			}
+
+		.in_ruban {
+			margin-bottom: 25px;
+			position: relative;
+			height: 29.7cm;
+			background: white;
+			box-shadow: 0 0 0.5cm rgba(0, 0, 0, 0.5);
+			}
+
+		.in_ruban table {
+			table-layout: auto;
+			}
+
+		.pagebreaker {
+			page-break-before: always;
+			}
+
+		.page_a4 {
+			width: 21cm;
+			display: block;
+			margin: 0 auto;
+			margin-bottom: 0.5cm;
+			}
+
+		.fk_body { background-color: #666666; padding: 10px 0; margin: 0 25px; }
+
+		.absolute { position: absolute; }
+
+		.relative { position: relative; }
+		.uppercase{text-transform: uppercase;}
+	</style>
+</head>
+<body>
+<div class = "fk_body">
+<div class = "page_a4" style = "width: 21cm;margin: 0 auto;margin-bottom: 0.5cm;">
+<div class = "in_ruban">
+	<table style = "width:100%;" class = "tabletop">
+		<tr>
+			<td style = "width:40%;">
+				<div style="font-size:13px;">
+				<strong>Croisières MAW</strong>
+				<br/>
+				455 Promenade des Anglais, Nice Premier A, 06200 Nice <br/>
+				Téléphone : 09 66 87 01 21<br/>
+				<span>Votre interlocuteur&nbsp;</span><br><span class = "uppercase">{prenomAgent}</span><br/>
+				<span>{emailAgent}</span></div>
+			</td>
+			<td class="aligncenter">
+				<img src="{FLATTENIMGHTTP}/logo_MAW.png" />
+			</td>
+			<td style = "text-align:right;width:40%;"><div style="font-size:13px;"><strong>Date du devis</strong><br>
+				Le
+				{dateCreationDevis}<br/>
+				Devis {iddevis}
+				<br/> <strong>{nomClient}&nbsp;</strong><span>&nbsp;{prenomClient}&nbsp;</span><br>
+				{adresseClient}
+				<br>
+				{emailClient} {telephoneClient}</div>
+			</td>
+		</tr>
+	</table>
+	<div class = "aligncenter  padding uppercase bold">{nomProduit_type} {nomProduit}</div>
+	<div class = "rubannoir">Détails de votre {nomProduit_type}</div>
+	<br>
+
+	<div class = "absolute" style = "width:145px;">
+		<div class = "padding">
+			<img src = "{imageFournisseur}" style = "width:135px;height:135px;"/>
+		</div>
+	</div>
+	<div class = "relative" style = "margin-left:155px;">
+		<table style = "vertical-align:top">
+			<tr>
+				<td style = "width:100px;">Armateur</td>
+				<td><strong>{nomFournisseur}</strong></td>
+				<td style = "width:110px;">&nbsp;{nomTransport_type}</td>
+				<td><strong>{nomTransport}</strong></td>
+			</tr>
+			<tr>
+				<td>Ville de départ</td>
+				<td><strong>{nomVille}</strong></td>
+				<td><span>Départ</span></td>
+				<td><strong>{dateDebutProduit_tarif}</strong></td>
+			</tr>
+			<tr>
+				<td>Ville d'arrivée</td>
+				<td><strong>{nomVilleArrivee}</strong></td>
+				<td>Durée</td>
+				<td><strong>{dureeProduit}</strong> jours {dureeNuitProduit} nuits.</td>
+			</tr>
+			<tr>
+				<td>Itinéraire</td>
+				<td colspan="3">
+					<div>{inclusItineraireDevis}</div></td>
+			</tr>
+			<tr>
+				<td colspan = "4">
+					<br><br>
+					* Passeport valable 6 mois après la date de retour<br/>
+					* Veuillez consulter le site <a target = "_blank" href = "http://www.diplomatie.gouv.fr/fr/conseils-aux-voyageurs/">Diplomatie.gouv.fr</a>
+					pour vous tenir informé.<br>
+					* itinéraire soumis éventuellement à modification de la part de la compagnie,* Prix sous reserve de disponibilité.
+				</td>
+			</tr>
+		</table>
+	</div>
+	<!-- START hashotel -->
+	<br/>
+
+	<div class = "relative" style = "height:68px;">
+		<div class = "absolute" style = "width:135px;">
+			<div class = "padding">
+				<img src = "{imageHotel}" style = "width:135px;height:68px;"/>
+			</div>
+		</div>
+		<div class = "relative" style = "margin-left:145px;">
+			<div class = "uppercase">Hotel</div>
+			<div class = "uppercase bold">{nomHotel}</div>
+			<div class = "justify ellipsis">{descriptionHotelCourte}</div>
+			<span>{villeHotel}</span>
+		</div>
+	</div>
+	<!-- END hashotel -->
+	<div class = "rubannoir">Contrat de voyage</div>
+	<div class = "padding">
+		{nomProduit_type} {nomProduit}
+	</div>
+	<div class = "padding">
+		<div class = "relative">
+			<table class = "tablevertical" style = "width:100%;" cellpadding = "0" cellspacing = "0">
+				<tr class = "entete">
+					<td style = "width:auto;">Désignation</td>
+					<td style = "width:70px;">Prix</td>
+					<td style = "width:50px;">Quantité</td>
+					<td style = "width:70px;">Total euros</td>
+				</tr>
+				<!-- START ligne_devis -->
+				<tr>
+					<td class = "borderl">{nomDevis_prestation}{descriptionDevis_prestation}</td>
+					<td class = "alignright">{prixDevis_prestation}</td>
+					<td class = "aligncenter">{quantiteDevis_prestation}</td>
+					<td class = "alignright">{totalDevis_prestation}</td>
+				</tr>
+				<!-- END ligne_devis -->
+				<tr class = "bordert">
+					<td></td>
+					<td style = "border-left:none;"></td>
+					<td style = "border-left:none;" class = "alignright">Total&nbsp;</td>
+					<td class = "bold alignright">{prixDevis} &euro;</td>
+				</tr>
+			</table>
+		</div>
+		<br/>
+
+		<div class = "rubannoir">Formalités de paiement</div>
+		<table class = "tabletop" style = "width:100%;" cellpadding = "0" cellspacing = "0">
+			<tr>
+				<td style = "width:45%;">
+					<div class = "padding"><img src = "{HTTPCUSTOMERSITE}images/arrow.png"/> Dates de réglement.</div>
+					<div class = "retrait">
+						<table cellpadding = "0" cellspacing = "0">
+							<!-- START ligne_acompte -->
+							<tr>
+								<td style = "width:90px;"><strong>{nomDevis_acompte_type}</strong></td>
+								<td style = "width:80px">le {dateDebutDevis_acompte}</td>
+								<td class = "bold">{prixDevis_acompte} €</td>
+							</tr>
+							<!-- END ligne_acompte -->
+						</table>
+					</div>
+
+					<div class="padding bordert">
+						<img src = "{HTTPCUSTOMERSITE}images/arrow.png"/> <strong>Coordonnées bancaires MAW</strong><div class="retrait">
+						<strong>RIB FRANCE</strong> 19106 00601 43639721010 70<br>
+						<strong>IBAN</strong> FR76 1910 6006 0143 6397 2101 070<br>
+						<strong>BIC</strong> AGRIFRPP891</div>
+					</div>
+				</td>
+				<td style = "width:55%;">
+					<div class = "padding"><img src = "{HTTPCUSTOMERSITE}images/arrow.png"/> Soit au total la somme de <strong>{prixDevis} euros</strong> que je regle.
+					</div>
+					<div class = "retrait">
+						<span><img src = "{HTTPCUSTOMERSITE}images/square.jpg"/> En espèces </span><br/>
+						<span><img src = "{HTTPCUSTOMERSITE}images/square.jpg"/> Par virement bancaire </span><br/>
+						<span><img src = "{HTTPCUSTOMERSITE}images/square.jpg"/> Par carte bancaire :</span>
+						<div class="padding">
+							_&nbsp;&nbsp;_&nbsp;&nbsp;_&nbsp;&nbsp;_&nbsp;&nbsp;      _&nbsp;&nbsp;_&nbsp;&nbsp;_&nbsp;&nbsp;_&nbsp;&nbsp;  _&nbsp;&nbsp;_&nbsp;&nbsp;_&nbsp;&nbsp;_&nbsp;&nbsp;  _&nbsp;&nbsp;_&nbsp;&nbsp;_&nbsp;&nbsp;_&nbsp;&nbsp;  &nbsp;&nbsp;&nbsp;&nbsp;    Mois / Année : -  -  / - - - - <br><br>
+							Code de sécurité  -&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-
+						</div>
+					</div>
+				</td>
+			</tr>
+		</table>
+		<table class = "bordert" style = "width:100%;">
+			<tr>
+				<td class = "alignright" style="vertical-align:top;">
+					<div class = "padding">
+						<img src = "{HTTPCUSTOMERSITE}images/square.jpg"/> Je soussigné <span style = "color:#cccccc;">..................................................................</span>
+					</div>
+				</td>
+				<td style = "width:200px;">
+					<div class = "padding borderl"><strong>Date</strong> :<br/>
+						<strong>Signature</strong> :<br/>
+						<br/>
+						<br/>
+					</div>
+				</td>
+			</tr>
+		</table>
+		<div class = "retrait">En signant ma demande de réservation j'atteste avoir pris connaissance des conditions générales et particulières de ventes, de leur contenu, et des conditions générales
+		                       et particulières de l'armateur via sa brochure ou site internet. Avoir accepter ou refuser les assurances qui m'ont été proposées et je m'engage à vérifier la validité
+		                       des
+		                       passeports ou cartes d'identité des passagers y compris des bébés. Toutes les demandes sont sous réserve de disponibilités et nécessitent une confirmation<br/>
+		</div>
+	</div>
+</div>
+<div class = "in_ruban">
+	<div class = "page_header"></div>
+	<table style = "width:100%;" class = "tabletop">
+		<tr>
+			<td style = "width:50%;"><strong>Croisières MAW</strong>
+				<br/>
+				455 Promenade des Anglais, Nice Premier A, 06200 Nice <br/>
+				Téléphone : 09 66 87 01 21<br/>
+				<span>Votre interlocuteur&nbsp;</span><span class = "uppercase">{prenomAgent}</span><br/>
+				<span>{emailAgent}</span><br/>
+			</td>
+			<td style = "text-align:right;width:50%;"><strong>Date du devis</strong><br>
+				Le
+				{dateCreationDevis}<br/>
+				Devis {numeroDevis}
+				<br/> <strong>{nomClient}&nbsp;</strong><span>&nbsp;{prenomClient}&nbsp;</span>
+				<br>
+				{emailClient}
+			</td>
+		</tr>
+	</table>
+	<div class = "rubannoir">Contact en cas d'urgence :</div>
+	<div class = "padding"><img src = "{HTTPCUSTOMERSITE}images/arrow.png"/>&nbsp;Merci d'indiquer ici les informations
+	                                                                        concernant la personne à joindre en cas d'urgence.<br/>
+
+		<div class = "padding uppercase">&nbsp;Celle ci ne doit pas faire partie du voyage.</div>
+	</div>
+	<br/>
+
+	<div>
+		<table cellpadding = "0" cellspacing = "0" style = "width:100%;" class = "tablepadding">
+			<tr>
+				<td class = "bold" style = "width:100px;">Nom</td>
+				<td style = "width:140px;"></td>
+				<td class = "bold" style = "width:100px;">Prénom</td>
+				<td style = "width:130px;"></td>
+				<td class = "bold" style = "width:90px;">Parenté</td>
+				<td style = "width:130px;"></td>
+			</tr>
+			<tr>
+				<td class = "bold">Téléphone fixe</td>
+				<td></td>
+				<td class = "bold">Téléphone portable</td>
+				<td></td>
+				<td class = "bold">Adresse mail</td>
+				<td></td>
+			</tr>
+			<tr>
+				<td class = "bold">Adresse</td>
+				<td colspan = "5"></td>
+			</tr>
+		</table>
+	</div>
+	<div class = "rubannoir">Liste des passagers :</div>
+	<div class = "padding"><img src = "{HTTPCUSTOMERSITE}images/arrow.png"/>&nbsp;Liste des passagers participants au
+	                                                                        voyage.<br/>
+
+		<div class = "padding uppercase"> Merci de remplir ces informations avec soins.</div>
+	</div>
+	<br/>
+	<table cellpadding = "0" cellspacing = "0" style = "width:100%;" class = "tablepadding">
+		<!-- START ligne_passager -->
+		<tr>
+			<td colspan = "6"><br/>
+				<span>- Passager devis {numeroDevis}</span><br/></td>
+		</tr>
+		<tr>
+			<td class = "bold" style = "width:100px">Nom</td>
+			<td style = "width:150px">{nomPassager}</td>
+			<td class = "bold" style = "width:150px">Nom jeune fille</td>
+			<td>{nomJeuneFillePassager}</td>
+			<td class = "bold" style = "width:150px">Né(e) le</td>
+			<td style = "width:80px">{naissancePassager}</td>
+		</tr>
+		<tr>
+			<td class = "bold">Prénom</td>
+			<td>{prenomPassager}&nbsp;</td>
+			<td class = "bold">Nationalité</td>
+			<td>{nationalitePassager}&nbsp;</td>
+			<td></td>
+			<td>{lieuNaissancePassager}&nbsp;</td>
+		</tr>
+		<tr>
+			<td class = "bold">N° passport/CNI</td>
+			<td>{numeroCartePassager}</td>
+			<td class = "bold">Date validité</td>
+			<td>{dateEmissionPassager}</td>
+			<td class = "bold">Lieu émission</td>
+			<td>{lieuEmissionPassager}</td>
+		</tr>
+		<tr>
+			<td class = "bold">Téléphone</td>
+			<td>{telephonePassager}</td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+		</tr>
+		<!-- END ligne_passager -->
+	</table>
+
+	<div class = "padding justify bordert">
+		Il est sous la responsabilité de chaque passager de s'assurer qu'il est en conformité avec les formalités douanières administratives et sanitaires des destinations et lieux de rtansit de son
+		voyage.<br>
+		Il est egalement sous la responsabilité du passager de nous fournir ses noms et prénoms correctement orthographiés tels qu'ils apparaissent sur la pièce d'identité avec laquelle il voyage.
+	</div><br><br><br>
+	<div style="position:absolute;bottom:0;width:100%;text-align: center;">
+	<table style = "width:100%;">
+		<tr>
+			<td>
+				<div style = "text-align:center;"> MAW, SARL au capital de 10000€<br>
+				                                   455 Promenade des Anglais, Nice Premier A, 06200 Nice, Licence Atout France IM006140010<br>
+				                                   RCS DE NICE 798863874, Garantie Financière: APST 15 Avenue Carnot 75017 PARIS, RC Pro HISCOX n° PRC0105078
+				</div>
+			</td>
+		</tr>
+	</table></div>
+</div>
+
+</div>
+</div>
+</body>
+</html>

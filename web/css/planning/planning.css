@@ -1,0 +1,47 @@
+table.tablePlanning td{ border: auto!important; border-right: 1px solid #CCCCCC; height: 20px; margin: 0; padding: 0;/* white-space: nowrap;*/ width: auto; }
+table.tablePlanning, table.tablePlanningMensuel { empty-cells: show; margin: 0; padding: 0; }
+table.tablePlanningMensuel td{ border: auto!important; border-right: 1px solid #CCCCCC; min-height: 16px; padding-bottom: 5px; width: auto; }
+.hDemi { border-top: 1px solid #ccc; }
+.hMidi { background-color: #FFFFD5; }
+.hPile { border-top: 1px solid #F6DBA2; }
+.hQuart { border-top: 1px dotted #ccc; }
+.cadreAmPm { border: 1px solid #ccc; clear: both; display: block; height: 100%; /*float: left;*/ width: 49%; }
+.cadreAmPmInline { border: 1px solid #ccc; display: block; float: left; height: 1%; width: 49%; }
+.calHor { display: block; }
+.calVert { display: block; float: left; float: left; height: 150px; overflow: auto; width: 18%; }
+.caseMois {   /*margin: 2px;*/ }
+.caseMois .newTask { clear: both; display: block; float: none!important; margin: 0px 3px 0px 3px; margin-top: 0px; width: auto; }
+.caseMois .tacheAmPm { clear: both; display: block; float: none!important; }
+.etJour { background-repeat: no-repeat; color: #fff; display: block; font-weight: bold; height: 25px; line-height: 25px; padding-left: 25px; }
+.evenementAmPm { background-color: #fff; border: 1px solid #ccc; display: block; height: auto!important; margin-bottom: 2px; text-align: left; }
+.evenementAmPm .innerNewTask .task_objet{ clear: left; padding-left: 4px; }
+.evenementAmPm .innerNewTask .task_societe{ clear: right; width: auto; }
+.evenementAmPm .innerNewTask .task_ville{ padding-left: 10px; }
+.evenementAmPm .newTask { border-bottom: 1px solid  #ccc; float: none!important; margin-bottom: 2px; margin-top: 2px; position: relative; width: auto!important; }
+.evenementAmPm.innerNewTask { background-color: #FFFFFF; border: none; height: 30px; padding-left: 15px; width: auto!important; word-wrap: nowrap; }
+.fondPlanning { }
+.forgroupJourTask { display: block; height: 14px; }
+.innerNewTask { background-color: #FFFFFF; display: block; height: 12px; line-height: 12px; margin: 0px; overflow: hidden; padding: 0px; padding-left: 1px; position: relative; white-space: nowrap; width: auto; word-break: break-all; word-wrap: break-word; }
+.innerNewTask img { margin-bottom: 3px; }
+.mdlCalendrierPlanning { display: block; height: 150px; padding-top: 5px; text-align: center; width: 190px; }
+.mdlEditTask { background-image: url(../images/window.png); /*background-color: #ffffff;
+	height: 210;*/ border: 1px  dotted #999; border-left: 4px solid #999; padding: 10px; position: absolute; width: auto; }
+.navSemaine { background: url(../images/navSemaine.jpg); background-repeat: no-repeat; color: #fff; display: block; font-weight: bold; height: 25px; line-height: 25px; padding-left: 25px; text-align: center; vertical-align: middle; width: 350px; }
+.newTask { color: #333333; display: block; float: left; height: 12px; width: 10px; }
+.tabBlue { background: #afc1d7; border: 1px solid #ccc; margin: 4px; padding-top: 8px; text-align: center; width: 190px; }
+.tacheAm, .tachePm { background-color: #E6E6E6; /*float: left;*/ width: 100%; }
+.tacheAmPm { min-height: 10px;position:relative;width:100%; }
+.tacheAmPmInline { border: 1px solid #ccc; display: block; float: left; height: 100%; width: 48%; }
+.taskClient { border-left: 2px solid green; height: 10px; width: 5px; }
+.taskProspect { border-left: 2px solid red; height: 10px; width: 5px; }
+.thumbTask { background: #FFFFFF; border: 1px solid #CCCCCC; color: #333333; display: block; float: left; font-family: Verdana, Arial, Helvetica, sans-serif; font-size: 10px; height: 35px; margin: 2px; overflow: hidden; padding: 0px; text-align: left; width: 140px; word-break: break-all; word-wrap: break-word; z-index: 3000; }
+.thumbTask .firstTask { color: #333333; display: block; font-family: Verdana, Arial, Helvetica, sans-serif; font-size: 10px; font-weight: normal; text-align: left; }
+.thumbTask .handleTask { background-color: #EEEEEE; border-bottom: 1px solid #CCCCCC; color: #333333; color: #6666; cursor: move; display: block; font-size: 10px; font-weight: bold; height: 13px; line-height: 13px; margin-top: 0px; overflow: hidden; padding-bottom: 2px; padding-left: 2px; width: 100%; word-break: break-all; word-wrap: break-word; }
+.thumbTask .innerThumbtask { clear: both; color: #333333; display: block; font-family: Verdana, Arial, Helvetica, sans-serif; font-size: 10px; width: 100%; }
+.thumbTaskInline { display: block; /*word-wrap: break-word;*/ padding: 1px; text-align: left; width: 90%; z-index: 5000; /*float: left;*/ }
+.thumbTaskInline .firstTask { display: block; font-family: Verdana, Arial, Helvetica, sans-serif; font-size: 10px; font-weight: normal; height: 22px; line-height: 22px; /*float: left;*/ padding-left: 2px; text-align: left; /*word-wrap: break-word;*/ }
+.thumbTaskInline .handleTask{ background-color: #eeeeee; clear: both; color: #333300; cursor: move; font-weight: bold; height: 17px; line-height: 17px; width: 100%; }
+.thumbTaskInline .innerThumbtask { clear: both; width: 100%; }
+.thumbTaskInline .spacer { clear: both; }
+.weekTache { border-bottom: 1px solid #ccc; border-top: 1px solid #666; }
+.weekTache .span { display: block; width: 310px; }

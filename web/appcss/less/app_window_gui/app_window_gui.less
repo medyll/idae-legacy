@@ -1,0 +1,195 @@
+@import "../vendor/animate-nc.less";
+.speed {
+	-webkit-animation-duration: 0.2s;
+	animation-duration: 0.2s;
+}
+
+// Color variables (appears count calculates by raw css)
+@color0: #ffffff;
+// Appears 15 times
+@color1: #333333;
+// Appears 5 times
+@color2: #fdfdc8;
+// Appears 4 times
+
+.containerdisp {
+	.animated;
+	.zoomIn;
+	.speed;
+	background-color : #ededed;
+	border           : 1px solid #999999;
+	display          : flex;
+	flex-direction   : column;
+	max-height       : 100%;
+	overflow         : hidden;
+	padding          : 0;
+	position         : absolute;
+	resize           : both;
+	.entetedisp {
+		padding  : 0.1em;
+		position : relative;
+	}
+	.handledisp {
+		display     : table;
+		line-height : 30px;
+		position    : relative;
+		text-shadow : 0 0 5px @color0, 0 0 5px @color0;
+		width       : 100%;
+		.buttondisp {
+			cursor         : pointer;
+			vertical-align : middle;
+			width          : 40px;
+			&:hover {
+				background-color : @color1;
+				color            : @color0;
+				zoom             : 1.1;
+			}
+		}
+		.buttonclose {
+			&:hover {
+				background-color : #B81900;
+				color            : @color0;
+			}
+		}
+		.buttonreduce {
+			&:hover {
+			}
+		}
+		.titlefrm {
+			color           : #123456;
+			display         : inline-block;
+			font-size       : 13px;
+			overflow        : hidden;
+			padding-left    : 5px;
+			text-align      : center;
+			text-decoration : none;
+			vertical-align  : middle;
+			width           : 100%;
+		}
+	}
+	.menudisp {
+		background-color : #ededed;
+		border           : 1px solid #cccccc;
+		display          : inline-block;
+		padding          : 0.5em;
+		position         : absolute;
+		z-index          : 1000;
+	}
+	.innerdisp {
+		background-color : @color0;
+		overflow-x       : hidden;
+		overflow-y       : auto;
+		position         : relative;
+		text-shadow      : none;
+		z-index          : -1;
+		flex             : 1;
+		&:empty { display : none; }
+	}
+	.footerdisp {
+		color   : @color1;
+		padding : 1px;
+	}
+	.footerFor {
+		display : none;
+	}
+	.enteteFor {
+		display : none;
+	}
+	.titreFor {
+		display : none;
+	}
+}
+.containerdisp.active {
+	background-color : @color0;
+	border           : 1px solid #cccccc;
+	box-shadow       : 0px 0px 21px -4px rgba(0, 0, 0, 0.3);
+}
+.containerdisp.note {
+	background-color : #fdfcbe;
+	background-image : none;
+	padding          : 0;
+}
+.widget.containerdisp {
+	background-color : rgba(0, 0, 0, 0.5);
+	border           : none;
+	opacity          : 0.9;
+}
+.widget {
+	.entetedisp {
+		background  : none;
+		text-shadow : 0 0 15px @color0, 0 0 15px @color0;
+		text-shadow : 0 0 4px @color1;
+	}
+	.innerdisp {
+		-moz-box-shadow    : none;
+		-webkit-box-shadow : none;
+		background         : none;
+		border             : none;
+		box-shadow         : none;
+		text-shadow        : 0 0 15px @color0, 0 0 15px @color0;
+		text-shadow        : 0 0 4px @color1;
+	}
+	.handledisp {
+		background : none;
+		border     : none;
+	}
+}
+.note.containerdisp {
+	border     : none;
+	box-shadow : 0 0px 1px #666666;
+	opacity    : 0.9;
+	:before {
+		border-bottom-width : 20px;
+		border-color        : transparent @color2;
+		border-right-width  : 30px;
+		border-style        : solid;
+		border              : 0;
+		bottom              : -20px;
+		content             : "";
+		display             : block;
+		height              : 0;
+		left                : 10px;
+		position            : absolute;
+		width               : 0;
+	}
+}
+.note.containerdisp.active {
+	border     : none;
+	box-shadow : 0 0px 1px #000000;
+	opacity    : 1;
+}
+.note {
+	.entetedisp {
+		background-color : #f8f7b6;
+		text-shadow      : 0 0 15px @color0, 0 0 15px @color0;
+		text-shadow      : 0 0 2px @color0;
+		text-shadow      : 0 0 4px @color1;
+	}
+	.innerdisp {
+		-moz-box-shadow    : none;
+		-webkit-box-shadow : none;
+		background-color   : @color2;
+		border             : none;
+		box-shadow         : none;
+	}
+	.handledisp {
+		background-color : @color2;
+		border           : none;
+	}
+}
+.note.containerdispe {
+	:after {
+		border-bottom-width : 20px;
+		border-color        : transparent @color2;
+		border-right-width  : 10px;
+		border-style        : solid;
+		border-width        : 0;
+		bottom              : -20px;
+		content             : "";
+		display             : block;
+		height              : 0;
+		left                : 30px;
+		position            : absolute;
+		width               : 0;
+	}
+}

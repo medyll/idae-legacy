@@ -1,0 +1,12 @@
+
+
+
+.contBig{padding:1px 4px;}
+.contBig>a{color:#333;display:inline;display:inline-block;height:24px;line-height:20px;text-align:center;}
+.contBig>a.active{background:#444;color:#fff;text-shadow:0 0 5px #000}
+
+.contOnglet{border-bottom:1px solid #ccc;display:block;padding:0.5em 0.25em 0 0.5em;width:auto;}
+.contOnglet a.active{-moz-transition-property:background-image, color;-moz-transition-duration:1s;background-color:#fff;background-image:url('images/ongletOn.png');border:1px solid #ccc;border-bottom:1px solid #fff;bottom:-1px;position:relative;text-align:center;text-decoration:none;}
+.contOnglet:after{clear:both;}
+.contOnglet a{-moz-transition-property:background-image, color;-moz-transition-duration:1s;color:#333;cursor:pointer!important;cursor:hand;display:inline-block;min-width:120px;max-width:200px;overflow:hidden;padding:0.5em;position:relative;text-align:center;text-decoration:none;text-decoration:none;vertical-align:top;z-index:0;text-shadow:0 0 8px #FFFFFF;}
+.contOnglet>a:hover { text-decoration:none;}

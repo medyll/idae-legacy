@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="fr">
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<script src="http://idaertys-preprod.mydde.fr:3006/socket.io/socket.io.js"></script>
+		<script>
+			var conn_options = {
+				'sync disconnect on unload': true,
+				transports: ['websocket'],
+				upgrade: false
+			};
+
+			var socket = io('http://idaertys-preprod.mydde.fr:3006', conn_options);
+			socket.on('message', function (data) {
+				console.log(data);
+				socket.emit('my other event', {my: 'data'});
+
+			});
+			//
+			socket.on('heartbeat_app', function (data) {
+				console.log('heartbeat_app ', data)
+			});
+			socket.on('ask_grantIn', function (data) {
+				console.log('ask_grantIn ', data)
+			});
+			socket.on('reloadModule', function (data) {
+				console.log('reloadModule ', data)
+			});
+			//
+			socket.emit('reloadModule', {mdl:'app/app_gui/app_gui_main'})
+		</script>
+	</head>
+	<body>
+	</body>
+</html>

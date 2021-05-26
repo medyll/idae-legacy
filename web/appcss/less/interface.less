@@ -1,0 +1,1041 @@
+@import "vendor/animate-nc.less";
+// @import "https://raw.githubusercontent.com/Mayccoll/animate.less/master/animate.less";
+.speed {
+	-webkit-animation-duration : 0.1s;
+	animation-duration         : 0.1s;
+}
+.fa {
+	min-width  : 20px;
+	text-align : center;
+}
+.app_component_info_bar_vert {
+	min-width : 50px;
+	.rgba_link {
+		a { display : block;
+			padding : 0 0;
+			&:hover {
+				background-color : rgba(51, 51, 51, 0.4);
+				box-shadow       : 0 0 3px #fff;
+			}
+			i {
+				font-size : 1.1rem;
+				display   : inline-block;
+				padding   : 0.8rem 0;
+			}
+			&.active {
+				background-color : rgba(0, 0, 0, 0.2);
+				box-shadow       : 0 0 3px #ccc;
+			}
+		}
+	}
+}
+[data-count_trigger=hide] {
+	position : absolute !important; height : 0 !important; width : 0 !important; z-index : -1 !important; overflow : hidden !important;
+}
+[sort_zone] {
+	.sortprevious, .sortnext {
+		cursor       : pointer;
+		color        : #999999;
+		margin-right : 5px;
+	}
+	.sortprevious:hover, .sortnext:hover {
+		color : #ff9966;
+	}
+	&:first-child .sortprevious, &:last-child .sortnext {
+		display : none;
+	}
+}
+#auto_expl_preview_zone {
+	.animated;
+	.slideInRight;
+	.speed;
+	min-width        : 30%;
+	background-color : #fff;
+}
+[draggable] {
+	cursor : move; /* fallback if grab cursor is unsupported */
+	cursor : grab;
+	cursor : -moz-grab;
+	cursor : -webkit-grab;
+	/*-moz-user-select    : none;
+	-webkit-user-select : none;
+	user-select         : none;
+	-webkit-user-drag   : element;*/
+	&:hover {
+		outline : 2px solid #ccc;
+	}
+}
+.gradb {
+	background : rgba(255, 255, 255, 0.9);
+	background : -moz-linear-gradient(top, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.9) 33%, rgba(217, 213, 217, 0.9) 100%);
+}
+.frmColSmall {
+	height     : 100%;
+	background : -moz-linear-gradient(top, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.9) 33%, rgba(171, 169, 171, 0.9) 100%);
+	border     : none;
+	width      : 40px;
+	min-width  : 40px;
+	overflow   : hidden;
+	position   : relative;
+
+	&:after {
+		height     : 100%;
+		width      : 20px;
+		position   : absolute;
+		top        : 0;
+		left       : 100%;
+		content    : ' ';
+		box-shadow : 5px 5px 10px #999;
+	}
+}
+.frmCol1 {
+	height       : 100%;
+	background   : -moz-linear-gradient(top, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.9) 33%, rgba(217, 213, 217, 0.9) 100%);
+	border-right : 1px solid #ededed;
+	width        : 230px;
+	min-width    : 230px;
+	overflow     : hidden;
+	position     : relative;
+	resize       : horizontal;
+
+	&:after {
+		height     : 100%;
+		width      : 20px;
+		position   : absolute;
+		top        : 0;
+		left       : 100%;
+		content    : 'redred';
+		box-shadow : 0 3px 5px #333;
+	}
+}
+.frmCol11 {
+	height           : 100%;
+	background-color : #ffffff;
+	border-right     : 1px solid #cccccc;
+	width            : 460px;
+	min-width        : 460px;
+	overflow         : hidden;
+	position         : relative;
+	resize           : horizontal;
+}
+.frmCol2 {
+	background-color : #ffffff;
+	flex             : 1;
+	height           : 100%;
+}
+.css_field_color, .color_field {
+	text-align : center;
+}
+.css_field_icon, .icon_field {
+	width         : 35px;
+	max-width     : 35px;
+	text-align    : center;
+	text-overflow : clip;
+}
+.css_field_email {
+	width     : 160px;
+	max-width : 160px;
+}
+.css_field_adresse {
+	min-width : 120px;
+}
+.css_field_texte {
+	min-width : 120px;
+}
+.css_field_prix {
+	text-align : right;
+	min-width  : 70px;
+}
+.css_field_valeur {
+	text-align : right;
+	min-width  : 50px;
+}
+.css_field_codification {
+	text-align : left;
+	min-width  : 90px;
+	max-width  : 90px;
+}
+.css_field_reference {
+	text-align : left;
+	min-width  : 60px;
+	max-width  : 60px;
+}
+.css_field_phone {
+	text-align : left;
+	width      : 120px;
+	max-width  : 120px;
+}
+.css_field_chk {
+	text-align : center;
+	width      : 30px;
+	max-width  : 30px;
+	min-width  : 30px;
+}
+.css_field_bool {
+	text-align : center;
+	width      : 35px;
+	max-width  : 35px;
+	min-width  : 35px;
+}
+table {
+
+	tr td.heure_field {
+		max-width  : 70px;
+		width      : 70px;
+		overflow   : hidden;
+		text-align : right;
+	}
+	tr td.color_field {
+		max-width  : 40px;
+		width      : 40px;
+		overflow   : hidden;
+		text-align : center;
+	}
+	tr td.date_field {
+		max-width  : 80px;
+		width      : 80px;
+		overflow   : hidden;
+		text-align : center;
+	}
+	tr td.name_field {
+		max-width  : 160px;
+		width      : 130px;
+		overflow   : hidden;
+		text-align : left;
+	}
+	tr td.nb_field {
+		width      : 50px;
+		max-width  : 50px;
+		overflow   : hidden;
+		text-align : center;
+	}
+	tr td.fk {
+		width     : 100px;
+		max-width : 100px;
+		overflow  : hidden;
+		color     : #3c3c3c;
+	}
+	tr td.main_field {
+		max-width : 250px;
+		width     : 250px;
+		overflow  : hidden;
+	}
+}
+table.table_icon {
+	box-sizing      : border-box;
+	border-collapse : collapse;
+	margin          : 0 auto;
+	max-width       : 100%;
+	table-layout    : fixed;
+	thead tr {
+		td:hover, td .explore_thead:hover {
+			background-color : #ededed;
+		}
+		td {
+			font-weight      : bold;
+			color            : #6e607a;
+			line-height      : 2;
+			text-decoration  : none;
+			cursor           : pointer;
+			overflow         : hidden;
+			background-color : #ffffff;
+			vertical-align   : bottom;
+			text-overflow    : ellipsis;
+			padding          : 5px 10px;
+			border-bottom    : 1px solid #edeeee;
+			border-top       : 1px solid #e0e0e0;
+			border-right     : 1px solid transparent;
+			a.explore_thead {
+				color            : #6e607a;
+				cursor           : pointer;
+				line-height      : 3;
+				text-overflow    : ellipsis;
+				overflow         : hidden;
+				white-space      : nowrap;
+				background-color : #ffffff;
+				border-bottom    : 1px solid #edeeee;
+				border-left      : 1px solid #e0e0e0;
+				border-top       : 1px solid #e0e0e0;
+				top              : 1px;
+				margin-top       : -1px;
+				margin-left      : -1px;
+				width            : 100%;
+				display          : block;
+				z-index          : 100;
+				padding-left     : 2px;
+				position         : absolute;
+			}
+		}
+		td[sortdir=up] .sortarrow {
+			display     : block;
+			position    : absolute;
+			bottom      : 0;
+			line-height : 12px;
+			width       : 100%;
+			text-align  : center;
+		}
+		td[sortdir=down] .sortarrow {
+			display     : block;
+			position    : absolute;
+			top         : 0;
+			line-height : 12px;
+			width       : 100%;
+			text-align  : center;
+		}
+		td:first-child .explore_thead {
+			border-left : 1px solid #e0e0e0;
+		}
+		td:last-child .explore_thead {
+			border-right : 1px solid #e0e0e0;
+		}
+
+	}
+	tbody tr {
+		border-bottom : 1px solid #ccc;
+		&:nth-child(2n + 1) {
+			border-bottom   : 1px solid green !important;
+			background-clip : padding-box;
+		}
+		td {
+			overflow      : hidden;
+			text-overflow : ellipsis;
+			empty-cells   : show;
+			line-height   : 22px;
+			min-height    : 22px;
+			padding-right : 1em;
+		}
+	}
+
+	tr.right_clicked td:first-child, tr.dragged td:first-child, tr.dragged td:last-child {
+		border-left : 1px solid #ff9900;
+	}
+}
+table.explorer {
+	box-sizing      : border-box;
+	border-collapse : collapse;
+	margin          : 0 10px;
+	min-width       : 30%;
+	max-width       : calc(80px);
+
+	.sortheaderSorted {
+		background-color : #d1e8ff !important;
+	}
+
+	tbody tr {
+		&.right_clicked td:first-child, &.dragged td:first-child, &.dragged td:last-child {
+			border-left : 1px solid #ff9900;
+		}
+		&:nth-child(5n + 1) {
+			border-bottom   : 1px solid #E8EAEC;
+			background-clip : padding-box;
+			position        : static;
+		}
+		&:nth-child(5n + 2) {
+			border-bottom   : 1px solid #ededed;
+			background-clip : padding-box;
+			position        : static;
+		}
+		&:nth-child(5n + 3) {
+			background-color : #F9F9F9;
+			border-bottom    : 1px solid #ededed;
+			background-clip  : padding-box;
+			position         : static;
+		}
+		&:nth-child(5n + 4) {
+			border-bottom   : 1px solid #ededed;
+			background-clip : padding-box;
+			position        : static;
+		}
+		&:nth-child(5n + 5) {
+			border-bottom   : 1px solid #cccccc;
+			background-clip : padding-box;
+			position        : static;
+		}
+		&.active {
+			background-color : #e4f0fb !important;
+			outline          : 1px solid #66a7e8;
+		}
+		td {
+			overflow      : hidden;
+			text-overflow : ellipsis;
+			empty-cells   : show;
+			line-height   : 22px;
+			min-height    : 22px;
+			border        : none;
+			padding-right : 1em;
+
+			&[colspan] {
+				overflow      : hidden;
+				empty-cells   : show;
+				line-height   : 22px;
+				min-height    : 22px;
+				border        : none;
+				padding-right : 1em;
+			}
+			&.disabled_field {
+				text-align      : right;
+				color           : #5e5e5e;
+				text-decoration : line-through;
+				max-width       : 80px;
+				width           : 80px;
+				overflow        : hidden;
+			}
+			&.fk {
+				color : #777777;
+			}
+		}
+
+	}
+
+	thead tr {
+		td {
+			color            : #4C6091;
+			line-height      : 3;
+			text-decoration  : none;
+			cursor           : pointer;
+			overflow         : visible;
+			background-color : #ffffff;
+			white-space      : nowrap;
+			vertical-align   : top;
+			text-overflow    : ellipsis;
+			padding          : 0;
+			border-bottom    : 1px solid #edeeee;
+			border-top       : 1px solid #e0e0e0;
+			border-right     : 1px solid transparent;
+			padding-right    : 1em;
+			&:hover, .explore_thead:hover {
+				background-color : #ededed;
+			}
+			a.explore_thead {
+				color            : #4C6091;
+				cursor           : pointer;
+				line-height      : 3;
+				text-overflow    : ellipsis;
+				overflow         : hidden;
+				white-space      : nowrap;
+				background-color : #ffffff;
+				border-bottom    : 1px solid #edeeee;
+				border-left      : 1px solid #e0e0e0;
+				border-top       : 1px solid #e0e0e0;
+				top              : 1px;
+				margin-top       : -1px;
+				margin-left      : -1px;
+				width            : 100%;
+				display          : block;
+				z-index          : 100;
+				padding-left     : 2px;
+				position         : absolute;
+			}
+			&[sortdir=up] .sortarrow {
+				display     : block;
+				position    : absolute;
+				bottom      : 0;
+				line-height : 12px;
+				width       : 100%;
+				text-align  : center;
+			}
+			&[sortdir=down] .sortarrow {
+				display     : block;
+				position    : absolute;
+				top         : 0;
+				line-height : 12px;
+				width       : 100%;
+				text-align  : center;
+			}
+			&.chk_show {
+				max-width : 35px !important;
+			}
+			&:first-child .explore_thead {
+				border-left : 1px solid #e0e0e0;
+			}
+			&:last-child .explore_thead {
+				border-right : 1px solid #e0e0e0;
+			}
+		}
+
+	}
+	/*thead.entete tr {
+		position : relative !important;
+		z-index  : 10;
+		td {
+			background-color : #ffffff !important;
+			border-bottom    : 0px solid transparent;
+		}
+	}*/
+
+	tr.dragged td {
+		border-color     : #e4f0fb;
+		background-color : #ffcc33 !important;
+		box-shadow       : 0 1px 0 0 #66a7e8 inset, 0px -1px 0 0 #66a7e8 inset;
+	}
+	tr.ededed td {
+		background-color : #ededed !important;
+		color            : #333333 !important;
+	}
+	tr.right_clicked {
+		td {
+			background-color : #ffcc33 !important;
+			border-bottom    : 1px solid #ff9900;
+			border-top       : 1px solid #ff9900;
+		}
+		td:last-child {
+			border-right : 1px solid #ff9900;
+		}
+	}
+	tr.selected {
+		td:first-child {
+			border-left : 1px solid #66a7e8;
+		}
+		td:last-child {
+			border-right : 1px solid #66a7e8;
+		}
+	}
+}
+table.explorer tbody [checked=checked], .explorer tr:hover td input[type=checkbox], table.explorer tbody input[type=checkbox][bugchk=bugchk], [data-show_chk=true] input[type=checkbox] {
+	visibility : visible;
+}
+table.explorer tbody input[type=checkbox], table.table_icon tbody input[type=checkbox], [data-show_chk=false] input[type=checkbox] {
+	visibility : hidden;
+}
+table.explorer tr.selected td, table.sortable tr.selected:hover td {
+	background-color : #d3f0e0 !important;
+	color            : #000000 !important;
+}
+td {
+	background-clip : padding-box;
+}
+td.label li.fa, tr td:first-child li.fa {
+	left         : -5px;
+	margin-right : 5px;
+}
+ul.menu_nav {
+	list-style : none;
+	display    : flex;
+	margin     : 0;
+	padding    : 0.5em;
+	li {
+		padding : 0.5em;
+	}
+}
+.act_dropdown {
+	background-color : #fefefe;
+	border           : 1px solid #bfbfbf;
+	border-top       : none;
+	max-height       : 250px;
+	margin-top       : -3px;
+	a {
+		display : block;
+		padding : 0.5em;
+	}
+	a:hover {
+		background-color : #0000ff;
+		color            : #ffffff;
+	}
+}
+.auto_tree {
+	display        : flex;
+	flex-direction : row;
+	width          : 100%;
+	align-items    : center;
+	> div {
+	}
+	&.hidden_caret:not(.no_hidden_caret) .auto_tree_caret {
+		visibility : hidden !important;
+	}
+	.auto_tree_caret {
+		.animated; .fadeIn;
+		color      : #cccccc;
+		min-width  : 30px;
+		max-width  : 30px;
+		text-align : center;
+		cursor     : pointer;
+		+ div {
+			flex : 1;
+		}
+	}
+	.auto_tree_caret:before {
+		cursor      : pointer;
+		font-family : FontAwesome;
+		content     : '\f054';
+		text-align  : center;
+	}
+	.auto_tree_caret:hover {
+		color : #000099;
+	}
+	[auto_tree_count] {
+		width : auto;
+	}
+	> div:last-child {
+		max-width  : 30px;
+		text-align : left;
+	}
+	> div:last-child:before {
+		text-align : center;
+	}
+	&:hover > .auto_tree_caret:before {
+		color : #f6a828;
+	}
+}
+.auto_tree[right] {
+
+	.auto_tree_caret:before {
+		color       : #999;
+		font-family : FontAwesome;
+		content     : "\f13a";
+		text-align  : center;
+	}
+}
+.auto_tree[right].opened > .auto_tree_caret:before {
+	font-family : FontAwesome;
+	content     : '\f139';
+	text-align  : center;
+}
+.auto_tree.opened > .auto_tree_caret:before {
+	font-family : FontAwesome;
+	content     : '\f078';
+	text-align  : center;
+}
+.appmetro {
+	vertical-align   : text-bottom;
+	min-height       : 60px;
+	margin           : 0.25em;
+	padding          : 0.5em;
+	position         : relative;
+	border           : 1px solid rgba(255, 255, 255, 0.3);
+	box-shadow       : 0 0 1px #999;
+	background-color : #fff;
+	cursor           : pointer;
+	&:hover {
+		background-color : #ededed;
+	}
+	a {
+		margin : 0em;
+	}
+	.ico {
+		position : absolute;
+		right    : 5px;
+		bottom   : 5px;
+		color    : #ccc;
+		z-index  : 0;
+	}
+}
+.contextmenu {
+	.animated;
+	.fadeIn;
+	.speed;
+	background-color : #ffffff;
+	text-align       : left;
+	z-index          : 7000;
+	min-width        : 215px;
+	position         : absolute;
+	box-shadow       : 1px 1px 5px #ababab;
+	display          : inline-block;
+	min-height       : 50px;
+	padding          : 5px;
+}
+.context_app_menu {
+	background-color : #ededed;
+	text-align       : left;
+	z-index          : 7000;
+	min-width        : 215px;
+	position         : absolute;
+	box-shadow       : 1px 1px 5px #ababab;
+	display          : inline-block;
+	min-height       : 50px;
+	padding          : 5px;
+}
+.disinput {
+	position : relative;
+	&:before {
+		position         : absolute;
+		width            : 100%;
+		height           : 100%;
+		padding          : 5px;
+		top              : 0;
+		left             : 0;
+		z-index          : 20;
+		background-color : rgba(255, 255, 255, 0.5);
+		content          : ' ';
+	}
+}
+.disinput.enabled:before {
+	display : none;
+}
+.estActif0:before, .estActifnull:before {
+	font-family : FontAwesome;
+	content     : "\f096";
+	text-align  : center;
+	color       : #cccccc;
+}
+.estActif1:before {
+	font-family : FontAwesome;
+	content     : "\f00c";
+	text-align  : center;
+}
+.estTop0:before, .estTopnull:before {
+	font-family : FontAwesome;
+	content     : "\f005";
+	text-align  : center;
+	color       : #cccccc;
+}
+.estTop1:before {
+	font-family : FontAwesome;
+	content     : "\f006";
+	text-align  : center;
+}
+.estVisible0:before, .estVisiblenull:before {
+	font-family : FontAwesome;
+	content     : "\f070";
+	text-align  : center;
+	color       : #cccccc;
+}
+.estVisible1:before {
+	font-family : FontAwesome;
+	content     : "\f06e";
+	text-align  : center;
+}
+.frmDaCol1 {
+	background-color : #ffffff;
+	margin-right     : 200px;
+	position         : relative;
+	width            : auto;
+	z-index          : 0;
+}
+.frmDaCol2 {
+	background-color : #ffffff;
+	border-left      : 1px solid #ededed;
+	height           : 100%;
+	right            : 0px;
+	top              : 0;
+	position         : absolute;
+	width            : 200px;
+	z-index          : 1;
+}
+.right_clicked {
+	background-color : #ffcc33 !important;
+	outline          : 1px solid #ff9900;
+}
+.table_form tr {
+	td.label, td:first-child {
+		color          : #666666;
+		padding-left   : 0.5em;
+		padding-right  : 5px;
+		vertical-align : top;
+		width          : 120px;
+	}
+	td {
+		padding     : 3px;
+		line-height : 20px;
+	}
+}
+.table_form_mini tr {
+	td.label, td:first-child {
+		color          : #666666;
+		padding-left   : 0.5em;
+		padding-right  : 5px;
+		vertical-align : top;
+		width          : 120px;
+	}
+	td {
+		padding     : 1px;
+		line-height : 20px;
+	}
+}
+.table_grille tr td {
+	border : 1px solid #ededed;
+}
+.table_mini_info {
+	empty-cells : show;
+	tr {
+		td.label, td:first-child {
+			color          : #999999;
+			padding-left   : 5px;
+			padding-right  : 5px;
+			vertical-align : top;
+			width          : 60px;
+			max-width      : 80px;
+			text-overflow  : ellipsis;
+			white-space    : nowrap;
+			overflow       : hidden;
+		}
+		td {
+			padding     : 2px !important;
+			line-height : 15px;
+		}
+	}
+}
+.nowrap {
+	white-space : nowrap;
+	overflow    : hidden;
+}
+.fiche_field_group {
+	min-width:50%;
+	max-width:100%;
+	/*border  : 1px solid orange;*/
+	.fiche_field {
+		padding : 0.5em 0.3em 0.5em 0;
+		/*border  : 1px solid green;*/
+		min-width:40%;
+		.label_field {
+			width          : 100px;
+			color          : #999999;
+			padding-left   : 0.5em;
+			vertical-align : top;
+			text-overflow  : ellipsis;
+			white-space    : nowrap;
+			overflow       : hidden;
+			/*box-shadow     : 0 0 2px red;*/
+		}
+		.label_field_icon {
+			color          : #333;
+			padding-left   : 0.5em;
+			vertical-align : top;
+			width          : 28px;
+			min-width      : 28px;
+			white-space    : nowrap;
+			overflow       : hidden;
+			span { display : none; }
+		}
+		.label_field + * { margin-left : 10px; }
+	}
+
+}
+.table_info {
+	max-width   : 100%;
+	empty-cells : show;
+	tr.entete {
+		background-color : #ffffff;
+		border-bottom    : 1px solid #ededed;
+		td {
+			border-left : 1px solid #cccccc;
+			line-height : 35px;
+			font-weight : bold;
+		}
+	}
+	tr.cesure {
+		background-color : #ffffff;
+		td {
+			border     : none !important;
+			min-height : 50px;
+			height     : 50px;
+		}
+	}
+	tr {
+		&:not(.nolabel) {
+			td.label, td:first-child {
+				color          : #999999;
+				padding-left   : 0.5em;
+				padding-right  : 15px;
+				vertical-align : top;
+				width          : 110px;
+				text-overflow  : ellipsis;
+				white-space    : nowrap;
+				overflow       : hidden;
+			}
+		}
+		td {
+			padding     : 0.5rem 0.3rem;
+			line-height : 15px !important;
+			width       : auto; color : inherit;
+			min-width   : 80px;
+		}
+	}
+}
+table.table_groupe {
+	empty-cells     : show;
+	border-collapse : collapse;
+	> tbody > tr.entete {
+		background-color : #e7e7e7;
+		> td {
+			border      : 1px solid #cccccc !important;
+			line-height : 2;
+			/*font-weight : bold;*/
+			padding     : 4px 2px;
+		}
+		> td:first-child {
+			border : none !important;
+		}
+	}
+	> tbody > tr.entete_groupe {
+		border-bottom    : 1px solid #cccccc !important;
+		border-top       : 1px solid #cccccc !important;
+		background-color : #f0f0f0;
+		padding          : 0 !important;
+		td {
+			padding : 0 !important;
+		}
+	}
+	> tbody > tr > td:first-child {
+		/*border : none !important;*/
+	}
+	> tbody > tr > td [type=checkbox] {
+		visibility : hidden;
+	}
+	> tbody > tr > td:hover [type=checkbox] {
+		visibility : visible;
+	}
+	/*> tbody   tr.cesure {
+		display:none;
+	}*/
+	> tbody tr.cesure {
+		background-color : #ffffff;
+		> td {
+			border        : none !important;
+			border-bottom : 1px solid #cccccc !important;
+			min-height    : 20px;
+			height        : 20px;
+		}
+	}
+	> tbody > tr:not(.entete) > td, > tbody > tr:not(.entete_groupe) > td {
+		padding       : 2px !important;
+		line-height   : 15px;
+		border        : 1px solid #ededed;
+		border-bottom : 1px solid #cccccc;
+	}
+}
+.trait {
+	overflow    : hidden;
+	text-align  : left;
+	white-space : nowrap;
+	:hover {
+		background-color : #999;
+	}
+	:before {
+		background-color : #70c0e7;
+		content          : "";
+		display          : inline-block;
+		height           : 1px;
+		position         : relative;
+		vertical-align   : middle;
+		width            : 1em;
+		left             : 0em;
+		margin-right     : 0.5em;
+	}
+
+	:after {
+		background-color : #70c0e7;
+		content          : "";
+		display          : inline-block;
+		height           : 1px;
+		position         : relative;
+		vertical-align   : middle;
+		width            : 100%;
+		left             : 0.5em;
+		margin-right     : -50%;
+	}
+}
+.tile_image {
+	max-width : 750px;
+	padding   : 0.5em;
+	img {
+		max-width        : 100%;
+		box-shadow       : 0 0 2px #333;
+		background-color : #333;
+		cursor           : pointer;
+		&:hover {
+			box-shadow : 0 0 3px #000;
+		}
+	}
+	.tile_image_in {
+		text-align : center;
+	}
+	.tile_text {
+		text-align    : center;
+		text-overflow : ellipsis;
+		padding       : 0.5em;
+		overflow      : hidden;
+	}
+}
+.tile {
+	text-align : center;
+	position   : relative;
+	min-height : 70px;
+	width      : 128px;
+	overflow   : hidden;
+	cursor     : pointer;
+	.animated; .fadeIn;
+	img {
+		max-width : 100%;
+	}
+	.tile_text {
+		text-shadow : 1px 1px 2px #ccc;
+	}
+	.tile_text_desk {
+		color          : #fff;
+		text-transform : uppercase;
+		text-shadow    : 0px 0px 2px #000, 0px 0px 5px #000 !important;
+	}
+	.tile_icon_main {
+		position  : relative;
+		width     : 50px;
+		max-width : 50px;
+		left      : 50%;
+		margin    : 0 0 0.5em -25px;
+		/*height    : 40px;*/
+		overflow  : visible;
+		padding   : 0.15em;
+		.tile_icon {
+			left     : 20px;
+			top      : 10px;
+			position : absolute;
+		}
+		.tile_background {
+			display          : inline-block;
+			margin-left      : -10px;
+			color            : #f7f7f7;
+			padding          : 0.1em;
+			box-shadow       : 0 0 2px #ccc;
+			background-color : rgba(255, 255, 255, 0.3)
+		}
+	}
+	.tile_bottom {
+		display       : block;
+		overflow      : hidden;
+		text-overflow : ellipsis;
+	}
+	&:hover {
+		/*position : inherit;*/
+		.tile_background {
+			text-shadow : 1px 1px 6px green;
+		}
+		.tile_icon_main {
+			text-shadow : 1px 1px 3px black;
+		}
+		.tile_icon {
+			text-shadow : 1px 1px 3px black;
+		}
+		.tile_text {
+			text-shadow : 1px 1px 3px black;
+		}
+	}
+	.tile_count {
+		border-radius    : 10px;
+		border           : 1px solid #000;
+		background-color : #fff;
+		display          : inline-block;
+		padding          : 0 0.5em;
+		box-shadow       : 0 0 3px #fff;
+		position         : absolute;
+		bottom           : 30px;
+		left             : calc ( 50% - 20px );
+	}
+}
+.infinite_loader {
+	height           : 4px;
+	width            : 100%;
+	position         : relative;
+	overflow         : hidden;
+	background-color : #dddddd;
+}
+.infinite_loading_element:before, .infinite_loader:before {
+	display           : block;
+	position          : absolute;
+	content           : "";
+	left              : -200px;
+	width             : 200px;
+	height            : 4px;
+	background-color  : #2980b9;
+	-webkit-animation : loading_loader 1s linear infinite;
+	-moz-animation    : loading_loader 1s linear infinite;
+	animation         : loading_loader 1s linear infinite;
+}

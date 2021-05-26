@@ -1,0 +1,14 @@
+{
+  "config":{
+    "disable-tls": true,
+    "secure-http": false
+  },
+  "require": {
+    "wisembly/elephant.io": "3.1.0",
+    "rase/socket.io-emitter": "0.7.0",
+    "ddeboer/imap": "0.5.2",
+    "smarty/smarty": "v3.1.30",
+    "latte/latte": "v2.4.2",
+    "altorouter/altorouter": "v1.2.0"
+  }
+}

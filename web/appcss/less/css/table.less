@@ -1,0 +1,95 @@
+@import "vars.less";
+@import "app_fabric.less";
+/* table */
+table {
+	margin          : 0;
+	padding         : 0;
+	table-layout    : fixed;
+	empty-cells     : show;
+	border-collapse : collapse;
+	border-spacing  : 0;
+	td {
+		empty-cells : show;
+		padding     : 1px;
+	}
+	td.date {
+		width : 75px;
+	}
+}
+
+table.tableexcel {
+
+	tr.entete td, thead td {
+		min-height : 30px;
+	}
+
+	tbody tr td {
+		border-bottom : 1px solid #cccccc;
+		border-right  : 1px solid #cccccc;
+		font-size     : 11px;
+		text-overflow : ellipsis;
+	}
+}
+table.tablegrille {
+
+	tr.entete td, thead td {
+		min-height : 30px;
+	}
+
+	tbody tr td {
+		border-bottom : 1px solid #cccccc;
+		font-size     : 11px;
+		text-overflow : ellipsis;
+	}
+}
+table.tablegrilleprestation {
+	tr td {
+		border-bottom  : 1px dashed #ededed;
+		vertical-align : middle;
+	}
+}
+table.tablegui {
+	tr td {
+		empty-cells    : show;
+		padding        : 0px;
+		vertical-align : top;
+	}
+}
+table.tablemiddle tr td {
+	vertical-align : middle;
+}
+table.tablepadding tr td {
+	padding : 5px;
+}
+table.tablevertical, table.table_vertical {
+	input[type=checkbox] { visibility : hidden; }
+	thead, tr.entete td {
+		border-bottom    : 1px solid #333;
+		font-weight      : bold;
+		height           : 15px;
+		line-height      : 15px;
+		background-color : #fff;
+		padding          : 0.5em;
+		text-overflow    : ellipsis;
+	}
+	tr .sortheader {
+		position         : absolute;
+		border-bottom    : 1px solid red;
+		height           : 15px;
+		line-height      : 15px;
+		background-color : #fff;
+		text-overflow    : ellipsis;
+		display          : none;
+	}
+	tr td {
+		border-right  : 1px solid #ededed;
+		font-size     : 11px;
+		overflow      : visible;
+		padding       : 0.25em;
+		text-overflow : ellipsis;
+
+		&:last-child {
+			border-right : none !important;
+		}
+	}
+}
