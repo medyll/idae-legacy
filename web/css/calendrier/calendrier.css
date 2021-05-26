@@ -1,0 +1,35 @@
+table.tableCalendrier { border-collapse: collapse; table-layout: fixed; width: 100%;vertical-align:middle }
+table.tableCalendrier td {   text-align: center; width: 20px;height:20px; padding:0 }
+table.tableCalendrierHeader { table-layout: fixed; width: 100%; }
+table.tableCalendrierHeader a, table.tableCalendrierHeader a, table.tableCalendrier a { color: inherit; }
+table.tableCalendrierHeader tr td { color: #333333; height: 18px!important; text-align: center;vertical-align:middle }
+.goodChoice { background-image: url(images/calHover.png); background-position: center center; background-repeat: no-repeat; }
+.goodChoice a { color: #333333; font-style: bold; text-decoration: none; }
+.listMois { display: inline-block; height: 25px; line-height: 20px; text-align: center; width: 30%; }
+.listMois:hover { display: inline-block; font-style: bold; text-decoration: none; }
+.titrejours { color: #333;  font-weight: bold; }
+.titremois, .titremois:hover { color: orange;  text-decoration: none; }
+.titremois, .titrenum { color: #333; }
+.titrenow { color: #990000;  font-weight: bold; }
+.titrenum2 { color: #ccc;  }
+.titreweek { color: #ccc;  }
+.titreweek2 { color: #999; }
+.titrewend { color: green; }
+.titrewend2 { color: #fff; }
+table.tableCalendrier a.chooseDate  {
+    color: #003333;
+    display: block; 
+    overflow: hidden; 
+    position: relative;
+    text-decoration: none !important;
+    vertical-align: middle; 
+    word-wrap: break-word; 
+	text-align:center
+}
+table.tableCalendrier a.chooseDate.active {
+    background-color: #D4D4D4;
+    box-shadow: 0 0 1px 1px #999999;
+    color: #000000;
+    text-decoration: none !important;
+    text-shadow: 0 0 4px #FFFFFF, 0 0 2px #FFFFFF, 0 0 2px #FFFFFF;
+}

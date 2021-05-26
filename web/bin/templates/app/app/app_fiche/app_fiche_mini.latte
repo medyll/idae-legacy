@@ -1,0 +1,18 @@
+<div >
+	<div    onclick="save_setting_autoNext(this ,'{$table|noescape}_preview_fk')" style="border-bottom:1px solid {$colorAppscheme|noescape}"  data-contextual="table={$table}&table_value={$table_value}">
+		<div class="relative ">
+			<div class="flex_h flex_align_middle">
+				<div class="padding"><i class="fa fa-{$iconAppscheme|noescape}"></i></div>
+				<div class="padding ">
+					<div class="ellipsis"> {$nomAppscheme|noescape} </div>
+				</div>
+				<div class="padding flex_main">
+					<a class="ellipisis" act_chrome_gui="app/app/app_fiche"  vars="table={$table}&table_value={$table_value}">le nom ci  </a>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="relative  " style=" ">
+		{$tpl_table_fields|noescape}
+	</div>
+</div>

@@ -1,0 +1,170 @@
+<style>
+.page_header {
+	height:90px;
+	background-image: url('{HTTPHOST}/images/header_devis_agent.jpg');
+	width:100%;
+	background-repeat:no-repeat;
+	position:relative;
+	margin-bottom:30px;
+}
+.rubannoir {
+	border-bottom:1px solid #ccc;
+	border-top:1px solid #999;
+	background-color:#ededed;
+	padding:10px;
+	text-transform:uppercase;
+	font-weight:bold;
+	margin-bottom:10px;
+	width:auto;
+}
+.in_ruban {
+	margin-left:25px;
+	margin-right:25px;
+	margin-bottom:25px;
+	position:relative;
+}
+.in_ruban table {
+	table-layout:auto;
+}
+.in_ruban_txt {
+	margin-left:70px;
+	margin-right:70px;
+	margin-bottom:25px;
+	position:relative;
+}
+.pagebreaker {
+	page-break-before:always;
+}
+.puce{background-color:#fff;background-image:url('{HTTPHOST}/css/images/arrowClose.png');background-position:left;background-repeat:no-repeat;border:1px solid #e9e9e9;font-size:12px;margin-top:2px;overflow:hidden;padding:5px 16px;position:relative;text-align:left;text-transform:uppercase;width:auto;}
+.puce_noir{border:none;background-color:#fcfcfc;background-image:url('{HTTPHOST}/css/images/arrowOpen.png');}
+</style>
+<div style="text-align:left;width:21cm;position:relative;background-color:#FFF;margin:0 auto;">
+  <div class="page_header" >
+  </div>
+  <div class="puce">Brochure personnalisée</div>
+  <div class="in_ruban">
+    <table style="width:100%;" class="tabletop" >
+      <tr>
+        <td style="width:50%;"><strong>Destinationsreve</strong>
+          <br />
+          52 Boulevard Risso 06300 Nice <br />
+          Téléphone : 0489244176<br />
+          FR 915 297 649 12<br />
+          <br /> </td>
+        <td style="text-align:right;width:50%;" > </td>
+      </tr>
+    </table>
+  </div>
+  <br />
+  <!-- START produit_fiche -->
+  <div class="rubannoir" >Brochure {nomProduit_type} {nomProduit}</div>
+  <div class="in_ruban" >
+    <div class="absolute" style="width:135px;">
+      <div class="padding" >
+        <img src="{imageProduit}" style="width:135px;height:68px;" />
+      </div>
+    </div>
+    <div class="relative" style="margin-left:145px;">
+      <div class="padding">{descriptionProduit}</div>
+      <br />
+      <table style="width:100%;vertical-align:top"   >
+        <tr>
+          <td style="width:100px;" >Prestataires</td>
+          <td style="width:150px;"><strong>{nomFournisseur}</strong></td>
+          <td style="width:120px;" >{nomTransport_type}</td>
+          <td><strong>{nomTransport}</strong></td>
+        </tr>
+        <tr>
+          <td >Ville de départ </td>
+          <td><strong>{villeDepartProduit}</strong></td>
+          <td><span>Prochain départ</span></td>
+          <td><strong>{dateDebutProduit_tarif}</strong></td>
+        </tr>
+        <tr>
+          <td>Ville d'arrivée </td>
+          <td><strong>{villeArriveeProduit}</strong></td>
+          <td>Durée</td>
+          <td><strong>{dureeJourProduit}</strong> jours {dureeNuitProduit} nuits.</td>
+        </tr>
+        <tr>
+          <td >Itinéraire</td>
+          <td colspan="3" >{etapeProduit}</td>
+        </tr>
+      </table>
+    </div>
+  </div>
+  {produit_transport}
+  {produit_cabine}
+  {produit_itineraire}
+  {produit_clause} 
+  <!-- END produit_fiche -->
+  <!-- START hotel_add -->
+  <div class="relative" style="height:68px;">
+    <div class="absolute" style="width:135px;">
+      <div class="padding" >
+        <img src="{imageHotel}" style="width:135px;height:68px;" />
+      </div>
+    </div>
+    <div class="relative" style="margin-left:145px;">
+      <div class="uppercase">Hotel</div>
+      <div class="uppercase bold">{nomHotel}</div>
+      <div class="justify ellipsis">{descriptionHotelCourte}</div>
+      <span>{villeHotel}</span>
+    </div>
+  </div>
+  <!-- END hotel_add --> 
+  <!-- START transport_fiche -->
+  <div class="rubannoir">{nomTransport}</div>
+  <div class="relative in_ruban" style="height:250px;">
+    <div class="absolute" style="width:255px;">
+      <div class="relative" >
+        <img src="{imageTransport}" style="width:255px;" />
+      </div>
+    </div>
+    <div class="relative" style="margin-left:265px;">
+      <div class="puce">{nomTransport_type} {nomTransport}</div>
+      <div class="padding justify" >{descriptionTransport}</div>
+    </div>
+  </div>
+  <!-- END transport_fiche -->
+  <!-- START hotel_fiche -->
+      <div class="rubannoir">{nomHotel}</div>
+  <div class="in_ruban" >
+    <div class="absolute" style="width:255px;">
+      <div class="padding" >
+        <img src="{imageHotel}" style="width:250px;height:120px;" />
+      </div>
+    </div>
+    <div class="relative" style="margin-left:265px;width:auto;min-height:120px;">
+      <div class="puce"><span>
+      {nomHotel}
+      </span></div>
+    <div class="retrait">
+      <table class="tabletop " cellspacing="0" style="width:100%">
+        <tr>
+          <td style="width:110px;">nombre d'étoiles</td>
+          <td>{etoileHotel}</td>
+        </tr>
+        <tr>
+          <td>Ville</td>
+          <td class="inputMedium">{nomVille}</td>
+        </tr>
+      </table>
+    </div> 
+      <div class="justify padding">{descriptionHotel}</div>
+    </div>
+  </div>
+  {hotel_full}
+  {hotel_chambre}
+  <!-- END hotel_fiche -->
+  <div style="height:20cm;">
+  </div>
+  <table style="width:100%;">
+    <tr>
+      <td><div style="text-align:center;"> Destinations Rêve SARL - Agence de voyage spécialisée trains de luxe, croisière et voyages d'exception<br>
+          N°RCI : 529 764 912 - Licence Agence de Voyage n° 006 11 0018 - N° TVA FR 915 297 649 12 <br>
+          <img src="{HTTPCUSTOMERSITE}images/apslogo.jpg" />&nbsp;<img src="{HTTPCUSTOMERSITE}images/generallilogo.jpg" />&nbsp;<img src="{HTTPCUSTOMERSITE}images/bnplogo.jpg" />
+        </div></td>
+    </tr>
+  </table>
+</div>

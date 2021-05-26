@@ -1,0 +1,6 @@
+/*!
+Animate.css - http://daneden.me/animate
+Licensed under the MIT license - http://opensource.org/licenses/MIT
+
+Copyright (c) 2015 Daniel Eden
+*/.myddeNotifier{animation-duration:1s;animation-fill-mode:both;animation-name:slideInRight;background-color:rgba(255,255,255,0.6);color:#333;position:fixed;top:auto!important;bottom:0!important;right:20px;padding:.25em;min-width:100px;max-width:350px;max-height:90%;margin-bottom:0;overflow-x:hidden;overflow-y:auto}@keyframes slideInRight{0%{visibility:visible;transform:translate3d(100%,0,0)}100%{transform:translate3d(0,0,0)}}.myddeNotifier .notifierNotice{background-color:#ededed;color:#333;border:1px solid #666;margin-top:.5em}.myddeNotifier .notifierNotice .titre_entete{padding:.5em}.myddeNotifierBottom{background-color:rgba(255,255,255,0.8);color:#333;position:fixed;bottom:0!important;right:30px;left:30px;margin-bottom:0;min-height:100px;max-height:200px;box-shadow:0 0 3px #999;padding:.25em}

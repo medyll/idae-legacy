@@ -1,0 +1,13 @@
+@location_fragment: 'css';
+
+@import "@{location_fragment}/vars.less";
+
+@import "@{location_fragment}/app_fabric.less";
+@import "@{location_fragment}/flex.less";
+
+[data-tpl=liste_produit_small] {
+	.flex_h; .flex_align_top; .flex_wrap; .flex_align_stretch;
+}
+[data-tpl=fiche_produit_small] {
+	.flex_h .flex_main;
+}

@@ -1,0 +1,94 @@
+<!-- START product_list_item -->
+<div class = "table" style = "width:100%;" >
+	<div class = "row" >
+		<div class = "cell" >
+			<div class = "padding" ><img width = "210" height = "140" src = "{transportSrc_small}" alt = "{nomTransport}" ></div >
+		</div >
+		<div class = "cell" >
+			<div class = "text-primary h4" >{nomProduit}</div >
+			<div ><span class = "text-muted" >AVEC LE</span > <span class = "texteorange" >{nomTransport}</span ></div >
+			<div class = "villes" >{nomVille}</div >
+			<div class = "texteorange" >Durée : {dureeProduit} jours<br >
+			                            Départ : {dateDepartProduit}
+			</div >
+		</div >
+	</div >
+	<div class = "row" >
+		<div class = "cell" >
+			<div class = "padding" >
+				<div class = "td_bleu" style = "width:210px;line-height:25px;" >à partir de <span class = "moyen_blanc" >{prixProduit} €</span ></div >
+				<div >{prod_volProduit}</div >
+			</div >
+		</div >
+		<div class = "cell" >
+			<div class = "padding" >
+				<table style = "width: 100%;" >
+					<tr >
+						<td ><img width = "100" height = "25" src = "{fournisseurSrc_tiny}" ></td >
+						<td style = "width:280px;" class = "alignright" >
+							<a class = "cart_button" href = "{href}" >Voir l'offre</a >
+						</td >
+					</tr >
+				</table >
+			</div >
+		</div >
+	</div >
+</div >
+<hr ><!-- END product_list_item --><!-- START produit_squary -->
+<div class = "scheme borderb" itemscope itemtype = "http://data-vocabulary.org/Product" style = "overflow:hidden;margin:0.5em 0 0.5em 0;float:left;width:auto;min-height:60px;" >
+	<div class = "absolute" style = "width:70px;" >
+		<div class = "relative aligncenter" >
+			<a href = "{href}" ><img width = "50" height = "50" itemprop = "photo" src = "{linkSrc_squary}" alt = "{nomProduit}" /></a >
+		</div >
+	</div >
+	<div class = "relative" style = "margin-left:80px;" >
+		<h3 class = "fontnormal ellipsis" >
+			<a href = "{href}" itemprop = "name" >{nomProduit}</a >
+		</h3 >
+
+		<div class = "table" style = "width:100%;" >
+			<div class = "cell " >
+				<h4 itemprop = "brand" ><strong class = "ellipsis" >{nomFournisseur}</strong ></h4 >
+			</div >
+			<div class = "cell alignright" >
+				<meta itemprop = "priceCurrency" content = "EUR" />
+				<p itemprop = "price" ><strong class = "ellipsis" >{budgetProduit} €*</strong ></p >
+			</div >
+		</div >
+		{prod_coeurProduit}{prod_homePageProduit}{prod_toutIncluProduit}{prod_volProduit}
+	</div >
+	<div class = "spacer" ></div >
+</div >
+<!-- END produit_squary -->
+<!-- START promo_zone_produit -->
+<div class = "scheme relative left" style = "width:33%;margin-bottom:3em;;" >
+	<div class = "ellipsis bold text-uppercase text-center" >
+		<span class = "inline borderb" >{nomDestination} </span >
+	</div >
+	<div style = "overflow:hidden;" class = "margin  link_hover" >
+		<div style = "overflow:hidden;position:relative;" onclick = "document.location.href='{href}'" >
+			<div style = "z-index:100;width:100%;position:absolute;top:-3px;text-align:center" ><img  style = "box-shadow:0 0 3px #333;" width="50" src = "{fournisseurSrc_small}"  /></div>
+			<div class = "absolute aligncenter" style = "width:100%;z-index:50;top:5px;" >
+				<img src = "{transportSrc_small}" style = "box-shadow:0 0 3px #333;width:100%;" />
+			</div >
+			<div class = "relative" style = "height:123px;" >
+				<div class = "padding absolute" style = "bottom:0;width:100%;color:#333;text-shadow:0 0 3px #fff; background-color:rgba(255,255,255,0.6);" >
+					{prod_coeurProduit}{prod_homePageProduit}{prod_toutIncluProduit}{prod_volProduit}
+				</div >
+			</div >
+			<div class = "padding" >
+				<strong class = "ellipsis" >{nomProduit}</strong >
+				Durée : {dureeProduit} jours<br >
+				Départ de :  <strong>{nomVille}</strong><br>
+				<div style="height: 25px"> Date(s) : {dateDepartProduit}</div>
+				<div class = "fontnormal" style = "max-height:60px;overflow:hidden;" >{atoutProduit}</div >
+				<div class="alignright"><span class = "textegris" >à partir de</span >
+				<a href = "{href}" style = "font-size:17px;" class = "textenoir bold" >{prixProduit} €</a >
+				<span class = "textegris" >*ttc /pers</span ></div>
+			</div >
+		</div >
+		<a class = "small_next block alignright bordert" href = "{href}" >Plus d'infos <i class="fa fa-info-circle"></i> </a >
+
+		<div class = "miniliste_france" >{dep_fr}</div >
+	</div >
+</div ><!-- END promo_zone_produit -->

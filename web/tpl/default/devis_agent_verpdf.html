@@ -1,0 +1,444 @@
+<style>
+<!--
+h1, h2, h3, h4, h5, h6 {
+	font-weight: normal;
+	margin-bottom:5px;
+	margin-top:5px;
+}
+h3 {
+	font-size: 1.1em;
+	line-height: 1;
+	padding-left: 0;
+}
+tr .entete td {
+	background-color:#666
+}
+p {
+	margin:0;
+}
+.devmod {
+	/*border-bottom:1px solid red;
+	padding-bottom:1em;
+	margin-bottom:3em;
+	box-shadow:0 0 5px #cccccc*/
+}
+.borderb {
+	border-bottom:1px solid #ccc;
+	padding-top:5px;
+	padding-bottom:15px;
+	margin-bottom:15px;
+}
+.rubannoir {
+	margin-top: 0.25em;
+	margin-bottom: 0.25em;
+	background-color: #ededed;
+	color:#333;
+	padding: 10px;
+	position: relative;
+	text-align: left;
+	z-index: 1200;
+	font-size: 20px;
+}
+#frise {
+	width:1000px;
+	background-image:url('{HTTPIMAGES}frise.png');
+	height:30px;
+}
+#header {
+	height:90px;
+	background-image: url(http://www.destinationsreve.com/media/production/bandeau/header_newsletter.jpg);
+}
+.dev_designation {
+	width:70%;
+}
+.dev_nombre {
+	width:10%;
+	text-align:center
+}
+.dev_prix {
+	width:10%;
+}
+.dev_total {
+	width:10%;
+}
+.td_passager {
+	padding-bottom:10px;
+	padding-top:10px;
+}
+.td_cb {
+	padding-bottom:10px;
+	padding-top:10px;
+}
+.dashed {
+	border-bottom:1px dashed #cccccc;
+}
+.border4 {
+	border:1px solid #CCC
+}
+.padding {
+	padding:5px;
+}
+.ccc {
+	background-color:#ededed
+}
+-->
+</style>
+<page_header height="200">
+<div id="header" style="position:relative">
+</div>
+<br />
+<br />
+</page_header>
+<br>
+<h4>Devis
+  {numeroDevis} </h4>
+<div>
+  <table style="width:100%" >
+    <tr>
+      <td style="width:50%"> {sexeClient}&nbsp;{prenomClient}&nbsp;{nomClient} <br>
+        {telephoneClient}<br>
+        {emailClient}</td>
+      <td style="text-align:right;width:50%;" > Date du devis<br>
+        Le
+        {dateCreationDevis} </td>
+    </tr>
+  </table>
+</div>
+<br />
+<div class="rubannoir"> {nomProduit_type}
+  :
+  {nomProduit} </div>
+<br />
+<h3 style="padding:0.5em 2em">- Détails de votre {nomProduit_type}</h3>
+<div class="" style="padding:0.5em 2em">
+  <div>
+    <table style="width:100%;vertical-align:top"   >
+      <tr>
+        <td style="width:15%">{nomFournisseur_type} </td>
+        <td style="width:35%"><strong>{nomFournisseur}</strong></td>
+        <td style="width:15%">{nomTransport_type}</td>
+        <td style="width:35%"><strong>{nomTransport}</strong></td>
+      </tr>
+      <tr>
+        <td style="width:15%">Ville de départ </td>
+        <td style="width:35%"><strong>{villeDepartProduit}</strong></td>
+        <td style="width:15%">Date de départ</td>
+        <td style="width:35%"><strong>{dateDebutProduit_tarif}</strong></td>
+      </tr>
+      <tr>
+        <td style="width:15%"> Ville d'arrivée </td>
+        <td style="width:35%"><strong>{villeArriveeProduit}</strong></td>
+        <td style="width:15%">Durée</td>
+        <td style="width:35%"><strong>{dureeJourProduit}</strong> jours {dureeNuitProduit} nuits.</td>
+      </tr>
+    </table>
+  </div>
+  <table style="width:100%;vertical-align:top"   >
+    <tr>
+      <td style="width:15%"> Prestations </td>
+      <td style="width:85%">: Pension complète hors boissons et pourboires </td>
+    </tr>
+    <tr>
+      <td style="width:15%"> Formalités </td>
+      <td style="width:85%">: Passeport valable 6 mois après la date de retour<br />
+        &nbsp;&nbsp;Veuillez consulter le site <a target="_blank" href="http://www.diplomatie.gouv.fr/fr/">Diplomatie.gouv.fr</a>
+        pour vous tenir informé.</td>
+    </tr>
+  </table>
+</div>
+<div class="" style="padding:0.5em 2em">
+  <table style="width:100%" cellpadding="0" cellspacing="0" >
+    <tr>
+      <td style="width:30%;text-align:center"><img src="{imageDestination}" /></td>
+      <td style="width:70%">{listeEtape}<br />
+        <span style="font-size:12px">* soumis éventuellement à modification de la part de la compagnie</span></td>
+    </tr>
+  </table>
+</div>
+<div>
+  <!-- START hashotel -->
+  <div class="borderb">
+    <table style="width:100%">
+      <tr>
+        <td style="width:50%;text-align:left;"><h3>- {nomHotel}</h3></td>
+        <td style="width:50%;text-align:right;"  ><img src="{imageHotel}" />&nbsp;</td>
+      </tr>
+    </table>
+  </div>
+  <!-- END hashotel -->
+  <br />
+  <div class="rubannoir" >Prestations</div>
+  <div class="" style="padding:0.5em 2em">
+    <table style="width:100%">
+      <tr>
+        <td style="width:50%"><strong>Prestations inclues</strong> : </td>
+        <td style="width:50%"><strong>Prestations non incluses</strong></td>
+      </tr>
+      <tr>
+        <td style="width:50%"><div class="padding">{inclusDevis}</div></td>
+        <td style="width:50%"><div class="padding">{nonInclusDevis}</div></td>
+      </tr>
+    </table>
+  </div>
+</div>
+<page backtop='25mm'></page>
+<div class="devmod">
+  <div class="rubannoir" >Contrat de voyage {iddevis}</div>
+  <div class="" style="padding:0.5em 2em">
+    <div class="" style="padding:0.5em 2em">
+      <table style="width:100%"   >
+        <tr>
+          <td style="width:50%"> Devis du {dateCreationDevis} <br />
+            {nomProduit_type} {nomProduit} </td>
+          <td style="width:50%;text-align:right">{sexeClient} {prenomClient}&nbsp;{nomClient} </td>
+        </tr>
+      </table>
+    </div>
+    <div>
+      <table class="border4" style="width:100%" cellpadding="0" cellspacing="0" >
+        <tr class="entete">
+          <td class="dev_designation" style="background-color:#ededed;padding:5px;">Désignation</td>
+          <td class="dev_prix" style="background-color:#ccc;padding:5px;">Prix</td>
+          <td class="dev_nombre" style="background-color:#ccc;padding:5px;">Nombre</td>
+          <td class="dev_total" style="background-color:#ccc;padding:5px;">Total euros</td>
+        </tr>
+        <!-- START ligne_devis -->
+        <tr>
+          <td class="dev_designation" style="border-bottom:1px solid #cccccc;padding:5px;">{descriptionLigne}</td>
+          <td class="dev_prix" style="border-bottom:1px solid #cccccc;padding:5px;">{prixLigne}</td>
+          <td class="dev_nombre" style="border-bottom:1px solid #cccccc;padding:5px;">{quantiteLigne}</td>
+          <td class="dev_total" style="border-bottom:1px solid #cccccc;padding:5px;">{totalLigne}</td>
+        </tr>
+        <!-- END ligne_devis -->
+        <tr>
+          <td class="dev_designation" style="padding:5px;"></td>
+          <td class="dev_prix" style="padding:5px;"></td>
+          <td class="dev_nombre" style="padding:5px;"></td>
+          <td class="dev_total" style="padding:5px;">{prixTotal} euros</td>
+        </tr>
+      </table>
+    </div>
+  </div>
+  <div class="" style="padding:0.5em 2em">
+    <img src="{HTTPCUSTOMERSITE}images/square.jpg" />
+    <span style="color:#F00;"  >*</span> J'ai pris connaissance des conditions générales de vente fournies en annexe à ce contrat.<br />
+    <h4>Date :</h4>
+    <h4>Signature :</h4>
+    <br />
+    <br />
+    <h3>- Formalités de paiement</h3>
+    <div class="padding ccc border4"> Les conditions de paiement peuvent varier selon les compagnies. Merci de vous référer aux conditions générales de vente.<br />
+      Merci de remplir ces informations avec soins, elles serviront de déclaration de votre identité auprés de la compagnie.<br />
+      Votre réservation deviendra effective à la reception de ce document signé. </div>
+    <br />
+    - Je soussigné <span style="color:#cccccc">..................................................................</span> autorise destinations reve à effectuer le paiement de mon voyage ci-dessus selon les modalités suivantes : <br />
+    <br />
+  </div>
+  <div class="" style="padding:0.5em 2em">
+    <div class="border4 ">
+      <table class="">
+        <tr>
+          <td style="width:100px;" class="td_cb">- Acompte le : </td>
+          <td style="width:150px;" class="td_cb">{dateAcompte}</td>
+          <td style="width:50px" class="td_cb">de : </td>
+          <td style="width:150px;" class="td_cb">{sommeAcompte}</td>
+          <td style="width:20px" class="td_cb">euros</td>
+        </tr>
+        <tr>
+          <td style="width:100px;" class="td_cb">- Solde le : </td>
+          <td style="width:150px;" class="td_cb">{dateSolde}</td>
+          <td style="width:50px" class="td_cb">de : </td>
+          <td style="width:150px;" class="td_cb">{sommeFinale}</td>
+          <td style="width:20px" class="td_cb">euros</td>
+        </tr>
+      </table>
+    </div>
+  </div>
+  <div class="" style="padding:0.5em 2em">
+    <div class="padding ccc"> Soit au total la somme de {prixTotal} euros que je regle. </div>
+    <div class="padding"><img src="{HTTPCUSTOMERSITE}images/square.jpg" /> En espèces </div>
+    <div class="padding"><img src="{HTTPCUSTOMERSITE}images/square.jpg" /> Par virement bancaire </div>
+    <div class="padding"><img src="{HTTPCUSTOMERSITE}images/square.jpg" /> Par carte bancaire<br />
+      <div class="padding">
+        <table class="border4">
+          <tr>
+            <td style="width:150px"><img src="{HTTPCUSTOMERSITE}images/square.jpg" /> Master card</td>
+            <td style="width:150px"><img src="{HTTPCUSTOMERSITE}images/square.jpg" /> Visa</td>
+            <td style="width:150px"><img src="{HTTPCUSTOMERSITE}images/square.jpg" /> Eurocard</td>
+            <td style="width:150px"><img src="{HTTPCUSTOMERSITE}images/square.jpg" /> Carte bleue</td>
+          </tr>
+        </table>
+      </div>
+      <br />
+      <div class="padding">Numéro de carte bancaire :</div>
+      <div class="padding">Titulaire de la carte :</div>
+      <div class="padding">Date d'expiration :</div>
+      <div class="padding">Cryptogramme :</div>
+    </div>
+    <div class="padding">
+      <table class="border4">
+        <tr>
+          <td style="width:80px">Fait à : </td>
+          <td style="width:300px" class="dashed"></td>
+          <td style="width:80px" >Le : </td>
+          <td style="width:300px" class="dashed"></td>
+        </tr>
+        <tr>
+          <td style="width:80px">Signature : </td>
+          <td style="width:300px" class="dashed"></td>
+          <td style="width:80px" ></td>
+          <td style="width:300px"  ></td>
+        </tr>
+      </table>
+    </div>
+  </div>
+</div>
+<br />
+<page backtop='25mm'></page>
+<div class="" style="padding:0.5em 2em">
+  <div class="rubannoir" >- Contact en cas d'urgence :</div>
+  <div class="padding border4"> Merci d'indiquer ici les informations concernant la personne à joindre en cas d'urgence.<br />
+    Celle ci ne doit pas faire partie du voyage. </div>
+  <br />
+  <div>
+    <table width="100%"  cellpadding="0" cellspacing="0" style="width:100%" >
+      <tr>
+        <td class="td_passager" style="width:100px;" >Nom</td>
+        <td class="td_passager dashed" style="width:140px;" ></td>
+        <td class="td_passager" style="width:100px;">Prénom</td>
+        <td class="td_passager dashed" style="width:130px;" ></td>
+        <td class="td_passager" style="width:90px;" >Parenté</td>
+        <td class="td_passager dashed" style="width:130px;" ></td>
+      </tr>
+      <tr>
+        <td class="td_passager" >Téléphone fixe</td>
+        <td class="td_passager dashed" ></td>
+        <td class="td_passager" >Téléphone portable</td>
+        <td class="td_passager dashed" ></td>
+        <td class="td_passager" >Adresse mail</td>
+        <td class="td_passager dashed" ></td>
+      </tr>
+    </table>
+  </div>
+</div>
+<div class="devmod">
+  <div class="rubannoir" >- Liste des passagers :</div>
+  <div  style="padding:0.5em 2em">
+    <div class="padding ccc border4"> Liste des passagers participants au voyage.<br />
+      Merci de remplir ces informations avec soins. </div>
+    <br />
+    <!-- START ligne_passager -->
+    <div class="border4">
+      <table width="100%"  cellpadding="0" cellspacing="0" style="width:100%" >
+        <tr>
+          <td class="td_passager" style="width:100px;" >Nom</td>
+          <td class="td_passager dashed" style="width:140px;" >{nomPassager}</td>
+          <td class="td_passager" style="width:100px;">Nom jeune fille</td>
+          <td class="td_passager dashed" style="width:130px;" >{nomJeuneFillePassager}</td>
+          <td class="td_passager" style="width:90px;" >Né(e) le</td>
+          <td class="td_passager dashed" style="width:130px;" >{naissancePassager}</td>
+        </tr>
+        <tr>
+          <td class="td_passager" >Prénom</td>
+          <td class="td_passager dashed" >{prenomPassager}</td>
+          <td class="td_passager" >Nationalité</td>
+          <td class="td_passager dashed" >{nationalitePassager}</td>
+          <td class="td_passager" ></td>
+          <td class="td_passager dashed" >{lieuNaissancePassager}</td>
+        </tr>
+        <tr>
+          <td class="td_passager" >Adresse</td>
+          <td class="td_passager dashed" >{adressePassager}</td>
+          <td class="td_passager dashed" ></td>
+          <td class="td_passager dashed" ></td>
+          <td class="td_passager dashed" ></td>
+          <td class="td_passager dashed" ></td>
+        </tr>
+        <tr>
+          <td class="td_passager" >Code postal</td>
+          <td class="td_passager dashed" >{codePostalPassager}</td>
+          <td class="td_passager" >Ville</td>
+          <td class="td_passager dashed" >{villePassager}</td>
+          <td class="td_passager" >Pays</td>
+          <td class="td_passager dashed" >{paysPassager}</td>
+        </tr>
+        <tr>
+          <td class="td_passager" >N° passport/CNI</td>
+          <td class="td_passager dashed" >{numeroCartePassager}</td>
+          <td class="td_passager" >Date émission</td>
+          <td class="td_passager dashed" >{dateEmissionPassager}</td>
+          <td class="td_passager" >Lieu émission</td>
+          <td class="td_passager dashed" >{lieuEmissionPassager}</td>
+        </tr>
+        <tr>
+          <td class="td_passager" >Email</td>
+          <td class="td_passager dashed" >{emailPassager}</td>
+          <td class="td_passager" >Téléphone</td>
+          <td class="td_passager dashed" >{telephonePassager}</td>
+          <td class="td_passager" ></td>
+          <td class="td_passager" ></td>
+        </tr>
+      </table>
+      <br />
+    </div>
+    <br />
+    <!-- END ligne_passager -->
+  </div>
+</div>
+<page backtop='25mm'></page>
+<!-- START fiche_transport -->
+<div class="devmod">
+  <div class="rubannoir">{nomTransport}</div>
+  <div class="" style="padding:0.5em 2em">
+    <div class=" ">
+      <table style="width:100%">
+        <tr>
+          <td style="width:75%;text-align:left;"><h3><strong>{nomTransport_type} {nomTransport}</strong></h3>
+            {descriptionTransport}</td>
+          <td style="width:25%;text-align:right;"  ><img src="{imageProduit}" />&nbsp;</td>
+        </tr>
+      </table>
+      <br />
+      <table style="width:100%" cellpadding="0" cellspacing="0" >
+        <tr>
+          <td width="100%"><h3><strong>{nomTransport_gamme}</strong></h3>
+            {descriptionTransport_gamme}</td>
+        </tr>
+      </table>
+    </div>
+  </div>
+</div>
+<!-- END fiche_transport -->
+<div class="devmod">
+  <div class="rubannoir">Clauses</div>
+  <div class="" style="padding:0.5em 2em">
+    <!-- START clause_produit -->
+    <div class="border4">
+      <h3>- {codeProduit_clause}</h3>
+    </div>
+    {texteProduit_clause}<br />
+    <!-- END clause_produit -->
+  </div>
+</div>
+<div class="devmod">
+    <div class="rubannoir">
+       Conditions d'annulation pour la compagnie {nomFournisseur} 
+    </div>
+  <div class="" style="padding:0.5em 2em">
+    <br />
+    {cgv_text}<br />
+  </div>
+</div>
+<div class="devmod">
+   {inclusItineraireDevis} 
+</div>
+<page_footer>
+  <table style="width:100%;">
+    <tr>
+      <td><div style="text-align:center;"> Destinations Rêve SARL - Agence de voyage spécialisée trains de luxe, croisière et voyages d'exception<br>
+          N°RCI : 529 764 912 - Licence Agence de Voyage n° 006 11 0018 - N° TVA FR 915 297 649 12 <br>
+          <img src="{HTTPCUSTOMERSITE}images/apslogo.jpg" />&nbsp;<img src="{HTTPCUSTOMERSITE}images/generallilogo.jpg" />&nbsp;<img src="{HTTPCUSTOMERSITE}images/bnplogo.jpg" />
+        </div></td>
+    </tr>
+  </table>
+</page_footer>

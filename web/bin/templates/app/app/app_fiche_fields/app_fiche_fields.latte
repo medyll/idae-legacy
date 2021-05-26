@@ -1,0 +1,37 @@
+<div data-table="{$table}" data-table_value="{$table_value}"  data-contextual="table={$table}&table_value={$table_value}">
+	<div class=" flex_h   flex_wrap">
+		{*si pas groupe*}
+
+		{*sinon*}
+		{foreach $ARR_FIELDS as $ARR_FIELD_GROUP}
+			<div n:if="$titre" class="borderb textgrisfonce" style="width:100%;">
+				<div class="padding_more flex_main     flex_h flex_align_middle flex_padding  relative">
+					<div class="">{$ARR_FIELD_GROUP['appscheme_field_group']['nomAppscheme_field_group']}</div>
+					<div><i class="fa fa-{$ARR_FIELD_GROUP['appscheme_field_group']['iconAppscheme_field_group']} "></i></div>
+				</div>
+			</div>
+			<div class=" flex_h flex_wrap flex_align_middle flex_align_stretch fiche_field_group" >
+				{foreach $ARR_FIELD_GROUP['appscheme_fields'] as $ARR_FIELD}
+					<div class="flex_h flex_wrap fiche_field" >
+						<div n:class="$hide_field_title ?  label_field_icon : label_field "  title="{$ARR_FIELD['nom']}"  >
+							<i class="fa fa-{$ARR_FIELD['icon']} item_icon textgris"></i><span>{$ARR_FIELD['nom']|capitalize}</span>
+						</div>
+						{if ($html_map_link )}
+							<div class="cursor" data-module_link="fiche_map" data-vars="{$html_map_link}">
+								<div class="item_icon more ">
+									<i class="fa fa-map-marker"></i>
+								</div>
+							</div>
+						{/if}
+						<div class="flex_main  {$ARR_FIELD['css_bol']} ">
+							{empty($edit_field) ? $ARR_FIELD['value_html'] : $ARR_FIELD['value_input']|noescape}
+						</div>
+					</div>
+				{/foreach}
+				<div n:if="$titre" >
+					<br/>
+				</div>
+			</div>
+		{/foreach}
+	</div>
+</div>

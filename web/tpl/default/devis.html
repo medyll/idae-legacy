@@ -1,0 +1,198 @@
+<style>
+<!--
+h1, h2, h3, h4, h5, h6 {
+	font-weight: normal;
+	margin-bottom:5px;
+	margin-top:5px;
+}
+h3 {
+	font-size: 1.3em;
+	line-height: 1;
+	padding-left: 0;
+}
+tr .entete td {
+	background-color:#666
+}
+.borderb {
+	border-bottom:1px solid #ccc;
+	padding-top:5px;
+	padding-bottom:15px;
+	margin-bottom:15px;
+}
+.rubannoir {
+	margin-top: 0.25em;
+	margin-bottom: 0.25em;
+	background-color: #ccc;
+	color:#333;
+	padding: 10px;
+	position: relative;
+	text-align: left;
+	z-index: 1200;
+	font-size: 20px;
+}
+#frise {
+	width:1000px;
+	background-image:url('{HTTPIMAGES}frise.png');
+	height:30px;
+}
+#header {
+	height:90px; 
+	background-image: url(http://www.destinationsreve.com/images/header.jpg);
+}
+#indigo {
+	width:260px;
+	height:90px;
+	position:absolute;
+	top:0;
+	left:0;
+	background-image:url(http://www.destinationsreve.com/images/indigo.png);
+}
+.dev_designation {
+	width:70%;
+}
+.dev_nombre {
+	width:10%;
+	text-align:center
+}
+.dev_prix {
+	width:10%;
+}
+.dev_total {
+	width:10%;
+}
+-->
+</style>
+<page backtop='10mm' backbottom='10mm' backleft='5mm' backright='5mm' >
+<page_header height="90">
+<table style="width:100%;">
+  <tr>
+    <td><div id="header" style="position:relative">
+        <div id="indigo"></div>
+      </div>
+      </td>
+  </tr>
+  <tr><td><br />
+      <br /></td></tr>
+</table>
+</page_header>
+<page_footer>
+  <table style="width:100%;">
+    <tr>
+      <td><div style="text-align:center;"> Destinations Rêve SARL – Agence de voyage spécialisée trains de luxe, croisière et voyages d'exception<br> 
+          N°RCI : 529 764 912 – Licence Agence de Voyage n° 006 11 0018 - N° TVA FR 915 297 649 12 <br>
+          <img src="{HTTPCUSTOMERSITE}images/apslogo.jpg" />&nbsp;<img src="{HTTPCUSTOMERSITE}images/generallilogo.jpg" />&nbsp;<img src="{HTTPCUSTOMERSITE}images/bnplogo.jpg" />
+        </div></td>
+    </tr>
+  </table>
+</page_footer>
+<br><br>
+<h3>Devis
+  {numeroDevis} </h3>
+<table style="width:100%" >
+  <tr>
+    <td style="width:50%"> {sexeDevis}&nbsp;{prenomDevis}&nbsp;{nomClient} <br>
+      {telephoneDevis}<br>
+      {emailDevis}</td>
+    <td style="text-align:right;width:50%;" >Date du devis<br>
+      Le
+      {dateCreationDevis}</td>
+  </tr>
+</table>
+<div class="rubannoir"> {nomProduit_type}
+  :
+  {nomProduit} </div>
+<br />
+<div class="borderb">
+  <h3>- Détails de votre voyage</h3>
+  <table style="width:100%">
+    <tr>
+      <td style="width:15%">Compagnie </td>
+      <td style="width:35%">: {nomFournisseur}</td>
+      <td style="width:15%">{nomTransport_type}</td>
+      <td style="width:35%">: {nomTransport}</td>
+    </tr>
+    <tr>
+      <td style="width:15%">Ville de départ </td>
+      <td style="width:35%">: {villeDepartProduit}</td>
+      <td style="width:15%">Date de départ</td>
+      <td style="width:35%">: {dateDebutProduit_tarif}</td>
+    </tr>
+    <tr>
+      <td style="width:15%"> Ville d'arrivée </td>
+      <td style="width:35%">: {villeArriveeProduit}</td>
+      <td style="width:15%">Durée</td>
+      <td style="width:35%">: {dureeJourProduit} jours {dureeNuitProduit} nuits.</td>
+    </tr>
+  </table>
+  <table style="width:100%">
+    <tr>
+      <td style="width:15%"> Prestation </td>
+      <td style="width:85%">: Pension complète hors boissons et pourboires </td>
+    </tr>
+    <tr>
+      <td style="width:15%"> Formalités </td>
+      <td style="width:85%">: Passeport valable 6 mois après la date de retour<br />&nbsp;&nbsp;Veuillez consulter le site  <a target="_blank" href="http://www.diplomatie.gouv.fr/fr/">Diplomatie.gouv.fr</a> pour vous tenir informé.</td>
+    </tr> 
+  </table>
+</div>
+<div class="borderb">
+  <table style="width:100%">
+    <tr>
+      <td width="100%"><h3>- Itinéraire *</h3></td>
+    </tr>
+    <tr>
+      <td width="100%">{listeEtape}</td>
+    </tr>
+    <tr>
+      <td width="100%" style="font-size:11px">* soumis à modification de la part de la compagnie</td>
+    </tr>
+  </table>
+</div>
+<div class="borderb">
+  <h3 >- Votre voyage</h3>
+  <table style="width:100%" >
+    <tr class="entete">
+      <td class="dev_designation" style="background-color:#ccc;padding:3px;">Désignation</td>
+      <td class="dev_prix" style="background-color:#ccc;padding:3px;">Prix</td>
+      <td class="dev_nombre" style="background-color:#ccc;padding:3px;">Nombre</td>
+      <td class="dev_total" style="background-color:#ccc;padding:3px;">Total</td>
+    </tr>
+    <!-- START ligne_devis -->
+    <tr>
+      <td class="dev_designation">{descriptionLigne}</td>
+      <td class="dev_prix">{prixLigne}</td>
+      <td class="dev_nombre">{quantiteLigne}</td>
+      <td class="dev_total">{totalLigne} €</td>
+    </tr>
+    <!-- END ligne_devis -->  
+    <tr>
+      <td class="dev_designation"></td>
+      <td class="dev_prix"></td>
+      <td class="dev_nombre"></td>
+      <td class="dev_total">{prixTotal} €</td>
+    </tr>
+  </table>
+</div>
+<div class="borderb">
+  <table style="width:100%">
+    <tr>
+      <td width="100%"><h3>- {nomTransport_type} {nomTransport}</h3>
+        {descriptionTransport}</td>
+    </tr>
+  </table>
+</div>
+<div class="borderb">
+  <table style="width:100%">
+    <tr>
+      <td width="100%"><h3>- {nomTransport_gamme}</h3>
+        {descriptionTransport_gamme}</td>
+    </tr>
+  </table>
+</div>
+<div class="borderb">
+<!-- START clause_produit --> 
+<h3>- {codeProduit_clause}</h3>
+<br />{texteProduit_clause}<br />
+<!-- END clause_produit --> 
+</div>
+</page>

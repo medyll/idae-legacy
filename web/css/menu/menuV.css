@@ -1,0 +1,91 @@
+/* menuV.css
+ * For: menuDropdown.js (version: 0.1x)
+ */
+
+#mainMenu1 {
+  background-color: #EEE;
+  color: #000;
+  margin: 0;
+  padding: 0;
+  /* if the menu is vertical:
+   * set border to 'none'
+   * padding-left must be equal to padding-right
+   */
+  width: 9em;
+  top: 0.6em;
+  left: 0.6em;
+  z-index: 1;
+  position: absolute;
+  /* if the menu is horizontal: use a 'static' position
+   * if the menu is vertical: use an 'absolute' or 'fixed' position
+   */
+}
+
+#menuList1 {
+  border: 1px solid #CCC;
+  margin: 0;
+  padding: 2px;
+  /* do not use a position other than 'static' here */
+  /* if the menu is vertical:
+   * margin-left + border-left-width + padding-left must be equal to
+   * margin-right + border-right-width + padding-right
+   */
+}
+
+#menuList1 li {
+  /* do not change these rules */
+  display: inline;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  /* do not change these rules */
+}
+
+#menuList1 li a {
+  background-color: transparent;
+  color: #000;
+  display: block;
+  border: 1px solid #EEE;
+  margin: 0;
+  padding: 2px 10px;
+  /* always set margin to '0' */
+  /* Win/IE5.0 will ignore border and padding if display is 'inline' */
+  text-decoration: none;
+}
+
+#menuList1 li a:hover, #menuList1 li a:focus {
+  background-color: #f8f8f8;
+  color: #000;
+  border-color: #CCC;
+}
+
+#menuList1 li a.actuator {
+  background: url("images/fleche-noire.jpg") no-repeat 100% 50%;
+  color: #000;
+  padding-right: 20px;
+}
+
+#menuList1 li a.actuator:hover, #menuList1 li a.actuator:focus {
+  background: url("images/fleche-grise.jpg") no-repeat 100% 50% #f8f8f8;
+  color: #000;
+}
+
+#menuList1 .menu {
+  background-color: #EEE;
+  color: #000;
+  border: 1px solid #CCC;
+  margin: 0;
+  padding: 2px;
+  /* only set '0' or negative margin */
+  /* border  width must be the same on the four sides (in 'px' units) */
+  /* padding width must be the same on the four sides (in 'px' units) */
+  z-index: 1;
+  position: absolute;
+  visibility: hidden;
+  /* always set position to 'absolute' and visibility to 'hidden' */
+}
+
+#menuList1 .menu .menu {
+  margin-left: 2px;
+  /* if a non-zero padding is set on .menu, set margin-left to margin-left + padding */
+}

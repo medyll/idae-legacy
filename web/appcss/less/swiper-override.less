@@ -1,0 +1,31 @@
+
+.swiper-button-prev, .swiper-button-next {
+	position                : absolute;
+	top                     : 0 !important;
+	width                   : 27px !important;
+	height                  : 100% !important;
+	line-height             : 100% !important;
+	margin-top              : 0 !important;
+	z-index                 : 10;
+	cursor                  : pointer;
+	color: #333;
+	-moz-background-size    : 27px 44px;
+	-webkit-background-size : 27px 44px;
+	background-size         : 27px 44px;
+	background-position     : center;
+	background-repeat       : no-repeat;
+	&.swiper-button-disabled {
+		display: none;
+		opacity        : 0.6 !important;
+		cursor         : auto;
+		pointer-events : none;
+		background-color : white !important;
+		background-image : none !important;
+	}
+}
+
+.swiper-pagination {
+	top:150px;
+	bottom:auto;
+	display:none;
+}

@@ -1,0 +1,326 @@
+{define entete_fiche}
+
+	<div class="padding_more">entete_fiche
+		<div class="flex_h flex_align_top">
+			<div class="padding_more">
+				<img src="{$img[img_small][href]}">
+			</div>
+			<div class="padding_more flex_main">
+				<h1>{$nom}</h1>
+				<h2 n:if="$petitNom" >{$petitNom}</h2>
+				<h5 n:if="$atout"> Atout : {$atout}</h5>
+				<div class="margin_more padding_more bordert   flex_h flex_align_middle">
+					<div class="  aligncenter borderr">
+						<a href="{$link[fiche_detail]}"><i class="fa fa-info-circle fa-2x"></i> fiche detail</a>
+					</div>
+					<div class="  aligncenter">
+						<a href="{$link[hub]}"><i class="fa fa-home fa-2x"></i> hub</a>
+					</div>
+				</div>
+			</div>
+			<div n:inner-foreach="$liste_fk as $item">
+				<div class="margin_more padding_more border4">
+					<a href="{$item[data_vars][link][hub]}">{$item[page_data_html][estTop]|noescape} {$item[page_data_html][nom]|noescape}</a>
+				</div>
+			</div>
+		</div>
+		<div n:if="$description" class="padding_more justify">
+			{$description|truncate:500|noescape}
+		</div>
+	</div>
+{/define}
+{define entete_fiche_detail  }
+
+	<div class="padding_more">entete_fiche_detail
+		<div class="flex_h flex_align_top">
+			<div class="padding_more borderr">
+				<img src="{$img[img_large][href]}" width="{$img[img_large][size][0]}" height="{$img[img_large][size][1]}" style="max-width:100%">
+			</div>
+			<div class="padding_more flex_main">
+				<h1 class="aligncenter">{$nom}</h1>
+
+				<div class="  aligncenter">
+					<img class="boxshadow" src="{$img[img_small][href]}" width="{$img[img_small][size][0]}" height="{$img[img_small][size][1]}" style="max-width:100%">
+				</div>
+				<div class="margin_more padding_more bordert flex flex_h flex_align_middle">
+					<div class="flex_main aligncenter borderr">
+						<a href="{$link[fiche]}"><i class="fa fa-file-text fa-2x"></i> fiche</a>
+					</div>
+					<div class="flex_main aligncenter">
+						<a href="{$link[hub]}"><i class="fa fa-home fa-2x"></i> hub</a>
+					</div>
+				</div>
+				<div n:if="$petitNom" class="aligncenter">
+					<h4>{$petitNom}</h4>
+				</div>
+				<div n:if="$atout" class="aligncenter">
+					<h5> Atout : {$atout}</h5>
+				</div>
+				<div>
+					<div n:inner-foreach="$liste_fk as $item">
+						<div class="padding_more bordert">
+							<a href="{$item[data_vars][link][hub]}">{$item[page_data_html][estTop]|noescape} {$item[page_data_html][nom]|noescape}</a>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div n:tag-ifset="$information" class="padding_more">
+			<h4 n:tag-ifset="$petitNom" >{$petitNom}</h4>
+			{$information|noescape}
+		</div>
+	</div>
+{/define}
+{define fiche_mini  }
+	{if $data} {php extract($data)}{/if}
+	<div data-tpl="fiche_mini" class="margin_more border4 flex_h flex_main">
+		<div class="boxshadow aligncenter">
+			<a href="{$link[hub]}" class="inline">
+				<img src="{$img[img_small][href]}" width="{$img[img_small][size][0]}" height="{$img[img_small][size][1]}">
+			</a>
+		</div>
+		<div class="flex_v flex_align_stretch padding_more">
+			<div class=""><h4>{$nom}</h4></div>
+			<div n:if="$atout" class=""><h5>{$atout}</h5></div>
+			<div n:if="$description" ><h5>{$description|truncate:250}</h5></div>
+			<div class="padding_more">
+				<a n:tag-ifset="$link[fiche]" href="{$link[fiche]}">Fiche {$nomAppscheme} {$petitNom}</a>
+				<a n:tag-ifset="$link[fiche_detail]" href="{$link[fiche_detail]}">Fiche détail {$petitNom}</a>
+			</div>
+		</div>
+	</div>
+{/define}
+{define fiche_micro  }
+	<div data-tpl="fiche_micro" class="margin_more border4 flex_h flex_align_middle flex_main">
+		<div n:if="$data[img][img_small]" style="width:70px;">
+			<img width="{$data[img][img_small][size][0]}" height="auto" class="boxshadow" src="{$data[img][img_small][href]}" style="max-width:100%;">
+		</div>
+		<div class="flex_main padding">
+			<h4 style="width:150px;" class="ellipsis">{$data[nom]|noescape}</h4>
+
+			<div class="">
+				<a href="{$data[link][liste]}">voir {$data[nom]|noescape|truncate:25}</a>
+			</div>
+		</div>
+		<div class="ededed borderl padding flex_align_middle">
+			<i class="fa fa-caret-right"></i>
+		</div>
+	</div>
+{/define}
+{define fiche_image}
+	<div n:if="$data[img][img_small]" class="relative cool">
+		<a href="{$data[link][hub]}" class="inline borderr">
+			<img width="{$data[img][img_small][size][0]}" height="{$data[img][img_small][size][1]}" class="" src="{$data[img][img_small][href]}">
+			<div class="ededed padding_more   aligncenter bordert">
+				{$data[nom]|noescape} {$data[estTop]|noescape}
+			</div>
+		</a>
+	</div>
+{/define}
+{define fiche_detail_fk}
+	<div class="margin_more border4 flex_h flex_main">
+		<div class="boxshadow aligncenter">
+			<a href="{$link[hub]}" class="inline" style="width:90px;">
+				<img src="{$img[img_small][href]}" width="{$img[img_small][size][0]}" height="{$img[img_small][size][1]}" style="max-width:100%">
+			</a>
+		</div>
+		<div class="flex_v flex_align_stretch padding_more">
+			<div class=""><h4>{$nom}</h4></div>
+			<div class=""><h5>{$nomAppscheme}</h5></div>
+			<div class="padding_more">
+				<a n:tag-ifset="$link[fiche]" href="{$link[fiche]}">Fiche {$nomAppscheme} {$petitNom}</a>
+				<a n:tag-ifset="$link[fiche_detail]" href="{$link[fiche_detail]}">Fiche détail {$petitNom}</a>
+			</div>
+		</div>
+	</div>
+{/define}
+{define fiche_produit_small}
+	{if $data} {php extract($data)}{/if}
+	<div data-tpl="fiche_produit_small" class="promo_zone_produit scheme blanc relative" >
+		<div class="ellipsis bold padding  text-center">
+			<span class="inline borderb">{$nomDestination} </span>
+		</div>
+		<div style="overflow:hidden;" class="margin ">
+			<div class="border4" style="overflow:hidden;position:relative;" onclick="document.location.href='{$href}'">
+				<div class="aligncenter" style="z-index:100;width:100%;position:absolute;left:-0px;top:30px;">
+					<img style="box-shadow:0 0 3px #333;" width="50" src="{$fournisseurSrc_small}"/>
+				</div>
+				<div class="shadow">
+					<div class="col-xs-6 nopadding alignright" style="">
+						<img class="img-responsive" src="{$destinationSrc_square}"/>
+					</div>
+					<div class="col-xs-6 nopadding alignleft" style="">
+						<img class="img-responsive" src="{$transportSrc_square}"/>
+					</div>
+					<div class="spacer"></div>
+				</div>
+				<div class="relative">
+					<div class="padding"
+					     style="bottom:0;width:100%;color:#333;text-shadow:0 0 3px #fff; background-color:rgba(255,255,255,0.6);">
+						{$estCoeur|noescape}{$estHome|noescape}{$estOutInclus|noescape}{$estVol|noescape}
+					</div>
+				</div>
+				<div class="padding">
+					<strong class="ellipsis">{$nomProduit}</strong>
+
+					<div class="ellipsis">Durée : {$duree} jours</div>
+					<div class="ellipsis">Départ de : <strong>{$nomVille}</strong></div>
+					<div class="ellipsis"> Date(s) : {$dateDepart}</div>
+					<div class="ellipsis fontnormal">{$atout}</div>
+					<div class="alignright ellipsis bordert"><span class="textegris">dés </span>
+						<a href="{$href}" style="font-size:17px;" class="texteorange bold">{$prix|noescape} €</a>
+						<br>
+						{$promotion}<span class="textegris">*ttc/pers</span></div>
+					<div class="alignright">
+						<a class="small_next block alignright" href="{$href}">Plus d'infos <i class="fa fa-info-circle"></i></a>
+					</div>
+				</div>
+			</div>
+			<div class="miniliste_france">{$dep_fr}</div>
+		</div>
+	</div>
+{/define}
+{define fiche_rfk}
+	{if $page_rfk}
+		{foreach $page_rfk as $row}
+			{if !$cartouche}
+				{include cartouche_default , row=>$row }
+			{else}
+				{include #$cartouche , row=>$row }
+			{/if}
+		{/foreach}
+	{/if}
+{/define}
+{define liste}  {* cartouche et liste*}
+	{if $data}
+		{if !$cartouche}
+			{include cartouche_default , row=>$data }
+		{else}
+			{include #$cartouche , row=>$data }
+		{/if}
+	{/if}
+{/define}
+{define liste_produit_small}
+	{foreach $data as $row}
+		{include fiche_produit_small , data => $row }
+	{/foreach}
+{/define}
+{define liste_produit}
+	{foreach $data as $row}
+		{include fiche_produit , data => $row }
+	{/foreach}
+{/define}
+{define liste_micro}
+	{foreach $data as $row}
+		{include fiche_micro , data => $row }
+	{/foreach}
+{/define}
+{define liste_mini}
+	{foreach $data as $row}
+		{include fiche_mini , data => $row }
+	{/foreach}
+{/define}
+{define liste_image}
+	{foreach $data as $row}
+		{include fiche_image , data => $row }
+	{/foreach}
+{/define}
+{define cartouche_default} {* on recoit data_cartouche et data*}
+	<div data-tpl="cartouche_default" class="flex_main" style="min-width:50%;">
+		<div class="padding_more margin_more">
+			<div>
+				<div><h3>{$row[nomAppscheme]} {$lienType}</h3></div>
+				<div>
+					<a href="{$row[link][liste]}">({$row[count]}) Liste {$row[nomAppscheme]}</a>
+				</div>
+			</div>
+			{if $row[liste_micro]}
+				<div data-tpl="liste_micro" class="flex_h flex_wrap flex_align_stretch">
+					{include liste_micro, data => $row[liste_micro] }
+				</div>
+			{/if}
+			{if $row[liste_mini]}
+				<div data-tpl="liste_mini">
+					{include liste_mini, data => $row[liste_mini] }
+				</div>
+			{/if}
+			{if $row[liste_produit]}
+				<div data-tpl="liste_produit">
+					{include liste_produit, data => $row[liste_produit] }
+				</div>
+			{/if}
+			{if $row[liste_produit_small]}
+				<div data-tpl="liste_produit_small">
+					{include liste_produit_small, data => $row[liste_produit_small] }
+				</div>
+			{/if}
+		</div>
+	</div>
+{/define}
+{define cartouche_carrousel}  {* on recoit data_cartouche et data*}
+	{*{$row|dump}*}
+	<div class="padding_more margin_more flex_main">
+		<div>
+			<div><h3>{$row[data][nomAppscheme]} cartouche_carrousel</h3></div>
+			<div>
+				<a href="{$row[data][link][liste]}">({$row[data][count]}) Liste {$row[data][nomAppscheme]}</a>
+			</div>
+		</div>
+		<div class="flex_h flex_align_middle border4">
+			<div class="swiper-container  swiper-container-horizontal" swiper="swiper">
+				<div class="swiper-wrapper">
+					{if $row[liste]}
+						{include liste_image, data => $row[liste] }
+					{/if}
+				</div>
+				<div class="swiper-pagination"></div>
+				<div class="swiper-button-prev"></div>
+				<div class="swiper-button-next"></div>
+				<div class="swiper-scrollbar"></div>
+			</div>
+		</div>
+	</div>
+{/define}
+
+
+
+{define calendar}
+	<div class="margin  flex_h flex_align_middle">
+		<div class="padding_more margin_more aligncenter borderr">
+			<i class="fa fa-calendar fa-3x"></i>
+		</div>
+		<div class="swiper-container  swiper-container-horizontal" swiper="swiper">
+			<div class="swiper-wrapper">
+				{foreach $data as $row}
+					<div class="flex_h  flex_wrap flex_align_top cool" style="min-width:100%;">
+						{if is_array|($row)}
+							{foreach $row as $row2}
+								<div class="aligncenter carre borderb" style="width:16%;">
+									<div class="borderr">
+										<h5 class="aligncenter">{$row2[mois_fr]}</h5>
+										<a href="{$row2[link_produit]}">
+											{$row2[count]} croisières
+											<span class="textegris">dés</span> {$row2[prix]} €
+										</a>
+									</div>
+								</div>
+							{/foreach}
+						{else}
+							<div class="aligncenter border4" style="width:80px;">
+								<h5 class="aligncenter">{$row[mois_fr]}</h5>
+								<a href="{$row[link_produit]}">
+									{$row[count]} croisières
+									<span class="textegris">dés</span> {$row[prix]} €
+								</a>
+							</div>
+						{/if}
+					</div>
+				{/foreach}
+			</div>
+			<div class="swiper-pagination"></div>
+			<div class="swiper-button-prev"></div>
+			<div class="swiper-button-next"></div>
+			<div class="swiper-scrollbar"></div>
+		</div>
+	</div>
+{/define}

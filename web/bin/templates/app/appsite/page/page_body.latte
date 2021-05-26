@@ -1,0 +1,339 @@
+<!doctype html>
+<html lang="fr"  manifest="{$HTTPCUSTOMERSITE}app.manifest?ver=1">
+	<head>
+		<title>{meta_title}</title>
+		<base href="{$HTTPCUSTOMERSITE}">
+		<meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+		<meta name="title" content="{meta_title}">
+		<meta name="description" content="{description}">
+		<meta name="keywords" content="{keywords}">
+		<meta name="robots" content="nofollow, index"/>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+		<meta name="rating" content="tourism"/>
+		<meta http-equiv="Cache" Content="no store">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="msvalidate.01" content=""/>
+		<meta name="google-site-verification" content="of1bdMedoWLM3keEzUQTIVc6lgZfjFI-y3PH7Ys7v2I"/>
+		<script language="javascript" type="text/javascript" src="{HTTPHOST}:3001/socket.io/socket.io.js"></script>
+		<meta charset="utf-8">
+		<link rel="shortcut icon" href="../../../../../favicon.ico">
+		<!-- Latest compiled and minified CSS -->
+		<link rel="stylesheet" href="{$HTTPCUSTOMERSITE}css/bootstrap/css/bootstrap.min.css">		
+		<link rel="stylesheet" href="{$HTTPCUSTOMERSITE}css/bootstrap-flat.css">
+		
+		<link rel="stylesheet" type="text/css" href="{$HTTPCUSTOMERSITE}{APPCSS}generated/main.css">
+		<link rel="stylesheet" type="text/css" href="{$HTTPCUSTOMERSITE}css/external.css">
+		<link rel="stylesheet" type="text/css" href="{$HTTPCUSTOMERSITE}css/scheme-responsive.css">
+		<link rel="stylesheet" type="text/css" href="{$HTTPCUSTOMERSITE}css/font-awesome/css/font-awesome.css">
+		<link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+		<script type="text/javascript" src="{$HTTPJAVASCRIPT}prototype.js"></script>
+		<script type="text/javascript" src="{$HTTPJAVASCRIPT}scriptaculous/scriptaculous.js"></script>
+		<script type="text/javascript" src="{$HTTPJAVASCRIPT}methods.js"></script>
+		<script type="text/javascript" src="{$HTTPJAVASCRIPT}engine.js"></script>
+		<script type="text/javascript" src="{$HTTPJAVASCRIPT}module.js"></script>
+		<script type="text/javascript" src="{$HTTPJAVASCRIPT}slider.js"></script>
+		<script type="text/javascript" src="{$HTTPJAVASCRIPT}slideBox.js"></script>
+		<script type="text/javascript" src="{$HTTPJAVASCRIPT}bootstrap-without-jquery.js"></script>
+		<script type="text/javascript" src="{$HTTPJAVASCRIPT}insertionQs.js"></script>
+		<script type="text/javascript" src="{$HTTPJAVASCRIPT}autoToggle.js"></script>
+		<!-- START script_map -->
+		<meta name="viewport" content="initial-scale=1.0, user-scalable=no"/>
+		<!-- END script_map -->
+	</head>
+	<body id="body" role="document" style="position:relative;">
+		{$tpl_keepon}
+		<!--{$meta_title_test}-->
+
+		<div id="div_notify" style="z-index:10000;display:none;position:fixed;overflow:hidden;top:0;width:100%;margin:0 auto;min-height:100%;height:100%;max-height: 100%;background-color:rgba(255,255,255,0.6); "></div>
+		<div class="header_site_menu borderb shadow" >
+			{$mdl_header}
+		</div>
+		<div id="for_ajax_zone" class="col-xs-12 transpnoir" style="display:none;left:0;top:0;height:100%;position:fixed;z-index:5000;" onclick="$(this).hide()">
+			<div id="ajax_zone" style="height:100%;" class="blanc col-xs-11 col-xs-pull-1 shadow">
+
+			</div>
+		</div>
+		<div id="content" class="container-fluid blanc">
+			<div class="row">
+				<div  style="position:sticky;top:100px"  class="col-sm-3 col-md-3 col-lg-3  hidden-xs hidden-sm borderr" id="col_gauche">{$navbar_gauche}</div>
+				<div  class="col-xs-12 col-sm-12 col-md-9 col-lg-9" id="col_droite" >
+					<div class="relative">{$mainoutput} <div class="spacer"></div></div>
+				</div>
+			</div>
+			<div class="row ededed">
+				<div class="col-xs-12">
+					{$mdl_footer}
+				</div>
+			</div>
+		</div>
+		<style>
+			.debug{display:none;}
+			.shadow{box-shadow: 0px 1px 5px 0px rgba(0, 0, 0, 0.09);}
+			.container,.row  #col_droite {
+				padding-left: 0 !important;
+				padding-right: 0 !important;
+
+			}
+			/*@media only screen and (max-width : 640px) {
+
+				#gauche{display:none!important;}
+        #droite{width:100%!important;}
+        #container,.container{width:100%!important;}
+        img {max-width:100%!important;}
+        .scheme     {width:100%!important;}
+    }*/
+			body {
+				font-family: "Open Sans", "Palatino Linotype", "Book Antiqua", Palatino, serif;
+				font-size: 12px;
+				padding: 0px;
+			}
+			body {
+				background: #93cede; /* Old browsers */
+				background: -moz-linear-gradient(-45deg, #93cede 0%, #75bdd1 41%, #49a5bf 56%, #ffffff 70%); /* FF3.6+ */
+				background: -webkit-gradient(linear, left top, right bottom, color-stop(0%, #93cede), color-stop(41%, #75bdd1), color-stop(56%, #49a5bf), color-stop(70%, #ffffff)); /* Chrome,Safari4+ */
+				background: -webkit-linear-gradient(-45deg, #93cede 0%, #75bdd1 41%, #49a5bf 56%, #ffffff 70%); /* Chrome10+,Safari5.1+ */
+				background: -o-linear-gradient(-45deg, #93cede 0%, #75bdd1 41%, #49a5bf 56%, #ffffff 70%); /* Opera 11.10+ */
+				background: -ms-linear-gradient(-45deg, #93cede 0%, #75bdd1 41%, #49a5bf 56%, #ffffff 70%); /* IE10+ */
+				background: linear-gradient(135deg, #93cede 0%, #75bdd1 41%, #49a5bf 56%, #ffffff 70%); /* W3C */
+				filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#93cede', endColorstr='#ffffff', GradientType=1); /* IE6-9 fallback on horizontal gradient */
+
+			}
+			select {
+				line-height: 20px !important;
+				height: 30px !important;
+				color: #333;
+			}
+
+			.searchMdl select {
+				width: 200px !important;
+				margin: 0.25em 0;
+			}
+
+			#header {
+				height: 140px;
+				position: relative;
+				background-repeat: no-repeat;
+				z-index: 600;
+				max-width: 1000px;
+				margin: 0px auto;
+			}
+
+			#infos {
+				float: right;
+				width: 66%;
+				margin: 30px 0px 20px;
+			}
+
+			#infos1 {
+				float: left;
+				padding: 0px;
+				width: 50%;
+				text-align: center;
+			}
+
+
+			#menu_nav {
+				line-height: 40px;
+				background-color: transparent;
+				height: 40px;
+				width: 1000px;
+			}
+
+			#menu_nav > ul > li {
+				display: inline-block;
+				min-width: 32px;
+				position: relative;
+				vertical-align: top;
+				border-right: 1px solid #E8E8E8;
+				background-color: transparent;
+				transition: all 0s ease 0s;
+			}
+
+
+
+
+
+			.petit_orange {
+				font-size: 15px;
+				color: #F90;
+			}
+
+
+
+			.gris {
+				color: #999;
+				font-size: 14px;
+				text-transform: uppercase;
+			}
+
+			.gris_orange {
+				color: #F90;
+				font-size: 14px;
+				text-transform: uppercase;
+			}
+
+
+			.titres_orange {
+				font-size: 24px;
+				color: #F90;
+			}
+
+			.soustitre {
+				color: #06C;
+				font-size: 16px;
+				font-weight: bold;
+				line-height: 14px;
+			}
+
+
+			h3 {
+				color: #F90;
+			}
+
+			.petit_orange {
+				font-size: 15px;
+				color: #F90;
+			}
+
+
+			.moyen_orange {
+				font-size: 18px;
+				color: #F90;
+			}
+
+		</style>
+		<script>
+			show_glue_accept = function () {
+				$('glue_zone').hide();
+				$('glue_accept').show();
+				$('glue_wait').hide();
+				hide_glue_zone();
+			}
+			show_glue_zone = function () {
+				$('glue_zone').show();
+			}
+			hide_glue_zone = function () {
+				$('glue_zone').hide();
+			}
+			subscribe_glue = function () {
+				if ($('glue_input').value == '') return;
+				$('glue_input').hide();
+				$('glue_button').hide();
+				$('glue_cancel').show();
+				$('glue_wait').show();
+				socket_keep_on.emit("subscribe", { APPID: "{session_id}", id: '{session_id}', MSG: $('glue_input').value  });
+			}
+			unsubscribe_glue = function () {
+				socket_keep_on.emit("unsubscribe", { APPID: "{session_id}", id: '{session_id}', MSG: $('glue_input').value  });
+			}
+			var socket_keep_on = io(':3001/keep_on');
+			// signaler connection / request_glue
+			socket_keep_on.on('connect', function () {
+				socket_keep_on.emit("request_glue", {id: '{session_id}', APPID: '{session_id}'});
+			});
+			//
+			socket_keep_on.on('reconnect', function () {
+				socket_keep_on.emit("request_glue", {  id: '{session_id}', APPID: '{session_id}' });
+			});
+			// glue_reserve
+			socket_keep_on.on('glue_reserve', function (data) {
+				console.log('glue_reserve ', data);
+			});
+			// glue_reserve
+			socket_keep_on.on('mitete', function (data) {
+				show_glue_accept()
+				// alert('mitete ');
+			});
+			//
+			socket_keep_on.on('hide_glue', function () {
+				hide_glue_zone();
+			});
+
+			socket_keep_on.on('show_glue', function () {
+				show_glue_zone();
+			});
+
+			var timeMouse;
+			$('body').on('click', '.menu-icon', function (event) {
+
+			}.bind(this));
+			//  timeMouse = setTimeout(function(){ajaxV
+			Event.observe('body', 'clisk', function (event) {
+				x = Event.pointerX(event);//event.x+document.body.scrollLeft;
+				y = Event.pointerY(event);//event.y+document.body.scrollTop;
+				clearTimeout(timeMouse);
+				//timeMouse = setTimeout(function(){ajaxValidation('test','red')},1250);
+			}.bind(this));
+			//
+			var menuTop ;
+			Event.observe(window, 'scroll', function() {
+				top = $(document.body).getBoundingClientRect().top
+				top_c = $('content').getBoundingClientRect().top
+				top_m = $('header_site_menu').getBoundingClientRect().top
+				top_h = $('header_site_menu').getBoundingClientRect().height
+				// console.log(top_c,top,top_m)
+				if(top_c  <= top_h){
+					$('header_site_menu').setStyle({ position:'fixed',top:0,width:'100%'});
+					$('header_site_menu_more').show();
+				}else{
+					$('header_site_menu').setStyle({ position:'relative',zIndex:'10000' })
+					$('header_site_menu_more').hide();
+				}
+				if(top_c <= 0){
+					// $('scroll_menu').setStyle({ position:'fixed',top:0 });
+					// $('overlay_main').setStyle({ position:'fixed','top':0 });
+				}else{
+					// $('scroll_menu').setStyle({ position:'relative',zIndex:'10000' })  ;
+					// $('overlay_main').setStyle({ position:'absolute',top:'' });
+				}
+			}.bind(this));
+			//
+			document.observe('dom:loaded', function () {
+				menuTop = $('header_site_menu').offsetTop;
+				$$('.toggler').each(function (node, index) {
+					new autoToggle(node)  ;
+				}   );
+				$$('.slideBox .slideBoxIn').each(function (node, index) {
+					new myddeSlideBox(node)  ;
+				}   );
+				document.domain = document.domain;
+				$$('a.ancre').each(function (node, index) {
+					var to = $$('a[name=' + $(node).readAttribute('for') + ']').first()
+					$(node).observe('click', function (event) {
+						if ($$('[receiver=' + $(node).readAttribute('for') + ']').size() != 0) {
+							$$('[receiver=' + $(node).readAttribute('for') + ']').first().toggleContent();
+							Event.stop(event)
+						} else {
+							Event.stop(event)
+							//new Effect.ScrollTo('body');
+							document.location.hash = $(node).readAttribute('for')
+						}
+
+					}.bind(this))
+				})
+
+			})
+			regAdvert = function (id) {
+				ajaxValidation('clickadv', '', 'idadvert=' + id);
+			}
+		</script>
+		<script>
+			(function (i, s, o, g, r, a, m) {
+				i['GoogleAnalyticsObject'] = r;
+				i[r] = i[r] || function () {
+							(i[r].q = i[r].q || []).push(arguments)
+						}, i[r].l = 1 * new Date();
+				a = s.createElement(o),
+						m = s.getElementsByTagName(o)[0];
+				a.async = 1;
+				a.src = g;
+				m.parentNode.insertBefore(a, m)
+			})(window, document, 'script', '//www.google-analytics.com/analytics.js', 'ga');
+
+			ga('create', 'UA-53656937-1', 'auto');
+			ga('send', 'pageview');
+
+		</script>
+		{mdl_lauch_news}
+	</body>
+</html>
