@@ -22,12 +22,12 @@
 	if ('lan' === end(explode('.', $_SERVER['HTTP_HOST']))) {
 		ini_set('display_errors', 55);
 		DEFINE('ENVIRONEMENT', 'PREPROD');
-		DEFINE('SITEPATH', 'D:\boulot\UwAmp\www\idae.preprod.lan\web\\');
-		DEFINE('APPPATH', 'D:\boulot\UwAmp\www\idae.preprod.lan\\');
+		DEFINE('SITEPATH', 'D:\boulot\wamp64\www\idae.preprod.lan\web\\');
+		DEFINE('APPPATH', 'D:\boulot\wamp64\www\idae.preprod.lan\\');
 	} else {
 		die(".lan include only");
 	}
-	DEFINE('CUSTOMERPATH', 'D:\boulot\UwAmp\www\idae.preprod.lan\web\\');
+	DEFINE('CUSTOMERPATH', 'D:\boulot\wamp64\www\idae.preprod.lan\web\\');
 	// SESSION
 	DEFINE("SESSION_PATH", APPPATH . 'sessions/');
 	DEFINE("COOKIE_PATH", APPPATH . '/cookies/');
