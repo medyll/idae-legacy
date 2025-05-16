@@ -4,7 +4,7 @@ app_init_template = function () {
 
 			var file = file.replace (/(\r\n|\n|\r)/gm, "");
 			//  console.clear();
-			//  console.log(file)
+			console.log({file})
 			//  console.log(file)
 			escapeRegex = function (value) {
 				return value.replace (/([-.*+?\\\^=!:${}()|[\]\/\\])/g, '\\$1'); // prototype
@@ -14,6 +14,7 @@ app_init_template = function () {
 			var m;
 
 			while ((m = regex_main.exec (file)) !== null) {
+				console.log('...')
 				// This is necessary to avoid infinite loops with zero-width matches
 				if ( m.index === regex_main.lastIndex ) {
 					regex_main.lastIndex++;
@@ -26,7 +27,8 @@ app_init_template = function () {
 				}
 
 			}
-			resolve ('ok done tpl')
+			console.log(window.APP.APPTPL)
+			resolve ('ok done tpl 2023')
 		})
 
 	})
