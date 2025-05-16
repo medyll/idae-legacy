@@ -109,8 +109,45 @@ dist
 **/xmlfiles/
 **/tmp/
 **/stats/
-**/vendor/
 
 **/_notes/
 
-**/_notes/ 
+# Exclure les dossiers spécifiques
+/web/app_install/
+/web/images_base/
+/web/tmp/
+/web/vendor/
+/web/xmlfiles/
+
+# Exclure tous les dossiers _notes
+**/_notes/
+
+# Exclure tous les dossiers /stats
+**/stats/
+
+# Exclure tous les dossiers /cache
+**/cache/
+
+# Exclure uniquement le contenu des dossiers spécifiques, mais pas les dossiers eux-mêmes
+/web/app_install/*
+!/web/app_install/.gitkeep
+/web/images_base/*
+!/web/images_base/.gitkeep
+/web/tmp/*
+!/web/tmp/.gitkeep
+/web/vendor/*
+!/web/vendor/.gitkeep
+/web/xmlfiles/*
+!/web/xmlfiles/.gitkeep
+
+# Exclure le contenu de tous les dossiers _notes
+**/_notes/*
+!**/_notes/.gitkeep
+
+# Exclure le contenu de tous les dossiers /stats
+**/stats/*
+!**/stats/.gitkeep
+
+# Exclure le contenu de tous les dossiers /cache
+**/cache/*
+!**/cache/.gitkeep
