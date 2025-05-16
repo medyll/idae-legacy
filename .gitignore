@@ -103,12 +103,9 @@ dist
 # TernJS port file
 .tern-port
 
-app_install/
-/app_install/
-/images_base/
-images_base/
-cache/
-/cache/
+**/app_install/
+**/images_base/ 
+**/cache/ 
 **/xmlfiles/
 **/tmp/
 **/stats/
