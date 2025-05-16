@@ -34,8 +34,9 @@
 			}
 			$opt = ['db' => 'admin', 'username' => MDB_USER, 'password' => MDB_PASSWORD];
 			if (empty($PERSIST_CON)) {
+				// $PERSIST_CON = $this->conn = new MongoClient('mongodb://' . MDB_HOST );
 				$PERSIST_CON = $this->conn = new MongoClient('mongodb://' . MDB_USER . ':' . MDB_PASSWORD . '@' . MDB_HOST, $opt);
-				//$PERSIST_CON = $this->conn = new MongoClient('mongodb:///tmp/mongodb-27017.sock', $opt);
+				// $PERSIST_CON = $this->conn = new MongoClient('mongodb:///tmp/mongodb-27017.sock', $opt);
 			} else {
 				$this->conn = $PERSIST_CON;
 			}

@@ -13,8 +13,8 @@
 		public function __construct() {
 			$opt = ['db' => 'admin', 'username' => MDB_USER, 'password' => MDB_PASSWORD];
 
-			$this->conn   = new MongoClient('mongodb://admin:gwetme2011@127.0.0.1',$opt
-			);
+			$this->conn   = new MongoClient('mongodb://admin:gwetme2011@127.0.0.1:27017',$opt);
+			// $this->conn   = new MongoClient('mongodb://127.0.0.1:27017');
 			$sitebase_app = DEFINED(MDB_PREFIX) ? 'sitebase_session' : MDB_PREFIX . 'sitebase_session';
 			if(ENVIRONEMENT=='PREPROD') $sitebase_app .='_preprod';
 
@@ -60,8 +60,8 @@
 			// if(trim($data)=='') vardump_async(['VIDE !!! ',date('d-m-Y H:i:s', time() - $this->maxTime),$data,$_POST],true);
 			$backtrace = debug_backtrace();
 			// vardump_async([date('d-m-Y H:i:s', time() - $this->maxTime),$data,$_GET]);
-			// $this->dbSession->save(array("_id" => $id, "sessionData" => $data, "timeStamp" => time()));
-			$set = ["sessionData" => $data, "timeStamp" => time(),'date_heure'=>date('d-m-Y H:i:s', time() - $this->maxTime),'referrer'=>$_SERVER['HTTP_REFERER'],'nodebug'=>true,'MDB_PREFIX'=>MDB_PREFIX,'ENVIRONEMENT'=>ENVIRONEMENT ];
+			// $this->dbSession->save(array("_id" => $id, "sessionData" => $data, "timeStamp" => time()));,'referrer'=>$_SERVER['HTTP_REFERER']
+			$set = ["sessionData" => $data, "timeStamp" => time(),'date_heure'=>date('d-m-Y H:i:s', time() - $this->maxTime),'nodebug'=>true,'MDB_PREFIX'=>MDB_PREFIX,'ENVIRONEMENT'=>ENVIRONEMENT ];
 			$this->dbSession->update(["_id" => $id],['$set'=>$set],['upsert'=>true]);
 			// $this->dbSession->update(["_id" => $id],['$set'=>[ "sessionData" => $data, "timeStamp" => time()]],['upsert'=>true]);
 			//$this->dbSession->update(["_id" => $id],[ "sessionData" => $data, "timeStamp" => time()]);

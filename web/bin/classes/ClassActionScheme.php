@@ -128,7 +128,7 @@
 		}
 
 		public function addFK($ARGS) {
-			$_id               = new MongoId($_POST['_id']);
+			$_id               = new MongoId($_POST['_id']); 
 			$arr               = fonctionsProduction::cleanPostMongo($_POST['vars']);
 			$arr['uid']        = uniqid();
 			$arrskel           = $this->plug('sitebase_app', 'appscheme')->findOne(['_id' => $_id]);
