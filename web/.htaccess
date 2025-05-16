@@ -89,3 +89,6 @@ FileETag none
 	Header set Cache-Control "max-age=216000, publics"
 	</FilesMatch>
 </IfModule>
+
+# Désactiver temporairement les règles de réécriture pour le débogage
+# RewriteEngine off
