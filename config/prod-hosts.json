@@ -1,0 +1,142 @@
+{
+    "hosts": {
+        "appmaw.mydde.fr": {
+            "business": "cruise",
+            "smtp": {
+                "host": "localhost",
+                "user": "reservations@croisieres-maw.fr",
+                "email": "reservations@croisieres-maw.fr",
+                "pass": "mexicoMAW2016"
+            },
+            "mdb": {
+                "host": "127.0.0.1",
+                "user": "admin",
+                "password": "gwetme2011",
+                "prefix": "maw_"
+            },
+            "sql": {
+                "host": "localhost",
+                "db": "crm_general_new",
+                "user": "root",
+                "password": "redPoi654pied"
+            },
+            "external": {
+                "HTTPEXTERNALCUSTOMERSITE": "https://maw.lan"
+            }
+        },
+        "appcrfr.mydde.fr": {
+            "business": "cruise",
+            "smtp": {
+                "host": "localhost",
+                "user": "reservations@appcrfr.fr",
+                "email": "reservations@appcrfr.fr",
+                "pass": "123"
+            },
+            "mdb": {
+                "host": "127.0.0.1",
+                "user": "admin",
+                "password": "gwetme2011",
+                "prefix": "crfr_"
+            },
+            "sql": {
+                "host": "localhost",
+                "db": "crm_general_new",
+                "user": "root",
+                "password": "redPoi654pied"
+            }
+        },
+        "appmaw-idaertys-preprod.mydde.fr": {
+            "business": "cruise",
+            "smtp": {
+                "host": "localhost",
+                "user": "reservations@croisieres-maw.fr",
+                "email": "reservations@croisieres-maw.fr",
+                "pass": "mexicoMAW2016"
+            },
+            "mdb": {
+                "host": "127.0.0.1",
+                "user": "admin",
+                "password": "gwetme2011",
+                "prefix": "maw_"
+            },
+            "sql": {
+                "host": "localhost",
+                "db": "crm_general_new",
+                "user": "root",
+                "password": "redPoi654pied"
+            },
+            "external": {
+                "customer_site": "https://maw.lan"
+            }
+        },
+        "appblog.idaertys-preprod.mydde.fr": {
+            "business": "blog",
+            "smtp": {
+                "host": "localhost",
+                "user": "reservations@appcrfr.fr",
+                "email": "reservations@appcrfr.fr",
+                "pass": "123"
+            },
+            "mdb": {
+                "host": "127.0.0.1",
+                "user": "admin",
+                "password": "gwetme2011",
+                "prefix": "appblog_"
+            },
+            "sql": {
+                "host": "localhost",
+                "db": "crm_general_new",
+                "user": "root",
+                "password": "redPoi654pied"
+            }
+        },
+        "appcrfr.idaertys-preprod.mydde.fr": {
+            "business": "cruise",
+            "smtp": {
+                "host": "localhost",
+                "user": "reservations@appcrfr.fr",
+                "email": "reservations@appcrfr.fr",
+                "pass": "123"
+            },
+            "mdb": {
+                "host": "127.0.0.1",
+                "user": "admin",
+                "password": "gwetme2011",
+                "prefix": "crfr_"
+            },
+            "sql": {
+                "host": "localhost",
+                "db": "crm_general_new",
+                "user": "root",
+                "password": "redPoi654pied"
+            }
+        },
+        "idaertys-preprod.mydde.fr": {
+            "business": "commercial",
+            "smtp": {
+                "host": "mail.mydde.fr",
+                "user": "ged.idae@mydde.fr",
+                "email": "ged.idae@mydde.fr",
+                "pass": "malaterre654"
+            },
+            "ged": {
+                "host": "mail.mydde.fr",
+                "user": "ged.idae@mydde.fr",
+                "email": "ged.idae@mydde.fr",
+                "pass": "malaterre654"
+            },
+            "mdb": {
+                "host": "127.0.0.1",
+                "user": "admin",
+                "password": "gwetme2011",
+                "prefix": "idaenext_"
+            },
+            "sql": {
+                "host": "localhost",
+                "db": "crm_general_new",
+                "user": "root",
+                "password": "redPoi654pied"
+            }
+        }
+    }
+}
