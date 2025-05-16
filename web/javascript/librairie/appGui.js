@@ -129,7 +129,7 @@ appGui.prototype = {
 		daParent = $ (options.element_id).up () || $ (options.element_id);
 		//
 		if ( options.taskBar && options.title ) {
-			$ (options.onglet_id).addClassName ('active').siblings ().invoke ('removeClassName', 'active');
+			if($(options.onglet_id)) $(options.onglet_id).addClassName ('active').siblings ().invoke ('removeClassName', 'active');
 		}
 		if ( options.mode == 'slide' ) {
 			delta = eval (daParent.offsetLeft);

@@ -149,7 +149,7 @@
 <? } ?>
 <script>
 	window.JSGUI = new appGui ($ ('mainApp'));
-	localStorage.setItem ('cache_mode', 'on');
+	localStorage.setItem ('cache_mode', 'off');
 	$ ('body').on ('click', '.hide_gui_pane', function (event, node) {
 		$ ('gui_pane').hide ();
 	})
