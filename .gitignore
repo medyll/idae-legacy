@@ -113,11 +113,11 @@ dist
 **/_notes/
 
 # Exclure les dossiers spécifiques
-/web/app_install/
-/web/images_base/
-/web/tmp/
-/web/vendor/
-/web/xmlfiles/
+**/web/app_install/
+**/web/images_base/
+**/web/tmp/
+**/web/vendor/
+**/web/xmlfiles/
 
 # Exclure tous les dossiers _notes
 **/_notes/
@@ -129,16 +129,16 @@ dist
 **/cache/
 
 # Exclure uniquement le contenu des dossiers spécifiques, mais pas les dossiers eux-mêmes
-/web/app_install/*
-!/web/app_install/.gitkeep
-/web/images_base/*
-!/web/images_base/.gitkeep
-/web/tmp/*
-!/web/tmp/.gitkeep
-/web/vendor/*
-!/web/vendor/.gitkeep
-/web/xmlfiles/*
-!/web/xmlfiles/.gitkeep
+**/web/app_install/*
+!**/web/app_install/.gitkeep
+**/web/images_base/*
+!**/web/images_base/.gitkeep
+**/web/tmp/*
+!**/web/tmp/.gitkeep
+**/web/vendor/*
+!**/web/vendor/.gitkeep
+**/web/xmlfiles/*
+!**/web/xmlfiles/.gitkeep
 
 # Exclure le contenu de tous les dossiers _notes
 **/_notes/*
