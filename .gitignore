@@ -107,8 +107,12 @@ app_install/
 /app_install/
 /images_base/
 images_base/
+cache/
+/cache/
 /xml_files/
+xml_files/
 /tmp/
 tmp/
 /stats/
+stats/
 /vendor/
