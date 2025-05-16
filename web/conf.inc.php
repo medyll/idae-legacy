@@ -11,29 +11,29 @@ header("Access-Control-Allow-Methods: POST, GET, OPTIONS");
 if (!ini_get('date.timezone')) {
     date_default_timezone_set('GMT');
 }
+ini_set('error_reporting', 'E_ALL & ~E_DEPRECATED & ~E_STRICT');
 ini_set('short_open_tag', 'On');
-ini_set('scream.enabled', false);
+ini_set('scream.enabled', true);
+ini_set('display_errors', 'Off'); 
 
 !defined('SOCKET_EMSGSIZE') && DEFINE('SOCKET_EMSGSIZE', 4000000);
 
-$HTTP_PREFIX = ($_SERVER['HTTPS'] == 'on') ? 'https://' : 'http://';
-//
-// ini_set('session.save_path','/var/www/idaertys.mydde.fr/tmp/') ;
-//
-setlocale(LC_CTYPE, 'fr_FR.UTF-8');
-//
-global $IMG_SIZE_ARR, $buildArr;
-//
+$HTTP_PREFIX = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') ? 'https://' : 'http://';
+$host_parts = explode('.', $_SERVER['HTTP_HOST']);
 $host = str_replace('www.', '', $_SERVER['HTTP_HOST']);
+$host = explode(':', $host)[0];
 $host_name = explode('.', $_SERVER['HTTP_HOST'])[0];
+
+// echo "$host";
 //
-if ('lan' === end(explode('.', $_SERVER['HTTP_HOST']))) {
+if ('lan' === end($host_parts)) { 
     ini_set('display_errors', 55);
     /*		DEFINE('ENVIRONEMENT', 'PREPROD');
             DEFINE('SITEPATH', 'D:\boulot\UwAmp\www\idae.preprod.lan\web\\');
             DEFINE('APPPATH', 'D:\boulot\UwAmp\www\idae.preprod.lan\\');*/
     include_once('conf.lan.inc.php');
-
+/* echo APPTPL;
+die(); */
     return;
 } else {
     if (strpos($_SERVER['HTTP_HOST'], 'preprod') === false) {
@@ -386,7 +386,7 @@ switch ($host) {
         DEFINE('HTTPAPP', $HTTP_PREFIX . 'idaertys-preprod.mydde.fr/');
         //
         DEFINE('FLATTENIMGDIR', CUSTOMERPATH . 'images_base/' . CUSTOMERNAME . '/');
-        DEFINE('FLATTENIMGHTTP', HTTPCUSTOMERSITE . '/images_base/' . CUSTOMERNAME . '/');
+        DEFINE('FLATTENIMGHTTP', HTTPCCUSTOMERSITE . '/images_base/' . CUSTOMERNAME . '/');
         //
         DEFINE('SOCKETIO_PORT', 3006);
         //
@@ -470,7 +470,7 @@ switch ($host) {
         DEFINE('HTTPAPP', 'http://localhost/');
         //
         DEFINE('FLATTENIMGDIR', CUSTOMERPATH . 'images_base/');
-        DEFINE('FLATTENIMGHTTP', HTTPCUSTOMERSITE . '/images_base/');
+        DEFINE('FLATTENIMGHTTP', HTTPCCUSTOMERSITE . '/images_base/');
         //
         DEFINE('SOCKETIO_PORT', 3005);
         //
@@ -505,7 +505,7 @@ switch ($host) {
         DEFINE('HTTPAPP', 'http://idaertys.mydde.fr/');
         //
         DEFINE('FLATTENIMGDIR', CUSTOMERPATH . 'images_base/');
-        DEFINE('FLATTENIMGHTTP', HTTPCUSTOMERSITE . '/images_base/');
+        DEFINE('FLATTENIMGHTTP', HTTPCCUSTOMERSITE . '/images_base/');
         //
         DEFINE('SOCKETIO_PORT', 3005);
         //
@@ -567,7 +567,7 @@ $IMG_SIZE_ARR = !empty($IMG_SIZE_ARR) ? $IMG_SIZE_ARR : ['square' => ['120', '12
 $buildArr = !empty($buildArr) ? $buildArr : ['tiny' => ['100', '25'], 'squary' => ['68', '68'], 'largy' => ['325', '215'], 'wallpapery' => ['100', '25']];
 //
 
-if (!function_exists(my_autoloader)) {
+if (!function_exists('my_autoloader')) {
     function my_autoloader($class_name)
     {
         // echo APPCLASSES . '/appcommon/Class' . $class_name . '.php';
@@ -608,7 +608,7 @@ if (!function_exists(my_autoloader)) {
 include_once('appclasses/ClassSession.php');
 
 //
-if (!function_exists(myddeDebug)) {
+if (!function_exists('myddeDebug')) {
     function myddeDebug($vars)
     {
         echo "<pre>";
