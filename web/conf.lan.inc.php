@@ -8,7 +8,7 @@
 
 	!defined('SOCKET_EMSGSIZE') && DEFINE('SOCKET_EMSGSIZE', 4000000);
 
-	$HTTP_PREFIX = ($_SERVER['HTTPS'] && $_SERVER['HTTPS'] == 'on') ? 'https://' : 'http://';
+	$HTTP_PREFIX = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') ? 'https://' : 'http://';
 	//
 	// ini_set('session.save_path','/var/www/idaertys.mydde.fr/tmp/') ;
 	//
@@ -17,13 +17,16 @@
 	global $IMG_SIZE_ARR, $buildArr;
 	//
 	$host      = str_replace('www.', '', $_SERVER['HTTP_HOST']);
+	$host = explode(':', $host)[0];
+
 	$host_name = explode('.',$_SERVER['HTTP_HOST'])[0];
 	//
-	if ('lan' === end(explode('.', $_SERVER['HTTP_HOST']))) {
-		ini_set('display_errors', 55);
+	$host_parts = explode('.', $_SERVER['HTTP_HOST']);
+	if ('lan' === end($host_parts)) {
+		//ini_set('display_errors', 55);
 		DEFINE('ENVIRONEMENT', 'PREPROD');
 		DEFINE('SITEPATH', 'D:\boulot\wamp64\www\idae.preprod.lan\web\\');
-		DEFINE('APPPATH', 'D:\boulot\wamp64\www\idae.preprod.lan\\');
+		DEFINE('APPPATH', 'D:\\boulot\\wamp64\\www\\idae.preprod.lan\\');
 	} else {
 		die(".lan include only");
 	}
@@ -39,11 +42,14 @@
 	DEFINE('CONFINC', APPPATH . '/web/conf.inc.php');
 	DEFINE('ACTIVEMODULEFILE', APPPATH . '/web/services/json_data_event.txt');
 	//
+	DEFINE('APPNAME', 'idae-'.$host_name.'-lan');
+	DEFINE('CUSTOMERNAME', $host_name);
+
 	DEFINE('APPBIN', APPPATH . 'web/bin/');
 	DEFINE('APP_CONFIG_DIR', APPBIN . 'config/'); // auto creation of metier
 	DEFINE('APPMDL', APPPATH . 'web/mdl/');
 	DEFINE('APPLESS', 'appcss/');
-	DEFINE('APPTPL', APPPATH . 'web/tpl/app/');
+	DEFINE('APPTPL', APPPATH . 'web\\tpl\\app\\');
 	DEFINE('APPBINTPL', APPPATH . 'web/bin/templates/app/');
 	DEFINE('PATHTMP', APPPATH . '/tmp/');
 	DEFINE('ADODBDIR', APPPATH . '/web/adodb/');
@@ -65,8 +71,6 @@
 	DEFINE('FLATTENIMGHTTP', HTTPCUSTOMERSITE . '/images_base/' . CUSTOMERNAME . '/');
 	DEFINE('SOCKETIO_PORT', 3005);
 	//
-	DEFINE('APPNAME', 'idae-'.$host_name.'-lan');
-	DEFINE('CUSTOMERNAME', $host_name);
 	//
 	DEFINE('HTTPHOST', $HTTP_PREFIX . DOCUMENTDOMAIN);
 	DEFINE('HTTPHOSTNOPORT', $HTTP_PREFIX . DOCUMENTDOMAINNOPORT);
@@ -161,6 +165,32 @@
 			DEFINE("MDB_USER", "admin");
 			DEFINE("MDB_PASSWORD", "gwetme2011");
 			DEFINE("MDB_PREFIX", "idaenext_"); // crfr_ // maw_ // idaenext_
+			//
+			DEFINE('SMTPHOST', 'mail.mydde.fr');
+			DEFINE('SMTPUSER', 'ged.idae@mydde.fr'); //
+			DEFINE('SMTPEMAIL', 'ged.idae@mydde.fr');
+			DEFINE('SMTPPASS', 'malaterre654');
+
+			DEFINE('SMTPHOSTGED', 'mail.mydde.fr');
+			DEFINE('SMTPUSERGED', 'ged.idae@mydde.fr'); //
+			DEFINE('SMTPEMAILGED', 'ged.idae@mydde.fr');
+			DEFINE('SMTPPASSGED', 'malaterre654');
+
+			//
+			break;
+					case "crfr.idae.preprod.lan":
+
+			DEFINE('BUSINESS', 'commercial');
+			//
+			DEFINE("SQL_HOST", "localhost");
+			DEFINE("SQL_BDD", "crm_general_new");
+			DEFINE("SQL_USER", "root");
+			DEFINE("SQL_PASSWORD", "redPoi654pied");
+			//
+			DEFINE("MDB_HOST", "127.0.0.1");
+			DEFINE("MDB_USER", "admin");
+			DEFINE("MDB_PASSWORD", "gwetme2011");
+			DEFINE("MDB_PREFIX", "crfr_"); // crfr_ // maw_ // idaenext_
 			//
 			DEFINE('SMTPHOST', 'mail.mydde.fr');
 			DEFINE('SMTPUSER', 'ged.idae@mydde.fr'); //
@@ -293,16 +323,17 @@
 
 		spl_autoload_register('my_autoloader');
 	}
+
 	// SESSIONS
 	include_once('appclasses/ClassSession.php');
 
 	//
-	if (!function_exists(myddeDebug)) {
+/* 	if (!function_exists(myddeDebug)) {
 		function myddeDebug($vars) {
 			echo "<pre>";
 			var_dump($vars);
 			echo "</pre>";
 		}
-	}
+	} */
 	/*$APP->init_scheme('sitebase_devis', 'client_type');*/
 
