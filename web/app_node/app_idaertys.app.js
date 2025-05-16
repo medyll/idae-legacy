@@ -1,6 +1,7 @@
 /**
  * Created by lebru_000 on 25/12/14.
  */
+/* seems to be the one to lauch */
 
 var sessionMgm = require('sessionManagement');
 
@@ -36,9 +37,9 @@ app.listen(port);
 
 
 // move post here, this way
-http.get('/', function (req, res) {
+/* http.get('/', function (req, res) {
 
-});
+}); */
 
 io.set('authorization', function (handshakeData, accept) {
 
@@ -59,7 +60,7 @@ io.set('authorization', function (handshakeData, accept) {
 
 var server2 = new Server('localhost', 27017, {auto_reconnect: true});
 var db2 = new Db('sitebase_sockets', server2,{safe:false});
-db2.open(function(err,db){db.admin().authenticate('admin', 'gwetme2011',function(err,result){}) });
+db2.open(function(err,db){db.admin().authenticate('admin', 'gwetme2011',function(err,result){console.log(err,result)}) });
 var colOnline = db2.collection('onLine');
 var colOnlineSite = db2.collection('onLineSite');
 
@@ -348,10 +349,14 @@ io.on('connection', function(socket){
            /* SSSAVEPATH = data.SSSAVEPATH || '/',*/
             DOCUMENTDOMAIN = data.DOCUMENTDOMAIN || 'app.destinationsreve.com';
         //  	 fait tout planter mongo ICI
-        var url = 'http://'+DOCUMENTDOMAIN+'/services/'+data.mdl+'.php'
+        // var url = 'http://'+DOCUMENTDOMAIN+'/services/'+data.mdl+'.php'
 
+            var directory = (data.directory) ? data.directory : 'services';
+			var extension = (data.extension) ? data.extension : 'php';
+			//
+			var url = 'http://' + DOCUMENTDOMAIN + '/' + directory + '/' + data.mdl + '.' + extension;
 
-        console.log('get_data parameters : ',data);
+        console.log('get_data parameters : ',data, url);
         var j = request.jar();
         var soc_cook = socket.cookie_string;
 
