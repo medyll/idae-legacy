@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="WebServers">
+    <option name="servers">
+      <webServer id="0b5f8bd0-9d12-4e46-9a81-6f5bfe8d6267" name="ONLINE 1" url="http://idaertys-preprod.mydde.fr">
+        <fileTransfer rootFolder="/var/www/idaertys_preprod.mydde.fr" accessType="SFTP" host="62.210.97.92" port="22" sshConfigId="60a8bf71-7cfb-4e97-b8a9-b21cae62977b" sshConfig="root@62.210.97.92:22 password">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" keepAliveTimeout="0" passiveMode="true" shareSSLContext="true" />
+          </advancedOptions>
+        </fileTransfer>
+      </webServer>
+    </option>
+  </component>
+</project>
