@@ -1,0 +1,157 @@
+{
+    "hosts": {
+        "tactac.idae.preprod.lan": {
+            "business": "foodlivery",
+            "smtp": {
+                "host": "mail.mydde.fr",
+                "user": "ged.idae@mydde.fr",
+                "email": "ged.idae@mydde.fr",
+                "pass": "malaterre654"
+            },
+            "ged": {
+                "host": "mail.mydde.fr",
+                "user": "ged.idae@mydde.fr",
+                "email": "ged.idae@mydde.fr",
+                "pass": "malaterre654"
+            },
+            "mdb": {
+                "host": "127.0.0.1",
+                "user": "admin",
+                "password": "gwetme2011",
+                "prefix": "tactac_"
+            }
+        },
+        "maw.idae.preprod.lan": {
+            "business": "cruise",
+            "smtp": {
+                "host": "mail.mydde.fr",
+                "user": "ged.idae@mydde.fr",
+                "email": "ged.idae@mydde.fr",
+                "pass": "malaterre654"
+            },
+            "ged": {
+                "host": "mail.mydde.fr",
+                "user": "ged.idae@mydde.fr",
+                "email": "ged.idae@mydde.fr",
+                "pass": "malaterre654"
+            },
+            "mdb": {
+                "host": "127.0.0.1",
+                "user": "admin",
+                "password": "gwetme2011",
+                "prefix": "maw_"
+            },
+            "external": {
+                "HTTPEXTERNALCUSTOMERSITE": "https://maw.lan"
+            }
+        },
+        "leasys.idae.preprod.lan": {
+            "business": "commercial",
+            "smtp": {
+                "host": "mail.mydde.fr",
+                "user": "ged.idae@mydde.fr",
+                "email": "ged.idae@mydde.fr",
+                "pass": "malaterre654"
+            },
+            "ged": {
+                "host": "mail.mydde.fr",
+                "user": "ged.idae@mydde.fr",
+                "email": "ged.idae@mydde.fr",
+                "pass": "malaterre654"
+            },
+            "mdb": {
+                "host": "127.0.0.1",
+                "user": "admin",
+                "password": "gwetme2011",
+                "prefix": "idaenext_"
+            },
+            "sql": {
+                "host": "localhost",
+                "db": "crm_general_new",
+                "user": "root",
+                "password": "redPoi654pied"
+            }
+        },
+        "crfr.idae.preprod.lan": {
+            "business": "cruise",
+            "smtp": {
+                "host": "mail.mydde.fr",
+                "user": "ged.idae@mydde.fr",
+                "email": "ged.idae@mydde.fr",
+                "pass": "malaterre654"
+            },
+            "ged": {
+                "host": "mail.mydde.fr",
+                "user": "ged.idae@mydde.fr",
+                "email": "ged.idae@mydde.fr",
+                "pass": "malaterre654"
+            },
+            "mdb": {
+                "host": "127.0.0.1",
+                "user": "admin",
+                "password": "gwetme2011",
+                "prefix": "crfr_"
+            },
+            "sql": {
+                "host": "localhost",
+                "db": "crm_general_new",
+                "user": "root",
+                "password": "redPoi654pied"
+            }
+        },
+        "idae.io.idae.preprod.lan": {
+            "business": "communicationdata",
+            "smtp": {
+                "host": "mail.mydde.fr",
+                "user": "ged.idae@mydde.fr",
+                "email": "ged.idae@mydde.fr",
+                "pass": "malaterre654"
+            },
+            "ged": {
+                "host": "mail.mydde.fr",
+                "user": "ged.idae@mydde.fr",
+                "email": "ged.idae@mydde.fr",
+                "pass": "malaterre654"
+            },
+            "mdb": {
+                "host": "127.0.0.1",
+                "user": "admin",
+                "password": "gwetme2011",
+                "prefix": "idae_io_"
+            },
+            "sql": {
+                "host": "localhost",
+                "db": "crm_general_new",
+                "user": "root",
+                "password": "redPoi654pied"
+            }
+        },
+        "blog.idae.preprod.lan": {
+            "business": "blog",
+            "smtp": {
+                "host": "mail.mydde.fr",
+                "user": "ged.idae@mydde.fr",
+                "email": "ged.idae@mydde.fr",
+                "pass": "malaterre654"
+            },
+            "ged": {
+                "host": "mail.mydde.fr",
+                "user": "ged.idae@mydde.fr",
+                "email": "ged.idae@mydde.fr",
+                "pass": "malaterre654"
+            },
+            "mdb": {
+                "host": "127.0.0.1",
+                "user": "admin",
+                "password": "gwetme2011",
+                "prefix": "appblog_"
+            },
+            "sql": {
+                "host": "localhost",
+                "db": "crm_general_new",
+                "user": "root",
+                "password": "redPoi654pied"
+            }
+        }
+    }
+}
