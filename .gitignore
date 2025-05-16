@@ -106,6 +106,7 @@ dist
 app_install/
 /app_install/
 /images_base/
+images_base/
 /xml_files/
 /tmp/
 tmp/
