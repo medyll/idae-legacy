@@ -103,4 +103,10 @@ dist
 # TernJS port file
 .tern-port
 
+/app_install/
 /images_base/
+/xml_files/
+/tmp/
+tmp/
+/stats/
+/vendor/

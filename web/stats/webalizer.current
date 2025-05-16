@@ -1,0 +1,633 @@
+# Webalizer V2.23-05 Incremental Data - 09/18/2016 23:59:42
+2016 9 18 23 59 42
+28148 21852 31 174 18 9 254681221 18284 598 0 0 0
+8 265 2130 1 18
+128 105 970200 2 36 3 0 0
+0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0
+735 491 8447008 4 448 17 0 0
+472 403 5099688 3 223 14 0 0
+66 20 336459 2 42 2 0 0
+416 330 2337108 3 282 6 0 0
+314 164 3063159 5 175 9 0 0
+0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0
+646 511 4854529 4 320 15 0 0
+65 13 1212449 4 56 5 0 0
+1756 1596 7401105 5 1517 61 0 0
+5488 2962 70951713 6 2724 99 0 0
+5650 3818 47812906 8 3621 157 0 0
+3527 3163 20175156 6 3052 102 0 0
+8885 8276 82019741 8 5788 112 0 0
+0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0
+2300 769 34411628 699 0 0
+681 536 8247246 470 0 0
+325 253 3080281 271 0 0
+895 895 609930 895 0 0
+8 8 3824 8 0 0
+0 0 0 0 0 0
+0 0 0 0 0 0
+24 4 29972 24 0 0
+371 346 2305193 185 0 0
+1371 992 7834262 851 0 0
+507 381 3387543 401 0 0
+2519 2408 3404469 2468 0 0
+1363 1251 8780791 1190 0 0
+1289 1185 3989775 1203 0 0
+880 721 3615385 686 0 0
+2683 2309 23608166 1804 0 0
+1565 1347 16614863 860 0 0
+777 731 7347100 423 0 0
+1740 1649 21586902 997 0 0
+3055 2631 15695897 2579 0 0
+108 66 1343957 63 0 0
+2671 1696 35581007 1075 0 0
+1053 893 15590397 551 0 0
+1963 781 37612633 581 0 0
+0
+0
+0
+21852
+0
+0
+0
+0
+0
+0
+0
+0
+1096
+0
+5183
+0
+0
+0
+0
+0
+0
+15
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+2
+0
+0
+0
+0
+0
+# -urls- 
+/mdl/app/app_gui/app_gui_panel.php
+0 1091 0 4937088 19 27 0 0
+/mdl/app/app_scheme/app_scheme_has_field.php
+0 3 0 6129 1 0 0 0
+/mdl/app/app/app_explorer_entete.php
+0 18 0 150272 0 2 0 0
+/images/appimg-5659bc23a0ade1175e8b459e.jpg
+1 118 0 113072902 0 0 0 0
+/css/officeui/fabric.css
+0 52 0 1121718 0 0 0 0
+/javascript/socketio/socketio.js
+0 143 0 3335376 0 0 0 0
+/mdl/app/app/app_fiche.php
+0 34 0 493927 3 2 0 0
+/mdl/app/app_scheme/actions.php
+0 24 0 14192 2 2 0 0
+/favicon.png
+1 18 0 328883 0 0 0 0
+/javascript/app/app_calendrier.js
+0 141 0 90699 0 0 0 0
+/mdl/app/app_planning/app_planning_hebdo.php
+0 2 0 192956 0 0 0 0
+/javascript/librairie/myddeExplorer.js
+0 92 0 192228 0 0 0 0
+/javascript/librairie/cropper.js
+0 92 0 526092 0 0 0 0
+/mdl/app/app_select.php
+0 134 0 2783276 1 1 0 0
+/mdl/app/app_prod/app_prod_search.php
+0 1 34 4190 0 0 0 0
+/mdl/app/app/app_sort.php
+0 23 0 377502 0 0 0 0
+/mdl/dyn/dyn_daemon.php
+0 153 0 70839 13 3 0 0
+/javascript/app/app_draggable.js
+0 141 0 63642 0 0 0 0
+/javascript/app/app_php.js
+0 141 0 381823 0 0 0 0
+/appcomponents/datatable.tag
+0 145 0 126661 0 0 0 0
+/mdl/app/app/app_fiche_maxi.php
+0 78 0 1606900 9 0 0 0
+/css/niceForm/images/inputEdit.png
+1 2 0 892 0 0 0 0
+/mdl/app/app/app_fiche_forward_liste.php
+0 1024 0 1206914 21 2 0 0
+/services/json_ssid.php
+0 155 0 75762 5 1 0 0
+/css/font-awesome/css/font-awesome.css
+0 55 0 458169 0 0 0 0
+/javascript/app/app_bootstrap.js
+0 143 0 175163 0 0 0 0
+/images/appimg-5659bc43a0ade1175e8b45bb.jpg
+1 5 0 3506916 0 0 0 0
+/mdl/app/app_gui/app_gui_start.php
+0 54 0 1205067 0 0 0 0
+/mdl/app/app_liste/app_liste_pager.php
+0 19 0 38366 0 0 0 0
+/css/tinyeditor/style.css
+0 52 0 45101 0 0 0 0
+/javascript/scriptaculous/effects.js
+0 142 0 595384 0 0 0 0
+/javascript/app/app_menu.js
+0 141 0 98708 0 0 0 0
+/javascript/librairie/resize.js
+0 92 0 115548 0 0 0 0
+/javascript/vendor/chartist.js
+0 142 0 2397701 0 0 0 0
+/javascript/librairie/sortdiv.js
+0 92 0 83796 0 0 0 0
+/javascript/vendor/insertionQ.js
+0 142 0 138191 0 0 0 0
+/css/contextuel/contextuel.css
+0 52 0 20435 0 0 0 0
+/css/calendrier/calendrier.css
+0 52 0 53282 0 0 0 0
+/css/chartist/chartist.css
+0 52 0 151440 0 0 0 0
+/mdl/app/app_scheme/app_scheme_field.php
+0 6 0 32682 0 0 0 0
+/javascript/librairie/autoToggle.js
+0 141 0 89791 0 0 0 0
+/javascript/librairie/appGui.js
+0 92 0 92328 0 0 0 0
+/services/json_scheme.php
+0 195 0 42225598 59 1 0 0
+/mdl/app/app_custom/client/client_espace.php
+0 5 0 43278 0 0 0 0
+/mdl/app/app_gui/app_gui_production.php
+0 3 0 50346 0 0 0 0
+/javascript/app/app_contextual.js
+0 141 0 90604 0 0 0 0
+/mdl/app/app/app_fiche_mini.php
+0 136 0 431338 0 0 0 0
+/mdl/app/app_planning/app_planning_tache.php
+0 1 0 2751 0 0 0 0
+/mdl/app/app/app_fiche_maxi_liste.php
+0 11 0 123664 0 0 0 0
+/javascript/librairie/sorttable.js
+0 92 0 97940 0 0 0 0
+/javascript/app/app.js
+0 141 0 1107241 0 0 0 0
+/css/font-awesome/fonts/fontawesome-webfont.woff2
+0 57 0 2981729 0 0 0 0
+/mdl/app/app_calendrier/app_calendrier_echeance.php
+0 6 0 88558 0 0 0 0
+/mdl/customer/leasys/app_admin/app_migration_first.php
+0 297 0 1694539 19 8 0 0
+/javascript/vendor/lazyload.js
+0 142 0 327177 0 0 0 0
+/javascript/librairie/myddeNotifier.js
+0 92 0 60360 0 0 0 0
+/css/validation/validation.css
+0 52 0 33516 0 0 0 0
+/mdl/app/app/app_fiche_preview.php
+0 47 0 507099 0 1 0 0
+/css/onglet/onglet.css
+0 52 0 43343 0 0 0 0
+/javascript/librairie/observers.js
+0 92 0 69936 0 0 0 0
+/javascript/librairie/myddeAttach.js
+0 92 0 111228 0 0 0 0
+/css/myddeNotifier/myddeNotifier.css
+0 52 0 33829 0 0 0 0
+/javascript/librairie/myddeTree.js
+0 92 0 43548 0 0 0 0
+/javascript/app/app_conge.js
+0 141 0 89926 0 0 0 0
+/mdl/app/app/app_explorer_count_date.php
+0 18 0 48602 0 0 0 0
+/css/skin/light/images/cancel.png
+1 49 0 21014 0 0 0 0
+/javascript/librairie/picPicker.js
+0 92 0 97440 0 0 0 0
+/mdl/app/app_planning/app_planning.php
+0 2 0 35691 0 0 0 0
+/css/interface/interface.css
+0 65 0 221654 0 0 0 0
+/css/menu/menuH.css
+0 52 0 44905 0 0 0 0
+/mdl/app/app_liste/app_liste_gui.php
+0 83 0 1692665 0 0 0 0
+/javascript/librairie/textarea.js
+0 92 0 84336 0 0 0 0
+/mdl/app/app_user_pref/app_user_pref.php
+0 1 0 1868 0 0 0 0
+/css/cropper/cropper.css
+0 52 0 90990 0 0 0 0
+/css/officeui/fabric.components.css
+0 52 0 1147233 0 0 0 0
+/css/skin/light/images/max16.png
+1 49 0 29668 0 0 0 0
+/mdl/app/app_login/actions.php
+0 52 0 59028 8 10 0 0
+/mdl/app/app_user_pref/app_user_pref_scheme.php
+0 1 0 22917 0 0 0 0
+/mdl/app/app_gui/app_gui_today_echeancier.php
+0 54 0 155574 0 0 0 0
+/javascript/vendor/tinymce/tinymce.min.js
+0 143 0 7684490 0 0 0 0
+/images_base/leasys/agent/agent-square-3.jpg
+1 2 0 11594 0 0 0 0
+/javascript/librairie/rsvp.js
+0 143 0 1002799 0 0 0 0
+/mdl/app/app_prod/app_prod_liste_menu_date.php
+0 1 0 3400 0 0 0 0
+/javascript/librairie/resizeGui.js
+0 92 0 82536 0 0 0 0
+/javascript/librairie/myddeDatalist.js
+0 92 0 103848 0 0 0 0
+/css/pikaday/pikaday.css
+0 52 0 107629 0 0 0 0
+/javascript/engine/module.js
+0 92 0 66516 0 0 0 0
+/javascript/ms-lib-prototype/officeui-prototype.js
+0 141 0 77369 0 0 0 0
+/mdl/app/app_gui/app_gui_main.php
+0 153 0 1784673 4 10 0 0
+/actions.php
+0 2 0 1258 0 0 0 0
+/javascript/prototype/prototype.js
+0 143 0 3394413 0 0 0 0
+/mdl/app/actions.php
+0 77 0 42409 5 8 0 0
+/images_base/leasys/agent/agent-square-1.jpg
+1 9 0 35582 0 0 0 0
+/javascript/engine/engine.js
+0 92 0 135168 0 0 0 0
+/mdl/app/app_field_add.php
+0 2 0 2279 0 0 0 0
+/images/frm/image.php
+0 53 0 35075 1 9 0 0
+/images/icones/tache16.png
+1 2 0 1708 0 0 0 0
+/javascript/librairie/moment.js
+0 142 0 4435571 0 0 0 0
+/mdl/app/app/app_explorer_home.php
+0 18 0 114144 0 0 0 0
+/javascript/librairie/myddeupload.js
+0 92 0 107664 0 0 0 0
+/mdl/app/app_scheme/app_scheme_has_field_update.php
+0 23 0 2125752 0 0 0 0
+/javascript/engine/doredim.js
+0 92 0 29222 0 0 0 0
+/mdl/app/app_scheme/app_scheme_grille.php
+0 4 0 19164 0 0 0 0
+/javascript/librairie/accordeon.js
+0 92 0 42324 0 0 0 0
+/mdl/dyn/dyn_ged.php
+0 1 0 405 0 0 0 0
+/javascript/vendor/rio-compiler.js
+0 142 0 739000 0 0 0 0
+/mdl/app/app_contextual/app_contextual.php
+0 213 0 1296222 1 0 0 0
+/mdl/app/app_delete_multi.php
+0 3 0 5141 1 0 0 0
+/services/json_data_search.php
+0 168 0 68334 2 2 0 0
+/css/form/form.css
+0 52 0 55533 0 0 0 0
+/css/sortable/sortable.css
+0 57 0 86629 0 0 0 0
+/services/json_data_table.php
+0 9079 0 3755577 144 239 0 0
+/javascript/app/app_planning.js
+0 141 0 111284 0 0 0 0
+/css/planning/planning.css
+0 52 0 99736 0 0 0 0
+/css/niceForm/niceForm.css
+0 52 0 85626 0 0 0 0
+/css/images/spinner.gif
+1 10 0 4821 0 0 0 0
+/javascript/polyfill/EventSource.js
+0 142 0 143700 0 0 0 0
+/javascript/librairie/validation.js
+0 92 0 155760 0 0 0 0
+/services/json_scheme_field.php
+0 146 0 8976351 11 5 0 0
+/mdl/app/app/app_create.php
+0 13 0 127871 2 0 0 0
+/images_base/leasys/agent/agent-square-41.jpg
+1 126 0 316273 0 0 0 0
+/javascript/librairie/jsoncookie.js
+0 92 0 71232 0 0 0 0
+/mdl/app/app_admin/app_admin_reindex.php
+0 13 0 10585 0 0 0 0
+/mdl/app/app_scheme/app_scheme.php
+0 7 0 7896 0 0 0 0
+/mdl/app/app/app_update.php
+0 51 0 565890 1 0 0 0
+/javascript/app/app_socket.js
+0 141 0 232646 0 0 0 0
+/javascript/scriptaculous/dragdrop.js
+0 142 0 515070 0 0 0 0
+/javascript/engine/contextuel.js
+0 92 0 29221 0 0 0 0
+/javascript/app/app_window.js
+0 141 0 267122 0 0 0 0
+/mdl/app/app/app_update_multi.php
+0 1 0 4698 0 0 0 0
+/mdl/app/app_liste/app_liste.php
+0 311 0 6024451 3 1 0 0
+/mdl/app/app_select_heure.php
+0 9 0 178119 0 2 0 0
+/
+0 152 0 171104 64 23 0 0
+/mdl/app/app_login/app_login.php
+0 75 0 166350 0 15 0 0
+/mdl/customer/leasys/app_admin/app_migration_mysql.php
+0 47 0 36597 5 2 0 0
+/css/windowGui/windowGui.css
+0 64 0 103185 0 0 0 0
+/css/main.css
+0 74 0 268989 0 0 0 0
+/mdl/app/app_gui/app_gui_start_menu_launch.php
+0 40 0 240129 2 0 0 0
+/mdl/app/app/app_fiche_forward.php
+0 12 0 107423 0 0 0 0
+/mdl/app/app_img/image_dyn.php
+0 153 0 203405 0 2 0 0
+/javascript/librairie/myddeSelection.js
+0 92 0 73788 0 0 0 0
+/mdl/app/app_prod/app_prod_liste_menu_search.php
+0 1 0 17254 0 0 0 0
+/mdl/app/app_gui/app_gui_tile_click.php
+0 2 0 1394 0 0 0 0
+/javascript/engine/methods.js
+0 92 0 169800 0 0 0 0
+/javascript/polyfill/json2.js
+0 142 0 351449 0 0 0 0
+/javascript/app/app_chat.js
+0 141 0 192357 0 0 0 0
+/mdl/customer/leasys/app_admin/app_migration_check.php
+0 3 0 4308 0 0 0 0
+/javascript/engine/afterAjaxCall.js
+0 92 0 48084 0 0 0 0
+/javascript/librairie/tableGui.js
+0 92 0 54240 0 0 0 0
+/javascript/scriptaculous/scriptaculous.js
+0 143 0 130748 0 0 0 0
+/javascript/app/app_keepon.js
+0 141 0 125362 0 0 0 0
+/javascript/scriptaculous/builder.js
+0 142 0 150118 0 0 0 0
+/mdl/app/app_admin/app_admin.php
+0 52 0 165256 0 0 0 0
+/javascript/librairie/mask.js
+0 92 0 217464 0 0 0 0
+/javascript/vendor/localforage.js
+0 142 0 1318186 0 0 0 0
+/javascript/vendor/basket.js
+0 143 0 189021 0 0 0 0
+/javascript/librairie/pikaday.js
+0 142 0 523506 0 0 0 0
+/mdl/app/app_admin/app_migration_check.php
+0 5 0 1693718 0 0 0 0
+/mdl/app/app_select_icon_fa.php
+0 25 0 3459145 0 0 0 0
+/mdl/app/app/app_explorer.php
+0 18 0 55943 0 0 0 0
+/javascript/engine/initApp.js
+0 92 0 41172 0 0 0 0
+/javascript/app/app_live_data.js
+0 141 0 144145 0 0 0 0
+/javascript/librairie/myddeview.js
+0 92 0 61296 0 0 0 0
+/services/json_data_monitor.php
+0 2451 0 1203837 185 186 0 0
+/css/pickerHolder/pickerHolder.css
+0 52 0 29830 0 0 0 0
+/javascript/app/app_bootstrap_init.js
+0 143 0 186047 0 0 0 0
+/javascript/app/app_functions.js
+0 141 0 209266 0 0 0 0
+/javascript/app/app_cache.js
+0 141 0 108423 0 0 0 0
+/css/skin/light/light.css
+0 57 0 250838 0 0 0 0
+/mdl/app/app_scheme/app_scheme_has_field_update_model.php
+0 29 0 486628 0 1 0 0
+/mdl/app/app/app_explorer_search.php
+0 18 0 378499 4 0 0 0
+/javascript/app/app_insertionQ.js
+0 141 0 175967 0 0 0 0
+/services/json_data_artis_sync_list.php
+0 4 0 6219 1 0 0 0
+/mdl/app/app_liste/app_liste_menu.php
+0 19 0 279546 0 1 0 0
+# End Of Table - urls
+# -sites- (monthly)
+150.70.173.42
+0 2 0 2695 1 1474019407 0 0
+-
+37.161.25.24
+0 3 3 2763 1 1474067246 0 0
+/images/frm/image.php
+37.161.108.133
+0 24 22 430305 1 1474234113 0 0
+/
+37.167.0.117
+0 1997 1645 36755355 4 1474227797 0 0
+/mdl/app/app_login/actions.php
+37.161.36.159
+0 75 73 1589631 1 1473893152 0 0
+/mdl/app/actions.php
+83.113.155.147
+0 162 97 757762 3 1473699363 0 0
+/
+37.167.122.211
+0 93 9 1948602 1 1474158013 0 0
+/images/frm/image.php
+37.166.250.60
+0 153 25 2072934 8 1474065458 0 0
+/mdl/app/app_login/actions.php
+216.38.216.197
+0 17 9 950396 1 1473732965 0 0
+-
+150.70.173.47
+0 2 0 2695 1 1473412679 0 0
+-
+23.20.182.246
+0 20 0 28070 1 1474009400 0 0
+-
+150.70.188.170
+0 2 0 2695 1 1473077720 0 0
+-
+83.113.156.8
+0 42 0 38156 1 1473431944 0 0
+/
+37.161.15.77
+0 4084 292 56490141 3 1473991458 0 0
+/mdl/app/app_login/actions.php
+83.113.49.147
+0 42 0 38156 1 1473425716 0 0
+/
+37.165.205.160
+0 155 28 2941284 6 1474139134 0 0
+/mdl/app/actions.php
+83.113.179.158
+0 99 97 700828 1 1474049028 0 0
+/images/frm/image.php
+37.161.3.89
+0 254 53 4978358 1 1473966527 0 0
+/images/frm/image.php
+90.116.119.153
+0 21 0 19078 1 1474188568 0 0
+/
+37.161.201.211
+0 144 15 2015270 3 1474204477 0 0
+/images/frm/image.php
+80.14.156.22
+0 312 100 867893 6 1473932305 0 0
+/images/frm/image.php
+62.210.97.92
+0 14353 14350 92423602 328 1474243182 0 0
+/services/json_data_search.php
+37.160.101.141
+0 48 7 994055 1 1474227992 0 0
+/
+37.162.26.5
+0 161 34 2937707 2 1474149868 0 0
+/mdl/app/app_scheme/actions.php
+150.70.188.178
+0 2 0 2695 1 1473863416 0 0
+-
+37.162.152.118
+0 203 136 4080092 2 1474110446 0 0
+/
+83.113.31.22
+0 201 7 140849 4 1473092556 0 0
+/
+37.71.87.130
+0 4160 3696 19469421 209 1474083699 0 0
+/services/json_data_monitor.php
+37.162.1.114
+0 236 96 3580609 1 1473967304 0 0
+/images/frm/image.php
+37.167.83.98
+0 1079 1058 18416429 2 1474242761 0 0
+/
+150.70.188.169
+0 2 0 2695 1 1473679467 0 0
+-
+# End Of Table - sites (monthly)
+# -sites- (daily)
+37.161.108.133
+0 24 22 430305 1 1474234113 0 0
+/
+37.167.0.117
+0 1997 1645 36755355 4 1474227797 0 0
+/mdl/app/app_login/actions.php
+37.167.122.211
+0 45 4 972914 1 1474158013 0 0
+/images/frm/image.php
+90.116.119.153
+0 21 0 19078 1 1474188568 0 0
+/
+37.161.201.211
+0 144 15 2015270 3 1474204477 0 0
+/images/frm/image.php
+62.210.97.92
+0 5527 5525 22416335 99 1474243182 0 0
+/services/json_data_search.php
+37.160.101.141
+0 48 7 994055 1 1474227992 0 0
+/
+37.167.83.98
+0 1079 1058 18416429 2 1474242761 0 0
+/
+# End Of Table - sites (daily)
+# -referrers- 
+http://idaertys.mydde.fr/index.php
+1 9665
+http://idaertys.mydde.fr/javascript/librairie/rsvp.js
+1 1
+http://idaertys.mydde.fr/javascript/vendor/basket.js
+1 1
+http://idaertys.mydde.fr:80/reindex.php
+1 4
+http://idaertys.mydde.fr/javascript/app/app_bootstrap_init.js
+1 1
+- (Direct Request)
+0 18147
+http://idaertys.mydde.fr/appcomponents/datatable.tag
+1 1
+http://idaertys.mydde.fr/javascript/prototype/prototype.js
+1 1
+http://idaertys.mydde.fr/
+1 153
+http://idaertys.mydde.fr/css/font-awesome/css/font-awesome.css
+1 57
+http://idaertys.mydde.fr:80/index.php
+1 3
+http://idaertys.mydde.fr/css/niceForm/niceForm.css
+1 2
+http://idaertys.mydde.fr/javascript/vendor/tinymce/tinymce.min.js
+1 1
+http://idaertys.mydde.fr/javascript/app/app_bootstrap.js
+1 1
+http://idaertys.mydde.fr/css/main.css
+1 10
+http://idaertys.mydde.fr/css/skin/light/light.css
+1 98
+http://idaertys.mydde.fr/javascript/socketio/socketio.js
+1 1
+http://idaertys.mydde.fr/javascript/scriptaculous/scriptaculous.js
+1 1
+# End Of Table - referrers
+# -agents- 
+Mozilla/5.0 (Windows NT 10.0; WOW64; rv:47.0) Gecko/20100101 Firefox/47.0
+0 21
+Mozilla/5.0 (Macintosh; Intel Mac OS X 10.11; rv:42.0) Gecko/20100101 Firefox/42.0
+0 21
+Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 5.1; Trident/4.0)
+0 10
+Mozilla/5.0 (Windows NT 6.1; WOW64; rv:47.0) Gecko/20100101 Firefox/47.0
+0 201
+Mozilla
+0 153
+Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_1) AppleWebKit/535.1 (KHTML, like Gecko) Chrome/13.0.782.215 Safari/535.1
+0 17
+Mozilla/5.0 (Macintosh; Intel Mac OS X 10.9; rv:29.0) Gecko/20100101 Firefox/29.0
+0 20
+Mozilla/5.0 (Windows NT 10.0; WOW64; rv:48.0) Gecko/20100101 Firefox/48.0
+0 9885
+Mozilla/5.0 (Windows NT 6.1; WOW64; rv:48.0) Gecko/20100101 Firefox/48.0
+0 1165
+# End Of Table - agents
+# -search strings- 
+# End Of Table - search strings
+# -usernames- 
+# End Of Table - usernames

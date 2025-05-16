@@ -1,9 +1,4 @@
 <?php
-//header('Content-Type: text/html; charset=UTF-8');
-// header('Pragma: public');
-// header('Pragma: public');
-//header('Expires: ' . gmdate('D, d M Y H:i:s \G\M\T', time() + (60 * 60)));
-// session_start();
 //
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: POST, GET, OPTIONS");
@@ -27,13 +22,8 @@ $host_name = explode('.', $_SERVER['HTTP_HOST'])[0];
 // echo "$host";
 //
 if ('lan' === end($host_parts)) { 
-    ini_set('display_errors', 55);
-    /*		DEFINE('ENVIRONEMENT', 'PREPROD');
-            DEFINE('SITEPATH', 'D:\boulot\UwAmp\www\idae.preprod.lan\web\\');
-            DEFINE('APPPATH', 'D:\boulot\UwAmp\www\idae.preprod.lan\\');*/
-    include_once('conf.lan.inc.php');
-/* echo APPTPL;
-die(); */
+    ini_set('display_errors', 55); 
+    include_once('conf.lan.inc.php'); 
     return;
 } else {
     if (strpos($_SERVER['HTTP_HOST'], 'preprod') === false) {
