@@ -4,7 +4,7 @@ app_init_template = function () {
 
 			var file = file.replace (/(\r\n|\n|\r)/gm, "");
 			//  console.clear();
-			console.log({file})
+			// console.log({file})
 			//  console.log(file)
 			escapeRegex = function (value) {
 				return value.replace (/([-.*+?\\\^=!:${}()|[\]\/\\])/g, '\\$1'); // prototype
@@ -26,9 +26,8 @@ app_init_template = function () {
 					window.APP.APPTPL[m[1]] = m[2];
 				}
 
-			}
-			console.log(window.APP.APPTPL)
-			resolve ('ok done tpl 2023')
+			} 
+			resolve (true)
 		})
 
 	})
