@@ -9,7 +9,7 @@ if (!ini_get('date.timezone')) {
 ini_set('error_reporting', 'E_ALL & ~E_DEPRECATED & ~E_STRICT');
 ini_set('short_open_tag', 'On');
 ini_set('scream.enabled', true);
-ini_set('display_errors', 'Off'); 
+ini_set('display_errors', 'Off');
 
 !defined('SOCKET_EMSGSIZE') && DEFINE('SOCKET_EMSGSIZE', 4000000);
 
@@ -19,52 +19,54 @@ $host = str_replace('www.', '', $_SERVER['HTTP_HOST']);
 $host = explode(':', $host)[0];
 $host_name = explode('.', $_SERVER['HTTP_HOST'])[0];
 
-// echo "$host";
-//
-if ('lan' === end($host_parts)) { 
-    ini_set('display_errors', 55); 
-    include_once('conf.lan.inc.php'); 
+// Détermination des chemins principaux dynamiques
+$webDir = realpath(__DIR__);
+$projectRoot = realpath($webDir . DIRECTORY_SEPARATOR . '..') . DIRECTORY_SEPARATOR;
+
+if ('lan' === end($host_parts)) {
+    ini_set('display_errors', 55);
+    include_once('conf.lan.inc.php');
     return;
 } else {
     if (strpos($_SERVER['HTTP_HOST'], 'preprod') === false) {
         ini_set('display_errors', 0);
         DEFINE('ENVIRONEMENT', 'PROD');
-        DEFINE('SITEPATH', '/var/www/idaertys.mydde.fr/web/');
-        DEFINE('APPPATH', '/var/www/idaertys.mydde.fr/');
+        DEFINE('APPPATH', $projectRoot);
+        DEFINE('SITEPATH', $webDir . DIRECTORY_SEPARATOR);
     } else {
         ini_set('display_errors', 55);
         DEFINE('ENVIRONEMENT', 'PREPROD');
-        DEFINE('SITEPATH', '/var/www/idaertys_preprod.mydde.fr/web/');
-        DEFINE('APPPATH', '/var/www/idaertys_preprod.mydde.fr/');
+        DEFINE('APPPATH', $projectRoot);
+        DEFINE('SITEPATH', $webDir . DIRECTORY_SEPARATOR);
     }
 }
 // SESSION
-DEFINE("SESSION_PATH", APPPATH . 'sessions/');
-DEFINE("COOKIE_PATH", APPPATH . '/cookies/');
-set_include_path(get_include_path() . ':' . APPPATH . '/web');
-//
-DEFINE('DOCUMENTROOT', APPPATH . '/web/');
-DEFINE('APPCONFDIR', APPPATH . '/web/appconf/');
+DEFINE("SESSION_PATH", APPPATH . 'sessions' . DIRECTORY_SEPARATOR);
+DEFINE("COOKIE_PATH", APPPATH . 'cookies' . DIRECTORY_SEPARATOR);
+set_include_path(get_include_path() . PATH_SEPARATOR . SITEPATH);
 
-DEFINE('CONFINC', APPPATH . '/web/conf.inc.php');
-DEFINE('ACTIVEMODULEFILE', APPPATH . '/web/services/json_data_event.txt');
-//
-DEFINE('APPBIN', APPPATH . 'web/bin/');
-DEFINE('APP_CONFIG_DIR', APPBIN . 'config/'); // auto creation of metier
-DEFINE('APPMDL', APPPATH . 'web/mdl/');
-DEFINE('APPLESS', 'appcss/');
-DEFINE('APPTPL', APPPATH . 'web/tpl/app/');
-DEFINE('APPBINTPL', APPPATH . 'web/bin/templates/app/');
-DEFINE('PATHTMP', APPPATH . '/tmp/');
-DEFINE('ADODBDIR', APPPATH . '/web/adodb/');
-DEFINE('REPFONCTIONS_APP', APPPATH . '/web/appfunc/');
-DEFINE('XMLDIR', APPPATH . 'web/xmlfiles/');
-//
-DEFINE("APPCLASSES", APPPATH . "web/appclasses/");
-DEFINE("APPBINCLASSES", APPPATH . "web/bin/classes/");
-DEFINE("APPCLASSES_APP", APPPATH . "web/bin/classes_app/");
-DEFINE("OLDAPPCLASSES", APPPATH . "web/classes/");
-DEFINE('REPFONCTIONS', APPPATH . 'appfunc/');
+DEFINE('DOCUMENTROOT', SITEPATH);
+DEFINE('APPCONFDIR', SITEPATH . 'appconf' . DIRECTORY_SEPARATOR);
+
+DEFINE('CONFINC', SITEPATH . 'conf.inc.php');
+DEFINE('ACTIVEMODULEFILE', SITEPATH . 'services' . DIRECTORY_SEPARATOR . 'json_data_event.txt');
+
+DEFINE('APPBIN', SITEPATH . 'bin' . DIRECTORY_SEPARATOR);
+DEFINE('APP_CONFIG_DIR', APPBIN . 'config' . DIRECTORY_SEPARATOR); // auto creation of metier
+DEFINE('APPMDL', SITEPATH . 'mdl' . DIRECTORY_SEPARATOR);
+DEFINE('APPLESS', 'appcss' . DIRECTORY_SEPARATOR);
+DEFINE('APPTPL', SITEPATH . 'tpl' . DIRECTORY_SEPARATOR . 'app' . DIRECTORY_SEPARATOR);
+DEFINE('APPBINTPL', SITEPATH . 'bin' . DIRECTORY_SEPARATOR . 'templates' . DIRECTORY_SEPARATOR . 'app' . DIRECTORY_SEPARATOR);
+DEFINE('PATHTMP', APPPATH . 'tmp' . DIRECTORY_SEPARATOR);
+DEFINE('ADODBDIR', SITEPATH . 'adodb' . DIRECTORY_SEPARATOR);
+DEFINE('REPFONCTIONS_APP', SITEPATH . 'appfunc' . DIRECTORY_SEPARATOR);
+DEFINE('XMLDIR', SITEPATH . 'xmlfiles' . DIRECTORY_SEPARATOR);
+
+DEFINE("APPCLASSES", SITEPATH . "appclasses" . DIRECTORY_SEPARATOR);
+DEFINE("APPBINCLASSES", SITEPATH . "bin" . DIRECTORY_SEPARATOR . "classes" . DIRECTORY_SEPARATOR);
+DEFINE("APPCLASSES_APP", SITEPATH . "bin" . DIRECTORY_SEPARATOR . "classes_app" . DIRECTORY_SEPARATOR);
+DEFINE("OLDAPPCLASSES", SITEPATH . "classes" . DIRECTORY_SEPARATOR);
+DEFINE('REPFONCTIONS', SITEPATH . 'appfunc' . DIRECTORY_SEPARATOR);
 
 // prod / last / preprod
 
@@ -528,7 +530,7 @@ DEFINE('HTTPIMAGES', $HTTP_PREFIX . DOCUMENTDOMAIN . '/images/');
 DEFINE('ICONPATH', 'images/icones/');
 
 DEFINE('PATH', DOCUMENTROOT);
-DEFINE('PATHICC', DOCUMENTROOT . 'icc/');
+DEFINE('PATHICC', DOCUMENTROOT . 'icc' . DIRECTORY_SEPARATOR);
 DEFINE('APPROOT', DOCUMENTROOT);
 
 require_once(ADODBDIR . "adodb.inc.php");
@@ -560,7 +562,6 @@ $buildArr = !empty($buildArr) ? $buildArr : ['tiny' => ['100', '25'], 'squary' =
 if (!function_exists('my_autoloader')) {
     function my_autoloader($class_name)
     {
-        // echo APPCLASSES . '/appcommon/Class' . $class_name . '.php';
         $dirs = array(
             APPCLASSES,
             APPCLASSES . '/appcommon/',
@@ -569,7 +570,6 @@ if (!function_exists('my_autoloader')) {
             APPBINCLASSES
         );
         foreach ($dirs as $directory) {
-            //see if the file exsists
             if (file_exists($directory . 'Class' . $class_name . '.php')) {
                 require($directory . 'Class' . $class_name . '.php');
                 return true;

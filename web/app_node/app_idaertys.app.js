@@ -7,7 +7,6 @@ var sessionMgm = require('sessionManagement');
 
 var app = require('http').createServer(http_handler)
     ,	io 		= 	require('socket.io')(app)
-   /* ,   https    =   require('https')*/
     ,   http    =   require('http')
     ,   express =   require('express')
     ,   cookie  =   require('cookie')
@@ -19,12 +18,8 @@ var app = require('http').createServer(http_handler)
     , 	mongo 	=  	require('mongodb')
     , 	Server 	= 	mongo.Server
     , 	Db 		= 	mongo.Db
-    , 	MongoOplog = require('mongo-oplog')
-    ,   clustered_node = require("clustered-node");
 
 http.globalAgent.maxSockets = Infinity;
-
-// var app = express();
 
 
 
@@ -36,10 +31,6 @@ app.listen(port);
 
 
 
-// move post here, this way
-/* http.get('/', function (req, res) {
-
-}); */
 
 io.set('authorization', function (handshakeData, accept) {
 
@@ -161,13 +152,11 @@ function http_handler(req, res) {
 
 
             break;
-        case '/postReload': // => middleware ici
-            //  DOCUMENTDOMAIN
+        case '/postReload': 
             var fullBody = '';
 
             req.on('data', function(chunk) {
                 fullBody += chunk.toString();
-	           // console.log(fullBody,fullBody.length,1e6)
                 if (fullBody.length > 1e6) {
 	                console.log('destroy ',fullBody.length)
                     req.connection.destroy();
@@ -183,9 +172,6 @@ function http_handler(req, res) {
                 //
 	            DOCUMENTDOMAIN = data.DOCUMENTDOMAIN || '';
                 reloadVars={module:data.module,value:data.value || ''};
-                //
-
-	           // console.log( 'Type postReload ', typeof(data.vars));
 
                 if(data.cmd && data.vars){
                     if(data.OWN){
@@ -223,7 +209,6 @@ io.on('connection', function(socket){
 
         }
     };
-    // if(!socket.PHPSESSID) { console.log('refused ',socket.handshake); return;}
     // HEARTBEAT
     var sender = setInterval(function () {
         socket.emit('message', new Date().getTime());
@@ -250,14 +235,12 @@ io.on('connection', function(socket){
         sess.userId			= data.SESSID;
         sess.SESSID			= data.SESSID;
         sess.PHPSESSID		= data.PHPSESSID;
-       // sess.SSSAVEPATH		= data.SSSAVEPATH;
 	    //
 	    if(data.DOCUMENTDOMAIN){
 		    socket.join(data.DOCUMENTDOMAIN)
 	    }
         //
 	    io.sockets.to(data.DOCUMENTDOMAIN).send('user connected');
-        // socket.broadcast.send('user connected');
         //
         sessionMgm.add(sess);
         //
@@ -268,9 +251,6 @@ io.on('connection', function(socket){
         }
     })
     //
-    socket.on('message', function(message){
-        //	socket.send('cool');
-    });
     socket.on('reloadModule', function(data) {
         socket.broadcast.emit('reloadModule',data);
     });
@@ -302,7 +282,6 @@ io.on('connection', function(socket){
 		data.vars.defer = '';
 		SESSID = data.SESSID || '';
 		PHPSESSID = data.PHPSESSID || '';
-		//SSSAVEPATH = data.SSSAVEPATH || '/';
 
 		DOCUMENTDOMAIN = data.DOCUMENTDOMAIN || 'appgem.destinationsreve.com';
 		//
@@ -336,7 +315,6 @@ io.on('connection', function(socket){
             body:  qs.stringify(vars)
         },function(err,res,body){
             io.sockets.emit('upd_data',{body:body,vars:vars,mdl:mdl,title:title});
-            // socket.emit('upd_data',{body:body,vars:vars,mdl:mdl,title:title})
         });
     });
 
@@ -346,10 +324,7 @@ io.on('connection', function(socket){
             options = options || {},
             SESSID = data.SESSID || '',
 		    PHPSESSID = data.PHPSESSID || '',
-           /* SSSAVEPATH = data.SSSAVEPATH || '/',*/
             DOCUMENTDOMAIN = data.DOCUMENTDOMAIN || 'app.destinationsreve.com';
-        //  	 fait tout planter mongo ICI
-        // var url = 'http://'+DOCUMENTDOMAIN+'/services/'+data.mdl+'.php'
 
             var directory = (data.directory) ? data.directory : 'services';
 			var extension = (data.extension) ? data.extension : 'php';
@@ -372,7 +347,6 @@ io.on('connection', function(socket){
                 fn(body,options)
             });
         }else{
-            // console.log('socket.cookie_string ',socket.cookie_string,'socket.PHPSESSID ',socket.PHPSESSID)
             //
             request.get({
                 url	:	url ,
@@ -395,12 +369,11 @@ io.on('connection', function(socket){
         data.vars.defer = '';
         var SESSID = data.SESSID || '',
 		PHPSESSID = data.PHPSESSID || '',
-        /*SSSAVEPATH = data.SSSAVEPATH || '/',*/
         DOCUMENTDOMAIN = data.DOCUMENTDOMAIN || 'appgem.destinationsreve.com';
 
         //
         var url = 'http://'+DOCUMENTDOMAIN+'/'+data.file+'.php';
-        // ssid + file + vars
+
         key = SESSID+data.file+data.vars;
         //
         request.post({
