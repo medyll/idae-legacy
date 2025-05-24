@@ -22,8 +22,8 @@ $host_name = explode('.', $_SERVER['HTTP_HOST'])[0];
 // Détermination des chemins principaux dynamiques
 $webDir = realpath(__DIR__);
 $projectRoot = realpath($webDir . DIRECTORY_SEPARATOR . '..') . DIRECTORY_SEPARATOR;
-
-if ('lan' === end($host_parts)) {
+ 
+if ('lan' === end($host_parts) || $host === 'localhost' || $host === '127.0.0.1') {
     ini_set('display_errors', 55);
     include_once('conf.lan.inc.php');
     return;

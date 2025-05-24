@@ -11,7 +11,7 @@ ini_set('short_open_tag', 'On');
 ini_set('scream.enabled', false);
 ini_set('error_reporting', 'E_ALL & ~E_DEPRECATED & ~E_STRICT'); 
 ini_set('scream.enabled', true);
-ini_set('display_errors', 'Off');
+ini_set('display_errors', 'On');
 
 // Define socket message size if not already defined
 !defined('SOCKET_EMSGSIZE') && DEFINE('SOCKET_EMSGSIZE', 4000000);
@@ -32,14 +32,14 @@ $host_name = explode('.', $_SERVER['HTTP_HOST'])[0];
 $host_parts = explode('.', $_SERVER['HTTP_HOST']);
 
 // Only allow .lan hosts
-if ('lan' === end($host_parts)) {
+if ('lan' === end($host_parts) || $host === 'localhost' || $host === '127.0.0.1') {
     DEFINE('ENVIRONEMENT', 'PREPROD');
 } else  {
     DEFINE('ENVIRONEMENT', 'PROD');
 }
 
 // Load the correct hosts config file
-$configFile = (defined('ENVIRONEMENT') && ENVIRONEMENT === 'PREPROD')
+echo $configFile = (defined('ENVIRONEMENT') && ENVIRONEMENT === 'PREPROD')
     ? __DIR__ . '/../config/lan-hosts.json'
     : __DIR__ . '/../config/prod-hosts.json';
 
