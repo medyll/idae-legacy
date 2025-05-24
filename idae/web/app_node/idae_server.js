@@ -4,6 +4,29 @@
  * - Toutes les routes HTTP et tous les événements socket des deux fichiers sont présents.
  */
 
+const default_port = 3005;
+const sessionMgm = (() => {
+  const sessions = new Map();
+
+  return {
+    add: (sess) => {
+      if (sess && sess.sessionId) sessions.set(sess.sessionId, sess);
+    },
+    getBySession: (sessionId) => {
+      return sessions.get(sessionId) || null;
+    },
+    removeBySession: (sessionId) => {
+      sessions.delete(sessionId);
+    }
+  };
+})();
+
+const { program } = require('commander');
+program.option('--port <number>', 'port du serveur', default_port);
+program.parse(process.argv);
+const port = program.opts().port || process.env.PORT || default_port;
+
+
 const fs = require("fs");
 const http = require("http");
 const socketio = require("socket.io");
@@ -19,7 +42,6 @@ const Db = mongo.Db;
 var appcron = require("./appmodules/appcron.app.js");
 
 http.globalAgent.maxSockets = Infinity;
-let sessionMgm = require("sessionManagement");
 
 const app = http.createServer(http_handler);
 const io = socketio(app);
@@ -28,6 +50,27 @@ const io = socketio(app);
 const server2 = new Server("localhost", 27017, { auto_reconnect: true });
 const socket_db = new Db("sitebase_sockets", server2, { safe: false });
 open_socket_db();
+
+// --- Authorization (cookie + PHPSESSID) ---
+/* io.use(cookieParser); */
+/* io.use(check_php_cookie); */
+io.set("authorization", function (handshakeData, accept) {
+  console.log("auth", handshakeData.headers);
+  // check if there's a cookie header
+  if (handshakeData.headers.cookie) {
+    // if there is, parse the cookie
+    handshakeData.cookie = cookie.parse(handshakeData.headers.cookie);
+    cookie_obj = cookie.parse(handshakeData.headers.cookie);
+    if (cookie_obj.PHPSESSID == "undefined") {
+      console.log("Bad transmitted.");
+      return accept("Bad transmitted.", false);
+    }
+    // }
+  } else {
+    return accept("No cookie transmitted.", false);
+  }
+  accept(null, true);
+});
 
 let socket_db_collection, socket_db_collection_site;
 
@@ -223,10 +266,6 @@ const keepFidel = io.of("/fidel").on("connection", function (socket) {
   });
 });
 
-// --- Authorization (cookie + PHPSESSID) ---
-io.use(cookieParser);
-io.use(check_php_cookie);
-
 function check_php_cookie(socket, next) {
   let cookies = {};
   if (socket.request.headers.cookie) {
@@ -252,8 +291,7 @@ function check_php_cookie(socket, next) {
 let prefix = "";
 
 function sendGrantIn(socket) {
-  socket.emit("ask_grantIn");
-  socket.emit("ask_grantIn");
+    socket.emit("ask_grantIn");
 }
 
 function authorization_ok(socket) {
@@ -317,21 +355,6 @@ function build_vars(data) {
 }
 
 function socket_handlers() {
-  io.on("connect", function (socket) {
-    console.log("New socket connection:", socket.id);
-    // Join rooms by PHPSESSID
-    if (socket.PHPSESSID) {
-      socket.join(socket.PHPSESSID);
-    }
-    // Join by host if possible
-    if (
-      socket.handshake &&
-      socket.handshake.headers &&
-      socket.handshake.headers.host
-    ) {
-      socket.join(socket.handshake.headers.host);
-    }
-  });
   io.on("connection", function (socket) {
     // Join rooms by PHPSESSID
     if (socket.PHPSESSID) {
@@ -345,11 +368,20 @@ function socket_handlers() {
     ) {
       socket.join(socket.handshake.headers.host);
     }
+
+    json_cookie = cookie.parse(socket.handshake.headers.cookie);
+    if (json_cookie.PHPSESSID) {
+      socket.join(json_cookie.PHPSESSID);
+
+      socket.PHPSESSID = json_cookie.PHPSESSID;
+      socket.cookie_string = socket.handshake.headers.cookie;
+    }
     // Heartbeat
     const sender = setInterval(function () {
       socket.emit("message", new Date().getTime());
       socket.emit("heartbeat_app", new Date().getTime());
     }, 10000);
+
     // Disconnect
     socket.on("disconnect", function () {
       clearInterval(sender);
@@ -367,26 +399,30 @@ function socket_handlers() {
     // grantIn
     socket.on("grantIn", function (data, fn) {
       var sess = new Object();
+      console.log("socket on grantin ", data);
       sess.sessionId = socket.id;
       sess.DOCUMENTDOMAIN = data.DOCUMENTDOMAIN;
       sess.SESSID = data.SESSID;
       sess.PHPSESSID = data.PHPSESSID;
+
       if (data.DOCUMENTDOMAIN) {
         socket.join(data.DOCUMENTDOMAIN);
       }
-      if (data.IDAGENT) {
+      //
+      io.sockets.to(data.DOCUMENTDOMAIN).send("user connected");
+      //
+      sessionMgm.add(sess);
+      /*       if (data.IDAGENT) {
         socket.idagent = data.IDAGENT;
         socket.join(data.DOCUMENTDOMAIN + "IDAGENT" + data.IDAGENT);
-      }
-      io.sockets.to(data.DOCUMENTDOMAIN).send("user connected");
-      sessionMgm.add(sess);
+      } */
       if (data.SESSID) {
         if (fn) fn("woot");
         socket.emit("notify", data);
-        socket.broadcast.emit("reloadModule", {
+        /* socket.broadcast.emit("reloadModule", {
           module: "gadget/onliveGadget",
           value: "*",
-        });
+        }); */
       }
     });
     // dispatcher
@@ -513,6 +549,8 @@ function socket_handlers() {
         mdl +
         "." +
         extension;
+ 
+
       let j = request.jar();
       let soc_cook = socket.cookie_string;
       if (
@@ -588,7 +626,6 @@ module.exports = {
 
 // Démarrage automatique si appelé directement
 if (require.main === module) {
-  const port = process.env.PORT || 3005;
   app.listen(port);
   socket_handlers();
   appcron.cron_start();
