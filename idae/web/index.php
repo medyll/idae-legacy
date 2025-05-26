@@ -6,8 +6,7 @@
 		if($fileInfo->isDot()) continue;
 		echo $fileInfo->getFilename() . "<br>\n";
 	}*/
-
-
+ 
 	include_once($_SERVER['CONF_INC']);
 
 	if (empty($_SESSION['reindex'])) header("Location: reindex.php");

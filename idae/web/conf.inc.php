@@ -9,14 +9,14 @@ if (!ini_get('date.timezone')) {
 ini_set('error_reporting', 'E_ALL & ~E_DEPRECATED & ~E_STRICT');
 ini_set('short_open_tag', 'On');
 ini_set('scream.enabled', true);
-ini_set('display_errors', 'Off');
+ini_set('display_errors', 'On');
 
 !defined('SOCKET_EMSGSIZE') && DEFINE('SOCKET_EMSGSIZE', 4000000);
 
 $HTTP_PREFIX = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') ? 'https://' : 'http://';
-$host_parts = explode('.', $_SERVER['HTTP_HOST']);
 $host = str_replace('www.', '', $_SERVER['HTTP_HOST']);
 $host = explode(':', $host)[0];
+$host_parts = explode('.', $host);
 $host_name = explode('.', $_SERVER['HTTP_HOST'])[0];
 
 // Détermination des chemins principaux dynamiques
@@ -24,10 +24,10 @@ $webDir = realpath(__DIR__);
 $projectRoot = realpath($webDir . DIRECTORY_SEPARATOR . '..') . DIRECTORY_SEPARATOR;
  
 if ('lan' === end($host_parts) || $host === 'localhost' || $host === '127.0.0.1') {
-    ini_set('display_errors', 55);
     include_once('conf.lan.inc.php');
     return;
 } else {
+    echo "red";
     if (strpos($_SERVER['HTTP_HOST'], 'preprod') === false) {
         ini_set('display_errors', 0);
         DEFINE('ENVIRONEMENT', 'PROD');

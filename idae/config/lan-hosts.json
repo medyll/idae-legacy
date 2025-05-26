@@ -1,5 +1,32 @@
 {
     "hosts": {
+        "localhost": {
+            "business": "commercial",
+            "smtp": {
+                "host": "mail.mydde.fr",
+                "user": "ged.idae@mydde.fr",
+                "email": "ged.idae@mydde.fr",
+                "pass": "malaterre654"
+            },
+            "ged": {
+                "host": "mail.mydde.fr",
+                "user": "ged.idae@mydde.fr",
+                "email": "ged.idae@mydde.fr",
+                "pass": "malaterre654"
+            },
+            "mdb": {
+                "host": "127.0.0.1",
+                "user": "admin",
+                "password": "gwetme2011",
+                "prefix": "idaenext_"
+            },
+            "sql": {
+                "host": "localhost",
+                "db": "crm_general_new",
+                "user": "root",
+                "password": "redPoi654pied"
+            }
+        },
         "tactac.idae.preprod.lan": {
             "business": "foodlivery",
             "smtp": {

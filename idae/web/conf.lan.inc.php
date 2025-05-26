@@ -3,15 +3,17 @@
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: POST, GET, OPTIONS");
 
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
 // Set timezone if not already set
 if (!ini_get('date.timezone')) {
     date_default_timezone_set('GMT');
 }
-ini_set('short_open_tag', 'On');
-ini_set('scream.enabled', false);
-ini_set('error_reporting', 'E_ALL & ~E_DEPRECATED & ~E_STRICT'); 
-ini_set('scream.enabled', true);
-ini_set('display_errors', 'On');
+/* ini_set('short_open_tag', 'On'); 
+ini_set('error_reporting', 'E_ALL & ~E_DEPRECATED & ~E_STRICT');  */
+ini_set('scream.enabled', true); 
 
 // Define socket message size if not already defined
 !defined('SOCKET_EMSGSIZE') && DEFINE('SOCKET_EMSGSIZE', 4000000);
@@ -29,7 +31,7 @@ $projectRoot = realpath($webDir . DIRECTORY_SEPARATOR . '..') . DIRECTORY_SEPARA
 $host      = str_replace('www.', '', $_SERVER['HTTP_HOST']);
 $host      = explode(':', $host)[0];
 $host_name = explode('.', $_SERVER['HTTP_HOST'])[0];
-$host_parts = explode('.', $_SERVER['HTTP_HOST']);
+$host_parts = explode('.', $host);
 
 // Only allow .lan hosts
 if ('lan' === end($host_parts) || $host === 'localhost' || $host === '127.0.0.1') {
@@ -39,7 +41,7 @@ if ('lan' === end($host_parts) || $host === 'localhost' || $host === '127.0.0.1'
 }
 
 // Load the correct hosts config file
-echo $configFile = (defined('ENVIRONEMENT') && ENVIRONEMENT === 'PREPROD')
+$configFile = (defined('ENVIRONEMENT') && ENVIRONEMENT === 'PREPROD')
     ? __DIR__ . '/../config/lan-hosts.json'
     : __DIR__ . '/../config/prod-hosts.json';
 
@@ -50,7 +52,7 @@ if (!$config) {
 
 // Check if host is configured
 if (!isset($config['hosts'][$host])) {
-    die('Host non configuré dans lan-hosts.json');
+    die("'[$host] Host non configuré dans $configFile'");
 }
 $hostConf = $config['hosts'][$host];
 
@@ -217,6 +219,7 @@ if (!function_exists("my_autoloader")) {
 
 // --- Session class include ---
 include_once('appclasses/ClassSession.php');
+
 
 // --- Debug helper ---
 if (!function_exists('myddeDebug')) {
