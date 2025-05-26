@@ -5,7 +5,6 @@ services:
     build: .
     ports:
       - "8080:80"
-      - "27017:27017"
     volumes:
       - ./idae:/var/www/html
       - ./logs:/var/log/apache2
@@ -13,7 +12,11 @@ services:
       - APACHE_RUN_USER=www-data
       - APACHE_RUN_GROUP=www-data
       - CONF_INC=/var/www/html/conf.inc.php
+      - DOCKER_ENV=1
+      - MONGO_HOST=host.docker.internal
     container_name: idae-legacy
+
+
   mysql:
     image: mysql:5.7
     environment:
@@ -26,3 +29,4 @@ services:
 
 volumes:
   mysql_data:
+  mongo_data:

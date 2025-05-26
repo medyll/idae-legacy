@@ -33,10 +33,11 @@
 				return 'Utilisateur DB non defini';
 			}
 			$opt = ['db' => 'admin', 'username' => MDB_USER, 'password' => MDB_PASSWORD];
+			// Détection automatique de l'hôte MongoDB
+			$mongo_host = getenv('MONGO_HOST') ?: (getenv('DOCKER_ENV') ? 'host.docker.internal' : MDB_HOST);
+			$mongo_url = 'mongodb://' . MDB_USER . ':' . MDB_PASSWORD . '@' . $mongo_host;
 			if (empty($PERSIST_CON)) {
-				// $PERSIST_CON = $this->conn = new MongoClient('mongodb://' . MDB_HOST );
-				$PERSIST_CON = $this->conn = new MongoClient('mongodb://' . MDB_USER . ':' . MDB_PASSWORD . '@' . MDB_HOST, $opt);
-				// $PERSIST_CON = $this->conn = new MongoClient('mongodb:///tmp/mongodb-27017.sock', $opt);
+				$PERSIST_CON = $this->conn = new MongoClient($mongo_url, $opt);
 			} else {
 				$this->conn = $PERSIST_CON;
 			}
@@ -206,15 +207,15 @@
 				if (!empty($db_fk['codeAppscheme'])):
 
 					$out[$table_fk] = ['base_fk'        => $db_fk['codeAppscheme_base'],    // $out[$index]
-					                   'collection_fk'  => $db_fk['codeAppscheme'],
-					                   'nomAppscheme'   => $db_fk['nomAppscheme'],
-					                   'codeAppscheme'  => $db_fk['codeAppscheme'],
-					                   'iconAppscheme'  => $db_fk['iconAppscheme'],
-					                   'colorAppscheme' => $db_fk['colorAppscheme'],
-					                   'table_fk'       => $table_fk,
-					                   'idtable_fk'     => 'id' . $table_fk,
-					                   'nomtable_fk'    => 'nom' . ucfirst($table_fk),
-					                   'icon_fk'        => $db_fk['icon']];
+									   'collection_fk'  => $db_fk['codeAppscheme'],
+									   'nomAppscheme'   => $db_fk['nomAppscheme'],
+									   'codeAppscheme'  => $db_fk['codeAppscheme'],
+									   'iconAppscheme'  => $db_fk['iconAppscheme'],
+									   'colorAppscheme' => $db_fk['colorAppscheme'],
+									   'table_fk'       => $table_fk,
+									   'idtable_fk'     => 'id' . $table_fk,
+									   'nomtable_fk'    => 'nom' . ucfirst($table_fk),
+									   'icon_fk'        => $db_fk['icon']];
 				endif;
 			endforeach;
 
@@ -1156,21 +1157,21 @@
 			$ix = ucfirst($table);
 
 			return ['nom' . $ix              => 'nom',
-			        'dateCreation' . $ix     => 'date de création',
-			        'dateModification' . $ix => 'date de modification',
-			        'dateDebut' . $ix        => 'date de début',
-			        'dateFin' . $ix          => 'date de fin',
-			        'dateCloture' . $ix      => 'date de cloture'];
+					'dateCreation' . $ix     => 'date de création',
+					'dateModification' . $ix => 'date de modification',
+					'dateDebut' . $ix        => 'date de début',
+					'dateFin' . $ix          => 'date de fin',
+					'dateCloture' . $ix      => 'date de cloture'];
 		}
 
 		function get_date_fields($table = '') {
 			$ix = ucfirst($table);
 
 			return ['dateCreation' . $ix     => 'date de création',
-			        'dateModification' . $ix => 'date de modification',
-			        'dateDebut' . $ix        => 'date de début',
-			        'dateFin' . $ix          => 'date de fin',
-			        'dateCloture' . $ix      => 'date de cloture'];
+					'dateModification' . $ix => 'date de modification',
+					'dateDebut' . $ix        => 'date de début',
+					'dateFin' . $ix          => 'date de fin',
+					'dateCloture' . $ix      => 'date de cloture'];
 		}
 
 		function get_grille_count($table) {
@@ -1194,11 +1195,11 @@
 				$db_fk = $this->app_conn->findOne(['codeAppscheme' => $table_fk]);
 				if (!empty($db_fk['codeAppscheme_base'])):
 					$out[$index] = ['base_grille'       => $db_fk['codeAppscheme_base'],
-					                'collection_grille' => $db_fk['codeAppscheme'],
-					                'table_grille'      => $table_fk,
-					                'idtable_grille'    => 'id' . $table_fk,
-					                'nomtable_grille'   => 'nom' . ucfirst($table_fk),
-					                'icon_grille'       => $db_fk['icon']];
+									'collection_grille' => $db_fk['codeAppscheme'],
+									'table_grille'      => $table_fk,
+									'idtable_grille'    => 'id' . $table_fk,
+									'nomtable_grille'   => 'nom' . ucfirst($table_fk),
+									'icon_grille'       => $db_fk['icon']];
 				endif;
 			endforeach;
 			ksort($out);
@@ -1565,9 +1566,9 @@
 							$idjours = (int)$ARR_JOURS['idjours'];
 							if ($APP_SH_J->find(['idjours' => $idjours, 'idshop' => $table_value])->count() == 0) {
 								$idshop_jours = $APP_SH_J->insert(['idjours'         => $idjours, 'idshop' => $table_value,
-								                                   'nomShop_jours'   => $ARR_JOURS['nomJours'] . ' ' . $nomShop,
-								                                   'ordreShop_jours' => (int)$ARR_JOURS['ordreJours'],
-								                                   'actifShop_jours' => 1]);
+																   'nomShop_jours'   => $ARR_JOURS['nomJours'] . ' ' . $nomShop,
+																   'ordreShop_jours' => (int)$ARR_JOURS['ordreJours'],
+																   'actifShop_jours' => 1]);
 							} else {
 								$test         = $APP_SH_J->findOne(['idjours' => $idjours, 'idshop' => $table_value]);
 								$idshop_jours = (int)$test['idshop_jours'];

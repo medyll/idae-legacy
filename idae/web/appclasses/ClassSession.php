@@ -11,10 +11,13 @@
 		protected $maxTime;
 
 		public function __construct() {
-			$opt = ['db' => 'admin', 'username' => MDB_USER, 'password' => MDB_PASSWORD];
+		$opt = ['db' => 'admin', 'username' => MDB_USER, 'password' => MDB_PASSWORD];
 
-			$this->conn   = new MongoClient('mongodb://admin:gwetme2011@127.0.0.1:27017',$opt);
-			// $this->conn   = new MongoClient('mongodb://127.0.0.1:27017');
+		// Détection automatique de l'hôte MongoDB
+		$mongo_host = getenv('MONGO_HOST') ?: (getenv('DOCKER_ENV') ? 'host.docker.internal' : '127.0.0.1');
+		$mongo_url = 'mongodb://admin:gwetme2011@' . $mongo_host . ':27017';
+		$this->conn   = new MongoClient($mongo_url, $opt);
+		
 			$sitebase_app = DEFINED(MDB_PREFIX) ? 'sitebase_session' : MDB_PREFIX . 'sitebase_session';
 			if(ENVIRONEMENT=='PREPROD') $sitebase_app .='_preprod';
 
