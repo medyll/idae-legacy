@@ -47,9 +47,21 @@ const app = http.createServer(http_handler);
 const io = socketio(app);
 
 // --- MongoDB connection ---
-const server2 = new Server("localhost", 27017, { auto_reconnect: true });
-const socket_db = new Db("sitebase_sockets", server2, { safe: false });
-open_socket_db();
+// Détection automatique de l'hôte MongoDB
+const mongoHost = process.env.MONGO_HOST || (process.env.DOCKER_ENV ? 'host.docker.internal' : 'localhost');
+const mongoUser = process.env.MONGO_USER || 'admin';
+const mongoPass = process.env.MONGO_PASS || 'gwetme2011';
+const mongoUrl = `mongodb://${mongoUser}:${mongoPass}@${mongoHost}:27017/sitebase_sockets?authSource=admin`;
+const mongoClient = mongo.MongoClient;
+let socket_db;
+mongoClient.connect(mongoUrl, { useUnifiedTopology: true }, function(err, client) {
+  if (err) {
+    console.error('MongoDB connection error:', err);
+    return;
+  }
+  socket_db = client.db('sitebase_sockets');
+  open_socket_db();
+});
 
 // --- Authorization (cookie + PHPSESSID) ---
 /* io.use(cookieParser); */
