@@ -47,7 +47,7 @@ RUN sed -i 's|http://deb.debian.org/debian|http://archive.debian.org/debian|g' /
     && rm -rf /var/lib/apt/lists/*
 
 # Installer apt-transport-https avant d'ajouter les dépôts NodeSource
-RUN apt-get update && apt-get install -y --no-install-recommends apt-transport-https \
+RUN apt-get update && apt-get install -y --no-install-recommends --allow-unauthenticated apt-transport-https \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -56,10 +56,12 @@ RUN curl -fsSL https://deb.nodesource.com/gpgkey/nodesource.gpg.key | apt-key ad
     && echo "deb https://deb.nodesource.com/node_12.x stretch main" > /etc/apt/sources.list.d/nodesource.list \
     && echo "deb-src https://deb.nodesource.com/node_12.x stretch main" >> /etc/apt/sources.list.d/nodesource.list \
     && apt-get update \
-    && apt-get install -y nodejs
+    && apt-get install -y --allow-unauthenticated nodejs
 
 # Copier les fichiers de l'application dans le conteneur
-COPY ./web /var/www/html
+COPY ./idae /var/www/html
+# Copier la configuration de .user.ini dans le conteneur
+# COPY ./idae/web/.user.ini /var/www/html/.user.ini
 
 # Donner les permissions nécessaires
 RUN chown -R www-data:www-data /var/www/html \
@@ -74,8 +76,6 @@ RUN a2enmod headers
 # Exposer le port 8080
 EXPOSE 8080
 
-# Copier la configuration de .user.ini dans le conteneur
-COPY ./web/.user.ini /var/www/html/.user.ini
 
 # Copier le fichier de configuration des hôtes virtuels dans le conteneur
 COPY ./config/apache/httpd-vhosts.conf /etc/apache2/sites-available/httpd-vhosts.conf
