@@ -1,5 +1,7 @@
 <?
 	include_once($_SERVER['CONF_INC']);
+	require_once(__DIR__ . '/../../../../appclasses/appcommon/MongoCompat.php');
+	use AppCommon\MongoCompat;
 	$APP  = new App();
 	$time = time();
 	ini_set('display_errors', 0);
@@ -14,7 +16,7 @@
 	$NODAMAIL  = str_replace($DAMAIL, '', $remember);
 	$arrSearch = explode(' ', trim($DAMAIL));
 	foreach ($arrSearch as $key => $value) {
-		$out[] = new MongoRegex("/.*" . (string)$arrSearch[$key] . "*./i");
+		$out[] = MongoCompat::toRegex(".*" . MongoCompat::escapeRegex((string)$arrSearch[$key]) . "*.", 'i');
 	}
 	if (sizeof($out) == 1) {
 		$add = ['$or' => [['nomClient' => ['$in' => $out]], ['prenomClient' => ['$in' => $out]]]];

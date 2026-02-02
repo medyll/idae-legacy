@@ -82,9 +82,9 @@
 			// tourne ds fk
 			if (sizeof($GRILLE_FK) != 0) {
 				foreach ($GRILLE_FK as $field):
+					$nom_fk         = 'nom' . ucfirst($field['table_fk']);
 					$nom_fk_escaped = MongoCompat::escapeRegex($nom_fk);
-					$regexp         = MongoCompat::toRegex("." . $nom_fk_escaped . "*.", 'i'
-					$regexp         = new MongoRegex("/." . $nom_fk . "*./i");
+					$regexp         = MongoCompat::toRegex("." . $nom_fk_escaped . "*.", 'i');
 					$where['$or'][] = array($nom_fk => $regexp);
 				endforeach;
 			}
