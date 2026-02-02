@@ -15,9 +15,9 @@
                 "pass": "malaterre654"
             },
             "mdb": {
-                "host": "127.0.0.1",
-                "user": "admin",
-                "password": "gwetme2011",
+                "host": "mongodb",
+                "user": "",
+                "password": "",
                 "prefix": "idaenext_"
             },
             "sql": {
@@ -42,9 +42,9 @@
                 "pass": "malaterre654"
             },
             "mdb": {
-                "host": "127.0.0.1",
-                "user": "admin",
-                "password": "gwetme2011",
+                "host": "mongodb",
+                "user": "",
+                "password": "",
                 "prefix": "tactac_"
             }
         },
@@ -63,9 +63,9 @@
                 "pass": "malaterre654"
             },
             "mdb": {
-                "host": "127.0.0.1",
-                "user": "admin",
-                "password": "gwetme2011",
+                "host": "mongodb",
+                "user": "",
+                "password": "",
                 "prefix": "maw_"
             },
             "external": {
@@ -87,9 +87,9 @@
                 "pass": "malaterre654"
             },
             "mdb": {
-                "host": "127.0.0.1",
-                "user": "admin",
-                "password": "gwetme2011",
+                "host": "mongodb",
+                "user": "",
+                "password": "",
                 "prefix": "idaenext_"
             },
             "sql": {
@@ -114,9 +114,9 @@
                 "pass": "malaterre654"
             },
             "mdb": {
-                "host": "127.0.0.1",
-                "user": "admin",
-                "password": "gwetme2011",
+                "host": "mongodb",
+                "user": "",
+                "password": "",
                 "prefix": "crfr_"
             },
             "sql": {
@@ -141,9 +141,9 @@
                 "pass": "malaterre654"
             },
             "mdb": {
-                "host": "127.0.0.1",
-                "user": "admin",
-                "password": "gwetme2011",
+                "host": "mongodb",
+                "user": "",
+                "password": "",
                 "prefix": "idae_io_"
             },
             "sql": {
@@ -168,9 +168,9 @@
                 "pass": "malaterre654"
             },
             "mdb": {
-                "host": "127.0.0.1",
-                "user": "admin",
-                "password": "gwetme2011",
+                "host": "mongodb",
+                "user": "",
+                "password": "",
                 "prefix": "appblog_"
             },
             "sql": {

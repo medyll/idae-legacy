@@ -14,6 +14,35 @@
 
 When asked to perform a migration, always follow MIGRATION.md and MONGOCOMPAT.md. Ensure the project includes and adheres to those documents.
 
+## Code History & Authorship
+
+**Preserve existing authorship comments** in legacy code, especially **Date and Time** information:
+```php
+/**
+ * Created by PhpStorm.
+ * User: Mydde
+ * Date: 23/05/14      <-- PRESERVE THIS
+ * Time: 20:26         <-- PRESERVE THIS
+ */
+class ClassName { ... }
+```
+
+**English only**: All code comments, modification notes, and documentation must be in English.
+
+These timestamps track code origin and evolution in a legacy system without formal Git history. When making significant changes (migrations, major refactoring), **add a new comment line** documenting the change:
+```php
+/**
+ * Created by PhpStorm.
+ * User: Mydde
+ * Date: 23/05/14
+ * Time: 20:26
+ * 
+ * Modified: 2026-02-02 - Migrated to MongoDB v2.0 driver (Agent)
+ */
+```
+
+**Never remove** the original Date/Time markers — they preserve code provenance in a legacy system without formal Git history. Only add modification notes, never alter original timestamps.
+
 ---
 
 ## Key Architecture Patterns
