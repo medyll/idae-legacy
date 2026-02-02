@@ -1,4 +1,6 @@
 <?php
+	require_once __DIR__ . '/../../appclasses/appcommon/MongoCompat.php';
+	use AppCommon\MongoCompat;
 
 	/**
 	 * Created by PhpStorm.
@@ -128,7 +130,7 @@
 		}
 
 		public function addFK($ARGS) {
-			$_id               = new MongoId($_POST['_id']); 
+			$_id               = MongoCompat::toObjectId($_POST['_id']); 
 			$arr               = fonctionsProduction::cleanPostMongo($_POST['vars']);
 			$arr['uid']        = uniqid();
 			$arrskel           = $this->plug('sitebase_app', 'appscheme')->findOne(['_id' => $_id]);
@@ -143,7 +145,7 @@
 
 			$vars = fonctionsProduction::cleanPostMongo($_POST['vars']);
 
-			$_id = new MongoId($_POST['_id']);
+			$_id = MongoCompat::toObjectId($_POST['_id']);
 			$uid = $_POST['uid'];
 			if (empty($uid) || empty($_id)) return $ARGS;
 

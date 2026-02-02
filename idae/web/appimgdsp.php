@@ -1,12 +1,14 @@
 <? 
 // ob_start();
 	include_once($_SERVER['CONF_INC']);
+	require_once __DIR__ . '/appclasses/appcommon/MongoCompat.php';
+	use AppCommon\MongoCompat;
 	$APP = new App();
 	$arr_G = explode('.',$_GET['_id']) ;
 	$_id = $arr_G[0];
 	// ob_end_clean();
 	$base 	= $APP->plug_base('sitebase_image')->getGridFs('wallpaper');
-	$dsp 	= $base->findOne(array('_id'=>new MongoId($_id)));
+	$dsp 	= $base->findOne(array('_id'=>MongoCompat::toObjectId($_id)));
 
 	$imgsrc = $dsp->getBytes();
 

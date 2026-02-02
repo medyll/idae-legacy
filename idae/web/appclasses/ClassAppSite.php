@@ -1,4 +1,6 @@
 <?php
+	require_once __DIR__ . '/appcommon/MongoCompat.php';
+	use AppCommon\MongoCompat;
 
 	/**
 	 * Created by PhpStorm.
@@ -412,7 +414,7 @@
 				$extract                             = explode('-', $arrP);
 				$out[$key]['dateDebutProduit_tarif'] = $extract[0] . $extract[1];
 				//
-				$ct                        = $collection_e->distinct_all('idproduit', ['dateDebutProduit_tarif' => new MongoRegex("/$extract[0]-$extract[1]-*/i"), 'idproduit' => ['$in' => $arr_p]]);
+				$ct                        = $collection_e->distinct_all('idproduit', ['dateDebutProduit_tarif' => MongoCompat::toRegex(preg_quote($extract[0] . '-' . $extract[1], '/') . '-*', 'i'), 'idproduit' => ['$in' => $arr_p]]);
 				$out[$key]['prix']         = $collection->find(['idproduit' => ['$in' => $ct]], ['prixProduit' => 1])->sort(['prixProduit' => 1])->getNext()['prixProduit'];
 				$out[$key]['count']        = sizeof($ct);
 				$out[$key]['mois_fr']      = fonctionsProduction::mois_short_Date_fr($arrP);

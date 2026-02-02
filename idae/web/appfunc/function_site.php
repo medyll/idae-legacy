@@ -1,4 +1,6 @@
 <?
+	require_once __DIR__ . '/../appclasses/appcommon/MongoCompat.php';
+	use AppCommon\MongoCompat;
 
 	class fonctionsSite {
 		function fonctionsSite () {
@@ -169,7 +171,7 @@
 					$arrSort[(int)$arrVille['ordreProduit_etape']] = $arrVille;
 					if ( empty($arrVille['idville']) && !empty($arrVille['nomVille']) ) {
 						$nomVille = $arrVille['nomVille'];
-						$testV = $APP_V->findOne(['nomVille'=>new MongoRegex("/^$nomVille^/i")]);
+						$testV = $APP_V->findOne(['nomVille' => MongoCompat::toRegex('^' . preg_quote($nomVille, '/') . '^', 'i')]);
 						if(!empty($testV['idville'])){
 							$arrListeVille[] = ucfirst(strtolower($testV['nomVille'])) . '&nbsp;';
 							$arrListeEtape[] = ucfirst(strtolower($testV['nomPays'])) . '&nbsp;';
@@ -353,7 +355,7 @@
 		static function gridImage ($id , $col = 'appimg' , $base = 'sitebase_base' , $width = 120 , $height = 60) {
 			$APP   = new App();
 			$grid  = empty($col) ? $APP->plug_base($base)->getGridFs() : $APP->plug_base($base)->getGridFs($col);
-			$data  = $grid->findOne(array( '_id' => new MongoId($id) ));
+			$data  = $grid->findOne(array( '_id' => MongoCompat::toObjectId($id) ));
 			$im    = new Imagick();
 			$bytes = $data->getBytes();
 			$im->readImageBlob($bytes);
@@ -368,7 +370,7 @@
 		static function cropImage ($id , $col = 'fs' , $base = 'sitebase_image' , $vars = array()) {
 			$APP  = new App();
 			$grid = empty($col) ? $APP->plug_base($base)->getGridFs() : $APP->plug_base($base)->getGridFs($col);
-			$data = $grid->findOne(array( '_id' => new MongoId($id) ));
+			$data = $grid->findOne(array( '_id' => MongoCompat::toObjectId($id) ));
 
 			$im    = new Imagick();
 			$bytes = $data->getBytes();
@@ -514,7 +516,7 @@
 
 				$finalOut = file_get_contents($nameNewtmp);
 				$myMeta   = array( 'filename'   => $thumb ,
-				                   'uploadDate' => new MongoDate() ,
+				                   'uploadDate' => MongoCompat::toDate(time()) ,
 				                   'metadata'   => array_merge(array( 'time' => time() ,
 				                                                      'date'     => date('Y-m-d') ,
 				                                                      'heure'     => date('H:i:s') ,
