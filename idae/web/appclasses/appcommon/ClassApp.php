@@ -25,6 +25,7 @@
 	global $app_conn_nb;
 	global $PERSIST_CON;
 
+	#[\AllowDynamicProperties]
 	class App {
 
 		// MongoDB connection objects (modern driver)
@@ -107,9 +108,14 @@
 			$this->app_default_fields_add  = ['petitNom', 'nom', 'bgcolor', 'code', 'color', 'icon', 'ordre', 'slug', 'actif'];
 			$this->app_default_fields      = ['nom' => '', 'prenom' => '', 'petitNom' => 'nom court', 'code' => '', 'reference' => 'reference', 'description' => '', 'quantite' => '', 'prix' => '', 'total' => '', 'atout' => '', 'valeur' => '', 'rang' => '', 'dateCreation' => 'crée le', 'dateDebut' => 'date debut', 'dateFin' => 'date de fin', 'duree' => '', 'heure' => '', 'email' => '', 'telephone' => '', 'fax' => '', 'adresse' => '', 'url' => '', 'totalHt' => 'total HT', 'totalTtc' => 'total TTC', 'totalMarge' => 'total Marge', 'totalTva' => 'total TVA', 'ordre' => '', 'color' => '', 'image' => ''];
 			$this->app_default_group_field = ['codification' => '', 'identification' => '', 'date' => '', 'prix' => '', 'localisation' => '', 'valeur' => '', 'texte' => '', 'image' => '', 'telephonie' => '', 'heure' => '', 'divers' => 'Autres'];
-
 			//  $this->make_classes_app();
+		}
 
+		public function get_database_name() {
+			if (!empty($this->database) && method_exists($this->database, 'getDatabaseName')) {
+				return $this->database->getDatabaseName();
+			}
+			return '';
 		}
 		
 		/**
@@ -159,31 +165,29 @@
 		return $PERSIST_CON;
 	}
 
-	public function get_autoload_class() {
-		$table     = $this->table;
-		$file_name = $table;
-		$path      = APPCLASSES_APP . CUSTOMERNAME . '/' . $table . '/';
-		foreach (['app', 'act', 'ui', 'pre_act', 'post_act'] as $key => $extension) {
-			$className     = $file_name . '_' . $extension;
-			$path_and_file = $path . $className . '.php';
-			if (!file_exists($path)) {
-				@mkdir($path, 0777, true);
-			}
-			if (!file_exists($path_and_file)) {
-				$monfichier = @fopen($path_and_file, 'a+');
-				$content    = $this->write_classes_app($className, $table, $extension);
-				@fputs($monfichier, $content);
-				@fclose($monfichier);
+		public function get_autoload_class() {
+			$table     = $this->table;
+			$file_name = $table;
+			$path      = APPCLASSES_APP . CUSTOMERNAME . '/' . $table . '/';
+			foreach (['app', 'act', 'ui', 'pre_act', 'post_act'] as $key => $extension) {
+				$className     = $file_name . '_' . $extension;
+				$path_and_file = $path . $className . '.php';
+				if (!file_exists($path)) {
+					@mkdir($path, 0777, true);
+				}
+				if (!file_exists($path_and_file)) {
+					$monfichier = @fopen($path_and_file, 'a+');
+					$content    = $this->write_classes_app($className, $table, $extension);
+					@fputs($monfichier, $content);
+					@fclose($monfichier);
+				}
 			}
 		}
-	}
 
-	function write_classes_app($className, $table, $type) {
-		$content = file_get_contents(APP_CONFIG_DIR . 'class_model.php');
+		function write_classes_app($className, $table, $type) {
+			$content = file_get_contents(APP_CONFIG_DIR . 'class_model.php');
 
-		return $content;
-	}
-
+			return $content;
 		}
 
 		/**
@@ -1391,8 +1395,8 @@
 		function create_update($vars, $fields = []) {
 			if (empty($vars)) return false;
 			$table = $this->app_table_one['codeAppscheme'];
-			$test  = $this->find($vars);
-			if ($test->count() == 0):
+			$existing = $this->findOne($vars);
+			if (empty($existing)):
 				if (empty($vars['id' . $table])) {
 					$id                    = (int)$this->getNext('id' . $table);
 					$fields['id' . $table] = $id;
@@ -1400,8 +1404,7 @@
 				$fields = array_merge($vars, $fields);
 				$id     = $this->insert($fields);
 			else:
-				$arr_c  = $test->getNext();
-				$id     = (int)$arr_c['id' . $table];
+				$id     = (int)$existing['id' . $table];
 				$fields = array_merge($vars, $fields);
 				$this->update(['id' . $table => $id], $fields);
 			endif;

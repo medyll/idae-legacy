@@ -11,6 +11,34 @@
 	$APP = new App('appscheme');
 
 	if(empty($APP->app_table_one) || $APP->app_table_one == 'null'){
+		if (!empty(getenv('DEBUG_DB'))) {
+			header('Content-Type: text/plain; charset=UTF-8');
+			$mongoHost = getenv('MONGO_HOST') ?: (defined('MDB_HOST') ? MDB_HOST : 'undefined');
+			$mongoPrefix = getenv('MDB_PREFIX') ?: (defined('MDB_PREFIX') ? MDB_PREFIX : 'undefined');
+			$mongoUser = getenv('MDB_USER') ?: (defined('MDB_USER') ? MDB_USER : '');
+			$mongoPass = (getenv('MDB_PASSWORD') ?: (defined('MDB_PASSWORD') ? MDB_PASSWORD : '')) ? '***' : '';
+			$mongoEnvHost = getenv('MONGO_HOST') ?: '';
+			$sitebaseApp = $mongoPrefix . 'sitebase_app';
+			$sitebaseSockets = $mongoPrefix . 'sitebase_sockets';
+			$databaseName = method_exists($APP, 'get_database_name') ? $APP->get_database_name() : 'unknown';
+			$appschemeCount = 0;
+			try {
+				$appschemeCount = $APP->app_conn->countDocuments();
+			} catch (Exception $e) {
+				$appschemeCount = 'error: ' . $e->getMessage();
+			}
+			echo "DB DEBUG\n";
+			echo "MDB_HOST: {$mongoHost}\n";
+			echo "MONGO_HOST env: {$mongoEnvHost}\n";
+			echo "MDB_USER: {$mongoUser}\n";
+			echo "MDB_PASSWORD: {$mongoPass}\n";
+			echo "MDB_PREFIX: {$mongoPrefix}\n";
+			echo "Expected DB (app): {$sitebaseApp}\n";
+			echo "Expected DB (sockets): {$sitebaseSockets}\n";
+			echo "Selected DB: {$databaseName}\n";
+			echo "appscheme count: {$appschemeCount}\n";
+			exit;
+		}
 		echo HTTPAPP."conf_install.php";
 		header("Location: ".HTTPAPP."appconf/conf_install.php");
 		exit;
