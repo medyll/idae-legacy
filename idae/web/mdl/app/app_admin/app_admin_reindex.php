@@ -1,4 +1,6 @@
 <?php
+	require_once(__DIR__ . '/../../../appclasses/appcommon/MongoCompat.php');
+	use AppCommon\MongoCompat;
 	/**
 	 * Created by PhpStorm.
 	 * User: Mydde
@@ -126,7 +128,7 @@
 		$arr_ct = $ct->getNext();
 		if ($ct->count() != 0 && empty($arr_ct['id' . $table])) {
 			while ($arr_ct = $ct->getNext()) {
-				$_id = new MongoId($arr_ct['_id']);
+				$_id = MongoCompat::toObjectId($arr_ct['_id']);
 				$APP_TMP->update(['_id' => $_id], ['id' . $table => $APP->getNext('id' . $table)]);
 				$zou++;
 				skelMdl::send_cmd('act_progress', ['progress_name'    => 'first_job',
