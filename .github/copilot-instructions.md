@@ -10,6 +10,10 @@
 - **Deployment**: Docker (Apache + PHP + MySQL 5.7 + Node.js 12)
 - **Status**: Legacy maintenance mode; focus on stability over modernization
 
+## Migration Guidance
+
+When asked to perform a migration, always follow MIGRATION.md and MONGOCOMPAT.md. Ensure the project includes and adheres to those documents.
+
 ---
 
 ## Key Architecture Patterns
