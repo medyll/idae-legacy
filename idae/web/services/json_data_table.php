@@ -2,6 +2,8 @@
 
 	// ob_end_clean();
 	include_once($_SERVER['CONF_INC']);
+	require_once(__DIR__ . '/../appclasses/appcommon/MongoCompat.php');
+	use AppCommon\MongoCompat;
 	//ini_set('display_errors', 0);
 	if (empty($_SESSION['idagent'])) {
 		// skelMdl::send_cmd('act_notify', ['msg' => 'Agent non connecté', 'options' => $_GET + ['mdl' => 'app/app_login/app_login', 'sticky' => 1, 'id' => 'json_debug']], session_id());
@@ -170,7 +172,8 @@
 	endforeach;
 
 	if (!empty($_POST['search'])) { // un champ de recherche unique
-		$regexp = new MongoRegex("/" . $_POST['search'] . "/i");
+		$search_escaped = MongoCompat::escapeRegex($_POST['search']);
+		$regexp = MongoCompat::toRegex($search_escaped, 'i');
 
 		if (is_int($_POST['search'])) $where['$or'][] = [$id => (int)$_POST['search']];
 		/*$out[] = new MongoRegex("/" . (string)$_POST['search'] . "/i");
@@ -200,7 +203,8 @@
 	}
 
 	if (!empty($_POST['search_start'])) {
-		$regexp = new MongoRegex("/^" . $_POST['search_start'] . "./i");
+		$search_start_escaped = MongoCompat::escapeRegex($_POST['search_start']);
+		$regexp = MongoCompat::toRegex("^" . $search_start_escaped . ".", 'i');
 		// $where['$or'][] = [$nom => $regexp];
 		if ($APP->has_field('nom')) {
 			$vars[$nom] = $regexp;
@@ -213,7 +217,8 @@
 		foreach ($vars_search as $key_field => $field_value):
 			if (empty($field_value)) continue;
 			// tourne ds fields
-			$regexp         = new MongoRegex("/" . $field_value . "/i");
+			$field_value_escaped = MongoCompat::escapeRegex($field_value);
+			$regexp         = MongoCompat::toRegex($field_value_escaped, 'i');
 			$where['$or'][] = [$key_field => $regexp];
 
 		endforeach;
@@ -245,7 +250,8 @@
 			// tourne ds fields
 			foreach ($APP_TABLE_SCHEME as $key_field => $field_scheme):
 				$tmp_name          = $field_scheme['field_name'];
-				$regexp            = new MongoRegex("/" . $val_search . "/i");
+				$val_search_escaped = MongoCompat::escapeRegex($val_search);
+				$regexp            = MongoCompat::toRegex($val_search_escaped, 'i');
 				$where_fk['$or'][] = [$tmp_name => $regexp];
 			endforeach;
 			// query distinct id
@@ -277,7 +283,8 @@
 				if ($testid == 'id') continue;
 				$tmp_name           = $field_scheme['nomAppscheme_field'];
 				$tmp_name_raw       = $field_scheme['codeAppscheme_field'];
-				$regexp             = new MongoRegex("/" . $val_search . "/i");
+				$val_search_escaped = MongoCompat::escapeRegex($val_search);
+				$regexp             = MongoCompat::toRegex($val_search_escaped, 'i');
 				$where_rfk['$or'][] = [$tmp_name => $regexp];
 				if ($tmp_name_raw == 'adresse') {
 					$where_rfk['$or'][] = ['adresse1' . ucfirst($table_key) => $regexp];
@@ -399,17 +406,20 @@
 					$table_value = $arr_dist[$groupBy_field];
 					break;
 				case 'date':
-					$vars_groupBy[$groupBy_field] =  new MongoRegex("/^" . $arr_dist . "/i");
-					$table_value = $arr_dist;
-					break;
-				case 'email':
-					$vars_groupBy[$groupBy_field] =  new MongoRegex("/" . $arr_dist . "/i");;
-					$table_value = $arr_dist;
-					break;
-				case 'field':
-				case 'integer':
-				case 'string':
-					$vars_groupBy[$groupBy_field] =  new MongoRegex("/^" . $arr_dist . "/i");;
+				$arr_dist_escaped = MongoCompat::escapeRegex($arr_dist);
+				$vars_groupBy[$groupBy_field] =  MongoCompat::toRegex("^" . $arr_dist_escaped, 'i');
+				$table_value = $arr_dist;
+				break;
+			case 'email':
+				$arr_dist_escaped = MongoCompat::escapeRegex($arr_dist);
+				$vars_groupBy[$groupBy_field] =  MongoCompat::toRegex($arr_dist_escaped, 'i');
+				$table_value = $arr_dist;
+				break;
+			case 'field':
+			case 'integer':
+			case 'string':
+				$arr_dist_escaped = MongoCompat::escapeRegex($arr_dist);
+				$vars_groupBy[$groupBy_field] =  MongoCompat::toRegex("^" . $arr_dist_escaped, 'i');
 					$table_value = $arr_dist;
 					break;
 			endswitch;
