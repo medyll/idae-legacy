@@ -1,5 +1,7 @@
 <? 
 include_once($_SERVER['CONF_INC']);
+require_once(__DIR__ . '/../../../appclasses/appcommon/MongoCompat.php');
+use AppCommon\MongoCompat;
 ini_set('display_errors',55); 
 $table = $_POST['table'];
 $container = (empty($_POST['container']))? 'stat_container'.uniqid() : $_POST['container'] ;
@@ -24,7 +26,7 @@ while ($dateStart-> format('Y-m-d') <= $dateEnd->format('Y-m-d')){
  	$DADATE_MONTH =  $dateStart -> format('Y-m');
 	$dateStart -> modify('+1 '.$incr);
 	//
-	$ct = $APP->find(array($typeDate.$Table=> new MongoRegex('/^'.$DADATE.'/') ))->count();
+	$ct = $APP->find(array($typeDate.$Table=> MongoCompat::toRegex('^' . preg_quote($DADATE, '/') . '/', '') ))->count();
 	//
 	$labels[$DADATE] =  '"'.$DADATE.'"';
 	$labels_month[$DADATE_MONTH] =  $DADATE;
