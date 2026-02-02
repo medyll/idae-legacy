@@ -12,7 +12,7 @@
 		$base       = $_GET['base'];
 
 		$grid           = skelMongo::connectBase($base)->getGridFs($collection);
-		$ct             = $grid->findOne(array('_id' => new MongoId($_id)));
+		$ct             = $grid->findOne(array('_id' => MongoCompat::toObjectId($_id)));
 		$file_extension = strtolower(substr(strrchr($ct->file['filename'], '.'), 1));
 
 		switch ($file_extension) {

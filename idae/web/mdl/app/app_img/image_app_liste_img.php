@@ -65,10 +65,10 @@
 					<i class = "fa fa-plus-circle" ></i > <?= idioma('Ajouter une image pele-mele') ?>
 				</a >
 				<?
-				$reg = "/.*$table-pelemele-large-$table_value-*/";
+				$reg = "/.*" . preg_quote($table, '/') . "-pelemele-large-" . preg_quote((string)$table_value, '/') . "-.*/";
 				$db = $APP->plug_base('sitebase_image'); //$con->sitebase_image;
 				$grid = $db->getGridFS();
-				$download = $grid->find(array( 'filename' => new MongoRegex($reg) )); // instance of MongoGridFSFile
+				$download = $grid->find(array( 'filename' => MongoCompat::toRegex($reg) )); // instance of MongoGridFSFile
 				$count = $download->count();
 				$count ++;
 				foreach ($download as $value) {

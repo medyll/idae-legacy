@@ -6,11 +6,11 @@
 
 	$arrSearchClient = explode(' ', trim($_POST['searchDataClient']));
 	foreach ($arrSearchClient as $key => $value) {
-		$outClient[] = new MongoRegex("/.*" . (string)$arrSearchClient[$key] . "*./i");
+		$outClient[] = MongoCompat::toRegex("/.*" . preg_quote((string)$arrSearchClient[$key], '/') . ".*/i");
 	}
 	$arrSearchDevis = explode(' ', trim($_POST['searchDataDevis']));
 	foreach ($arrSearchDevis as $key => $value) {
-		$outDevis[] = new MongoRegex("/.*" . (string)$arrSearchDevis[$key] . "*./i");
+		$outDevis[] = MongoCompat::toRegex("/.*" . preg_quote((string)$arrSearchDevis[$key], '/') . ".*/i");
 	}
 	// vardump($outDevis);
 	$varsCli    = array('estClientClient' => 1, '$or' => array(array('idclient' => (int)$_POST['searchDataClient']), array('nomClient' => array('$in' => $outClient)), array('prenomClient' => array('$in' => $outClient))));
