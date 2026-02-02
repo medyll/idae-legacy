@@ -11,7 +11,12 @@ services:
       - APACHE_RUN_GROUP=www-data
       - CONF_INC=/var/www/html/idae/web/conf.inc.php
       - DOCKER_ENV=1
-      - MONGO_HOST=mongodb
+      - MONGO_HOST=${MONGO_HOST:-mongodb}
+      - MDB_USER=${MDB_USER:-}
+      - MDB_PASSWORD=${MDB_PASSWORD:-}
+      - MDB_PREFIX=${MDB_PREFIX:-}
+      - DEBUG_DB=${DEBUG_DB:-}
+      - DEBUG_SESSION=${DEBUG_SESSION:-}
       - MONGO_HOST_PORT=27017
       - SOCKET_PORT=3005
     container_name: idae-legacy

@@ -33,6 +33,12 @@ class Session {
 		$sitebase_app = defined('MDB_PREFIX') && MDB_PREFIX ? MDB_PREFIX . 'sitebase_session' : 'sitebase_session';
 		if (ENVIRONEMENT == 'PREPROD') $sitebase_app .= '_preprod';
 
+		$debug = !empty(getenv('DEBUG_SESSION'));
+		if ($debug) {
+			error_log('[Session::__construct] mongo_url=' . $mongo_url);
+			error_log('[Session::__construct] session_db=' . $sitebase_app);
+		}
+
 		$this->dbSession = $this->conn->selectDB($sitebase_app)->selectCollection('session');
 		$this->maxTime   = 3600;
 
@@ -66,6 +72,22 @@ class Session {
 
 	public function gc() {
 		$lastAccessed = time() - $this->maxTime;
+		$debug = !empty(getenv('DEBUG_SESSION'));
+		if ($debug) {
+			$mongoHost = getenv('MONGO_HOST') ?: (defined('MDB_HOST') ? MDB_HOST : '');
+			$mongoUser = getenv('MDB_USER') ?: (defined('MDB_USER') ? MDB_USER : '');
+			$mongoPrefix = defined('MDB_PREFIX') ? MDB_PREFIX : '';
+			$sitebase = $mongoPrefix . 'sitebase_session' . (defined('ENVIRONEMENT') && ENVIRONEMENT == 'PREPROD' ? '_preprod' : '');
+			error_log('[Session::gc] delete expired sessions');
+			error_log('[Session::gc] host=' . $mongoHost . ' user=' . $mongoUser . ' db=' . $sitebase . ' cutoff=' . $lastAccessed);
+			$trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 5);
+			foreach ($trace as $i => $row) {
+				$file = isset($row['file']) ? $row['file'] : '';
+				$line = isset($row['line']) ? $row['line'] : '';
+				$func = isset($row['function']) ? $row['function'] : '';
+				error_log('[Session::gc] #' . $i . ' ' . $func . ' ' . $file . ':' . $line);
+			}
+		}
 		$this->dbSession->remove(["timeStamp" => ['$lt' => $lastAccessed]]);
 	}
 
@@ -83,6 +105,17 @@ class Session {
 	}
 
 	public function destroy($id) {
+		$debug = !empty(getenv('DEBUG_SESSION')) || !empty($_GET['debug_session']);
+		if ($debug) {
+			error_log('[Session::destroy] delete session id=' . $id);
+			$trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 5);
+			foreach ($trace as $i => $row) {
+				$file = isset($row['file']) ? $row['file'] : '';
+				$line = isset($row['line']) ? $row['line'] : '';
+				$func = isset($row['function']) ? $row['function'] : '';
+				error_log('[Session::destroy] #' . $i . ' ' . $func . ' ' . $file . ':' . $line);
+			}
+		}
 		$this->dbSession->remove(["_id" => $id]);
 		return true;
 	}

@@ -28,9 +28,10 @@ $webDir = realpath(__DIR__);
 $projectRoot = realpath($webDir . DIRECTORY_SEPARATOR . '..') . DIRECTORY_SEPARATOR;
 
 // Host detection
-$host      = str_replace('www.', '', $_SERVER['HTTP_HOST']);
-$host      = explode(':', $host)[0];
-$host_name = explode('.', $_SERVER['HTTP_HOST'])[0];
+$http_host = str_replace('www.', '', $_SERVER['HTTP_HOST']);
+$host      = explode(':', $http_host)[0];
+$host_port = explode(':', $http_host)[1] ?? '';
+$host_name = explode('.', $host)[0];
 $host_parts = explode('.', $host);
 
 // Only allow .lan hosts
@@ -102,14 +103,15 @@ DEFINE('REPFONCTIONS', SITEPATH . 'appfunc' . DIRECTORY_SEPARATOR);
 // URLs and domain related constants
 DEFINE('DOCUMENTDOMAIN', $host);
 DEFINE('DOCUMENTDOMAINNOPORT', $host);
-DEFINE('DOCUMENTDOMAINPORT', '');
-DEFINE('HTTPCUSTOMERSITE', $HTTP_PREFIX . $host . '/');
-DEFINE('HTTPAPP', $HTTP_PREFIX . $host . '/');
+DEFINE('DOCUMENTDOMAINPORT', $host_port);
+$host_port_part = !empty($host_port) ? ':' . $host_port : '';
+DEFINE('HTTPCUSTOMERSITE', $HTTP_PREFIX . $host . $host_port_part . '/');
+DEFINE('HTTPAPP', $HTTP_PREFIX . $host . $host_port_part . '/');
 DEFINE('FLATTENIMGDIR', CUSTOMERPATH . 'images_base' . DIRECTORY_SEPARATOR . CUSTOMERNAME . DIRECTORY_SEPARATOR);
 DEFINE('FLATTENIMGHTTP', HTTPCUSTOMERSITE . 'images_base/' . CUSTOMERNAME . '/');
 DEFINE('SOCKETIO_PORT', 3005);
 
-DEFINE('HTTPHOST', $HTTP_PREFIX . DOCUMENTDOMAIN);
+DEFINE('HTTPHOST', $HTTP_PREFIX . DOCUMENTDOMAIN . $host_port_part);
 DEFINE('HTTPHOSTNOPORT', $HTTP_PREFIX . DOCUMENTDOMAINNOPORT);
 DEFINE('NAMESITE', DOCUMENTDOMAIN);
 DEFINE('MAINSITEHOST', HTTPHOST);
@@ -137,6 +139,23 @@ if (isset($hostConf['smtp'])) {
 }
 // MongoDB config
 if (isset($hostConf['mdb'])) {
+    // Allow runtime override (Docker or native)
+    $envMongoHost = getenv('MONGO_HOST');
+    $envMongoUser = getenv('MDB_USER');
+    $envMongoPass = getenv('MDB_PASSWORD');
+    $envMongoPrefix = getenv('MDB_PREFIX');
+    if (!empty($envMongoHost)) {
+        $hostConf['mdb']['host'] = $envMongoHost;
+    }
+    if (!empty($envMongoUser)) {
+        $hostConf['mdb']['user'] = $envMongoUser;
+    }
+    if (!empty($envMongoPass)) {
+        $hostConf['mdb']['password'] = $envMongoPass;
+    }
+    if (!empty($envMongoPrefix)) {
+        $hostConf['mdb']['prefix'] = $envMongoPrefix;
+    }
     define_if_exists('host', $hostConf['mdb'], 'MDB_HOST');
     define_if_exists('user', $hostConf['mdb'], 'MDB_USER');
     define_if_exists('password', $hostConf['mdb'], 'MDB_PASSWORD');
