@@ -1,5 +1,7 @@
 <?
 	include_once($_SERVER['CONF_INC']);
+	require_once(__DIR__ . '/../../appclasses/appcommon/MongoCompat.php');
+	use AppCommon\MongoCompat;
 
 	$vars   = empty($_POST['vars']) ? [] : fonctionsProduction::cleanPostMongo($_POST['vars'], 1);
 	$vars   = array_filter($vars);

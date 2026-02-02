@@ -1,6 +1,6 @@
 <?
-	include_once($_SERVER['CONF_INC']);
-
+	include_once($_SERVER['CONF_INC']);	require_once(__DIR__ . '/../../../appclasses/appcommon/MongoCompat.php');
+	use AppCommon\MongoCompat;
 	array_walk_recursive($_POST, 'CleanStr', $_POST);
 
 	$APP = new App();
@@ -130,7 +130,7 @@
 			$APP_FIELD->insert($arr);
 			break;
 		case "addInput":
-			$_id            = new MongoId($_POST['_id']);
+			$_id            = MongoCompat::toObjectId($_POST['_id']);
 			$arr            = fonctionsProduction::cleanPostMongo($_POST['vars']);
 			$arrskel        = $APP->plug('sitebase_skelbuilder', 'skel_builder')->findOne(array('_id' => $_id));
 			$arr['idinput'] = (int)(sizeof($arrskel['grilleInput'])) + 1;
@@ -138,7 +138,7 @@
 			$_POST['reloadModule']['app/app_skel/skelbuilder_input'] = $_POST['_id'];
 			break;
 		case "addInput_":
-			$_id            = new MongoId($_POST['_id']);
+			$_id            = MongoCompat::toObjectId($_POST['_id']);
 			$arr            = fonctionsProduction::cleanPostMongo($_POST['vars']);
 			$arrskel        = $APP->plug('sitebase_app', 'appscheme')->findOne(array('_id' => $_id));
 			$arr['idinput'] = (int)(sizeof($arrskel['grilleInput'])) + 1;
@@ -146,7 +146,7 @@
 			$_POST['reloadModule']['app/app_skel/skelbuilder_input'] = $_POST['_id'];
 			break;
 		case "addFK":
-			$_id               = new MongoId($_POST['_id']);
+			$_id               = MongoCompat::toObjectId($_POST['_id']);
 			$arr               = fonctionsProduction::cleanPostMongo($_POST['vars']);
 			$arr['uid']        = uniqid();
 			$arrskel           = $APP->plug('sitebase_app', 'appscheme')->findOne(array('_id' => $_id));
@@ -161,7 +161,7 @@
 			//exit;
 			$vars = fonctionsProduction::cleanPostMongo($_POST['vars']);
 
-			$_id = new MongoId($_POST['_id']);
+			$_id = MongoCompat::toObjectId($_POST['_id']);
 			$uid = $_POST['uid'];
 			if (empty($uid) || empty($_id))
 				break;
@@ -184,7 +184,7 @@
 			// le nom de la table :
 			//exit;
 			$vars        = fonctionsProduction::cleanPostMongo($_POST['vars'], 1);
-			$_id         = new MongoId($_POST['_id']);
+			$_id         = MongoCompat::toObjectId($_POST['_id']);
 			$uid         = $_POST['uid'];
 			$input_name  = $_POST['input_name'];
 			$input_value = $_POST['input_value'];
@@ -195,7 +195,7 @@
 			break;
 
 		case "addGrille":
-			$_id               = new MongoId($_POST['_id']);
+			$_id               = MongoCompat::toObjectId($_POST['_id']);
 			$nomGrille         = $_POST['nomGrille'];
 			$arr               = fonctionsProduction::cleanPostMongo($_POST['vars']);
 			$arr['uid']        = uniqid();
@@ -211,7 +211,7 @@
 			//exit;
 			$vars = fonctionsProduction::cleanPostMongo($_POST['vars']);
 
-			$_id = new MongoId($_POST['_id']);
+			$_id = MongoCompat::toObjectId($_POST['_id']);
 			$uid = $_POST['uid'];
 			if (empty($uid) || empty($_id))
 				break;
@@ -228,7 +228,7 @@
 		case "deleteForm":
 			if (empty($_POST['_id']))
 				break;
-			$_id = new MongoId($_POST['_id']);
+			$_id = MongoCompat::toObjectId($_POST['_id']);
 			//
 			$base = skelMongo::connect('skel_builder', 'sitebase_skelbuilder');
 			$base->remove(array('_id' => $_id));

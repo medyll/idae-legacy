@@ -2,13 +2,16 @@
 	if (file_exists('../conf.inc.php')) include_once('../conf.inc.php');
 	if (file_exists('../../conf.inc.php')) include_once('../../conf.inc.php');
 	if (file_exists('../../../conf.inc.php')) include_once('../../../conf.inc.php');
+	require_once(__DIR__ . '/../../../appclasses/appcommon/MongoCompat.php');
+	use AppCommon\MongoCompat;
 	// ini_set('display_errors',55);
 	$time   = uniqid();
 	$whereT = [];
 	$vars   = empty($_POST['vars']) ? [] : $_POST['vars'];
 	//	vardump($vars);
 	if (!empty($_POST['typeInput'])) {
-		$regexp = new MongoRegex("/" . $_POST['typeInput'] . "/i");
+		$search_escaped = MongoCompat::escapeRegex($_POST['typeInput']);
+		$regexp = MongoCompat::toRegex($search_escaped, 'i');
 		$whereT = ["typeInput" => $regexp];
 	}
 	//
