@@ -1,5 +1,7 @@
 <?
 	include_once($_SERVER['CONF_INC']);
+	require_once(__DIR__ . '/../../appclasses/appcommon/MongoCompat.php');
+	use AppCommon\MongoCompat;
 
 	array_walk_recursive($_POST, 'CleanStr', $_POST);
 
@@ -26,7 +28,7 @@
 					vardump($arr_match[1] . ' ' . $arr_match[3]);
 					$qte      = $arr_match[1];
 					$prod     = $arr_match[3];
-					$reg      = new MongoRegex("/^$prod/i");
+					$reg      = MongoCompat::toRegex('^' . MongoCompat::escapeRegex($prod), 'i');
 					$ARR_PROD = $APP_PROD->findOne(['codeProduit' => $reg]);
 
 					if (!empty($ARR_PROD['idproduit'])) {

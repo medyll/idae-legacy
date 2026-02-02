@@ -1,5 +1,7 @@
 <?
 	include_once($_SERVER['CONF_INC']);
+	require_once(__DIR__ . '/../../../appclasses/appcommon/MongoCompat.php');
+	use AppCommon\MongoCompat;
 	if (empty($_POST['table']))
 		return;
 	ini_set('display_errors', 55);
@@ -19,7 +21,7 @@
 	//
 	$whereT = array();
 	if (!empty($_POST['search'])) {
-		$regexp = new MongoRegex("/" . $_POST['search'] . "/i");
+		$regexp = MongoCompat::toRegex(MongoCompat::escapeRegex($_POST['search']), 'i');
 		$whereT = array('$or' => array(array($nom => $regexp), array($id => (int)$_POST['search'])));
 	}
 

@@ -1,5 +1,7 @@
 <?
 	include_once($_SERVER['CONF_INC']);
+	require_once(__DIR__ . '/../../../appclasses/appcommon/MongoCompat.php');
+	use AppCommon\MongoCompat;
 	ini_set('display_errors', 55);
 	vardump($_POST);
 	//
@@ -23,7 +25,7 @@
 		$search    = trim($_POST['search']);
 		$arrSearch = explode(' ', trim($search));
 		foreach ($arrSearch as $key => $value) {
-			$out[] = new MongoRegex("/.*" . (string)$arrSearch[$key] . "*./i");
+			$out[] = MongoCompat::toRegex(".*" . MongoCompat::escapeRegex((string)$arrSearch[$key]) . "*.", 'i');
 		}
 
 		$add = array('$or' => array(array($nom => array('$in' => $out)), array($nom => array('$in' => $out))));

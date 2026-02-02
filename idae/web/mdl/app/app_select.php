@@ -32,9 +32,9 @@
 		$search    = trim($_POST['search']);
 		$arrSearch = explode(' ', trim($search));
 		foreach ($arrSearch as $key => $value) {
-			// $out[] = new MongoRegex("/.*" . (string)$arrSearch[$key] . "*./i");
+			// $out[] = MongoCompat::toRegex(".*" . MongoCompat::escapeRegex((string)$arrSearch[$key]) . "*.", 'i');
 		}
-		$out[] = new MongoRegex("/" . (string)$search . "/i");
+		$out[] = MongoCompat::toRegex(MongoCompat::escapeRegex((string)$search), 'i');
 		if (sizeof($out) == 1) {
 			$add = ['$or' => [[$nom => ['$all' => $out]], [$id => (int)$_POST['search']], ['code' . $Table => ['$in' => $out]], [$prenom => ['$in' => $out]]]];
 		}
