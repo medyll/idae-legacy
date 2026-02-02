@@ -10,8 +10,8 @@ services:
       - APACHE_RUN_USER=www-data
       - APACHE_RUN_GROUP=www-data
       - CONF_INC=/var/www/html/idae/web/conf.inc.php
-      - DOCKER_ENV=1
-      - MONGO_HOST=${MONGO_HOST:-mongodb}
+      - DOCKER_ENV=1# Utilise l'alias DNS interne pour l'hôte
+      - MONGO_HOST=host.docker.internal
       - MDB_USER=${MDB_USER:-}
       - MDB_PASSWORD=${MDB_PASSWORD:-}
       - MDB_PREFIX=${MDB_PREFIX:-}

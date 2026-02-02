@@ -70,46 +70,47 @@
 		}
 		
 		return null;
+	}
 
-		public function __construct($table = '') {
-			global $app_conn_nb;
-			global $PERSIST_CON;
-			
-			// Validation
-			if (!defined('MDB_USER')) {
-				return 'Utilisateur DB non defini';
-			}
-			
-			// Modern MongoDB driver connection (singleton pattern)
-			$this->mongoClient = $this->getMongoClient();
-			$this->conn = $this->mongoClient; // Backward compatibility
-			
-			// Database selection
-			$sitebase_app = MDB_PREFIX . 'sitebase_app';
-			$sitebase_sockets = MDB_PREFIX . 'sitebase_sockets';
-			
-			$this->database = $this->mongoClient->selectDatabase($sitebase_app);
-			$database_sockets = $this->mongoClient->selectDatabase($sitebase_sockets);
-			
-			// Collection assignments (schema collections)
-			$this->table = $table;
-			$this->app_conn = $this->database->selectCollection('appscheme');
-			$this->appscheme = $this->database->selectCollection('appscheme');
-			$this->appscheme_type = $this->database->selectCollection('appscheme_type');
-			$this->appscheme_base = $this->database->selectCollection('appscheme_base');
-			$this->appscheme_field = $this->database->selectCollection('appscheme_field');
-			$this->appscheme_field_type = $this->database->selectCollection('appscheme_field_type');
-			$this->appscheme_field_group = $this->database->selectCollection('appscheme_field_group');
-			$this->appscheme_has_field = $this->database->selectCollection('appscheme_has_field');
-			$this->appscheme_has_table_field = $this->database->selectCollection('appscheme_has_table_field');
-			$this->APPCACHE = $database_sockets->selectCollection('data_activity');
+	public function __construct($table = '') {
+		global $app_conn_nb;
+		global $PERSIST_CON;
 
-			// Table-specific initialization
-			if (!empty($table)) {
-				// Select main data collection for this table
-				$this->collection = $this->database->selectCollection($table);
+		// Validation
+		if (!defined('MDB_USER')) {
+			return 'Utilisateur DB non defini';
+		}
+
+		// Modern MongoDB driver connection (singleton pattern)
+		$this->mongoClient = $this->getMongoClient();
+		$this->conn = $this->mongoClient; // Backward compatibility
+
+		// Database selection
+		$sitebase_app = MDB_PREFIX . 'sitebase_app';
+		$sitebase_sockets = MDB_PREFIX . 'sitebase_sockets';
+
+		$this->database = $this->mongoClient->selectDatabase($sitebase_app);
+		$database_sockets = $this->mongoClient->selectDatabase($sitebase_sockets);
+
+		// Collection assignments (schema collections)
+		$this->table = $table;
+		$this->app_conn = $this->database->selectCollection('appscheme');
+		$this->appscheme = $this->database->selectCollection('appscheme');
+		$this->appscheme_type = $this->database->selectCollection('appscheme_type');
+		$this->appscheme_base = $this->database->selectCollection('appscheme_base');
+		$this->appscheme_field = $this->database->selectCollection('appscheme_field');
+		$this->appscheme_field_type = $this->database->selectCollection('appscheme_field_type');
+		$this->appscheme_field_group = $this->database->selectCollection('appscheme_field_group');
+		$this->appscheme_has_field = $this->database->selectCollection('appscheme_has_field');
+		$this->appscheme_has_table_field = $this->database->selectCollection('appscheme_has_table_field');
+		$this->APPCACHE = $database_sockets->selectCollection('data_activity');
+
+		// Table-specific initialization
+		if (!empty($table)) {
+			// Select main data collection for this table
+			$this->collection = $this->database->selectCollection($table);
 			$this->table = $table;
-			
+
 			// LAZY LOADING: Don't fetch metadata here to avoid MongoDB queries on every App() instantiation
 			// Metadata will be loaded on first access via __get() magic method
 			$this->app_table_one = null; // Will be loaded lazily
@@ -117,6 +118,7 @@
 			$this->app_default_group_field = ['codification' => '', 'identification' => '', 'date' => '', 'prix' => '', 'localisation' => '', 'valeur' => '', 'texte' => '', 'image' => '', 'telephonie' => '', 'heure' => '', 'divers' => 'Autres'];
 			//  $this->make_classes_app();
 		}
+	}
 
 		public function get_database_name() {
 			if (!empty($this->database) && method_exists($this->database, 'getDatabaseName')) {
@@ -218,19 +220,19 @@
 				$table = $this->table;
 				$this->app_field_name_id       = 'id' . $table;
 				$this->app_field_name_id_type  = 'id' . $table . '_type';
-				$this->app_field_name_nom      = $this->app_table_one['nomAppscheme'] ?? '';
+				$this->app_field_name_nom      = isset($this->app_table_one['nomAppscheme']) ? $this->app_table_one['nomAppscheme'] : '';
 				$this->app_field_name_nom_type = 'nom' . ucfirst($table) . '_type';
 				$this->app_field_name_top      = 'estTop' . ucfirst($table);
 				$this->app_field_name_actif    = 'estActif' . ucfirst($table);
-				$this->idappscheme             = (int)($this->app_table_one['idappscheme'] ?? 0);
-				$this->codeAppscheme           = $this->app_table_one['codeAppscheme'] ?? '';
-				$this->iconAppscheme           = $this->app_table_one['iconAppscheme'] ?? '';
-				$this->colorAppscheme          = $this->app_table_one['colorAppscheme'] ?? '';
-				$this->nomAppscheme            = $this->app_table_one['nomAppscheme'] ?? '';
-				$this->codeAppscheme_base      = $this->app_table_one['codeAppscheme_base'] ?? '';
-				$this->app_table_icon          = $this->app_table_one['icon'] ?? '';
-				$this->grilleFK                = $this->app_table_one['grilleFK'] ?? [];
-				$this->hasImageScheme          = $this->app_table_one['hasImageScheme'] ?? false;
+				$this->idappscheme             = isset($this->app_table_one['idappscheme']) ? (int)$this->app_table_one['idappscheme'] : 0;
+				$this->codeAppscheme           = isset($this->app_table_one['codeAppscheme']) ? $this->app_table_one['codeAppscheme'] : '';
+				$this->iconAppscheme           = isset($this->app_table_one['iconAppscheme']) ? $this->app_table_one['iconAppscheme'] : '';
+				$this->colorAppscheme          = isset($this->app_table_one['colorAppscheme']) ? $this->app_table_one['colorAppscheme'] : '';
+				$this->nomAppscheme            = isset($this->app_table_one['nomAppscheme']) ? $this->app_table_one['nomAppscheme'] : '';
+				$this->codeAppscheme_base      = isset($this->app_table_one['codeAppscheme_base']) ? $this->app_table_one['codeAppscheme_base'] : '';
+				$this->app_table_icon          = isset($this->app_table_one['icon']) ? $this->app_table_one['icon'] : '';
+				$this->grilleFK                = isset($this->app_table_one['grilleFK']) ? $this->app_table_one['grilleFK'] : array();
+				$this->hasImageScheme          = isset($this->app_table_one['hasImageScheme']) ? $this->app_table_one['hasImageScheme'] : false;
 			}
 		}
 

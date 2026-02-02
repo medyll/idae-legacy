@@ -451,8 +451,8 @@
 			return $bytesOut; //$bytesOut;
 		}
 
-		function makeThumb ($file , $idd , $width = 250 , $height = 120 , $sizeName , $tag , $nameSizeFrom = 'large') {
-			fonctionsSite::makeGdThumb($file , $width , $height , $sizeName , $tag , $nameSizeFrom);
+		function makeThumb ($file , $idd , $sizeName , $tag , $width = 250 , $height = 120 , $nameSizeFrom = 'large') {
+			fonctionsSite::makeGdThumb($file , $sizeName , $tag , $width , $height , $nameSizeFrom);
 
 			return;
 			$db    = skelMongo::connectBase('sitebase_image'); //$con->sitebase_image;
@@ -492,8 +492,8 @@
 		}
 		//
 		//
-		// $file,$idd,$width=250,$height=120,$sizeName,$tag,$nameSizeFrom='large'
-		static function makeGdThumb ($file , $thumb_width = 250 , $thumb_height = 120 , $sizeName , $tag , $nameSizeFrom = 'large',$metadata=[]) {
+		// $file,$idd,$sizeName,$tag,$thumb_width=250,$thumb_height=120,$nameSizeFrom='large'
+		static function makeGdThumb ($file , $sizeName , $tag , $thumb_width = 250 , $thumb_height = 120 , $nameSizeFrom = 'large',$metadata=[]) {
 			//
 			$APP = new App();
 			ob_start();

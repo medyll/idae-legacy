@@ -61,7 +61,7 @@ class fonctionsJs
 		return "act_chrome_gui('app/app/app_fiche_preview_gui','table=$table&table_value=$table_value',{ident: '$ident' });";
 	}
 
-	static function app_liste($table,$table_value='',$vars ){
+	static function app_liste($table, $vars, $table_value=''){
 		$ident = 'app_liste_gui'.$table.'_'.$table_value;
 		$query = is_array($vars) ? http_build_query($vars) : $vars;
 		return "act_chrome_gui('app/app_liste/app_liste_gui','table=$table&table_value=$table_value&$query',{ident: '$ident' });";
