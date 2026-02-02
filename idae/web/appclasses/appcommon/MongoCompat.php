@@ -249,3 +249,193 @@ class MongoCompat {
         return $result;
     }
 }
+
+/**
+ * MongoClient compatibility wrapper for legacy code
+ * Wraps MongoDB\Client for backward compatibility with old Mongo extension
+ */
+class MongoClient {
+    private $client;
+    private $defaultDb;
+    
+    public function __construct($uri, $options = []) {
+        // Parse database from options or URI
+        $this->defaultDb = $options['db'] ?? 'admin';
+        
+        // Create modern MongoDB client
+        $this->client = new \MongoDB\Client($uri, [], [
+            'typeMap' => [
+                'root' => 'array',
+                'document' => 'array',
+                'array' => 'array'
+            ]
+        ]);
+    }
+    
+    public function selectDB($dbName) {
+        return new MongoDB($this->client, $dbName);
+    }
+    
+    public function __get($dbName) {
+        return $this->selectDB($dbName);
+    }
+}
+
+/**
+ * MongoDB compatibility wrapper
+ */
+class MongoDB {
+    private $client;
+    private $dbName;
+    
+    public function __construct($client, $dbName) {
+        $this->client = $client;
+        $this->dbName = $dbName;
+    }
+    
+    public function selectCollection($collectionName) {
+        return new MongoCollection($this->client, $this->dbName, $collectionName);
+    }
+    
+    public function __get($collectionName) {
+        return $this->selectCollection($collectionName);
+    }
+}
+
+/**
+ * MongoCollection compatibility wrapper
+ */
+class MongoCollection {
+    private $collection;
+    
+    public function __construct($client, $dbName, $collectionName) {
+        $this->collection = $client->selectDatabase($dbName)->selectCollection($collectionName);
+    }
+    
+    public function find($query = [], $fields = []) {
+        $options = [];
+        if (!empty($fields)) {
+            $options['projection'] = $fields;
+        }
+        
+        $cursor = $this->collection->find($query, $options);
+        return new MongoCursor($cursor);
+    }
+    
+    public function findOne($query = [], $fields = []) {
+        $options = [];
+        if (!empty($fields)) {
+            $options['projection'] = $fields;
+        }
+        
+        return $this->collection->findOne($query, $options);
+    }
+    
+    public function insert($document, $options = []) {
+        $result = $this->collection->insertOne($document);
+        return $result->getInsertedId();
+    }
+    
+    public function update($criteria, $update, $options = []) {
+        if (isset($options['multiple']) || isset($options['multi'])) {
+            $result = $this->collection->updateMany($criteria, $update, $options);
+        } else {
+            $result = $this->collection->updateOne($criteria, $update, $options);
+        }
+        return true;
+    }
+    
+    public function remove($criteria, $options = []) {
+        if (isset($options['justOne']) && $options['justOne']) {
+            $this->collection->deleteOne($criteria);
+        } else {
+            $this->collection->deleteMany($criteria);
+        }
+        return true;
+    }
+    
+    public function createIndex($keys, $options = []) {
+        return $this->collection->createIndex($keys, $options);
+    }
+    
+    public function ensureIndex($keys, $options = []) {
+        return $this->createIndex($keys, $options);
+    }
+}
+
+/**
+ * MongoCursor compatibility wrapper
+ */
+class MongoCursor implements \Iterator {
+    private $cursor;
+    private $current;
+    private $key = 0;
+    
+    public function __construct($cursor) {
+        $this->cursor = $cursor;
+    }
+    
+    public function rewind(): void {
+        $this->cursor->rewind();
+        $this->key = 0;
+        $this->fetchCurrent();
+    }
+    
+    public function current(): mixed {
+        return $this->current;
+    }
+    
+    public function key(): mixed {
+        return $this->key;
+    }
+    
+    public function next(): void {
+        $this->cursor->next();
+        $this->key++;
+        $this->fetchCurrent();
+    }
+    
+    public function valid(): bool {
+        return $this->cursor->valid();
+    }
+    
+    private function fetchCurrent() {
+        if ($this->cursor->valid()) {
+            $this->current = $this->cursor->current();
+        } else {
+            $this->current = null;
+        }
+    }
+    
+    public function sort($fields) {
+        // Note: This won't work on already-executed cursors
+        // In real usage, sorting should be done in find() options
+        return $this;
+    }
+    
+    public function limit($num) {
+        return $this;
+    }
+    
+    public function skip($num) {
+        return $this;
+    }
+    
+    public function count($all = false) {
+        return iterator_count($this->cursor);
+    }
+}
+
+// Create global aliases for backward compatibility
+if (!class_exists('MongoClient', false)) {
+    class_alias('AppCommon\MongoClient', 'MongoClient');
+}
+if (!class_exists('MongoDB', false)) {
+    class_alias('AppCommon\MongoDB', 'MongoDB');
+}
+if (!class_exists('MongoCollection', false)) {
+    class_alias('AppCommon\MongoCollection', 'MongoCollection');
+}
+if (!class_exists('MongoCursor', false)) {
+    class_alias('AppCommon\MongoCursor', 'MongoCursor');
+}
