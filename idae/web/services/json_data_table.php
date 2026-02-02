@@ -186,7 +186,10 @@
 		if ($APP->has_field('email')) $where['$or'][] = ['email' . $Table => $regexp];
 		if ($APP->has_field('code')) $where['$or'][] = ['code' . $Table => $regexp];
 		if ($APP->has_field('reference')) $where['$or'][] = ['reference' . $Table => $regexp];
-		if ($APP->has_field('telephone')) $where['$or'][] = ['telephone' . $Table => new MongoRegex("/" . cleanTel($_POST['search']) . "/i")];
+		if ($APP->has_field('telephone')) {
+			$tel_escaped = MongoCompat::escapeRegex(cleanTel($_POST['search']));
+			$where['$or'][] = ['telephone' . $Table => MongoCompat::toRegex($tel_escaped, 'i')];
+		}
 
 		// tourne ds fk
 		if (sizeof($GRILLE_FK) != 0) {
