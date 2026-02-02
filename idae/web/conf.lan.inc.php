@@ -137,6 +137,7 @@ if (isset($hostConf['smtp'])) {
     define_if_exists('email', $hostConf['smtp'], 'SMTPEMAIL');
     define_if_exists('pass', $hostConf['smtp'], 'SMTPPASS');
 }
+if (isset($hostConf['mdb'])) {
 // MongoDB config
 if (isset($hostConf['mdb'])) {
     // Allow runtime override (Docker or native)
@@ -156,11 +157,22 @@ if (isset($hostConf['mdb'])) {
     if (!empty($envMongoPrefix)) {
         $hostConf['mdb']['prefix'] = $envMongoPrefix;
     }
+    // DEBUG PRINT: Show resolved MongoDB connection info
+    if (!empty(getenv('DEBUG_DB'))) {
+        header('Content-Type: text/plain; charset=UTF-8');
+        echo "[DEBUG] MONGO_HOST (env): ".$envMongoHost."\n";
+        echo "[DEBUG] MDB_HOST (final): ".$hostConf['mdb']['host']."\n";
+        echo "[DEBUG] MDB_USER: ".$hostConf['mdb']['user']."\n";
+        echo "[DEBUG] MDB_PASSWORD: ".($hostConf['mdb']['password'] ? '***' : '')."\n";
+        echo "[DEBUG] MDB_PREFIX: ".$hostConf['mdb']['prefix']."\n";
+        echo "[DEBUG] configFile: $configFile\n";
+        echo "[DEBUG] host: $host\n";
+        exit;
+    }
     define_if_exists('host', $hostConf['mdb'], 'MDB_HOST');
     define_if_exists('user', $hostConf['mdb'], 'MDB_USER');
     define_if_exists('password', $hostConf['mdb'], 'MDB_PASSWORD');
     define_if_exists('prefix', $hostConf['mdb'], 'MDB_PREFIX');
-    
     // Aliases pour compatibilité avec le nouveau driver
     if (!defined('MONGO_USER') && defined('MDB_USER')) define('MONGO_USER', MDB_USER);
     if (!defined('MONGO_PASS') && defined('MDB_PASSWORD')) define('MONGO_PASS', MDB_PASSWORD);

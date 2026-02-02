@@ -12,9 +12,10 @@ ini_set('scream.enabled', true);
 ini_set('display_errors', 'On');
 
 !defined('SOCKET_EMSGSIZE') && DEFINE('SOCKET_EMSGSIZE', 4000000);
-if (!defined('DEBUG_DB') && getenv('DEBUG_DB')) {
+DEFINE('DEBUG_DB', 1);
+/* if (!defined('DEBUG_DB') && getenv('DEBUG_DB')) {
     DEFINE('DEBUG_DB', getenv('DEBUG_DB'));
-}
+} */
 
 $HTTP_PREFIX = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') ? 'https://' : 'http://';
 $host = str_replace('www.', '', $_SERVER['HTTP_HOST']);
