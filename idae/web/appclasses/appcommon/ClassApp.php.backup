@@ -5,37 +5,18 @@
 	 * User: Mydde
 	 * Date: 23/05/14
 	 * Time: 20:26
-	 * 
-	 * MIGRATION NOTE: Migrated from MongoDB driver v1.x to modern driver (2026-02-02)
-	 * - Changed from extending \MongoClient to standalone class
-	 * - Using MongoDB\Client instead of MongoClient
-	 * - Using AppCommon\MongoCompat for type conversions
 	 */
 	//namespace appclasses\appcommon ;
-
-	// Modern MongoDB driver
-	use MongoDB\Client;
-	use MongoDB\Collection;
-	use MongoDB\Database;
-	
-	// MongoCompat helper for type conversions
-	require_once __DIR__ . '/MongoCompat.php';
-	use AppCommon\MongoCompat;
 
 	global $app_conn_nb;
 	global $PERSIST_CON;
 
-	class App {
+	class App extends \MongoClient {
 
-		// MongoDB connection objects (modern driver)
-		private $mongoClient;    // MongoDB\Client instance
-		private $database;       // MongoDB\Database instance
-		public $collection;      // MongoDB\Collection instance (for current table)
-		
-		// Legacy properties (kept for backward compatibility)
 		public $app_table_one;
 		public $app_db;
-		public $conn;            // Kept for compatibility, now holds MongoDB\Client
+
+		public $conn;
 		public $app_conn;
 
 		public $obj;
@@ -47,61 +28,52 @@
 		public function __construct($table = '') {
 			global $app_conn_nb;
 			global $PERSIST_CON;
-			
-			// Validation
+			//
 			if (!defined('MDB_USER')) {
 				return 'Utilisateur DB non defini';
 			}
-			
-			// Modern MongoDB driver connection (singleton pattern)
-			$this->mongoClient = $this->getMongoClient();
-			$this->conn = $this->mongoClient; // Backward compatibility
-			
-			// Database selection
-			$sitebase_app = MDB_PREFIX . 'sitebase_app';
-			$sitebase_sockets = MDB_PREFIX . 'sitebase_sockets';
-			
-			$this->database = $this->mongoClient->selectDatabase($sitebase_app);
-			$database_sockets = $this->mongoClient->selectDatabase($sitebase_sockets);
-			
-			// Collection assignments (schema collections)
-			$this->table = $table;
-			$this->app_conn = $this->database->selectCollection('appscheme');
-			$this->appscheme = $this->database->selectCollection('appscheme');
-			$this->appscheme_type = $this->database->selectCollection('appscheme_type');
-			$this->appscheme_base = $this->database->selectCollection('appscheme_base');
-			$this->appscheme_field = $this->database->selectCollection('appscheme_field');
-			$this->appscheme_field_type = $this->database->selectCollection('appscheme_field_type');
-			$this->appscheme_field_group = $this->database->selectCollection('appscheme_field_group');
-			$this->appscheme_has_field = $this->database->selectCollection('appscheme_has_field');
-			$this->appscheme_has_table_field = $this->database->selectCollection('appscheme_has_table_field');
-			$this->APPCACHE = $database_sockets->selectCollection('data_activity');
+			$opt = ['db' => 'admin', 'username' => MDB_USER, 'password' => MDB_PASSWORD];
+			// Détection automatique de l'hôte MongoDB
+			$mongo_host = getenv('MONGO_HOST') ?: (getenv('DOCKER_ENV') ? 'host.docker.internal' : MDB_HOST);
+			$mongo_url = 'mongodb://' . MDB_USER . ':' . MDB_PASSWORD . '@' . $mongo_host;
+			if (empty($PERSIST_CON)) {
+				$PERSIST_CON = $this->conn = new MongoClient($mongo_url, $opt);
+			} else {
+				$this->conn = $PERSIST_CON;
+			}
 
-			// Table-specific initialization
+			$sitebase_app     = MDB_PREFIX . 'sitebase_app';
+			$sitebase_sockets = MDB_PREFIX . 'sitebase_sockets';
+
+			$this->table                     = $table;
+			$this->app_conn                  = $this->conn->$sitebase_app->appscheme;
+			$this->appscheme                 = $this->conn->$sitebase_app->appscheme;
+			$this->appscheme_type            = $this->conn->$sitebase_app->appscheme_type;
+			$this->appscheme_base            = $this->conn->$sitebase_app->appscheme_base;
+			$this->appscheme_field           = $this->conn->$sitebase_app->appscheme_field;
+			$this->appscheme_field_type      = $this->conn->$sitebase_app->appscheme_field_type;
+			$this->appscheme_field_group     = $this->conn->$sitebase_app->appscheme_field_group;
+			$this->appscheme_has_field       = $this->conn->$sitebase_app->appscheme_has_field;
+			$this->appscheme_has_table_field = $this->conn->$sitebase_app->appscheme_has_table_field;
+			$this->APPCACHE                  = $this->conn->$sitebase_sockets->data_activity;
+
 			if (!empty($table)) {
-				// Select main data collection for this table
-				$this->collection = $this->database->selectCollection($table);
-				
-				// Fetch table metadata
-				$this->app_table_one = $this->app_conn->findOne(['codeAppscheme' => $table]); // si pas reg ?
-				
-				if ($this->app_table_one) {
-					$this->app_field_name_id       = 'id' . $table;
-					$this->app_field_name_id_type  = 'id' . $table . '_type';
-					$this->app_field_name_nom      = $this->app_table_one['nomAppscheme'];
-					$this->app_field_name_nom_type = 'nom' . ucfirst($table) . '_type';
-					$this->app_field_name_top      = 'estTop' . ucfirst($table);
-					$this->app_field_name_actif    = 'estActif' . ucfirst($table);
-					$this->idappscheme             = (int)$this->app_table_one['idappscheme'];
-					$this->codeAppscheme           = $this->app_table_one['codeAppscheme'];
-					$this->iconAppscheme           = isset($this->app_table_one['iconAppscheme']) ? $this->app_table_one['iconAppscheme'] : '';
-					$this->colorAppscheme          = isset($this->app_table_one['colorAppscheme']) ? $this->app_table_one['colorAppscheme'] : '';
-					$this->nomAppscheme            = $this->app_table_one['nomAppscheme'];
-					$this->codeAppscheme_base      = isset($this->app_table_one['codeAppscheme_base']) ? $this->app_table_one['codeAppscheme_base'] : '';
-					$this->app_table_icon          = isset($this->app_table_one['icon']) ? $this->app_table_one['icon'] : '';
-					$this->grilleFK                = isset($this->app_table_one['grilleFK']) ? $this->app_table_one['grilleFK'] : [];
-					$this->hasImageScheme          = isset($this->app_table_one['hasImageScheme']) ? $this->app_table_one['hasImageScheme'] : false;
-				}
+				$this->app_table_one           = $this->app_conn->findOne(['codeAppscheme' => $table]); // si pas reg ?
+				$this->app_field_name_id       = 'id' . $table;
+				$this->app_field_name_id_type  = 'id' . $table . '_type';
+				$this->app_field_name_nom      = $this->app_table_one['nomAppscheme'];
+				$this->app_field_name_nom_type = 'nom' . ucfirst($table) . '_type';
+				$this->app_field_name_top      = 'estTop' . ucfirst($table);
+				$this->app_field_name_actif    = 'estActif' . ucfirst($table);
+				$this->idappscheme             = (int)$this->app_table_one['idappscheme'];
+				$this->codeAppscheme           = $this->app_table_one['codeAppscheme'];
+				$this->iconAppscheme           = $this->app_table_one['iconAppscheme'];
+				$this->colorAppscheme          = $this->app_table_one['colorAppscheme'];
+				$this->nomAppscheme            = $this->app_table_one['nomAppscheme'];
+				$this->codeAppscheme_base      = $this->app_table_one['codeAppscheme_base'];
+				$this->app_table_icon          = $this->app_table_one['icon'];
+				$this->grilleFK                = $this->app_table_one['grilleFK'];
+				$this->hasImageScheme          = $this->app_table_one['hasImageScheme'];
 			}
 
 			$this->app_default_fields_add  = ['petitNom', 'nom', 'bgcolor', 'code', 'color', 'icon', 'ordre', 'slug', 'actif'];
@@ -110,41 +82,6 @@
 
 			//  $this->make_classes_app();
 
-		}
-		
-		/**
-		 * Get MongoDB Client instance (singleton pattern)
-		 * Replaces legacy MongoClient with modern MongoDB\Client
-		 * 
-		 * @return Client MongoDB\Client instance
-		 */
-		private function getMongoClient() {
-			global $PERSIST_CON;
-			
-			// Return existing connection if available (singleton)
-			if (!empty($PERSIST_CON) && $PERSIST_CON instanceof Client) {
-				return $PERSIST_CON;
-			}
-			
-			// Build connection URL
-			$mongo_host = getenv('MONGO_HOST') ?: (getenv('DOCKER_ENV') ? 'host.docker.internal' : MDB_HOST);
-			$mongo_url = 'mongodb://' . MDB_USER . ':' . MDB_PASSWORD . '@' . $mongo_host;
-			
-			// Create new MongoDB\Client instance
-			$PERSIST_CON = new Client($mongo_url, [
-				'username' => MDB_USER,
-				'password' => MDB_PASSWORD,
-				'authSource' => 'admin'
-			], [
-				// TypeMap ensures arrays are returned (not objects) - matches v1 behavior
-				'typeMap' => [
-					'root' => 'array',
-					'document' => 'array',
-					'array' => 'array'
-				]
-			]);
-			
-			return $PERSIST_CON;
 		}
 
 		function make_classes_app() {
@@ -369,46 +306,25 @@
 			return $out;
 		}
 
-		/**
-		 * Plug into a specific database collection (modern driver)
-		 * 
-		 * @param string $base Database name (without prefix)
-		 * @param string $table Collection name
-		 * @return Collection MongoDB\Collection instance
-		 */
-		function plug($base, $table) {
+		function  plug($base, $table) {
 			if (empty($table) || empty($base) || !defined('MDB_USER')) {
 				return 'choisir une base';
 			}
-			
-			// Get database instance
-			$db = $this->plug_base($base);
-			
-			// Return collection instance
-			if ($db === 'choisir une base') {
-				return $db;
-			}
-			
-			$collection = $db->selectCollection($table);
+			// PREFIX HERE POUR BASE
+			$db         = $this->plug_base($base);
+			$collection = $db->$table;
+
 			return $collection;
 		}
 
-		/**
-		 * Get database instance (modern driver)
-		 * 
-		 * @param string $base Database name (without prefix)
-		 * @return Database MongoDB\Database instance
-		 */
-		function plug_base($base) {
+		function  plug_base($base) {
 			if (empty($base) || !defined('MDB_USER')) {
 				return 'choisir une base';
 			}
-			
-			// Add prefix to base name
-			$base_prefixed = MDB_PREFIX . $base;
-			
-			// Return MongoDB\Database instance
-			$db = $this->mongoClient->selectDatabase($base_prefixed);
+			// PREFIX HERE POUR BASE
+			$base = MDB_PREFIX . $base;
+			$db   = $this->conn->$base;
+
 			return $db;
 		}
 
