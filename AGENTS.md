@@ -7,6 +7,7 @@ This repository uses automated agents for maintenance tasks.
 - Avoid unnecessary refactors or modernization.
 - Keep changes minimal, targeted, and well-scoped.
 - Prefer existing project patterns and conventions.
+- Ensure the project includes and follows MIGRATION.md and MONGOCOMPAT.md.
 - Document any operational changes in the main README if needed.
 
 ## Safety
