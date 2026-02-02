@@ -11,22 +11,46 @@
 		protected $maxTime;
 
 		public function __construct() {
-		$opt = ['db' => 'admin', 'username' => MDB_USER, 'password' => MDB_PASSWORD];
+	// Détection automatique de l'hôte MongoDB
+	$mongo_host = getenv('MONGO_HOST') ?: (getenv('DOCKER_ENV') ? 'host.docker.internal' : '127.0.0.1');
+	
+	// Debug: voir d'où viennent les credentials
+	error_log("DEBUG: getenv(MDB_USER)=" . (getenv('MDB_USER') ?: 'empty'));
+	error_log("DEBUG: defined(MONGO_USER)=" . (defined('MONGO_USER') ? MONGO_USER : 'not defined'));
+	error_log("DEBUG: defined(MDB_USER)=" . (defined('MDB_USER') ? MDB_USER : 'not defined'));
+	
+	// Priorité: 1. Variables d'env, 2. Constantes, 3. Par défaut
+	$mongo_user = getenv('MDB_USER') ?: (defined('MONGO_USER') ? MONGO_USER : (defined('MDB_USER') ? MDB_USER : ''));
+	$mongo_pass = getenv('MDB_PASSWORD') ?: (defined('MONGO_PASS') ? MONGO_PASS : (defined('MDB_PASSWORD') ? MDB_PASSWORD : ''));
+	
+	// Debug: afficher les credentials utilisés
+	if (getenv('DOCKER_ENV')) {
+		error_log("MongoDB credentials: user=$mongo_user, host=$mongo_host");
+	}
+	
+	// Build connection string (no auth if credentials empty)
+	if (!empty($mongo_user) && !empty($mongo_pass)) {
+		$mongo_url = 'mongodb://' . $mongo_user . ':' . $mongo_pass . '@' . $mongo_host . ':27017';
+	} else {
+		$mongo_url = 'mongodb://' . $mongo_host . ':27017';
+	}
+	
+	// MongoClient is now available via MongoCompat loaded in conf.lan.inc.php
+	$this->conn = new MongoClient($mongo_url, ['db' => 'admin']);
+	
+		$sitebase_app = defined('MDB_PREFIX') && MDB_PREFIX ? MDB_PREFIX . 'sitebase_session' : 'sitebase_session';
+		if(ENVIRONEMENT=='PREPROD') $sitebase_app .='_preprod';
 
-		// Détection automatique de l'hôte MongoDB
-		$mongo_host = getenv('MONGO_HOST') ?: (getenv('DOCKER_ENV') ? 'host.docker.internal' : '127.0.0.1');
-		$mongo_url = 'mongodb://admin:gwetme2011@' . $mongo_host . ':27017';
-		$this->conn   = new MongoClient($mongo_url, $opt);
-		
-			$sitebase_app = DEFINED(MDB_PREFIX) ? 'sitebase_session' : MDB_PREFIX . 'sitebase_session';
-			if(ENVIRONEMENT=='PREPROD') $sitebase_app .='_preprod';
+		$this->dbSession = $this->conn->selectDB($sitebase_app)->selectCollection('session');
+		$this->maxTime   = 3600;//get_cfg_var("session.gc_maxlifetime");
 
-			$this->dbSession = $this->conn->$sitebase_app->session;
-			$this->maxTime   = 3600;//get_cfg_var("session.gc_maxlifetime");
-
-			// $this->dbSession->ensureIndex(['id'=>1]);
-			$this->dbSession->ensureIndex(['timeStamp' => 1]);
-			$this->dbSession->ensureIndex(['timeStamp' => -1]);
+		// Migration: ensureIndex → createIndex
+		try {
+			$this->dbSession->createIndex(['timeStamp' => 1]);
+			$this->dbSession->createIndex(['timeStamp' => -1]);
+		} catch (Exception $e) {
+			// Index might already exist
+		}
 			/*register_shutdown_function('session_write_close');
 			session_set_save_handler(
 				array($this, 'open'),

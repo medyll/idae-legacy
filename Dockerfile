@@ -1,71 +1,66 @@
-# Revenir à une image de base avec PHP 5.6 et Apache
-FROM php:5.6-apache
+# PHP 8.2 avec Apache
+FROM php:8.2-apache
 
-# Mettre à jour les sources des dépôts pour Debian Stretch
-RUN sed -i '/stretch-updates/d' /etc/apt/sources.list \
-    && sed -i 's|http://deb.debian.org/debian|http://archive.debian.org/debian|g' /etc/apt/sources.list \
-    && sed -i 's|http://security.debian.org/debian-security|http://archive.debian.org/debian-security|g' /etc/apt/sources.list \
-    && apt-get update -o Acquire::Check-Valid-Until=false -o Acquire::Check-Date=false \
+# Installation des dépendances système et extensions PHP
+RUN apt-get update \
     && apt-get install -y --no-install-recommends \
         libfreetype6-dev \
         libjpeg62-turbo-dev \
         libpng-dev \
-        libbz2-dev \
-        libgmp-dev \
-        libldap2-dev \
+        libzip-dev \
         libicu-dev \
         libxml2-dev \
         libxslt1-dev \
-        libsqlite3-dev \
         libonig-dev \
-        libmcrypt-dev \
         libcurl4-openssl-dev \
-        libedit-dev \
-        libssl-dev \
-        zlib1g-dev \
-        libzip-dev \
         unzip \
-    && pecl install mongo \
-    && docker-php-ext-enable mongo
-
-# Configurer short_open_tag à On
-RUN echo "short_open_tag=On" >> /usr/local/etc/php/php.ini
-
-# Ajouter les directives session directement dans le fichier php.ini
-RUN echo "session.save_path = /tmp" >> /usr/local/etc/php/php.ini \
-    && echo "session.auto_start = On" >> /usr/local/etc/php/php.ini
-
-# Configurer le fichier de log des erreurs PHP
-RUN echo "error_log = /var/log/apache2/php-error.log" >> /usr/local/etc/php/php.ini
-
-# Mettre à jour les sources de Debian Stretch vers les archives
-RUN sed -i 's|http://deb.debian.org/debian|http://archive.debian.org/debian|g' /etc/apt/sources.list \
-    && sed -i '/security.debian.org/d' /etc/apt/sources.list \
-    && apt-get update \
-    && apt-get install -y --no-install-recommends gnupg \
+        curl \
+        gnupg \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install -j$(nproc) \
+        gd \
+        mysqli \
+        pdo_mysql \
+        zip \
+        intl \
+        opcache \
+    && pecl install mongodb \
+    && docker-php-ext-enable mongodb \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Installer apt-transport-https avant d'ajouter les dépôts NodeSource
-RUN apt-get update && apt-get install -y --no-install-recommends --allow-unauthenticated apt-transport-https \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+# Configuration PHP
+RUN echo "short_open_tag=On" >> /usr/local/etc/php/php.ini \
+    && echo "session.save_path = /tmp" >> /usr/local/etc/php/php.ini \
+    && echo "session.auto_start = On" >> /usr/local/etc/php/php.ini \
+    && echo "error_log = /var/log/apache2/php-error.log" >> /usr/local/etc/php/php.ini \
+    && echo "memory_limit = 256M" >> /usr/local/etc/php/php.ini \
+    && echo "upload_max_filesize = 50M" >> /usr/local/etc/php/php.ini \
+    && echo "post_max_size = 50M" >> /usr/local/etc/php/php.ini
 
-# Modifier les dépôts NodeSource pour installer Node.js 12.x au lieu de 14.x
-RUN curl -fsSL https://deb.nodesource.com/gpgkey/nodesource.gpg.key | apt-key add - \
-    && echo "deb https://deb.nodesource.com/node_12.x stretch main" > /etc/apt/sources.list.d/nodesource.list \
-    && echo "deb-src https://deb.nodesource.com/node_12.x stretch main" >> /etc/apt/sources.list.d/nodesource.list \
-    && apt-get update \
-    && apt-get install -y --allow-unauthenticated nodejs
+# Installation de Node.js 18.x
+RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
+    && apt-get install -y nodejs
+
+# Installer Composer
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
 # Copier les fichiers de l'application dans le conteneur
-COPY ./idae /var/www/html
+COPY ./idae /var/www/html/idae
 # Copier la configuration de .user.ini dans le conteneur
 # COPY ./idae/web/.user.ini /var/www/html/.user.ini
 
 # Donner les permissions nécessaires
 RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 755 /var/www/html
+
+# Installer les dépendances PHP avec Composer (mongodb/mongodb)
+WORKDIR /var/www/html/idae/web
+RUN if [ -f composer.json ]; then \
+        composer install --no-dev --ignore-platform-reqs --optimize-autoloader; \
+    fi
+
+WORKDIR /var/www/html
 
 # Activer le module Apache mod_rewrite
 RUN a2enmod rewrite

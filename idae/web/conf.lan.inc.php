@@ -141,6 +141,10 @@ if (isset($hostConf['mdb'])) {
     define_if_exists('user', $hostConf['mdb'], 'MDB_USER');
     define_if_exists('password', $hostConf['mdb'], 'MDB_PASSWORD');
     define_if_exists('prefix', $hostConf['mdb'], 'MDB_PREFIX');
+    
+    // Aliases pour compatibilité avec le nouveau driver
+    if (!defined('MONGO_USER') && defined('MDB_USER')) define('MONGO_USER', MDB_USER);
+    if (!defined('MONGO_PASS') && defined('MDB_PASSWORD')) define('MONGO_PASS', MDB_PASSWORD);
 }
 // SQL config
 if (isset($hostConf['sql'])) {
@@ -216,6 +220,9 @@ if (!function_exists("my_autoloader")) {
     }
     spl_autoload_register('my_autoloader');
 }
+
+// --- MongoDB Compatibility Layer (must load before ClassSession) ---
+require_once(__DIR__ . '/appclasses/appcommon/MongoCompat.php');
 
 // --- Session class include ---
 include_once('appclasses/ClassSession.php');

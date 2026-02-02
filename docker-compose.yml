@@ -1,31 +1,42 @@
-version: '3.8'
-
 services:
   app:
     build: .
     ports:
       - "8080:80"
     volumes:
-      - ./idae:/var/www/html
+      - ./idae:/var/www/html/idae
       - ./logs:/var/log/apache2
     environment:
       - APACHE_RUN_USER=www-data
       - APACHE_RUN_GROUP=www-data
-      - CONF_INC=/var/www/html/idae/conf.inc.php
+      - CONF_INC=/var/www/html/idae/web/conf.inc.php
       - DOCKER_ENV=1
-      - MONGO_HOST=host.docker.internal
+      - MONGO_HOST=mongodb
       - MONGO_HOST_PORT=27017
       - SOCKET_PORT=3005
     container_name: idae-legacy
+    depends_on:
+      - mysql
+      - mongodb
 
+  mongodb:
+    image: mongo:4.4
+    container_name: idae-mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
 
   mysql:
     image: mysql:5.7
+    container_name: idae-mysql
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: idae_preprod
       MYSQL_USER: idae_user
       MYSQL_PASSWORD: idae_password
+    ports:
+      - "3306:3306"
     volumes:
       - mysql_data:/var/lib/mysql
 
