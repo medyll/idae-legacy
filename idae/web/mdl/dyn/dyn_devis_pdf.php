@@ -1,7 +1,9 @@
 <?
 if(file_exists('../conf.inc.php')) include_once('../conf.inc.php');
 if(file_exists('../../conf.inc.php')) include_once('../../conf.inc.php');
-if(file_exists('../../../conf.inc.php')) include_once('../../../conf.inc.php'); 
+if(file_exists('../../../conf.inc.php')) include_once('../../../conf.inc.php');
+require_once(__DIR__ . '/../../appclasses/appcommon/MongoCompat.php');
+use AppCommon\MongoCompat; 
 
 ini_set('display_errors',55);
   
@@ -34,7 +36,7 @@ $filename = niceUrl($arrDevis['produit']['nomProduit']).'.pdf';
 $grid = skelMongo::connectFs('sitebase_devis');
 $grid->remove(array('md5Devis'=>$md5Devis));   
 //
-$obj = array('filename'=> $filename,'md5Devis'=>$md5Devis,'idclient'=>$idclient,'iddevis'=>$iddevis,'date'=>new MongoDate()); 
+$obj = array('filename'=> $filename,'md5Devis'=>$md5Devis,'idclient'=>$idclient,'iddevis'=>$iddevis,'date'=>MongoCompat::toDate()); 
 $grid->storeBytes($pdffile,$obj);  
 
 

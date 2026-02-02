@@ -1,5 +1,7 @@
 <?php
 	include_once($_SERVER['CONF_INC']);
+	require_once(__DIR__ . '/../../appclasses/appcommon/MongoCompat.php');
+	use AppCommon\MongoCompat;
 
 	$APP = new App();
 	$APP_AGENT = new App('agent');
@@ -28,7 +30,7 @@
 			$out = fonctionsProduction::cleanPostMongo($msg);
 			$out['uid'] = (int)$out['uid'];
 			$uid =(int)$out['uid'];
-			$out['mongoDate']   = new MongoDate(strtotime($out['date']));
+			$out['mongoDate']   = MongoCompat::toDate(strtotime($out['date']));
 			$out['accountMail'] = $arrAgent['emailAgent'];
 			$out['idagent']  = $idagent ;
 			$out['idmail'] = $idmail = (int)$APP->getNext('idemail');
@@ -64,7 +66,7 @@
 				$out = array();
 				$out['accountMail'] = $arrAgent['emailAgent'];
 				$out['idagent'] = $idagent;
-				$out['mongoDate']=new MongoDate(strtotime($msg['date']));
+				$out['mongoDate']=MongoCompat::toDate(strtotime($msg['date']));
 				$out['message_id'] = $msg['message_id'] ;
 				$out['date'] = iconv_mime_decode($msg['date'],2,"UTF-8");
 				$out['from'] = iconv_mime_decode($msg['from'],2,"UTF-8");
