@@ -1,4 +1,6 @@
 <?
+	require_once __DIR__ . '/../appclasses/appcommon/MongoCompat.php';
+	use AppCommon\MongoCompat;
 
 	class skelMdl {
 		static function cf_module($module, $array = [], $value = '', $attributes = '') {
@@ -340,7 +342,7 @@
 			$pattern  = '/(?:(?<=\>)|(?<=\/\>))(\s+)(?=\<\/?)/';
 			$newfinal = preg_replace($pattern, "", $final);
 
-			$obj             = ['filename' => $moduleid . '.html', 'time' => (int)time(), "module" => $module, 'date' => new MongoDate(), 'uploadDate' => new MongoDate()];
+			$obj             = ['filename' => $moduleid . '.html', 'time' => (int)time(), "module" => $module, 'date' => MongoCompat::toDate(time()), 'uploadDate' => MongoCompat::toDate(time())];
 			$obj['metadata'] = $array;
 			//
 			$Fs->storeBytes($newfinal, $obj);

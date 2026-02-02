@@ -1,4 +1,6 @@
 <?php
+	require_once __DIR__ . '/appcommon/MongoCompat.php';
+	use AppCommon\MongoCompat;
 
 	/**
 	 * Created by PhpStorm.
@@ -1132,7 +1134,7 @@
 				$mois  = substr($arrIn['dateDebutProduit_tarif'], 4, 2);
 				$annee = substr($arrIn['dateDebutProduit_tarif'], 0, 4);
 
-				$arrIn['grilleDateProduit'] = new MongoRegex("/^" . $annee . "-" . $mois . "/i"); // array('$gte' => $annee . '-' . $mois . '-01', '$lte' => $annee . '-' . $mois . '-31');
+				$arrIn['grilleDateProduit'] = MongoCompat::toRegex('^' . preg_quote($annee . '-' . $mois, '/'), 'i'); // array('$gte' => $annee . '-' . $mois . '-01', '$lte' => $annee . '-' . $mois . '-31');
 				//print_r($arrIn['grilleDateProduit']);
 				unset($arrIn['dateDebutProduit_tarif']);
 
@@ -1160,7 +1162,7 @@
 				//
 				$mois    = substr($arrV['dateDebutVacance'], 5, 2);
 				$annee   = substr($arrV['dateDebutVacance'], 0, 4);
-				$out_d[] = new MongoRegex("/$annee-$mois-*/i");
+				$out_d[] = MongoCompat::toRegex(preg_quote($annee . '-' . $mois, '/') . '-*', 'i');
 
 				//$mois                                         = substr($arrV['dateFinVacance'], 5, 2);
 				//$annee                                        = substr($arrV['dateFinVacance'], 0, 4);
@@ -1169,7 +1171,7 @@
 				// myddeDebug($out_d);
 				//
 				// $arrIn['grilleDateProduit.dateProduit_tarif'] = array('$gte' => $dateDebutVacance, '$lte' => $dateFinVacance);
-				$arrIn['grilleDateProduit.dateDebutProduit_tarif'] = new MongoRegex("/$annee-$mois-*/i");
+				$arrIn['grilleDateProduit.dateDebutProduit_tarif'] = MongoCompat::toRegex(preg_quote($annee . '-' . $mois, '/') . '-*', 'i');
 				unset($arrIn['idvacance']);
 			endif;
 			if (!empty($arrIn['idtransport_gamme'])):

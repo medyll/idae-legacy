@@ -1,4 +1,6 @@
 <?php
+	require_once __DIR__ . '/../../appclasses/appcommon/MongoCompat.php';
+	use AppCommon\MongoCompat;
 
 	/**
 	 * Created by PhpStorm.
@@ -112,7 +114,7 @@
 					if (!empty($arr_match[1]) && !empty($arr_match[3])) {
 						$qte      = $arr_match[1];
 						$prod     = $arr_match[3];
-						$reg      = new MongoRegex("/^$prod/i");
+						$reg      = MongoCompat::toRegex('^' . preg_quote($prod, '/'), 'i');
 						$ARR_PROD = $APP_PROD->findOne(['codeProduit' => $reg]);
 
 						if (!empty($ARR_PROD['idproduit'])) {
@@ -412,7 +414,7 @@
 
 			foreach (array_keys($ARGS['vars']['arr_settings']) as $key => $val) {
 				skelMdl::send_cmd('act_notify', ['msg' => json_encode($val)]);
-				$APP->plug('sitebase_pref', 'agent_pref')->remove(['idagent' => (int)$ARGS['vars']['idagent'], 'codeAgent_pref' => new MongoRegex("/$val/i")]);
+				$APP->plug('sitebase_pref', 'agent_pref')->remove(['idagent' => (int)$ARGS['vars']['idagent'], 'codeAgent_pref' => MongoCompat::toRegex(preg_quote($val, '/'), 'i')]);
 				switch ($val) {
 					case "app_search":
 						foreach (droit_table_multi($ARGS['vars']['idagent'], 'R') as $ks => $table) {

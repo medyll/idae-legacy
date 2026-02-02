@@ -1,4 +1,6 @@
 <?php
+	require_once __DIR__ . '/../../appclasses/appcommon/MongoCompat.php';
+	use AppCommon\MongoCompat;
 
 	/**
 	 * Created by PhpStorm.
@@ -73,7 +75,7 @@
 						$name_id = "id" . $http_vars['table'];
 					}
 					if (!empty($name_id) && !empty($http_vars[$name_id]) && !is_int($http_vars[$name_id])) {
-						$arr_idae            = $idae->findOne(['_id' => new MongoId($http_vars[$name_id])]);
+						$arr_idae            = $idae->findOne(['_id' => MongoCompat::toObjectId($http_vars[$name_id])]);
 						$http_vars[$name_id] = (int)$arr_idae[$name_id];
 					}
 					echo $idae->module($module, $http_vars);
@@ -82,7 +84,7 @@
 					$idae = new Idae($table);
 					$id   = trim($id);
 					if ((int)$id != $id) {
-						$arr_idae = $idae->findOne(['_id' => new MongoId($id)]);
+						$arr_idae = $idae->findOne(['_id' => MongoCompat::toObjectId($id)]);
 						$id       = (int)$arr_idae["id$table"];
 					}
 					if (method_exists($idae, $module)) {

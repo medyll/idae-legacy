@@ -1,4 +1,6 @@
 <?   
+	require_once __DIR__ . '/../appclasses/appcommon/MongoCompat.php';
+	use AppCommon\MongoCompat;
 class fonctionsDevis
 { 
 	function fonctionsDevis(){  
@@ -7,7 +9,7 @@ class fonctionsDevis
 	function testCodeClient($texte,$emailClient){
 		$texte=strtoupper($texte);
 		//$texte = ereg_replace("[0-9]","",$texte);
-		$regexp  = new MongoRegex("/[0-9]".$texte."[0-9]/i "); 
+		$regexp  = MongoCompat::toRegex('[0-9]' . preg_quote($texte, '/') . '[0-9]', 'i'); 
 		$testCli = skelMongo::connect('client','sitebase_devis')->find(array('codeClient'=>$regexp));  
 		$testCli->count();
 		if($testCli->count()==0){  
