@@ -126,89 +126,63 @@
 				return $PERSIST_CON;
 			}
 			
-			// Build connection URL
-			$mongo_host = getenv('MONGO_HOST') ?: (getenv('DOCKER_ENV') ? 'host.docker.internal' : MDB_HOST);
-			$mongo_url = 'mongodb://' . MDB_USER . ':' . MDB_PASSWORD . '@' . $mongo_host;
-			
-			// Create new MongoDB\Client instance
-			$PERSIST_CON = new Client($mongo_url, [
-				'username' => MDB_USER,
-				'password' => MDB_PASSWORD,
-				'authSource' => 'admin'
-			], [
-				// TypeMap ensures arrays are returned (not objects) - matches v1 behavior
-				'typeMap' => [
-					'root' => 'array',
-					'document' => 'array',
-					'array' => 'array'
-				]
-			]);
-			
-			return $PERSIST_CON;
+		// Build connection URL with credentials (only if both user and password are non-empty)
+		$mongo_host = getenv('MONGO_HOST') ?: (getenv('DOCKER_ENV') ? 'mongodb' : MDB_HOST);
+		$mongo_user = getenv('MDB_USER') ?: (defined('MDB_USER') ? MDB_USER : '');
+		$mongo_pass = getenv('MDB_PASSWORD') ?: (defined('MDB_PASSWORD') ? MDB_PASSWORD : '');
+		
+		// Build URI: only include credentials if both present
+		if (!empty($mongo_user) && !empty($mongo_pass)) {
+			$mongo_url = 'mongodb://' . $mongo_user . ':' . $mongo_pass . '@' . $mongo_host;
+		} else {
+			$mongo_url = 'mongodb://' . $mongo_host;
 		}
+		
+		// Prepare auth options (only if credentials provided)
+		$options = [];
+		if (!empty($mongo_user) && !empty($mongo_pass)) {
+			$options['username'] = $mongo_user;
+			$options['password'] = $mongo_pass;
+			$options['authSource'] = 'admin';
+		}
+		
+		// Create new MongoDB\Client instance
+		$PERSIST_CON = new Client($mongo_url, $options, [
+			// TypeMap ensures arrays are returned (not objects) - matches v1 behavior
+			'typeMap' => [
+				'root' => 'array',
+				'document' => 'array',
+				'array' => 'array'
+			]
+		]);
+		
+		return $PERSIST_CON;
+	}
 
-		function make_classes_app() {
-			if (empty($this->table)) return false;
-			if (!is_string($this->table)) return false;
-			$table     = $this->table;
-			$file_name = $table;
-			$path      = APPCLASSES_APP . CUSTOMERNAME . '/' . $table . '/';
-			foreach (['app', 'act', 'ui', 'pre_act', 'post_act'] as $key => $extension) {
-				$className     = $file_name . '_' . $extension;
-				$path_and_file = $path . $className . '.php';
-				if (!file_exists($path)) {
-					@mkdir($path, 0777, true);
-				}
-				if (!file_exists($path_and_file)) {
-					$monfichier = @fopen($path_and_file, 'a+');
-					$content    = $this->write_classes_app($className, $table, $extension);
-					@fputs($monfichier, $content);
-					@fclose($monfichier);
-				}
+	public function get_autoload_class() {
+		$table     = $this->table;
+		$file_name = $table;
+		$path      = APPCLASSES_APP . CUSTOMERNAME . '/' . $table . '/';
+		foreach (['app', 'act', 'ui', 'pre_act', 'post_act'] as $key => $extension) {
+			$className     = $file_name . '_' . $extension;
+			$path_and_file = $path . $className . '.php';
+			if (!file_exists($path)) {
+				@mkdir($path, 0777, true);
+			}
+			if (!file_exists($path_and_file)) {
+				$monfichier = @fopen($path_and_file, 'a+');
+				$content    = $this->write_classes_app($className, $table, $extension);
+				@fputs($monfichier, $content);
+				@fclose($monfichier);
 			}
 		}
+	}
 
-		function write_classes_app($className, $table, $type) {
-			$content = file_get_contents(APP_CONFIG_DIR . 'class_model.php');
+	function write_classes_app($className, $table, $type) {
+		$content = file_get_contents(APP_CONFIG_DIR . 'class_model.php');
 
-			return $content;
-		}
-
-		function rest($params = ['table', 'action', 'vars']) {
-			//
-			Helper::dump(func_get_args());
-
-			if (strpos($params['vars'], '/') === false) {
-				$value = $params['vars'];
-
-			} else {
-				$value = explode('/', $params['vars']);
-			}
-			$new_value = array_map(function ($node) {
-				if (strpos($node, ':') === false) {
-
-					return $node;
-				}
-				$tmp = explode(':', $node);
-
-				if (strpos($tmp[0], '[]') === true) {
-					echo "array";
-				}
-
-				return [$tmp[0] => $tmp[1]];
-
-			}, $value);
-			Helper::dump($new_value);
-			$app = new App($params['table']);
-
-			if ($params['action'] == 'remove') {
-				die('verboten');
-			}
-
-			$rs = $app->$params['action']();
-
-			echo json_encode(iterator_to_array($rs));
-			// $this->$params['action']($value);
+		return $content;
+	}
 
 		}
 
