@@ -21,6 +21,10 @@
 	// MongoCompat helper for type conversions
 	require_once __DIR__ . '/MongoCompat.php';
 	use AppCommon\MongoCompat;
+	
+	// MongodbCursorWrapper for ADODB-style getNext() compatibility
+	require_once __DIR__ . '/MongodbCursorWrapper.php';
+	use AppCommon\MongodbCursorWrapper;
 
 	global $app_conn_nb;
 	global $PERSIST_CON;
@@ -40,10 +44,32 @@
 		public $app_conn;
 
 		public $obj;
+	private $app_table_one_loaded = false; // Track if table metadata has been loaded
 
-		function set_table($table) {
-			return $this->__construct($table);
+	function set_table($table) {
+		return $this->__construct($table);
+	}
+	
+	/**
+	 * Magic method to lazy-load table metadata on first access
+	 */
+	public function __get($name) {
+		// If accessing table metadata properties, load them if not already loaded
+		$table_metadata_properties = [
+			'app_table_one', 'app_field_name_id', 'app_field_name_nom', 
+			'idappscheme', 'codeAppscheme', 'nomAppscheme', 'grilleFK'
+		];
+		
+		if (in_array($name, $table_metadata_properties) && !$this->app_table_one_loaded) {
+			$this->loadTableMetadata();
 		}
+		
+		// Return the property if it exists
+		if (property_exists($this, $name)) {
+			return $this->$name;
+		}
+		
+		return null;
 
 		public function __construct($table = '') {
 			global $app_conn_nb;
@@ -82,31 +108,12 @@
 			if (!empty($table)) {
 				// Select main data collection for this table
 				$this->collection = $this->database->selectCollection($table);
-				
-				// Fetch table metadata
-				$this->app_table_one = $this->app_conn->findOne(['codeAppscheme' => $table]); // si pas reg ?
-				
-				if ($this->app_table_one) {
-					$this->app_field_name_id       = 'id' . $table;
-					$this->app_field_name_id_type  = 'id' . $table . '_type';
-					$this->app_field_name_nom      = $this->app_table_one['nomAppscheme'];
-					$this->app_field_name_nom_type = 'nom' . ucfirst($table) . '_type';
-					$this->app_field_name_top      = 'estTop' . ucfirst($table);
-					$this->app_field_name_actif    = 'estActif' . ucfirst($table);
-					$this->idappscheme             = (int)$this->app_table_one['idappscheme'];
-					$this->codeAppscheme           = $this->app_table_one['codeAppscheme'];
-					$this->iconAppscheme           = isset($this->app_table_one['iconAppscheme']) ? $this->app_table_one['iconAppscheme'] : '';
-					$this->colorAppscheme          = isset($this->app_table_one['colorAppscheme']) ? $this->app_table_one['colorAppscheme'] : '';
-					$this->nomAppscheme            = $this->app_table_one['nomAppscheme'];
-					$this->codeAppscheme_base      = isset($this->app_table_one['codeAppscheme_base']) ? $this->app_table_one['codeAppscheme_base'] : '';
-					$this->app_table_icon          = isset($this->app_table_one['icon']) ? $this->app_table_one['icon'] : '';
-					$this->grilleFK                = isset($this->app_table_one['grilleFK']) ? $this->app_table_one['grilleFK'] : [];
-					$this->hasImageScheme          = isset($this->app_table_one['hasImageScheme']) ? $this->app_table_one['hasImageScheme'] : false;
-				}
-			}
-
-			$this->app_default_fields_add  = ['petitNom', 'nom', 'bgcolor', 'code', 'color', 'icon', 'ordre', 'slug', 'actif'];
-			$this->app_default_fields      = ['nom' => '', 'prenom' => '', 'petitNom' => 'nom court', 'code' => '', 'reference' => 'reference', 'description' => '', 'quantite' => '', 'prix' => '', 'total' => '', 'atout' => '', 'valeur' => '', 'rang' => '', 'dateCreation' => 'crée le', 'dateDebut' => 'date debut', 'dateFin' => 'date de fin', 'duree' => '', 'heure' => '', 'email' => '', 'telephone' => '', 'fax' => '', 'adresse' => '', 'url' => '', 'totalHt' => 'total HT', 'totalTtc' => 'total TTC', 'totalMarge' => 'total Marge', 'totalTva' => 'total TVA', 'ordre' => '', 'color' => '', 'image' => ''];
+			$this->table = $table;
+			
+			// LAZY LOADING: Don't fetch metadata here to avoid MongoDB queries on every App() instantiation
+			// Metadata will be loaded on first access via __get() magic method
+			$this->app_table_one = null; // Will be loaded lazily
+			$this->app_table_one_loaded = false;
 			$this->app_default_group_field = ['codification' => '', 'identification' => '', 'date' => '', 'prix' => '', 'localisation' => '', 'valeur' => '', 'texte' => '', 'image' => '', 'telephonie' => '', 'heure' => '', 'divers' => 'Autres'];
 			//  $this->make_classes_app();
 		}
@@ -159,7 +166,11 @@
 				'root' => 'array',
 				'document' => 'array',
 				'array' => 'array'
-			]
+			],
+			// Connection timeout settings
+			'connectTimeoutMS' => 5000,      // 5 seconds to connect
+			'serverSelectionTimeoutMS' => 5000, // 5 seconds to select server
+			'socketTimeoutMS' => 30000       // 30 seconds for socket operations
 		]);
 		
 		return $PERSIST_CON;
@@ -188,6 +199,39 @@
 			$content = file_get_contents(APP_CONFIG_DIR . 'class_model.php');
 
 			return $content;
+		}
+
+		/**
+		 * Load table metadata lazily (only when needed)
+		 * Called automatically on first access to table properties
+		 */
+		private function loadTableMetadata() {
+			if ($this->app_table_one_loaded || empty($this->table)) {
+				return;
+			}
+			
+			// Fetch table metadata from appscheme collection
+			$this->app_table_one = $this->app_conn->findOne(['codeAppscheme' => $this->table]);
+			$this->app_table_one_loaded = true;
+			
+			if ($this->app_table_one) {
+				$table = $this->table;
+				$this->app_field_name_id       = 'id' . $table;
+				$this->app_field_name_id_type  = 'id' . $table . '_type';
+				$this->app_field_name_nom      = $this->app_table_one['nomAppscheme'] ?? '';
+				$this->app_field_name_nom_type = 'nom' . ucfirst($table) . '_type';
+				$this->app_field_name_top      = 'estTop' . ucfirst($table);
+				$this->app_field_name_actif    = 'estActif' . ucfirst($table);
+				$this->idappscheme             = (int)($this->app_table_one['idappscheme'] ?? 0);
+				$this->codeAppscheme           = $this->app_table_one['codeAppscheme'] ?? '';
+				$this->iconAppscheme           = $this->app_table_one['iconAppscheme'] ?? '';
+				$this->colorAppscheme          = $this->app_table_one['colorAppscheme'] ?? '';
+				$this->nomAppscheme            = $this->app_table_one['nomAppscheme'] ?? '';
+				$this->codeAppscheme_base      = $this->app_table_one['codeAppscheme_base'] ?? '';
+				$this->app_table_icon          = $this->app_table_one['icon'] ?? '';
+				$this->grilleFK                = $this->app_table_one['grilleFK'] ?? [];
+				$this->hasImageScheme          = $this->app_table_one['hasImageScheme'] ?? false;
+			}
 		}
 
 		/**
@@ -491,7 +535,7 @@
 			$vars['idactivity_expl']            = (int)$this->getNext('idactivity_expl');
 			$vars['idagent']                    = (int)$idagent;
 			$vars['nomActivity_expl']           = $vars['vars']['table'] . ' ' . $vars['vars']['groupBy']; //.' '  .App::get_full_titre_vars($vars['vars']);
-			$this->plug('sitebase_base', 'activity_expl')->update(['uid' => $vars['uid']], ['$set' => $vars], ['upsert' => true]);
+			$this->plug('sitebase_base', 'activity_expl')->updateOne(['uid' => $vars['uid']], ['$set' => $vars], ['upsert' => true]);
 		}
 
 		function getNext($id, $min = 1) {
@@ -500,11 +544,11 @@
 				$test = $this->plug('sitebase_increment', 'auto_increment')->findOne(['_id' => $id]);
 				if (!empty($test['value'])) {
 					if ($test['value'] < $min) {
-						$this->plug('sitebase_increment', 'auto_increment')->update(['_id' => $id], ['value' => (int)$min], ["upsert" => true]);
+						$this->plug('sitebase_increment', 'auto_increment')->updateOne(['_id' => $id], ['value' => (int)$min], ["upsert" => true]);
 					}
 				}
 			}
-			$this->plug('sitebase_increment', 'auto_increment')->update(['_id' => $id], ['$inc' => ['value' => 1]], ["upsert" => true]);
+			$this->plug('sitebase_increment', 'auto_increment')->updateOne(['_id' => $id], ['$inc' => ['value' => 1]], ["upsert" => true]);
 			$ret = $this->plug('sitebase_increment', 'auto_increment')->findOne(['_id' => $id]);
 
 			return (int)$ret['value'];
@@ -524,7 +568,7 @@
 			$upd['table']         = $table;
 			$upd['table_value']   = (int)$table_value;
 			// sitebase_pref // agent activite
-			$this->plug('sitebase_base', 'activity')->update($upd, ['$set' => $upd], ['upsert' => true]);
+			$this->plug('sitebase_base', 'activity')->updateOne($upd, ['$set' => $upd], ['upsert' => true]);
 			// nlle table agent_history
 			$index_upd['idagent']             = (int)$idagent;
 			$index_upd['codeAgent_history']   = $table;
@@ -540,7 +584,7 @@
 			if (empty($test['idagent_history'])) {
 				$index_upd['idagent_history'] = $h_upd['idagent_history'] = (int)App::getNext('idagent_history');
 			}
-			$this->plug('sitebase_pref', 'agent_history')->update($index_upd, ['$set' => $h_upd, '$inc' => ['quantiteAgent_history' => 1]], ['upsert' => true]);
+			$this->plug('sitebase_pref', 'agent_history')->updateOne($index_upd, ['$set' => $h_upd, '$inc' => ['quantiteAgent_history' => 1]], ['upsert' => true]);
 			skelMdl::reloadModule('app/app_gui/app_gui_panel', $table);
 		}
 
@@ -561,7 +605,7 @@
 				if (empty($arr['idagent_pref'])) {
 					$out['idagent_pref'] = (int)$this->getNext('idagent_pref');
 				}
-				$this->plug('sitebase_pref', 'agent_pref')->update(['idagent' => (int)$idagent, 'codeAgent_pref' => $key], ['$set' => $out], ['upsert' => true]);
+				$this->plug('sitebase_pref', 'agent_pref')->updateOne(['idagent' => (int)$idagent, 'codeAgent_pref' => $key], ['$set' => $out], ['upsert' => true]);
 			}
 		}
 
@@ -925,7 +969,7 @@
 
 			if (empty($field)) $field = 'nombreVue' . ucfirst($table);
 			//
-			$this->plug($this->app_table_one['codeAppscheme_base'], $table)->update($vars, ['$inc' => [$field => 1]], ["upsert" => true]);
+			$this->plug($this->app_table_one['codeAppscheme_base'], $table)->updateOne($vars, ['$inc' => [$field => 1]], ["upsert" => true]);
 
 		}
 
@@ -936,7 +980,7 @@
 		}
 
 		function setNext($id, $value) {
-			$this->plug('sitebase_increment', 'auto_increment')->update(['_id' => $id], ['value' => (int)$value], ["upsert" => true]);
+			$this->plug('sitebase_increment', 'auto_increment')->updateOne(['_id' => $id], ['value' => (int)$value], ["upsert" => true]);
 
 			return $value;
 		}
@@ -1002,10 +1046,9 @@
 			// sort field peut etre count +1 ou count -1
 
 			if ($sort_field[0] != 'count') {
-				$rs_basedist = $base_rs->find($vars, ['_id' => 0])->limit(3000)->sort([$sort_on => $sort_field[1]]);
-			} else
-				$rs_basedist = $base_rs->find($vars, ['_id' => 0])->limit(3000)->sort(['nom' . ucfirst($this->table) => 1]);
-
+			$rs_basedist = new MongodbCursorWrapper($base_rs->find($vars, ['_id' => 0])->limit(3000)->sort([$sort_on => $sort_field[1]]));
+		} else
+			$rs_basedist = new MongodbCursorWrapper($base_rs->find($vars, ['_id' => 0])->limit(3000)->sort(['nom' . ucfirst($this->table) => 1]));
 			# boucle dans liste triée
 
 			while ($arr_basedist = $rs_basedist->getNext()) {
@@ -1026,7 +1069,7 @@
 				$arr_collect_rs[$arr_basedist[$field]] = $arr_dist + $arr_basedist + ['nomAppscheme' => $groupBy_table, 'count' => 0, 'groupBy' => $groupBy_table, $field => $arr_basedist[$field], $this->app_field_name_id => (int)$arr_basedist[$this->app_field_name_id], $sort_field[0] => $arr_basedist[$sort_field[0] . ucfirst($this->table)]];
 
 				$tmp_iddistinct[] = (int)$arr_basedist[$this->app_field_name_id];;
-				$rs_base_rs_tmp                                 = $base_rs->find($vars + [$idgroupBy_table => (int)$arr_basedist[$idgroupBy_table]], ['_id' => 0]);
+				$rs_base_rs_tmp                                 = new MongodbCursorWrapper($base_rs->find($vars + [$idgroupBy_table => (int)$arr_basedist[$idgroupBy_table]], ['_id' => 0]));
 				$rs_base_rs_count                               = $rs_base_rs_tmp->count();
 				$arr_collect_rs[$arr_basedist[$field]]['count'] = $rs_base_rs_count;
 				//
@@ -1328,7 +1371,7 @@
 				$idappscheme_base = $APP_BASE->create_update(['codeAppscheme_base' => $ARR['base']], ['nomAppscheme_base' => $ARR['base']]);
 			}
 			if (empty($ARR['iconAppscheme']) && !empty($ARR['icon'])) {
-				$APP_SCH->update(['idappscheme' => $idappscheme], ['iconAppscheme' => $ARR['icon']]);
+				$APP_SCH->update(['idappscheme' => $idappscheme], ['$set' => ['iconAppscheme' => $ARR['icon']]]);
 			}
 			//
 			$arr_has = ['statut', 'type', 'categorie', 'group', 'groupe'];
@@ -1345,7 +1388,7 @@
 				endif;
 				$test = strpos($table, "_$value");
 				if (strpos($table, "_$value") !== false && (empty($ARR['is' . $Value . 'Scheme']) || empty($ARR['grouped_scheme']))):
-					$APP_SCH->update(['idappscheme' => $idappscheme], ['is' . $Value . 'Scheme' => 1, 'grouped_scheme' => 1]);
+					$APP_SCH->update(['idappscheme' => $idappscheme], ['$set' => ['is' . $Value . 'Scheme' => 1, 'grouped_scheme' => 1]]);
 				endif;
 			endforeach;
 
@@ -1375,7 +1418,7 @@
 				$ins['codeAppscheme_has_table_field']     = $ARR_FIELD_NOM['codeAppscheme_field'] . ucfirst($DA_TABLE_CODE);
 				$force                                    = 0;
 				if ($force == 1 || $ins['iconAppscheme_has_table_field'] != $ARR_HAST['iconAppscheme_has_table_field'] || $ins['codeAppscheme_has_table_field'] != $ARR_HAST['codeAppscheme_has_table_field'] || empty($ARR_HAST['codeAppscheme_has_table_field']) || empty($ARR_HAST['nomAppscheme_has_table_field'])) {
-					$APP_SCH_HAS_TABLE->update(['idappscheme_has_table_field' => (int)$ARR_HAST['idappscheme_has_table_field']], $ins);
+					$APP_SCH_HAS_TABLE->update(['idappscheme_has_table_field' => (int)$ARR_HAST['idappscheme_has_table_field']], ['$set' => $ins]);
 				}
 			}
 			$arrSF = $APP_SCH_HAS_TABLE->findOne(['idappscheme' => $idappscheme, 'idappscheme_link' => $idappscheme, 'idappscheme_field' => $IDFIELD_NOM]);
@@ -1425,7 +1468,8 @@
 				$rs = $this->plug($this->app_table_one['codeAppscheme_base'], $this->app_table_one['codeAppscheme'])->find($vars, $proj);
 			}
 
-			return $rs;
+			// Wrap MongoDB cursor in ADODB-compatible wrapper for getNext() support
+			return new MongodbCursorWrapper($rs);
 		}
 
 		function insert($vars = []) {
@@ -1449,7 +1493,7 @@
 			$GRILLE_FK  = $this->get_grille_fk();//$name_table
 			$col        = $this->plug($this->app_table_one['codeAppscheme_base'], $this->app_table_one['codeAppscheme']);
 			$arr_vars   = (empty($table_value)) ? [] : [$name_id => $table_value];
-			$rs         = $col->find($arr_vars);
+			$rs         = new MongodbCursorWrapper($col->find($arr_vars));
 			// table_has_field ?
 			//
 			while ($arr = $rs->getNext()):
@@ -1547,9 +1591,7 @@
 				if ($name_table == 'contrat'):
 					if (!empty($arr['idclient'])):
 						$APP_TMP  = new App('client');
-						$rs_test  = $col->find(['idclient' => (int)$arr['idclient']])->sort(['dateFinContrat' => 1]);
-						$arr_test = $rs_test->getNext();
-						$arr_cl   = $APP_TMP->findOne(['idclient' => (int)$arr['idclient']]);
+					$rs_test  = new MongodbCursorWrapper($col->find(['idclient' => (int)$arr['idclient']])->sort(['dateFinContrat' => 1]));
 
 						if ($arr_cl['dateFinClient'] != $arr_test['dateFinContrat']) $APP_TMP->update(['idclient' => (int)$arr['idclient']], ['dateFinClient' => $arr_test['dateFinContrat']]);
 					endif;
@@ -1684,7 +1726,7 @@
 					$arr_new['heureModification' . $Name_table] = date('H:i:s');
 					$arr_new['timeModification' . $Name_table]  = time();
 
-					$col->update([$name_id => $value_id], ['$set' => $arr_new], ['upsert' => true]);
+					$col->updateOne([$name_id => $value_id], ['$set' => $arr_new], ['upsert' => true]);
 				}
 				if ($rs->count() == 1) {
 					return $arr_new;
@@ -1701,7 +1743,7 @@
 					return;
 				}
 			}
-			$this->plug($this->app_table_one['codeAppscheme_base'], $this->app_table_one['codeAppscheme'])->update($vars, ['$set' => $fields], ['upsert' => $upsert]);
+			$this->plug($this->app_table_one['codeAppscheme_base'], $this->app_table_one['codeAppscheme'])->updateOne($vars, ['$set' => $fields], ['upsert' => $upsert]);
 
 			// $this->consolidate_scheme($table_value);
 		}
@@ -1727,7 +1769,7 @@
 			$fields = $arr_inter;
 			// UPDATE !!!
 			//vardump_async($fields,true);
-			$this->plug($this->app_table_one['codeAppscheme_base'], $this->app_table_one['codeAppscheme'])->update($vars, ['$set' => $fields], ['upsert' => $upsert]);
+			$this->plug($this->app_table_one['codeAppscheme_base'], $this->app_table_one['codeAppscheme'])->updateOne($vars, ['$set' => $fields], ['upsert' => $upsert]);
 			$this->consolidate_scheme($table_value);
 			//
 			$arr_one_after = $this->findOne([$this->app_field_name_id => $table_value]);
@@ -1762,7 +1804,7 @@
 						$APPCONV   = new App($table_rfk);
 						$sd_vars   = ['id' . $table => $table_value];
 						$fields_fk = ['nom' . ucfirst($table) => $fields['nom' . ucfirst($table)]];
-						$APPCONV->update($sd_vars, $fields_fk);
+						$APPCONV->update($sd_vars, ['$set' => $fields_fk]);
 
 					endif;
 				endforeach;
@@ -1965,7 +2007,7 @@
 				unset($options['grilleFK']);
 			}
 			$ins = array_filter($ins);
-			$this->appscheme->update(['idappscheme' => $ins['idappscheme']], ['$set' => $ins], ['upsert' => 1]);
+			$this->appscheme->updateOne(['idappscheme' => $ins['idappscheme']], ['$set' => $ins], ['upsert' => 1]);
 
 			$APP_TMP = new App('appscheme');
 			$APP_TMP->consolidate_scheme($ins['idappscheme']);
