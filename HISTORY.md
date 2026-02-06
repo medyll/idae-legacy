@@ -117,3 +117,13 @@ The last stretch required solving eight interlocking issues, each one invisible 
 Each fix was trivial in isolation. But like dominoes, they formed a chain where one masked the next. The CORS fix revealed the URL corruption. The URL fix revealed the missing handler. The handler fix revealed the JSON parsing bug. The parsing fix revealed the redirect loop. The redirect fix revealed the cursor crash. And the cursor fix revealed the error display pollution.
 
 The application's original architecture — a PHP backend, a Node.js real-time layer, and a Prototype.js browser client communicating via Socket.IO — was designed in 2007 and remains fundamentally sound. It just needed its plumbing reconnected after 18 years of infrastructure evolution.
+
+### The Strict Typing Era (Feb 6, 2026)
+
+With the infrastructure stabilized, the focus shifted to code execution within the PHP 8.2 container. The strictness of modern PHP exposed latent bugs in the logic that PHP 5.6 had previously tolerated.
+
+9. **The Login Null-Pointer**: Authentication via `actions.php` was failing with a 500 error due to `sizeof(null)` usage. In PHP 8+, `count()` and `sizeof()` throw fatal errors on non-countable types. Fixed by adding null coalescence checks.
+10. **The Socket Recursion Loop**: A critical flaw in `skelMdl::doSocket` was discovered. When the Node.js socket server was offline (e.g., during development), the connection failure triggered a system notification. This notification _itself_ attempted to use the socket to broadcast the error, creating an infinite recursion loop that crashed the stack. Added a `try-catch` block to break the cycle and fallback to log-only error reporting.
+11. **Static vs Dynamic Methods**: Legacy code frequently called methods statically (`fonctionsProduction::isTrueFloat`) that were defined as instance methods. While PHP 5 warns, PHP 8 throws fatal errors. Converted utility methods to `static` where appropriate.
+12. **GridFS Property Access**: The `ClassAct::imgSrc` method failed when trying to access properties (`$file['file']`) on `MongoGridFSFile` objects returned by the compatibility layer. The modern driver returns objects, not arrays. Updated `MongoCompat` to implement the magic `__get` method, restoring array-like property access for legacy code.
+13. **String Search Type Safety**: The `str_find` helper failed when processing array keys (integers) because `strpos` in PHP 8 no longer accepts integers as the haystack. Added strict type casting to ensure string operations receive strings.
