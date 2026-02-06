@@ -60,6 +60,24 @@ The path was not easy.
 -   **The Session Paradox**: The PHP session handler, attempting garbage collection during startup, would crash the application because it couldn't authenticate with the new Dockerized MongoDB instance via `host.docker.internal`.
 -   **Authentication Complexity**: Modern MongoDB requires explicit authentication databases (often `admin`), whereas the legacy code assumed implicit access. This required injecting `MDB_USER`/`MDB_PASSWORD` securely via environment variables and rewriting connection strings.
 
+## February 2026: The Hybrid Pivot
+
+As the migration deepened, the team realized that fully containerizing a 15-year-old stateful monolith was a bridge too far. The decision was made to pivot.
+
+### The "Hybrid" Architecture
+Instead of isolating the database inside a container—risking data loss and complicating backups—the architecture was inverted.
+-   **PHP 8.2** remains containerized, providing a clean, modern runtime.
+-   **Data Services (MongoDB, MySQL)** remain on the **Host Machine**.
+-   **The Bridge**: Docker's `host.docker.internal` became the lifeline, connecting the encapsulated logic to the persistent data.
+
+### The Great Cleanup
+Simultaneously, a massive reconnaissance mission mapped the "Legacy JS" territories.
+-   **Node.js Simplification**: Obsolete Node subsystems were purged, leaving only the essential socket server.
+-   **Documentation as Code**: The creation of `JS_STRUCTURE_LEGACY.md` and `MIGRATION_STATUS.md` transformed oral history into written canon.
+
+### The Battle of Authentication
+Progress was fierce but halted by the **"Auth Wall"**. As the PHP container tried to speak to the Host Mongo, strict modern authentication rules triggered a wave of `BulkWriteException`s. The legacy "implicit trust" model clashed with modern security standards, leaving the application in a state of "unauthenticated suspension" while the team forged new keys.
+
 ## The Future
 
 Today, IDAE stands at the threshold of a new era. It is a testament to the longevity of well-conceived software. By wrapping its legacy core in modern infrastructure (Docker, PHP 8.2, adapters), it preserves the genius of Meddy Lebrun's original vision while shedding the shackles of obsolete infrastructure.
