@@ -517,6 +517,9 @@ class MongoGridFSFile {
     }
     
     public function __get($name) {
+        if ($name === 'file') {
+            return $this->file;
+        }
         return $this->file[$name] ?? null;
     }
     

@@ -6,6 +6,7 @@
  * Time: 00:32
  */
 	function str_find($haystack, $needle, $ignoreCase = false) {
+		$haystack = (string)$haystack;
 		if ($ignoreCase) {
 			$haystack = strtolower($haystack);
 			$needle   = strtolower($needle);
@@ -609,7 +610,7 @@
 		$value = trim($value);
 		$value = "'".$value."'";
 	}
-	function cleanStr(&$value, $key=''){
+	function cleanStr(&$value, $key='', $userdata = null){
 		if(is_array($value) || is_object($value)){
 			array_walk_recursive($value, 'CleanStr',$value);
 			return;

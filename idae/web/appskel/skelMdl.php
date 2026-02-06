@@ -4,7 +4,9 @@
 
 	class skelMdl {
 		static function cf_module($module, $array = [], $value = '', $attributes = '') {
-			require($_SERVER['CONF_INC']);
+			if (file_exists($_SERVER['CONF_INC'])) {
+				include_once($_SERVER['CONF_INC']);
+			}
 
 			$APP = new App();
 			if (empty($array)) $array = [];
@@ -147,8 +149,8 @@
 			$query                  = http_build_query($vars);
 
 			if (!$fp) {
-				skelMdl::send_cmd('act_notify', ['msg' => 'ERREUR ' . $errstr . '  $errno ' . $errno, session_id()]);
-
+				// skelMdl::send_cmd('act_notify', ['msg' => 'ERREUR ' . $errstr . '  $errno ' . $errno, session_id()]);
+				error_log("skelMdl::doSocket Connection Failed: " . $errstr . " (" . $errno . ")");
 				return false;
 			} else {
 				stream_set_timeout($fp,2);
@@ -158,13 +160,18 @@
 				$out .= "Content-Type: application/x-www-form-urlencoded" . $crlf;
 				$out .= "Content-Length: " . strlen($query) . $crlf;
 				$out .= "Connection: Close" . $crlf;
+				
+				if (!empty($cookie_str)) {
+					// Fix: Cookie header must be before the empty line. Also removing substr -2 if logic was wrong,
+					// but keeping legacy behavior if it was intended for some reason, just moving position.
+					// Actually, strictly speaking, path should not be sent in Cookie header, but we preserve logic.
+					$out .= 'Cookie: ' . $cookie_str . $crlf; 
+				}
+				
 				$out .= $crlf;
 
 				if (isset($query)) {
 					$out .= $query;
-				}
-				if (!empty($cookie_str)) {
-					$out .= 'Cookie: ' . substr($cookie_str, 0, -2) . $crlf;
 				}
 
 				fwrite($fp, $out);
