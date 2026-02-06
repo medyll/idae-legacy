@@ -6,10 +6,12 @@ header("Access-Control-Allow-Methods: POST, GET, OPTIONS");
 if (!ini_get('date.timezone')) {
     date_default_timezone_set('GMT');
 }
-ini_set('error_reporting', 'E_ALL & ~E_DEPRECATED & ~E_STRICT');
+ini_set('error_reporting', E_ALL); // Force E_ALL for debugging migration
+ini_set('log_errors', 1);
+// ini_set('error_log', '/var/log/apache2/php-error.log'); // Already set in Dockerfile
 ini_set('short_open_tag', 'On');
 ini_set('scream.enabled', true);
-ini_set('display_errors', 'On');
+ini_set('display_errors', 0); // Disable display errors to client (AJAX safety)
 
 !defined('SOCKET_EMSGSIZE') && DEFINE('SOCKET_EMSGSIZE', 4000000);
 DEFINE('DEBUG_DB', 1);
