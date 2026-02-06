@@ -130,3 +130,19 @@ With the infrastructure stabilized, the focus shifted to code execution within t
 14. **Socket Host Parsing (fsockopen)**: The PHP backend's socket client (`skelMdl.php`) was failing with a 30s timeout during login. The cause was `fsockopen` receiving `localhost:8080` as the hostname (extracted from `$_SERVER['HTTP_HOST']`), where the port should only be passed as the second argument. Fixed by stripping the port from the host string, restoring instant backend-to-socket-server communication.
 15. **Frontend Cache Busting**: The browser persisted in serving stale versions of `bag.js` and other core libraries despite server changes. Implemented a "Nuclear Option" in `main_bag.js`: a global `cache_buster` variable (timestamp) is now appended to every script and CSS file requested by the loader (`?v=...`), ensuring the development cycle isn't hindered by aggressive caching.
 16. **Login Logic Updates**: Updated `idae/web/mdl/app/app_login/actions.php` to handle PHP 8.2 deprecations, specifically replacing the ternary shorthand `?:` with the null coalescing operator `??` to prevent warnings during authentication checks.
+
+### The Stabilization Phase (Feb 6, 2026 Night - "The First Login")
+
+Following the initial strict-typing fixes, a successful end-to-end login was achieved. The dashboard loaded successfully for the first time in the modern containerized environment. This milestone marked the transition from "broken migration" to "working prototype."
+
+17. **Docker Networking & Socket Fix**: The Node.js server (on host) and PHP container (in Docker) couldn't communicate efficiently.
+    -   Cause: PHP tried to connect to `localhost`, which refers to the container itself, not the host where Node runs.
+    -   Fix: Updated `droit_table` and socket connection logic to use `host.docker.internal`.
+18. **Critical GridFS Crash (Bucket Constructor)**: A fatal error (`500`) occurred during image retrieval.
+    -   Cause: `MongoCompat` instantiated `MongoDB\GridFS\Bucket` incorrectly (passing `Database` object as first arg instead of `Manager`).
+    -   Fix: Switched to `$database->selectGridFSBucket($options)`, which handles the instantiation correctly.
+19. **Visibility & Syntax Hardening**:
+    -   **Visibility**: `MongoGridFSFile` properties were private, breaking array access. Made them public or accessible via magic getters locally.
+    -   **Syntax Revert**: Reverted incompatible `??` (null coalescing) usage in `ClassAct` and `actions.php`. While valid in PHP 8.2, they caused issues with the specific legacy parser behavior or context. Replaced with standard `isset() ? :`.
+20. **Logging Rigor**: Eliminated dangerous `echo` debugging in `conf.lan.inc.php` which was corrupting AJAX responses. Switched entirely to `error_log` for cleaner debugging without breaking the frontend.
+

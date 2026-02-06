@@ -6,7 +6,8 @@
   "main": "src/main.js",
   "scripts": {
     "start": "node src/main.js",
-    "dev": "nodemon src/main.js"
+    "dev": "nodemon src/main.js",
+    "logs": "powershell Get-Content ../../../logs/php-error.log -Wait"
   },
   "dependencies": {
     "axios": "^1.6.0",
