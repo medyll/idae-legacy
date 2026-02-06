@@ -2021,7 +2021,7 @@
 				unset($options['grilleFK']);
 			}
 			$ins = array_filter($ins);
-			$this->appscheme->updateOne(['idappscheme' => $ins['idappscheme']], ['$set' => $ins], ['upsert' => 1]);
+			$this->appscheme->updateOne(['idappscheme' => $ins['idappscheme']], ['$set' => $ins], ['upsert' => true]);
 
 			$APP_TMP = new App('appscheme');
 			$APP_TMP->consolidate_scheme($ins['idappscheme']);
