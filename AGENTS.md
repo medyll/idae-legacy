@@ -11,6 +11,7 @@
 - **Credentials**: Do not modify production credentials or secrets.
 - **Comments**: **Preserve** original `Date:`/`Time:` headers in files. Add a `Modified: YYYY-MM-DD` line for major changes.
 - **Language**: English only for new comments and documentation.
+- **Debugging**: NEVER output debug text to the browser/client. Use `error_log()` for all debug information. HTML insertion occurs via AJAX and requires valid elements, not text content.
 
 ## Code Patterns
 - **MongoCompat**: ALWAYS use `AppCommon\MongoCompat` for Mongo types (ObjectId, Regex, Date).

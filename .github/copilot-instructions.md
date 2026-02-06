@@ -24,6 +24,7 @@
     -   X `new MongoDate()` -> V `MongoCompat::toDate()`
 -   **File Headers**: Preserve original `Date:`/`Time:` headers. Add `Modified:` line for changes.
 -   **Queries**: Use `class App` methods (`find`, `findOne`, `create_update`) which wrap the modern driver.
+-   **Debugging Strictness**: NO `echo`/`print` for debugging in client-facing code. Breaks AJAX. Use `error_log()` only.
 
 ## Workflows
 -   **Build**: `docker-compose up` (PHP container only).
