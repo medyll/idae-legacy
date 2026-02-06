@@ -137,7 +137,6 @@ if (isset($hostConf['smtp'])) {
     define_if_exists('email', $hostConf['smtp'], 'SMTPEMAIL');
     define_if_exists('pass', $hostConf['smtp'], 'SMTPPASS');
 }
-if (isset($hostConf['mdb'])) {
 // MongoDB config
 if (isset($hostConf['mdb'])) {
     // Allow runtime override (Docker or native)

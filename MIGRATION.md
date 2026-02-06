@@ -8,14 +8,15 @@
 
 ---
 
-## État actuel (snapshot février 2026)
+## Current state (snapshot February 2026)
 
-### Versions en production
-- **PHP**: 5.6 (Dockerfile `FROM php:5.6-apache`)
-- **MongoDB driver**: mongo PECL v1.x (obsolète, fin support 2015)
-- **Node.js**: 12 (Dockerfile)
+### Runtime versions
+- **PHP**: 8.2 (Docker image `php:8.2-apache`, Composer autoload enabled)
+- **MongoDB driver (PHP)**: `mongodb/mongodb` 1.8.0 + custom `MongoCompat` wrapper (legacy API still being migrated)
+- **Node.js**: 12 (Dockerfile still points to legacy stack)
 - **Socket.io Node**: 1.4.8 (package.json)
 - **MongoDB client Node**: 2.2.10 (package.json)
+- **MySQL container**: removed from docker-compose (legacy DSN now expected to point to host resources)
 
 ### Statistiques codebase
 | Catégorie | Count | Fichiers affectés |
@@ -60,6 +61,20 @@ Validation minimale pour avancer phase suivante:
 - Tests curl/JSON retournent même structure qu'avant (diff-safe)
 - Erreurs PHP/MongoDB logs < 5 CRITICAL errors
 - Socket.io events deliver correctement (si concerné)
+
+- **Environment**: Docker stack now runs PHP 8.2 only; legacy PHP 5.6 assumptions (short tags, ext-mysql) must be audited.
+
+### Recent updates (Feb 06 2026)
+- Docker Compose now only launches the PHP application container; MongoDB access relies on the host instance via `host.docker.internal`.
+- `MongoCompat` gained GridFS support and cursor wrappers; duplicate method declarations fixed.
+- `conf.lan.inc.php` syntax error resolved (duplicate `if (isset($hostConf['mdb']))` block removed).
+- `ClassApp::find()` now avoids double wrapping cursors returned by the compat layer.
+- Blank-page startup issue traced to Mongo authentication failure during PHP session garbage collection.
+
+### Immediate blockers
+1. **Mongo authentication**: PHP session handler still attempts to delete records without credentials, resulting in `BulkWriteException: command delete requires authentication`. Environment variables (`MDB_USER`, `MDB_PASSWORD`) must be wired to the host Mongo instance.
+2. **ClassApp CRUD refactor**: apart from connection layer and cursor fixes, legacy `insert/update/remove` code still uses v1 driver semantics.
+3. **Service endpoints**: `json_data.php` and related services have not yet been validated against the new driver and currently exit early due to the auth failure above.
 
 ---
 

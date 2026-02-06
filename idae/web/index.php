@@ -9,7 +9,16 @@
  
 	include_once($_SERVER['CONF_INC']);
 
-	if (empty($_SESSION['reindex'])) header("Location: reindex.php");
+	// Redirect loop protection
+	if (empty($_SESSION['reindex'])) {
+		// Check if we're already in redirect loop (max 3 redirects)
+		if (isset($_GET['retry']) && (int)$_GET['retry'] >= 3) {
+			die('<h1>Session Error</h1><p>Cannot initialize session. Check MongoDB connection and logs.</p>');
+		}
+		$retry = isset($_GET['retry']) ? (int)$_GET['retry'] + 1 : 1;
+		header("Location: reindex.php?retry=$retry");
+		exit;
+	}
 	// APPCONF_DIR
 	include_once(APPCONFDIR . "conf_init.php");
 ?>

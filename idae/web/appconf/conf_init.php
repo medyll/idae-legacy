@@ -10,7 +10,20 @@
 
 	$APP = new App('appscheme');
 
-	if(empty($APP->app_table_one) || $APP->app_table_one == 'null'){
+	$appschemeCount = 0;
+	try{
+		// Count existing entity definitions; if zero, schema was never installed
+		$appschemeCount = method_exists($APP->app_conn, 'countDocuments')
+			? $APP->app_conn->countDocuments()
+			: $APP->app_conn->count();
+	}catch(Exception $e){
+		$appschemeCount = 0;
+		if (!empty(getenv('DEBUG_DB'))){
+			error_log('[conf_init] appscheme count failed: '.$e->getMessage());
+		}
+	}
+
+	if($appschemeCount === 0){
 		if (!empty(getenv('DEBUG_DB'))) {
 			header('Content-Type: text/plain; charset=UTF-8');
 			$mongoHost = getenv('MONGO_HOST') ?: (defined('MDB_HOST') ? MDB_HOST : 'undefined');

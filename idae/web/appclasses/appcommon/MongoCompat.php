@@ -313,10 +313,6 @@ class MongoDB {
         return new MongoGridFS($this->database, $bucketName);
     }
     
-    public function getGridFS($bucketName = null) {
-        return $this->getGridFs($bucketName);
-    }
-    
     public function getInnerDatabase() {
         return $this->database;
     }
@@ -326,6 +322,9 @@ class MongoDB {
     }
 
     public function __call($name, $arguments) {
+        if (strtolower($name) === 'getgridfs') {
+            return $this->getGridFs(...$arguments);
+        }
         return $this->database->$name(...$arguments);
     }
 }

@@ -31,7 +31,7 @@ if ('lan' === end($host_parts) || $host === 'localhost' || $host === '127.0.0.1'
     include_once('conf.lan.inc.php');
     return;
 } else {
-    echo "red";
+    // echo "red"; // Debug output removed (2026-02-06)
     if (strpos($_SERVER['HTTP_HOST'], 'preprod') === false) {
         ini_set('display_errors', 0);
         DEFINE('ENVIRONEMENT', 'PROD');

@@ -117,6 +117,9 @@
 			$this->app_table_one_loaded = false;
 			$this->app_default_group_field = ['codification' => '', 'identification' => '', 'date' => '', 'prix' => '', 'localisation' => '', 'valeur' => '', 'texte' => '', 'image' => '', 'telephonie' => '', 'heure' => '', 'divers' => 'Autres'];
 			//  $this->make_classes_app();
+
+			// Legacy bootstrap expects metadata to be ready immediately (conf_init() checks it).
+			$this->loadTableMetadata();
 		}
 	}
 
