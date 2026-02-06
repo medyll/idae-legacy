@@ -8,9 +8,11 @@
 	}*/
  
 	include_once($_SERVER['CONF_INC']);
+	// die("Configuration loaded. CONF_INC included. You can now start the application.");
 
 	// Redirect loop protection
 	if (empty($_SESSION['reindex'])) {
+		die('Session reindex is empty - stopped to prevent infinite loop');
 		// Check if we're already in redirect loop (max 3 redirects)
 		if (isset($_GET['retry']) && (int)$_GET['retry'] >= 3) {
 			die('<h1>Session Error</h1><p>Cannot initialize session. Check MongoDB connection and logs.</p>');
@@ -19,8 +21,10 @@
 		header("Location: reindex.php?retry=$retry");
 		exit;
 	}
+	// die("Before app_confdir include. Session reindex: " . $_SESSION['reindex']);
 	// APPCONF_DIR
 	include_once(APPCONFDIR . "conf_init.php");
+	// die("Session initialized successfully. You can now access the application.");
 ?>
 <html>
 	<head>

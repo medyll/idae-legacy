@@ -2,6 +2,11 @@
 
 ## ⚡ Quick Scripts (PowerShell)
 
+**🚨 URGENCE - Container bloqué / Chargement infini :**
+```powershell
+.\docker-emergency.ps1              # Force kill + clean restart
+```
+
 **Redémarrer Apache rapidement :**
 ```powershell
 .\docker-restart.ps1                # Apache graceful reload (recommended)
@@ -44,6 +49,9 @@ Session initialization failure creates infinite redirect loop:
 - MongoDB connection slower through Docker network (`host.docker.internal`)
 - Session storage in MongoDB via `ClassSession.php`
 - Native dev has MongoDB on localhost (faster)
+
+**⚠️ CRITICAL: Never add `die()` in production code!**  
+Even for debugging - it causes incomplete HTTP responses → browser hangs → Apache zombies
 
 ### Protection Added (2026-02-06)
 
@@ -90,7 +98,33 @@ healthcheck:
 
 ## Quick Fixes
 
-### 0. Restart Apache Only (Fastest)
+### 0a. Chargement Infini / Docker Restart Bloqué (URGENCE)
+```powershell
+# Si docker compose restart bloque ou page charge infiniment :
+.\docker-emergency.ps1              # Force kill + clean restart (30s)
+
+# Ou manuellement :
+docker kill idae-legacy            # Force stop
+docker rm -f idae-legacy           # Remove container
+docker compose down                # Clean up
+docker compose up -d               # Fresh start
+```
+
+**Signes du problème :**
+- Page blanche avec spinner infini
+- `docker compose restart` ne répond pas
+- Processus Apache zombie (`<defunct>`)
+- Logs montrent boucles de redirections
+
+**Causes fréquentes :**
+- `die()` dans le code (même pour debug !)
+- Boucle de redirection infinie
+- MongoDB timeout/inaccessible
+- Session corruption
+
+**Temps de résolution :** ~30 secondes avec `docker-emergency.ps1`
+
+### 0b. Restart Apache Only (Fastest)
 ```powershell
 # Graceful restart (terminates requests cleanly)
 docker exec idae-legacy apachectl graceful

@@ -4,6 +4,55 @@ Scripts PowerShell pour gérer l'environnement Docker idae-legacy.
 
 ## 📋 Scripts disponibles
 
+### `docker-emergency.ps1` - 🚨 URGENCE
+
+Force-reset complet quand le conteneur est bloqué ou inaccessible.
+
+**Usage :**
+```powershell
+.\docker-emergency.ps1
+```
+
+**Quand l'utiliser :**
+- ⛔ Page charge infiniment (spinner permanent)
+- ⛔ `docker compose restart` bloque / ne répond pas
+- ⛔ Processus Apache zombie (`<defunct>` dans `ps aux`)
+- ⛔ Container unhealthy et restart impossible
+- ⛔ Après un `die()` accidentel dans le code
+
+**Ce que fait le script :**
+1. Kill forcé du conteneur (`docker kill`)
+2. Suppression forcée (`docker rm -f`)
+3. Nettoyage complet (`docker compose down --remove-orphans`)
+4. Détection et suppression des zombies
+5. Redémarrage propre (`docker compose up -d`)
+6. Attente du healthcheck (max 30s)
+7. Test HTTP automatique
+
+**Temps d'exécution :** ~30 secondes
+
+**Output exemple :**
+```
+🚨 EMERGENCY DOCKER RESET
+========================
+
+1️⃣ Killing container...
+2️⃣ Removing container...
+3️⃣ Docker compose down...
+4️⃣ Checking for zombie processes...
+5️⃣ Starting fresh container...
+6️⃣ Waiting for health check...
+   ⏳ Waiting... (2/30 s) - Status: starting
+   ⏳ Waiting... (4/30 s) - Status: healthy
+
+✅ Container is HEALTHY
+✅ HTTP 200 OK (Load time: 0.04s)
+
+✨ Emergency reset complete
+```
+
+---
+
 ### `docker-restart.ps1` - Redémarrage
 
 Redémarre Apache ou le conteneur selon les besoins.
@@ -96,6 +145,12 @@ Affiche les logs du conteneur avec filtres.
 ---
 
 ## 🚀 Workflows courants
+
+### 🚨 URGENCE - Page blanche / Container bloqué
+```powershell
+.\docker-emergency.ps1             # Reset complet (30s)
+# Puis vérifier le code pour die() ou boucles
+```
 
 ### Après modification de code PHP
 ```powershell

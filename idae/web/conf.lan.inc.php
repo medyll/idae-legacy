@@ -257,6 +257,7 @@ require_once(__DIR__ . '/appclasses/appcommon/MongoCompat.php');
 // --- Session class include ---
 include_once('appclasses/ClassSession.php');
 
+// die("Configuration loaded. Session class included. You can now start the application.");
 
 // --- Debug helper ---
 if (!function_exists('myddeDebug')) {

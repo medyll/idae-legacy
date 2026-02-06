@@ -15,8 +15,8 @@ services:
       - MDB_USER=${MDB_USER:-}
       - MDB_PASSWORD=${MDB_PASSWORD:-}
       - MDB_PREFIX=${MDB_PREFIX:-}
-      - DEBUG_DB=${DEBUG_DB:-}
-      - DEBUG_SESSION=${DEBUG_SESSION:-}
+      - DEBUG_DB=1
+      - DEBUG_SESSION=1
       - MONGO_HOST_PORT=27017
       - SOCKET_PORT=3005
     container_name: idae-legacy
