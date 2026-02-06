@@ -1,4 +1,5 @@
-if(bag)bag.clear();
+if(typeof bag !== 'undefined') bag.clear();
+localStorage.clear();
 var HTTPCSS = "css/";
 
 var require_trame = {
@@ -52,7 +53,7 @@ var require_trame = {
 		'javascript/app/app_quickfind.js',
 		'javascript/app/app_tree.js',
 		'javascript/app/app_init_template.js',
-		'javascript/engine/engine.js',
+		'javascript/engine/engine.js?v=debug1',
 		'javascript/engine/afterAjaxCall.js',
 		'javascript/engine/contextuel.js',
 		'javascript/engine/initApp.js'],
@@ -96,6 +97,19 @@ var require_sheet = [
 	HTTPCSS + 'vendor/animate/animate-min.css'
 ];
 // BANG
+// Force cache refresh
+var cache_buster = '?v=' + new Date().getTime();
+for (var key in require_trame) {
+    if (require_trame.hasOwnProperty(key)) {
+        for(var i=0; i<require_trame[key].length; i++) {
+        	require_trame[key][i] += cache_buster;
+        }
+    }
+}
+for(var i=0; i<require_sheet.length; i++) {
+    require_sheet[i] += cache_buster;
+}
+
 var app_dom_loaded = false;
 var require_size   = 0;// .push(data);
 var require_queue = [];// .push(data);
@@ -170,7 +184,7 @@ function require_progress(value, max, text) {
 	}
 }
 
-var require_boot = ['javascript/vendor/js.cookie.js', 'javascript/vendor/socket.io.js'];
+var require_boot = ['javascript/vendor/js.cookie.js' + cache_buster, 'javascript/vendor/socket.io.js' + cache_buster];
 bag.require (require_sheet).then (function () {
 	bag.require (require_boot).then (
 		function () {

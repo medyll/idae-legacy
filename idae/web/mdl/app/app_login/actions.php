@@ -14,7 +14,7 @@
 		case "app_log":
 
 			$_POST = fonctionsProduction::cleanPostMongo($_POST, 1);
-			$type  = $_POST['type'] ?: 'agent';
+			$type  = $_POST['type'] ?? 'agent';
 			$Type  = ucfirst($type);
 			$APP   = new App($type);
 			
