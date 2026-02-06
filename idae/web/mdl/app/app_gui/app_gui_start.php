@@ -17,9 +17,6 @@
 		<div class="  " style="width:50%;height:100%;">
 			<div class="flex_v blanc" style="height:100%;">
 				<div class="relative">
-					<script>
-						main_item_search = new BuildSearch('patolaon');
-					</script>
 					<div class="flex_h flex_align_middle">
 						<div class=" hide_gui_pane applink">
 							<a><i class="fa fa-times textrouge"></i></a>
@@ -56,6 +53,9 @@
 								</div>
 								<div class="flex_main boxshadow relative" id="patolaon" style="overflow:auto;height:100%;">
 								</div>
+								<script>
+									main_item_search = new BuildSearch('patolaon');
+								</script>
 							</div>
 						</div>
 					</div>

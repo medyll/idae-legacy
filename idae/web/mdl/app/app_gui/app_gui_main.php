@@ -86,9 +86,6 @@
 		<!--<div id="gui_menu" data-setting="gui_menu_visible" data-setting-default-value="none" data-setting-mode="display" data-setting-apply="true" class="gradb frmCol1 flex_v" style="display:none">-->
 		<div id="gui_menu" class="gradb frmCol1 flex_v" style="display:none">
 			<div class="padding ededed borderb aligncenter">
-				<script>
-					main_item_search_gui = new BuildSearch ('patolaon_bis');
-				</script>
 				<form onsubmit="main_item_search_gui.load_data($(this).serialize());$('for_patolon_bis').show();return false;">
 					<button type="submit" style="position:absolute;right: 0.5em; z-index: 10;border: none;background-color: transparent;">
 						<i class="fa fa-search"></i></button>
@@ -105,6 +102,9 @@
 				<a><i class="fa fa-times"></i><?= idioma('fermer') ?></a>
 			</div>
 			<div class="flex_main" id="patolaon_bis" style="overflow:auto;"></div>
+			<script>
+				main_item_search_gui = new BuildSearch ('patolaon_bis');
+			</script>
 		</div>
 		<div class="flex_v flex_main" style="height:auto;width:100%;">
 			<div class="relative flex_main" onclick="$('gui_pane').hide()" style="width:100%;height:100%;z-index:0;overflow:hidden">
