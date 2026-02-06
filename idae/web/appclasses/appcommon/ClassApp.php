@@ -1458,15 +1458,24 @@
 
 		function find($vars = [], $proj = []) {
 
-			if (empty($this->app_table_one['codeAppscheme_base'])) {
-				vardump($this->table);
-				vardump($vars);
+			if (empty($this->app_table_one['codeAppscheme_base']) || empty($this->app_table_one['codeAppscheme'])) {
+				error_log("[App::find] Missing schema info for table '{$this->table}' - base: " . 
+					($this->app_table_one['codeAppscheme_base'] ?? 'null') . ", schema: " . 
+					($this->app_table_one['codeAppscheme'] ?? 'null'));
+				return new MongodbCursorWrapper(new \ArrayIterator([]));
 			}
+
+			$collection = $this->plug($this->app_table_one['codeAppscheme_base'], $this->app_table_one['codeAppscheme']);
+			if (!is_object($collection)) {
+				error_log("[App::find] plug() returned non-object for table '{$this->table}': " . var_export($collection, true));
+				return new MongodbCursorWrapper(new \ArrayIterator([]));
+			}
+
 			// echo  '<br>'.$this->table.' - '.($this->app_table_one['codeAppscheme_base'].' - '. $this->app_table_one['codeAppscheme']);
 			if (sizeof($proj) == 0) {
-				$rs = $this->plug($this->app_table_one['codeAppscheme_base'], $this->app_table_one['codeAppscheme'])->find($vars);
+				$rs = $collection->find($vars);
 			} else {
-				$rs = $this->plug($this->app_table_one['codeAppscheme_base'], $this->app_table_one['codeAppscheme'])->find($vars, $proj);
+				$rs = $collection->find($vars, $proj);
 			}
 
 			// Avoid double wrapping when MongoCompat already returns a cursor wrapper
