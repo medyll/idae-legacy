@@ -1,43 +1,30 @@
 {
   "name": "app_idae",
-  "version": "0.0.1",
-  "description": "Application crm",
+  "version": "1.0.0",
+  "description": "Idae Legacy Node Server (Modernized)",
+  "type": "module",
+  "main": "src/main.js",
+  "scripts": {
+    "start": "node src/main.js",
+    "dev": "nodemon src/main.js"
+  },
   "dependencies": {
-    "commander": "^14.0.0",
-    "connect": "3.3.3",
-    "cookie": "^1.0.2",
-    "cron": "1.2.1",
-    "fs": "0.0.2",
-    "http": "0.0.0",
-    "https": "1.0.0",
-    "mongodb": "2.2.10",
-    "path": "0.12.7",
-    "qs": "6.2.1",
-    "request": "2.75.0",
-    "socket.io": "1.4.8",
-    "socket.io-cookie": "0.0.1",
-    "socket.io-cookie-parser": "1.0.0",
-    "url": "0.11.0"
+    "axios": "^1.6.0",
+    "commander": "^11.0.0",
+    "cookie": "^0.6.0",
+    "cron": "^3.1.0",
+    "dotenv": "^16.3.1",
+    "mongodb": "^6.3.0",
+    "qs": "^6.11.0",
+    "socket.io": "^4.7.0",
+    "winston": "^3.11.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   },
   "author": "Mydde",
-  "main": "app_idae.js",
-  "scripts": {
-    "start": "forever start -a -l logs/socket.log -o logs/socket-out.log -e logs/socket-err.log --uid idae_socket idae_server.js",
-    "stop": "forever stop idae_socket",
-    "restart": "forever restart idae_socket",
-    "status": "forever list",
-    "logs": "forever logs idae_socket",
-    "dev": "node idae_server.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "keywords": [
-    "base",
-    "module",
-    "for",
-    "idae"
-  ],
-  "license": "ISC",
-  "devDependencies": {
-    "forever": "^4.0.3"
-  }
+  "license": "ISC"
 }
