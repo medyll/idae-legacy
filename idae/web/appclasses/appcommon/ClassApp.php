@@ -15,8 +15,8 @@
 
 	// Modern MongoDB driver
 	use MongoDB\Client;
-	use MongoDB\Collection;
-	use MongoDB\Database;
+	use AppCommon\MongoDB as LegacyMongoDB;
+	use AppCommon\MongoCollection as LegacyMongoCollection;
 	
 	// MongoCompat helper for type conversions
 	require_once __DIR__ . '/MongoCompat.php';
@@ -89,8 +89,8 @@
 		$sitebase_app = MDB_PREFIX . 'sitebase_app';
 		$sitebase_sockets = MDB_PREFIX . 'sitebase_sockets';
 
-		$this->database = $this->mongoClient->selectDatabase($sitebase_app);
-		$database_sockets = $this->mongoClient->selectDatabase($sitebase_sockets);
+		$this->database = new LegacyMongoDB($this->mongoClient, $sitebase_app);
+		$database_sockets = new LegacyMongoDB($this->mongoClient, $sitebase_sockets);
 
 		// Collection assignments (schema collections)
 		$this->table = $table;
@@ -428,12 +428,8 @@
 				return 'choisir une base';
 			}
 			
-			// Add prefix to base name
 			$base_prefixed = MDB_PREFIX . $base;
-			
-			// Return MongoDB\Database instance
-			$db = $this->mongoClient->selectDatabase($base_prefixed);
-			return $db;
+			return new LegacyMongoDB($this->mongoClient, $base_prefixed);
 		}
 
 		function query_one($vars, $fields = []) {
@@ -1470,7 +1466,11 @@
 				$rs = $this->plug($this->app_table_one['codeAppscheme_base'], $this->app_table_one['codeAppscheme'])->find($vars, $proj);
 			}
 
-			// Wrap MongoDB cursor in ADODB-compatible wrapper for getNext() support
+			// Avoid double wrapping when MongoCompat already returns a cursor wrapper
+			if ($rs instanceof MongodbCursorWrapper) {
+				return $rs;
+			}
+
 			return new MongodbCursorWrapper($rs);
 		}
 

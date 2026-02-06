@@ -103,7 +103,7 @@ class MongodbCursorWrapper implements \Iterator, \Countable {
      * WARNING: This may load all documents into memory
      * @return int
      */
-    public function count(): int {
+    public function count($foundOnly = false): int {
         if ($this->isArray) {
             return count($this->documents);
         }

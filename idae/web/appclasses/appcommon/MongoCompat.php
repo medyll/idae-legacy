@@ -14,7 +14,12 @@ namespace AppCommon;
 
 use MongoDB\BSON\ObjectId;
 use MongoDB\BSON\Regex;
+use MongoDB\GridFS\Bucket;
+use MongoDB\Database as MongoDriverDatabase;
+use MongoDB\Collection as MongoDriverCollection;
 use DateTime;
+
+require_once __DIR__ . '/MongodbCursorWrapper.php';
 
 class MongoCompat {
     
@@ -287,18 +292,41 @@ class MongoClient {
 class MongoDB {
     private $client;
     private $dbName;
+    private $database;
     
     public function __construct($client, $dbName) {
         $this->client = $client;
         $this->dbName = $dbName;
+        $this->database = $client->selectDatabase($dbName);
     }
     
     public function selectCollection($collectionName) {
-        return new MongoCollection($this->client, $this->dbName, $collectionName);
+        $collection = $this->database->selectCollection($collectionName);
+        return new MongoCollection($collection);
     }
     
     public function __get($collectionName) {
         return $this->selectCollection($collectionName);
+    }
+    
+    public function getGridFs($bucketName = null) {
+        return new MongoGridFS($this->database, $bucketName);
+    }
+    
+    public function getGridFS($bucketName = null) {
+        return $this->getGridFs($bucketName);
+    }
+    
+    public function getInnerDatabase() {
+        return $this->database;
+    }
+    
+    public function getDatabaseName() {
+        return $this->dbName;
+    }
+
+    public function __call($name, $arguments) {
+        return $this->database->$name(...$arguments);
     }
 }
 
@@ -308,8 +336,12 @@ class MongoDB {
 class MongoCollection {
     private $collection;
     
-    public function __construct($client, $dbName, $collectionName) {
-        $this->collection = $client->selectDatabase($dbName)->selectCollection($collectionName);
+    public function __construct($clientOrCollection, $dbName = null, $collectionName = null) {
+        if ($clientOrCollection instanceof MongoDriverCollection) {
+            $this->collection = $clientOrCollection;
+        } else {
+            $this->collection = $clientOrCollection->selectDatabase($dbName)->selectCollection($collectionName);
+        }
     }
     
     public function find($query = [], $fields = []) {
@@ -317,7 +349,6 @@ class MongoCollection {
         if (!empty($fields)) {
             $options['projection'] = $fields;
         }
-        
         $cursor = $this->collection->find($query, $options);
         return new MongoCursor($cursor);
     }
@@ -346,7 +377,8 @@ class MongoCollection {
     }
     
     public function remove($criteria, $options = []) {
-        if (isset($options['justOne']) && $options['justOne']) {
+        $justOne = (!empty($options['justOne']) || !empty($options['single']));
+        if ($justOne) {
             $this->collection->deleteOne($criteria);
         } else {
             $this->collection->deleteMany($criteria);
@@ -361,70 +393,140 @@ class MongoCollection {
     public function ensureIndex($keys, $options = []) {
         return $this->createIndex($keys, $options);
     }
+    
+    public function distinct($field, $filter = [], array $options = []) {
+        return $this->collection->distinct($field, $filter, $options);
+    }
+    
+    public function count($filter = [], $options = []) {
+        return $this->collection->countDocuments($filter, $options);
+    }
+    
+    public function drop() {
+        return $this->collection->drop();
+    }
+    
+    public function getCollection() {
+        return $this->collection;
+    }
+
+    public function __call($name, $arguments) {
+        return $this->collection->$name(...$arguments);
+    }
 }
 
-/**
- * MongoCursor compatibility wrapper
- */
-class MongoCursor implements \Iterator {
-    private $cursor;
-    private $current;
-    private $key = 0;
+class MongoGridFS {
+    private $bucket;
     
-    public function __construct($cursor) {
-        $this->cursor = $cursor;
-    }
-    
-    public function rewind(): void {
-        $this->cursor->rewind();
-        $this->key = 0;
-        $this->fetchCurrent();
-    }
-    
-    public function current(): mixed {
-        return $this->current;
-    }
-    
-    public function key(): mixed {
-        return $this->key;
-    }
-    
-    public function next(): void {
-        $this->cursor->next();
-        $this->key++;
-        $this->fetchCurrent();
-    }
-    
-    public function valid(): bool {
-        return $this->cursor->valid();
-    }
-    
-    private function fetchCurrent() {
-        if ($this->cursor->valid()) {
-            $this->current = $this->cursor->current();
-        } else {
-            $this->current = null;
+    public function __construct(MongoDriverDatabase $database, $bucketName = null) {
+        $options = [];
+        if (!empty($bucketName)) {
+            $options['bucketName'] = $bucketName;
         }
+        $this->bucket = new Bucket($database, $options);
     }
     
-    public function sort($fields) {
-        // Note: This won't work on already-executed cursors
-        // In real usage, sorting should be done in find() options
-        return $this;
+    private function normalizeFilter($filter) {
+        if (is_string($filter)) {
+            return ['filename' => $filter];
+        }
+        return $filter ?: [];
     }
     
-    public function limit($num) {
-        return $this;
+    public function find($filter = [], $options = []) {
+        $cursor = $this->bucket->find($this->normalizeFilter($filter), $options);
+        $files = [];
+        foreach ($cursor as $file) {
+            $files[] = new MongoGridFSFile($this->bucket, $file);
+        }
+        return new MongoCursor($files);
     }
     
-    public function skip($num) {
-        return $this;
+    public function findOne($filter = [], $options = []) {
+        $cursor = $this->find($filter, $options);
+        return $cursor->getNext();
     }
     
-    public function count($all = false) {
-        return iterator_count($this->cursor);
+    public function storeBytes($bytes, array $options = []) {
+        $filename = $options['filename'] ?? ('file_' . uniqid());
+        $metadata = $options['metadata'] ?? [];
+        if (isset($options['metatag'])) {
+            $metadata['metatag'] = $options['metatag'];
+        }
+        $stream = fopen('php://temp', 'wb+');
+        fwrite($stream, $bytes);
+        rewind($stream);
+        $id = $this->bucket->uploadFromStream($filename, $stream, ['metadata' => $metadata]);
+        fclose($stream);
+        return $id;
+    }
+    
+    public function remove($criteria, array $options = []) {
+        $filter = $this->normalizeFilter($criteria);
+        if (isset($filter['_id'])) {
+            $this->bucket->delete($filter['_id']);
+            return true;
+        }
+        $cursor = $this->bucket->find($filter, $options);
+        foreach ($cursor as $file) {
+            $this->bucket->delete($file['_id']);
+        }
+        return true;
+    }
+    
+    public function delete($id) {
+        $this->bucket->delete($id);
+    }
+    
+    public function drop() {
+        $this->bucket->drop();
+    }
+    
+    public function get($id) {
+        $cursor = $this->bucket->find(['_id' => $id]) ;
+        foreach ($cursor as $file) {
+            return new MongoGridFSFile($this->bucket, $file);
+        }
+        return null;
     }
 }
+
+class MongoGridFSFile {
+    private $bucket;
+    private $file;
+    
+    public function __construct(Bucket $bucket, array $file) {
+        $this->bucket = $bucket;
+        $this->file = $file;
+    }
+    
+    public function getBytes() {
+        $stream = fopen('php://temp', 'wb+');
+        $this->bucket->downloadToStream($this->file['_id'], $stream);
+        rewind($stream);
+        $contents = stream_get_contents($stream);
+        fclose($stream);
+        return $contents;
+    }
+    
+    public function getFilename() {
+        return $this->file['filename'] ?? '';
+    }
+    
+    public function getId() {
+        return $this->file['_id'] ?? null;
+    }
+    
+    public function __get($name) {
+        return $this->file[$name] ?? null;
+    }
+    
+    public function toArray() {
+        return $this->file;
+    }
+}
+
+class MongoCursor extends MongodbCursorWrapper {}
 
 // Create global aliases for backward compatibility
 if (!class_exists('MongoClient', false)) {
@@ -438,4 +540,10 @@ if (!class_exists('MongoCollection', false)) {
 }
 if (!class_exists('MongoCursor', false)) {
     class_alias('AppCommon\MongoCursor', 'MongoCursor');
+}
+if (!class_exists('MongoGridFS', false)) {
+    class_alias('AppCommon\MongoGridFS', 'MongoGridFS');
+}
+if (!class_exists('MongoGridFSFile', false)) {
+    class_alias('AppCommon\MongoGridFSFile', 'MongoGridFSFile');
 }
