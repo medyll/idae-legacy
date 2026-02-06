@@ -186,7 +186,9 @@
 		static function send_cmd($cmd, $vars = [], $room = '') {
 			$arrjson = ['timeStamp' => (int)time(), 'cmd' => $cmd];
 			//
-			if (sizeof($vars) != 0) {
+			// PHP 8.2: sizeof/count requires array or Countable - handle stdClass objects
+			$varsCount = is_array($vars) ? count($vars) : (is_object($vars) ? count((array)$vars) : 0);
+			if ($varsCount != 0) {
 				$arrjson['vars'] = $vars;
 			}
 			//
