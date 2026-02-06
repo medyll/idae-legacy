@@ -492,7 +492,7 @@ class MongoGridFS {
 
 class MongoGridFSFile {
     private $bucket;
-    private $file;
+    public $file;
     
     public function __construct(Bucket $bucket, array $file) {
         $this->bucket = $bucket;

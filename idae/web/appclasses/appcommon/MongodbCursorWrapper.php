@@ -25,7 +25,7 @@ class MongodbCursorWrapper implements \Iterator, \Countable {
      */
     public function __construct($cursor) {
         if (is_array($cursor)) {
-            $this->documents = $cursor;
+            $this->documents = array_values($cursor); // Re-index to ensure 0-based integer keys
             $this->isArray = true;
         } else {
             $this->cursor = $cursor;
@@ -57,10 +57,30 @@ class MongodbCursorWrapper implements \Iterator, \Countable {
             return false;
         }
         
+        // Handle nested MongoCursor wrapper
+        if ($this->cursor instanceof MongodbCursorWrapper) {
+            return $this->cursor->getNext();
+        }
+
         // Initialize iterator on first call
         if ($this->cursorIterator === null) {
-            $this->cursorIterator = $this->cursor;
-            $this->cursorIterator->rewind();
+            
+            // Check if cursor is already a wrapper (nested) - Handled above now, but strictly speaking we might have Traversable
+            if ($this->cursor instanceof \Traversable) {
+                $this->cursorIterator = $this->cursor;
+                if ($this->cursorIterator instanceof \Iterator) {
+                     $this->cursorIterator->rewind();
+                }
+            }
+            elseif (is_array($this->cursor)) {
+                 $this->documents = $this->cursor;
+                 $this->isArray = true;
+                 return $this->getNext(); // Recursive call to handle array path
+            }
+             else {
+                // Unexpected type?
+                 return false;
+            }
             $this->hasStarted = true;
         } elseif ($this->hasStarted) {
             // Move to next only if not first call
