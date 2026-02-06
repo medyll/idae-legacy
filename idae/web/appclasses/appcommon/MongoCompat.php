@@ -361,11 +361,27 @@ class MongoCollection {
         return $this->collection->findOne($query, $options);
     }
     
+    public function insertOne($document, $options = []) {
+        return $this->collection->insertOne($document, $options);
+    }
+
+    public function insertMany($documents, $options = []) {
+        return $this->collection->insertMany($documents, $options);
+    }
+    
     public function insert($document, $options = []) {
         $result = $this->collection->insertOne($document);
         return $result->getInsertedId();
     }
     
+    public function updateOne($criteria, $update, $options = []) {
+        return $this->collection->updateOne($criteria, $update, $options);
+    }
+
+    public function updateMany($criteria, $update, $options = []) {
+        return $this->collection->updateMany($criteria, $update, $options);
+    }
+
     public function update($criteria, $update, $options = []) {
         if (isset($options['multiple']) || isset($options['multi'])) {
             $result = $this->collection->updateMany($criteria, $update, $options);
@@ -373,6 +389,14 @@ class MongoCollection {
             $result = $this->collection->updateOne($criteria, $update, $options);
         }
         return true;
+    }
+    
+    public function deleteOne($criteria, $options = []) {
+        return $this->collection->deleteOne($criteria, $options);
+    }
+
+    public function deleteMany($criteria, $options = []) {
+        return $this->collection->deleteMany($criteria, $options);
     }
     
     public function remove($criteria, $options = []) {
