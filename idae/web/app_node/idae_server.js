@@ -87,13 +87,11 @@ io.set("authorization", function (handshakeData, accept) {
 let socket_db_collection, socket_db_collection_site;
 
 async function open_socket_db() {
-  socket_db.open(function (err, db) {
-    db.admin().authenticate("admin", "gwetme2011", function (err, result) {
-      console.log("opening socket db", err, result);
-      socket_db_collection = socket_db.collection("onLine");
-      socket_db_collection_site = socket_db.collection("onLineSite");
-    });
-  });
+  // Database is already open and authenticated via MongoClient.connect()
+  console.log("Initializing socket database collections");
+  socket_db_collection = socket_db.collection("onLine");
+  socket_db_collection_site = socket_db.collection("onLineSite");
+  console.log("Socket database collections initialized");
 }
 
 function http_handler(req, res) {

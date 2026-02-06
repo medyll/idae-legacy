@@ -22,6 +22,12 @@
   "author": "Mydde",
   "main": "app_idae.js",
   "scripts": {
+    "start": "forever start -a -l logs/socket.log -o logs/socket-out.log -e logs/socket-err.log --uid idae_socket idae_server.js",
+    "stop": "forever stop idae_socket",
+    "restart": "forever restart idae_socket",
+    "status": "forever list",
+    "logs": "forever logs idae_socket",
+    "dev": "node idae_server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
@@ -30,5 +36,8 @@
     "for",
     "idae"
   ],
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "forever": "^4.0.3"
+  }
 }
