@@ -160,15 +160,15 @@ if (isset($hostConf['mdb'])) {
     }
     // DEBUG PRINT: Show resolved MongoDB connection info
     if (!empty(getenv('DEBUG_DB'))) {
-        header('Content-Type: text/plain; charset=UTF-8');
-        echo "[DEBUG] MONGO_HOST (env): ".$envMongoHost."\n";
-        echo "[DEBUG] MDB_HOST (final): ".$hostConf['mdb']['host']."\n";
-        echo "[DEBUG] MDB_USER: ".$hostConf['mdb']['user']."\n";
-        echo "[DEBUG] MDB_PASSWORD: ".($hostConf['mdb']['password'] ? '***' : '')."\n";
-        echo "[DEBUG] MDB_PREFIX: ".$hostConf['mdb']['prefix']."\n";
-        echo "[DEBUG] configFile: $configFile\n";
-        echo "[DEBUG] host: $host\n";
-        exit;
+        // header('Content-Type: text/plain; charset=UTF-8');
+        error_log("[DEBUG] MONGO_HOST (env): ".$envMongoHost);
+        error_log("[DEBUG] MDB_HOST (final): ".$hostConf['mdb']['host']);
+        error_log("[DEBUG] MDB_USER: ".$hostConf['mdb']['user']);
+        error_log("[DEBUG] MDB_PASSWORD: ".($hostConf['mdb']['password'] ? '***' : ''));
+        error_log("[DEBUG] MDB_PREFIX: ".$hostConf['mdb']['prefix']);
+        error_log("[DEBUG] configFile: $configFile");
+        error_log("[DEBUG] host: $host");
+        // exit;
     }
     define_if_exists('host', $hostConf['mdb'], 'MDB_HOST');
     define_if_exists('user', $hostConf['mdb'], 'MDB_USER');
