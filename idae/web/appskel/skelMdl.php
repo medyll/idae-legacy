@@ -132,7 +132,8 @@
 			}
 			/// echo HTTPHOSTNOPORT . ':' . SOCKETIO_PORT . '/run';
 			// write a socket file
-			skelMdl::doSocket(HTTPHOSTNOPORT . ':' . SOCKETIO_PORT . '/run', $arrjson);
+			$socketHost = defined('SOCKET_HOST') ? SOCKET_HOST : HTTPHOSTNOPORT;
+			skelMdl::doSocket($socketHost . ':' . SOCKETIO_PORT . '/run', $arrjson);
 		}
 
 		static function doSocket($url, $vars = []) {
@@ -141,8 +142,8 @@
 			$parts      = parse_url($url);
 			$cookie_str = session_name() . "=" . session_id() . "; path=" . session_save_path();
 
-			//
-			$host = explode(':', $_SERVER['HTTP_HOST'])[0];
+			// Fix: Use host from URL if present (needed for Docker networking), otherwise fallback to current host
+			$host = !empty($parts['host']) ? $parts['host'] : explode(':', $_SERVER['HTTP_HOST'])[0];
 			$fp = fsockopen($host, isset($parts['port']) ? $parts['port'] : 80, $errno, $errstr, 5);
 			// $fp                     = fsockopen($parts['host'], isset($parts['port']) ? $parts['port'] : 80, $errno, $errstr, 30);
 			$vars['DOCUMENTDOMAIN'] = DOCUMENTDOMAIN;
@@ -193,7 +194,8 @@
 				$arrjson['OWN'] = $room;
 			}
 
-			skelMdl::doSocket(HTTPHOSTNOPORT . ':' . SOCKETIO_PORT . '/postReload', $arrjson);
+			$socketHost = defined('SOCKET_HOST') ? SOCKET_HOST : HTTPHOSTNOPORT;
+			skelMdl::doSocket($socketHost . ':' . SOCKETIO_PORT . '/postReload', $arrjson);
 
 		}
 		static function send_cmd_eleph($cmd, $vars = [], $room = '') {
@@ -243,7 +245,8 @@
 			}
 
 			$arrjson['str_cookie'] = session_name() . "=" . session_id() . "; path=" . session_save_path();
-			skelMdl::doSocket(HTTPHOSTNOPORT . ':' . SOCKETIO_PORT . '/runModule', $arrjson);
+			$socketHost = defined('SOCKET_HOST') ? SOCKET_HOST : HTTPHOSTNOPORT;
+			skelMdl::doSocket($socketHost . ':' . SOCKETIO_PORT . '/runModule', $arrjson);
 		}
 
 		function _construct() {

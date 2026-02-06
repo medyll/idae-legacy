@@ -492,7 +492,7 @@
 			}
 			$con  = $APP->plug_base('sitebase_image');
 			$grid = $con->getGridFs();
-
+			
 			if ($size == 'smallest') {
 				global $IMG_SIZE_ARR, $buildArr;
 				$arr_size = array_merge(array_keys($buildArr), array_keys($IMG_SIZE_ARR));
@@ -532,13 +532,19 @@
 			if (empty($image)) {
 				$image = $grid->findOne($nude_name);
 			}
+			
+			if (empty($image)) {
+				return "http://www.notfound.com/images/blank.png?f=" . $nude_name;
+			}
+			
 			//	vardump($image);
 			// echo " $nude_name. $type , $nude_name  ";
 			// $dir  = $image->file['metadata']['tag'] . '/';
 			$dir  = $famille . '/';
-			$file = $image->file;
+			$file = isset($image->file) ? $image->file : []; // Safety check
 
-			switch ($file['metadata']['contentType']) {
+			$contentType = isset($file['metadata']['contentType']) ? $file['metadata']['contentType'] : '';
+			switch ($contentType) {
 				case "image/jpeg":
 					$ext = 'jpg';
 					break;
@@ -565,12 +571,14 @@
 			//echo " what 00 ";
 			if (!empty($image) || !file_exists($image_file)) { // && 3 == 8
 				//	echo " what 11 ";
-				// on écrit image
-				$id   = $image->file['_id'];
-				$file = $image->file;
-				$sdir = $image->file['metadata']['tag'];
+				// on écrit image ?? null;
+				$file = isset($image->file) ? $image->file : [];
+				$sdir = isset($file['metadata']['tag']) ? $file['metadata']['tag'] : 'default';
+				
+				if (empty($sdir)) $sdir = 'default';
+				
 				if (is_array($sdir)) {
-					$sdir = $sdir[0];
+					$sdir = isset($sdir[0]) ? $sdir[0] : 'default';
 				}
 				//	echo " what 22 ";
 				$dir = FLATTENIMGDIR . $sdir . '/';

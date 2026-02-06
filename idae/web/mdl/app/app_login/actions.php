@@ -14,11 +14,13 @@
 		case "app_log":
 
 			$_POST = fonctionsProduction::cleanPostMongo($_POST, 1);
-			$type  = $_POST['type'] ?? 'agent';
+			$type  = isset($_POST['type']) ? $_POST['type'] : 'agent';
 			$Type  = ucfirst($type);
 			$APP   = new App($type);
 			
 			$arrAgent = $APP->findOne(["login$Type" => $_POST["login$Type"], "password$Type" => $_POST["password$Type"]]);
+
+			$phpsessid = isset($_COOKIE['PHPSESSID']) ? $_COOKIE['PHPSESSID'] : '';
 
 			if (!empty($arrAgent)) {
 				error_log("DEBUG: actions.php agent found: " . $arrAgent["id$type"]);
@@ -36,21 +38,24 @@
 				setcookie("login", $_POST['loginAgent'], time() + 3600 * 24 * 30, '/');
 				setcookie("id$type", $idagent, 0, '/');
 				setcookie("SESSID", $idagent, 0, '/');
-				setcookie("APPID", $_COOKIE['PHPSESSID'] ?? '', 0, '/');
+				setcookie("APPID", $phpsessid, 0, '/');
 
-				skelMdl::send_cmd('act_notify', ['msg' => 'En ligne ' . $arrAgent["prenom$Type"], "id$type" => $arrAgent["id$type"], 'PHPSESSID' => ($_COOKIE['PHPSESSID'] ?? ''), 'SESSID' => $arrAgent["idagent"]]);
-				$APP->update(['idagent' => $idagent], ['PHPSESSID' => ($_COOKIE['PHPSESSID'] ?? '')]);
+				skelMdl::send_cmd('act_notify', ['msg' => 'En ligne ' . $arrAgent["prenom$Type"], "id$type" => $arrAgent["id$type"], 'PHPSESSID' => $phpsessid, 'SESSID' => $arrAgent["idagent"]]);
+				$APP->update(['idagent' => $idagent], ['PHPSESSID' => $phpsessid]);
 
+				error_log("DEBUG: actions.php calling app_login_success");
 				$mdl = skelMdl::cf_module('app/app_login/app_login_success');//;
+				error_log("DEBUG: actions.php app_login_success done");
+				
 				skelMdl::send_cmd('act_notify', ['msg' => $mdl]);
 				?>
 				<script>
 					localStorage.setItem ('SESSID', '<?=$arrAgent["id$type"]?>');
 					localStorage.setItem ('IDAGENT', '<?=$arrAgent["id$type"]?>');
-					localStorage.setItem ('APPID', '<?=($_COOKIE['PHPSESSID'] ?? '')?>');
-					localStorage.setItem ('PHPSESSID', '<?=($_COOKIE['PHPSESSID'] ?? '')?>');
+					localStorage.setItem ('APPID', '<?=$phpsessid?>');
+					localStorage.setItem ('PHPSESSID', '<?=$phpsessid?>');
 
-					socket.emit ('grantIn', { DOCUMENTDOMAIN : '<?=DOCUMENTDOMAIN?>', IDAGENT :<?=$arrAgent["id$type"]?>, SESSID :<?=$arrAgent["id$type"]?>, PHPSESSID : '<?=($_COOKIE['PHPSESSID'] ?? '')?>' }, function (data) {
+					socket.emit ('grantIn', { DOCUMENTDOMAIN : '<?=DOCUMENTDOMAIN?>', IDAGENT :<?=$arrAgent["id$type"]?>, SESSID :<?=$arrAgent["id$type"]?>, PHPSESSID : '<?=$phpsessid?>' }, function (data) {
 						$ ('inBody').loadModule ('app/app_gui/app_gui_main', { onComplete : hide_login () });
 					})
 				</script>
@@ -59,7 +64,7 @@
 				$_SESSION["id$type"] = '';
 				unset($_SESSION["id$type"]);
 
-				skelMdl::send_cmd('act_notify', ['msg' => 'Accés refusé ' . $_POST["login$Type"]], ($_COOKIE['PHPSESSID'] ?? ''));
+				skelMdl::send_cmd('act_notify', ['msg' => 'Accés refusé ' . $_POST["login$Type"]], $phpsessid);
 			}
 			break;
 	}
