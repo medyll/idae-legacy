@@ -11,6 +11,19 @@ import qs from 'qs';
  */
 export function registerHandlers(io, socket) {
 
+    // Sanitize DOCUMENTDOMAIN from client (strip trailing slashes, paths, query strings)
+    function cleanDomain(domain) {
+        if (!domain) return domain;
+        // Remove trailing slash(es)
+        domain = domain.replace(/\/+$/, '');
+        // Remove any path/query that might have leaked in (e.g. localhost:8080/index.php?retry=1)
+        const slashIdx = domain.indexOf('/');
+        if (slashIdx !== -1) {
+            domain = domain.substring(0, slashIdx);
+        }
+        return domain;
+    }
+
     // --- Join Rooms logic ---
     if (socket.PHPSESSID) {
         socket.join(socket.PHPSESSID);
@@ -53,7 +66,7 @@ export function registerHandlers(io, socket) {
 
     // --- GrantIn (Login) ---
     socket.on("grantIn", function (data, fn) {
-        // console.log("socket on grantin ", data);
+        console.log("[SOCKET] grantIn received:", data);
         
         const sess = {
             sessionId: socket.id,
@@ -105,16 +118,19 @@ export function registerHandlers(io, socket) {
 
     // loadModule
     socket.on("loadModule", async function (data, func) {
-        const DOCUMENTDOMAIN = data.DOCUMENTDOMAIN || "app.destinationsreve.com";
+        const DOCUMENTDOMAIN = cleanDomain(data.DOCUMENTDOMAIN) || "app.destinationsreve.com";
         const mdl = data.mdl || "";
         const SESSID = data.SESSID || "";
         
+        console.log(`[loadModule] DOMAIN=${DOCUMENTDOMAIN} mdl=${mdl} SESSID=${SESSID} PHPSESSID=${data.PHPSESSID || 'none'} vars=${data.vars || ''}`);
         if (DOCUMENTDOMAIN) socket.join(DOCUMENTDOMAIN);
 
         const url = `http://${DOCUMENTDOMAIN}/mdl/${mdl}.php?SESSID=${SESSID}`;
+        console.log(`[loadModule] -> ${url}`);
         
         try {
-            const result = await phpBridge.post(url, data); // post uses data.vars
+            const result = await phpBridge.post(url, data);
+            console.log(`[loadModule] <- status=${result.status} size=${result.data ? result.data.length : 0}`);
             socket.emit("loadModule", {
                 body: result.data,
                 vars: data.vars || "",
@@ -122,32 +138,35 @@ export function registerHandlers(io, socket) {
                 title: data.title || ""
             });
         } catch (e) {
-            // Error handled in bridge
+            console.error(`[loadModule] ERROR: ${e.message}`);
         }
     });
 
     // socketModule
     socket.on("socketModule", async function (data, fun) {
-        const DOCUMENTDOMAIN = data.DOCUMENTDOMAIN || "appgem.destinationsreve.com";
+        const DOCUMENTDOMAIN = cleanDomain(data.DOCUMENTDOMAIN) || "appgem.destinationsreve.com";
+        console.log(`[socketModule] DOMAIN=${DOCUMENTDOMAIN} file=${data.file} element=${data.element || 'none'} PHPSESSID=${data.PHPSESSID || 'none'} SESSID=${data.SESSID || 'none'} vars=${data.vars || ''}`);
         if (DOCUMENTDOMAIN) socket.join(DOCUMENTDOMAIN);
 
         const url = `http://${DOCUMENTDOMAIN}/mdl/${data.file}.php`;
         
         try {
-            // The legacy code sent `data.vars` as body directly? 
-            // `body: data.vars` in legacy request.post
-            // We'll pass raw body
             const body = typeof data.vars === 'string' ? data.vars : qs.stringify(data.vars);
+            console.log(`[socketModule] -> ${url} body=${body.substring(0, 200)}`);
             const result = await phpBridge.post(url, data, body);
+            const preview = typeof result.data === 'string' ? result.data.substring(0, 150) : JSON.stringify(result.data).substring(0, 150);
+            console.log(`[socketModule] <- status=${result.status} size=${result.data ? result.data.length : 0} preview=${preview}`);
             
             socket.emit("socketModule", { body: result.data, out: data });
             if (fun) fun({ body: result.data, data: data });
-        } catch (e) {}
+        } catch (e) {
+            console.error(`[socketModule] ERROR: ${e.message}`);
+        }
     });
 
     // upd_data
     socket.on("upd_data", async function (data) {
-        const DOCUMENTDOMAIN = data.DOCUMENTDOMAIN || "app.destinationsreve.com";
+        const DOCUMENTDOMAIN = cleanDomain(data.DOCUMENTDOMAIN) || "app.destinationsreve.com";
         const url = `http://${DOCUMENTDOMAIN}/services/json_data_table_row.php`;
         
         try {
@@ -164,24 +183,45 @@ export function registerHandlers(io, socket) {
     // get_data
     socket.on("get_data", async function (data, options, fn) {
         try {
-            const DOCUMENTDOMAIN = data.DOCUMENTDOMAIN || "app.destinationsreve.com";
+            const DOCUMENTDOMAIN = cleanDomain(data.DOCUMENTDOMAIN) || "app.destinationsreve.com";
             const directory = data.directory || "services";
             const extension = data.extension || "php";
             const url = `http://${DOCUMENTDOMAIN}/${directory}/${data.mdl}.${extension}`;
 
+            console.log(`[get_data] DOMAIN=${DOCUMENTDOMAIN} mdl=${data.mdl} PHPSESSID=${data.PHPSESSID || 'none'} SESSID=${data.SESSID || 'none'} vars=${JSON.stringify(data.vars || {})}`);
+            console.log(`[get_data] -> ${url}`);
             const result = await phpBridge.get(url, data);
-            if (fn) fn(result, options);
+            
+            // Legacy client expects a JSON string, but Axios automatically parses JSON.
+            // We must stringify it back if it's an object, so the client can JSON.parse it.
+            let responseData = result;
+            if (typeof responseData === 'object') {
+                responseData = JSON.stringify(responseData);
+            }
+
+            const preview = responseData ? responseData.substring(0, 200) : 'empty';
+            console.log(`[get_data] <- size=${responseData ? responseData.length : 0} preview=${preview}`);
+
+            if (fn) fn(responseData, options);
         } catch (e) {
+            console.error(`[get_data] ERROR: ${e.message}`);
             if (fn) fn({ error: true, message: e.message }, options);
         }
     });
     
     // runModule
     socket.on("runModule", async function (data) {
-         const DOCUMENTDOMAIN = data.DOCUMENTDOMAIN || "appgem.destinationsreve.com";
+         const DOCUMENTDOMAIN = cleanDomain(data.DOCUMENTDOMAIN) || "appgem.destinationsreve.com";
          const url = `http://${DOCUMENTDOMAIN}/${data.file}.php`;
          
+         console.log(`[runModule] DOMAIN=${DOCUMENTDOMAIN} file=${data.file} PHPSESSID=${data.PHPSESSID || 'none'} vars=${data.vars || ''}`);
+         console.log(`[runModule] -> ${url}`);
          const body = typeof data.vars === 'string' ? data.vars : qs.stringify(data.vars);
-         await phpBridge.post(url, data, body);
+         try {
+             await phpBridge.post(url, data, body);
+             console.log(`[runModule] <- done`);
+         } catch (e) {
+             console.error(`[runModule] ERROR: ${e.message}`);
+         }
     });
 }

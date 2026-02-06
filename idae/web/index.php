@@ -12,7 +12,7 @@
 
 	// Redirect loop protection
 	if (empty($_SESSION['reindex'])) {
-		die('Session reindex is empty - stopped to prevent infinite loop');
+		// die('Session reindex is empty - stopped to prevent infinite loop');
 		// Check if we're already in redirect loop (max 3 redirects)
 		if (isset($_GET['retry']) && (int)$_GET['retry'] >= 3) {
 			die('<h1>Session Error</h1><p>Cannot initialize session. Check MongoDB connection and logs.</p>');

@@ -15,8 +15,8 @@
 	$COLLECT['idagent']   = (int)$_SESSION['idagent'];*/
 
 	$COLLECT['PHPSESSID'] = $_COOKIE['PHPSESSID'];
-	$COLLECT['SESSID']    = (int)$_SESSION['idagent'];
-	$COLLECT['idagent']   = (int)$_SESSION['idagent'];
+	$COLLECT['SESSID']    = isset($_SESSION['idagent']) ? (int)$_SESSION['idagent'] : 0;
+	$COLLECT['idagent']   = isset($_SESSION['idagent']) ? (int)$_SESSION['idagent'] : 0;
 
 
 	echo trim(json_encode($COLLECT));

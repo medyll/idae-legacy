@@ -38,8 +38,9 @@ async function bootstrap() {
     // 3. Setup Socket.IO
     const io = new Server(server, {
         cors: {
-            origin: "*", // Adjust as needed for security
-            methods: ["GET", "POST"]
+            origin: ["http://localhost:8080", "http://127.0.0.1:8080", "http://localhost"],
+            methods: ["GET", "POST"],
+            credentials: true
         },
         allowEIO3: true // Support legacy clients if needed (v2/v3)
     });
@@ -48,7 +49,12 @@ async function bootstrap() {
     io.use(authMiddleware);
 
     io.on('connection', (socket) => {
-        // console.log(`[SOCKET] New connection ${socket.id}`);
+        console.log(`[SOCKET] New connection ${socket.id}`);
+
+        socket.onAny((eventName, ...args) => {
+           // console.log(`[SOCKET DEBUG] INCOMING: ${eventName}`, args);
+        });
+
         registerHandlers(io, socket);
     });
 

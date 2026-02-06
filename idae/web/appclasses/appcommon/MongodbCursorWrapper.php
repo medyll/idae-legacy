@@ -159,8 +159,15 @@ class MongodbCursorWrapper implements \Iterator, \Countable {
         $this->position = 0;
         $this->hasStarted = false;
         if (!$this->isArray && $this->cursor !== null) {
-            $this->cursorIterator = $this->cursor;
-            $this->cursorIterator->rewind();
+            // Convert cursor to array to allow rewind (MongoDB cursors can't rewind after iteration)
+            if (empty($this->documents)) {
+                try {
+                    $this->documents = iterator_to_array($this->cursor);
+                } catch (\Exception $e) {
+                    $this->documents = [];
+                }
+            }
+            $this->isArray = true;
         }
     }
     
