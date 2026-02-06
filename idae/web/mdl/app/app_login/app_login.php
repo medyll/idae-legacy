@@ -12,7 +12,7 @@ $login = (empty($_COOKIE["login"])) ? '' : $_COOKIE["login"];
 		<div class="transpblanc aligncenter">
 			<div class="inline" style="text-align: left;">
 
-				<form class="Form" action="mdl/app/app_login/actions.php" onsubmit="console.log(ajaxFormValidation);ajaxFormValidation(this);return false;"
+				<form class="Form" action="mdl/app/app_login/actions.php" onsubmit="ajaxFormValidation(this);return false;"
 					name="formIdentificationUtilisateur" id="formIdentificationUtilisateur">
 					<div class="bold uppercase aligncenter padding margin borderb">Identification</div>
 
