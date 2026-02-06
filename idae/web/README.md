@@ -91,6 +91,39 @@ node idae_server.js
 # Access at http://localhost:8000
 ```
 
+### Socket.io Server Management
+
+The socket.io server can be managed using **forever** for background execution:
+
+```bash
+cd idae/web/app_node
+
+# Install dependencies (includes forever)
+npm install
+
+# Start server in background
+npm run start
+
+# Stop server
+npm run stop
+
+# Check status
+npm run status
+
+# View logs
+npm run logs
+
+# Development mode (foreground, Ctrl+C to stop)
+npm run dev
+```
+
+**Logs location**: `app_node/logs/` (socket-out.log, socket-err.log)
+
+**Troubleshoot**:
+- Kill all Node processes: `Stop-Process -Name node -Force` (Windows) or `pkill node` (Linux)
+- Check MongoDB connection if startup fails
+- Verify port 3005 is available: `netstat -an | findstr 3005`
+
 ## Application Bootstrap Flow
 
 ### Server-Side (PHP/Node.js)
@@ -281,8 +314,10 @@ file_put_contents(ACTIVEMODULEFILE, 'reloadModule("scope_name")');
 | Field name mismatch | Remember: `nomProduit` (not `nom`) - table name appended |
 | ADODB cursor exhaustion | Re-query if iterating multiple times |
 | Socket.io connection fails | Check port 3005 open, verify PHPSESSID in cookies |
+| Socket.io MongoDB error | Don't use `.open()` or `.authenticate()` with modern driver - connection is already open |
 | Type coercion issues | Cast IDs: `(int)$_POST['id']` before querying |
 | Regex injection | Use `preg_quote()` before MongoDB regex patterns |
+| Forever not starting | Run `npm install` first, ensure `.forever/logs/` directory exists in home |
 
 ## Performance Considerations
 
@@ -297,7 +332,9 @@ file_put_contents(ACTIVEMODULEFILE, 'reloadModule("scope_name")');
 ### Logs
 
 - **PHP errors**: `/var/log/apache2/php-error.log`
-- **Node.js**: stdout console
+- **Node.js stdout**: `app_node/logs/socket-out.log` (when using forever)
+- **Node.js stderr**: `app_node/logs/socket-err.log` (when using forever)
+- **Forever logs**: View with `npm run logs` or check `~/.forever/logs/`
 - **MongoDB**: Check collection sizes with `db.collection.stats()`
 
 ### Enable Debug Mode
