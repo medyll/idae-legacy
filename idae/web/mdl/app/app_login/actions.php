@@ -1,5 +1,5 @@
 <?php
-	// error_log("DEBUG: actions.php START");
+	error_log("DEBUG: actions.php START - POST: " . print_r($_POST, true));
 	include_once($_SERVER['CONF_INC']);
 
 	array_walk_recursive($_POST, 'CleanStr');

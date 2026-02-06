@@ -483,6 +483,7 @@
 		}
 
 		static function imgApp($famille, $id, $size = 'small', $reflect = '') {
+			error_log("DEBUG: ClassAct::imgApp START famille=$famille id=$id size=$size reflect=$reflect");
 			ini_set('display_errors', 0);
 
 			$APP = new App();
@@ -528,12 +529,20 @@
 			$nude_name = strtolower($famille) . '-' . $size . '-' . $id . $zen;
 
 			$fullNameImg = $nameImage . '.' . $type;
-			$image       = $grid->findOne($nude_name . '.' . $type);
-			if (empty($image)) {
-				$image = $grid->findOne($nude_name);
+			error_log("DEBUG: ClassAct::imgApp query nude_name=$nude_name type=$type");
+			try {
+				$image = $grid->findOne($nude_name . '.' . $type);
+				if (empty($image)) {
+					error_log("DEBUG: ClassAct::imgApp not found with ext, trying bare");
+					$image = $grid->findOne($nude_name);
+				}
+			} catch (Exception $e) {
+				error_log("ERROR: ClassAct::imgApp EXCEPTION: " . $e->getMessage());
+				return "http://www.notfound.com/images/error.png";
 			}
 			
 			if (empty($image)) {
+				error_log("DEBUG: ClassAct::imgApp image empty, returning 404 placeholder");
 				return "http://www.notfound.com/images/blank.png?f=" . $nude_name;
 			}
 			
@@ -541,6 +550,8 @@
 			// echo " $nude_name. $type , $nude_name  ";
 			// $dir  = $image->file['metadata']['tag'] . '/';
 			$dir  = $famille . '/';
+			
+			error_log("DEBUG: ClassAct::imgApp image found, processing file data");
 			$file = isset($image->file) ? $image->file : []; // Safety check
 
 			$contentType = isset($file['metadata']['contentType']) ? $file['metadata']['contentType'] : '';
