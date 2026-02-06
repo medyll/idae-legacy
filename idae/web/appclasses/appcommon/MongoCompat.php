@@ -422,7 +422,7 @@ class MongoGridFS {
         if (!empty($bucketName)) {
             $options['bucketName'] = $bucketName;
         }
-        $this->bucket = new Bucket($database, $options);
+        $this->bucket = $database->selectGridFSBucket($options);
     }
     
     private function normalizeFilter($filter) {
