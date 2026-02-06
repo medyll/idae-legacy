@@ -1,3 +1,6 @@
+
+console.log('DEBUG: engine.js execution STARTED');
+
 var searchtimer;
 quickFind = function (value, where, tag, spy) {
 	clearTimeout(searchtimer);
@@ -260,6 +263,7 @@ runSocketModule = function () {
 
 }
 ajaxFormValidation = function (form) {
+	console.log('ajaxFormValidation', form);
 	if (form.readAttribute('auto_close')) {
 		$(form).makeLoading();
 	}

@@ -142,7 +142,8 @@
 			$cookie_str = session_name() . "=" . session_id() . "; path=" . session_save_path();
 
 			//
-			$fp = fsockopen($_SERVER['HTTP_HOST'], isset($parts['port']) ? $parts['port'] : 80, $errno, $errstr, 30);
+			$host = explode(':', $_SERVER['HTTP_HOST'])[0];
+			$fp = fsockopen($host, isset($parts['port']) ? $parts['port'] : 80, $errno, $errstr, 5);
 			// $fp                     = fsockopen($parts['host'], isset($parts['port']) ? $parts['port'] : 80, $errno, $errstr, 30);
 			$vars['DOCUMENTDOMAIN'] = DOCUMENTDOMAIN;
 			$vars['PHPSESSID'] = session_id();
