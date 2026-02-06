@@ -222,6 +222,7 @@
 			if (empty($file_extension)) {
 				$image_name .= '.jpg';
 			};
+			$reflect = isset($reflect) ? $reflect : ''; // Fix undefined variable
 			$type = empty($reflect) ? 'jpg' : 'png';
 
 			$con  = $APP->plug_base('sitebase_image');

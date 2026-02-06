@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 
 	ini_set('display_errors', 55);
@@ -7,7 +7,7 @@
 	ini_set('max_input_time', 10);
 
 //if(isset($_POST['F_action'])){ $F_action =$_POST['F_action'];} else{exit;} 
-	array_walk_recursive($_POST, 'CleanStr', $_POST);
+	array_walk_recursive($_POST, 'CleanStr');
 	$msg = '';
 	$APP = new App();
 ?>
@@ -15,12 +15,12 @@
 		options = {}
 		options.className = 'myddeNotifier';
 
-		<? if(!empty($_POST['noticeMsg'])){$msg = '<br><strong>'.$_POST['noticeMsg'].'</strong>'; } ?>
-		<? if(empty($_POST['silentMsg']) && !(empty($msg))){ ?>
+		<?php if(!empty($_POST['noticeMsg'])){$msg = '<br><strong>'.$_POST['noticeMsg'].'</strong>'; } ?>
+		<?php if(empty($_POST['silentMsg']) && !(empty($msg))){ ?>
 		a = new myddeNotifier(options)
 		a.growl('<?=$msg?>');
-		<? } ?>
-		<?
+		<?php } ?>
+		<?php
 		extract($_POST);
 			switch ($F_action){
 				case "quitter":
@@ -28,7 +28,7 @@
 		localStorage.removeItem('PHPSESSID');
 		localStorage.removeItem('SESSID');
 		document.location.href = 'index.php';
-		<?
+		<?php
 		break;  
 		case 'identificationAgent':   
 		if(!empty($_SESSION['idagent'])){   
@@ -36,32 +36,32 @@
 		// ajaxInMdl('identificationagent/mdlIdentificationGood','div_notification_result_login','idagent=<?=$_SESSION['idagent']?>');  
 		$('div_notification_result_login').socketModule('identificationagent/mdlIdentificationGood', 'idagent=<?=$_SESSION['idagent']?>');
 		// document.location.href='http://<?=$_SERVER['HTTP_HOST']?>';
-		<?	 } else {  ?>
+		<?php	 } else {  ?>
 		ajaxInMdl('identificationagent/mdlIdentificationFail', 'div_notification_result_login', '', {single: true});
-		<?
+		<?php
 		}
 		break; 
 		case "createClient":
 		?>
 		ajaxMdl('client/client_fiche', 'Fiche client', 'idclient=<?=$_POST['idclient']?>');
-		<?
+		<?php
 		break;
 		case "makeDevisSite":
 		?>
 		setTimeout(function () {
 			<?=fonctionsJs::devis_update($_POST["iddevis"])?>
 		}.bind(this), 1250)
-		<?
+		<?php
 		break;
 		case "uploadWallpaper":
 		?>
 		window.parent.reloadModule('settings/mdlSettingsWallpaper', '*');
-		<?
+		<?php
 		break; 
 		case "delWallPaper":
 		?>
 		reloadModule('settings/mdlSettingsWallpaper', '*');
-		<?
+		<?php
 		break;
 	}
 ////
@@ -87,11 +87,11 @@ if(!empty($_POST['idfournisseur'])){
 // spy code
 $round_numerator = 60 * 5;
 $rounded_time = ( round ( time() / $round_numerator ) * $round_numerator );
-$upd['codeActivite'] = strtoupper($F_action);
+$upd['codeActivite'] = strtoupper($F_action ?? '');
 $upd['timeActivite'] = (int)$rounded_time;
 $upd['dateActivite']  = date('Y-m-d',$rounded_time); 
 $upd['heureActivite'] = date('H:i:s',$rounded_time);
-$upd['idagent']= (int)$_SESSION['idagent'];  
+$upd['idagent']= (int)($_SESSION['idagent'] ?? 0);
 $APP->plug('sitebase_base','activity')->update($upd,['$set'=>$upd,'$inc'=>['nb'=>1]],['upsert'=>true]);
 
 
@@ -125,7 +125,7 @@ foreach($_POST['deleteModule'] as $key=>$val)  {
 				}.bind(this), 500)
 			}
 		})
-		<?
+		<?php
 		}else{
 			foreach($val as $keykey=>$realval):
 				?>
@@ -151,7 +151,7 @@ foreach($_POST['deleteModule'] as $key=>$val)  {
 				}.bind(this), 500)
 			}
 		})
-		<?
+		<?php
 			endforeach;
 		}
 		}
@@ -165,12 +165,12 @@ foreach($_POST['deleteModule'] as $key=>$val)  {
 			} catch (e) {
 			}
 		})
-		<?
+		<?php
 		}
 	}
 	?>
 	</script>
-<?
+<?php
 	if (!empty($_POST['table'] && !empty($_POST['vars']['idnewsletter']))) {
 		echo $_POST['vars']['idnewsletter'];
 		skelMdl::reloadModule('app/app_newsletter/app_newsletter_preview', $_POST['vars']['idnewsletter']);
