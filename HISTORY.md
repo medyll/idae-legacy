@@ -83,3 +83,37 @@ Progress was fierce but halted by the **"Auth Wall"**. As the PHP container trie
 Today, IDAE stands at the threshold of a new era. It is a testament to the longevity of well-conceived software. By wrapping its legacy core in modern infrastructure (Docker, PHP 8.2, adapters), it preserves the genius of Meddy Lebrun's original vision while shedding the shackles of obsolete infrastructure.
 
 It remains a fascinating case study in software evolution: how a "No-Schema" pioneer survived the SQL wars, the death of PHP 5, and the reinvention of MongoDB, to run again on the modern web.
+
+---
+
+## February 6, 2026: First Boot — The Application Lives Again
+
+After weeks of migration work, **IDAE successfully booted for the first time on PHP 8.2 with the modern MongoDB driver**. The login screen appeared. The GUI loaded. The socket bridge responded. For the first time since the migration began, the full application stack was alive:
+
+**PHP 8.2 (Docker)** ↔ **Node.js 18 + Socket.IO 4** ↔ **MongoDB (Host)** ↔ **Legacy Browser Client**
+
+### The Final Chain of Blockers
+
+The last stretch required solving eight interlocking issues, each one invisible until the previous was fixed:
+
+1.  **CORS Policy** — Socket.IO server used `origin: "*"` but the legacy client connected with `withCredentials: true`. Modern browsers reject wildcard origins when credentials are included. Fixed by specifying explicit origins (`http://localhost:8080`) and enabling `credentials: true` in the Socket.IO server configuration.
+
+2.  **Corrupted DOCUMENTDOMAIN** — The client-side JavaScript built `DOCUMENTDOMAIN` using `window.document.location.href` instead of `window.document.location.host`. On localhost, this produced `localhost:8080/index.php?retry=2` instead of `localhost:8080`, causing every proxied URL to be malformed (e.g., `http://localhost:8080/index.php?retry=2/services/json_ssid.php`). Fixed in `app.js`, `app_bootstrap.js`, and `methods.js`.
+
+3.  **Trailing Slash Sanitization** — Even after the href fix, some edge cases produced `localhost:8080/` with a trailing slash, causing double-slash URLs (`http://localhost:8080//services/...`). Added a `cleanDomain()` sanitizer in the Node.js socket handlers to strip trailing slashes and any leaked path components.
+
+4.  **Missing `socketModule` DOM Handler** — The browser-side `app_socket.js` was missing the `socket.on('socketModule', ...)` listener responsible for injecting PHP-rendered HTML into the DOM. The server responded correctly, but the client silently discarded the responses. Added the handler to update `$(element)` with the response body and fire `content:loaded`.
+
+5.  **Axios JSON Auto-Parse** — The Node.js `phpBridge` used Axios, which automatically parses JSON responses into JavaScript objects. But the legacy client expected raw JSON **strings** (to call `JSON.parse()` manually). Receiving `[object Object]` caused silent parse failures. Fixed by re-stringifying object responses before sending them back through the socket.
+
+6.  **PHP Redirect Loop** — When the Node server proxied requests to PHP, Axios followed HTTP redirects (302 to `reindex.php`, then back to `index.php`). After 3 retries, PHP returned an HTML error page ("Session Error") instead of JSON. Fixed by setting `maxRedirects: 0` in the PHP bridge, letting the Node server detect and handle redirects gracefully.
+
+7.  **MongoDB Cursor Rewind** — The `MongodbCursorWrapper::rewind()` method attempted to call `rewind()` on a MongoDB cursor that had already been partially iterated, triggering a `LogicException`. Fixed by converting the cursor to an array on rewind, since MongoDB cursors are forward-only.
+
+8.  **PHP Error Display Pollution** — With `display_errors = 1`, PHP warnings (`Undefined array key`, etc.) were injected directly into JSON and HTML responses. The client JavaScript couldn't parse the corrupted output. Disabled `display_errors` in `conf.lan.inc.php` — errors are still logged to Apache's error log inside the container.
+
+### The Lesson
+
+Each fix was trivial in isolation. But like dominoes, they formed a chain where one masked the next. The CORS fix revealed the URL corruption. The URL fix revealed the missing handler. The handler fix revealed the JSON parsing bug. The parsing fix revealed the redirect loop. The redirect fix revealed the cursor crash. And the cursor fix revealed the error display pollution.
+
+The application's original architecture — a PHP backend, a Node.js real-time layer, and a Prototype.js browser client communicating via Socket.IO — was designed in 2007 and remains fundamentally sound. It just needed its plumbing reconnected after 18 years of infrastructure evolution.

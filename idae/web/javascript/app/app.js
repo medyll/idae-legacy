@@ -24,10 +24,10 @@ Storage.prototype.get = function (key) {
 
 switch (window.document.location.hostname) {
 	case 'localhost':
-		var DOCUMENTDOMAIN = window.document.location.href.replace (location.hash, "").replace (document.location.protocol + '//', "");
+		var DOCUMENTDOMAIN = window.document.location.host;
 		break;
 	case '192.168.11.44':
-		var DOCUMENTDOMAIN = window.document.location.href.replace (location.hash, "").replace (document.location.protocol + '//', "");
+		var DOCUMENTDOMAIN = window.document.location.host;
 		break;
 
 	default:

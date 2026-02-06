@@ -288,8 +288,30 @@ socket.on ('receive_cmd', function (data) {
 			break;
 	}
 }.bind (this));
+
+// Handles socketModule response to update DOM
+socket.on ('socketModule', function (data) {
+    if (data.out && data.out.element) {
+        var el = $(data.out.element);
+        if (el) {
+            el.update(data.body);
+            if (el.undoLoading) el.undoLoading();
+            if (window.afterAjaxCall) afterAjaxCall(el);
+            el.fire('content:loaded');
+            
+            // Handle caching if needed (mirroring app_test.js idea but simpler)
+             if (window.app_cache && data.out.options && data.out.options.cache) {
+                 // Cache update logic could go here
+            }
+        } else {
+            console.warn('socketModule: Element not found', data.out.element);
+        }
+    }
+});
+
 //
 socket.on ('reloadModule', function (data) {
+
 	// ici, on met à jour le cache de maniere tansparente, si on trouve data.module et data.vars
 	reloadModule (data.module, data.value, data.vars);
 }.bind (this));

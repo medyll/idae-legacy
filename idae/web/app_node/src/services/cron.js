@@ -51,7 +51,7 @@ class CronService {
                 });
                 // console.log(`[CRON] Executed ${type} on ${host}`);
             } catch (err) {
-                console.error(`[CRON] Error executing ${type} on ${host}: ${err.message}`);
+                // console.error(`[CRON] Error executing ${type} on ${host}: ${err.message}`);
             }
         }
     }
