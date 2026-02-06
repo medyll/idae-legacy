@@ -1,7 +1,7 @@
 <?php
 	include_once($_SERVER['CONF_INC']);
 
-	ini_set('display_errors', 55);
+	ini_set('display_errors', 0);
 	set_time_limit(10);
 	ini_set('max_execution_time', 10);
 	ini_set('max_input_time', 10);
@@ -87,12 +87,14 @@ if(!empty($_POST['idfournisseur'])){
 // spy code
 $round_numerator = 60 * 5;
 $rounded_time = ( round ( time() / $round_numerator ) * $round_numerator );
-$upd['codeActivite'] = strtoupper($F_action ?? '');
+$upd['codeActivite'] = strtoupper(isset($F_action) ? $F_action : '');
 $upd['timeActivite'] = (int)$rounded_time;
 $upd['dateActivite']  = date('Y-m-d',$rounded_time); 
 $upd['heureActivite'] = date('H:i:s',$rounded_time);
-$upd['idagent']= (int)($_SESSION['idagent'] ?? 0);
-$APP->plug('sitebase_base','activity')->update($upd,['$set'=>$upd,'$inc'=>['nb'=>1]],['upsert'=>true]);
+$upd['idagent']= (int)(isset($_SESSION['idagent']) ? $_SESSION['idagent'] : 0);
+if(isset($upd['codeActivite']) && $upd['codeActivite'] != 'POLL'){
+	$APP->plug('sitebase_base','activity')->update($upd,['$set'=>$upd,'$inc'=>['nb'=>1]],['upsert'=>true]);
+}
 
 
 ////
