@@ -83,6 +83,10 @@
 		skelMdl::send_cmd('act_notify', ['msg' => '<pre>  $vars after INIT=> ' . json_encode($vars, JSON_PRETTY_PRINT) . '</pre>', 'options' => ['sticky' => 1, 'id' => 'json_debug']], session_id());
 	}
 
+	// Initialize variables early to prevent null pointer errors in PHP 8.2+
+	$strm = [];
+	$data_main = [];
+
 	if (!droit_table($_SESSION['idagent'], 'CONF', $table) && $APP->has_agent()):
 		$vars['idagent'] = (int)$_SESSION['idagent'];
 	endif;
@@ -91,6 +95,32 @@
 	endif;
 	//
 	$APP_TABLE       = $APP->app_table_one;
+	
+	// Handle missing schema with silent fail and error logging
+	if (empty($APP_TABLE) || is_null($APP_TABLE)) {
+		error_log("[json_data_table] Missing schema for table '$table' - silent fail");
+		
+		// Return empty result to avoid breaking the frontend
+		$empty_response = [
+			'data_main' => [],
+			'maxcount' => 0,
+			'url_data' => isset($url_data) ? $url_data : '',
+			'table' => $table
+		];
+		
+		if (!empty($_POST['stream_to'])) {
+			$strm_vars = [
+				'stream_to' => $_POST['stream_to'],
+				'data_size' => 0,
+				'data' => $empty_response
+			];
+			skelMdl::send_cmd('act_stream_to', $strm_vars, session_id());
+		} else {
+			echo json_encode($empty_response);
+		}
+		exit;
+	}
+	
 	$GRILLE_FK       = $APP->get_fk_tables();
 	$GRILLE_COUNT    = $APP->get_grille_count($table);
 	$APP_DATE_FIELDS = $APP->get_date_fields($table);
@@ -519,7 +549,7 @@
 			if (!empty($_POST['stream_to'])):
 
 				$out_model = ['data_main' => $strm, 'maxcount' => $maxcount, 'url_data' => $url_data, 'table' => $table]; // 'columnModel' => $columnModel,
-				$strm_vars = ['stream_to' => $_POST['stream_to'], 'data' => $out_model, 'data_size' => sizeof($strm)];
+				$strm_vars = ['stream_to' => $_POST['stream_to'], 'data' => $out_model, 'data_size' => is_array($strm) ? sizeof($strm) : 0];
 
 				skelMdl::send_cmd('act_stream_to', json_decode(json_encode($strm_vars, JSON_FORCE_OBJECT)), session_id());
 				unset($strm);
@@ -536,7 +566,7 @@
 		$z = " Pas de résultats";
 
 		$strm_vars = ['stream_to' => $_POST['stream_to'],
-		              'data_size' => sizeof($strm),
+		              'data_size' => is_array($strm) ? sizeof($strm) : 0,
 		              'table'     => $table,
 		              'data'      => ['data_main' => ['html' => $z, 'table' => $table, 'vars' => $vars, 'groupBy' => 1],
 		                              'maxcount'  => $maxcount,
