@@ -1,0 +1,50 @@
+/* Global design-token mappings — Added Modified: 2026-02-07 */
+
+/* Base typography (safeguard) */
+html, body {
+  font-family: @font_inter;
+  font-size: @font-size-base;
+  line-height: @line-height-base;
+  color: @color-text;
+}
+
+/* Headings */
+h1, h2, h3, h4 {
+  font-weight: @heading-weight;
+}
+
+/* Buttons / actionable controls */
+button,
+input[type="button"],
+input[type="submit"],
+.appbutton,
+.applink.applinkbutton a {
+  background: @btn-bg;
+  color: @btn-color;
+  border: 1px solid @btn-border;
+  border-radius: @btn-radius;
+  padding: .45rem .7rem;
+}
+
+button:hover,
+input[type="button"]:hover,
+input[type="submit"]:hover,
+.appbutton:hover,
+.applink.applinkbutton a:hover {
+  background: @btn-bg-hover;
+}
+
+/* Form controls */
+input[type=text],
+input[type=email],
+input[type=password],
+textarea,
+select {
+  background: @input-bg;
+  border: 1px solid @input-border;
+}
+
+/* Ensure icon fonts keep their families */
+.fa, [class^="fa-"], [class*=" fa-"] {
+  font-family: FontAwesome !important;
+}
