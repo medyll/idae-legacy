@@ -227,7 +227,13 @@
 
 			$con  = $APP->plug_base('sitebase_image');
 			$grid = $con->getGridFs();
-			$grid->ensureIndex(['filename' => 1]);
+			// Modern MongoDB driver: create index on files collection directly
+			try {
+				$filesCollection = $con->getDatabase()->selectCollection($con->getGridFsBucketName() . ".files");
+				$filesCollection->createIndex(['filename' => 1]);
+			} catch (\Exception $e) {
+				error_log("GridFS index creation failed: " . $e->getMessage());
+			}
 			//
 			$image = $grid->findOne(['filename' => $image_name]);
 			if (empty($image)) {
