@@ -1314,7 +1314,7 @@
 		}
 
 		function get_schemes($arr_vars = [], $page = 0, $rppage = 250) {
-			return $this->app_conn->find($arr_vars)->sort(['nomAppscheme' => 1])->skip($page * $rppage)->limit($rppage);
+			return $this->app_conn->find($arr_vars)->sort(['nomAppscheme' => 1])->skip((int)$page * (int)$rppage)->limit((int)$rppage);
 		}
 
 		function get_http_mdl($mdl, $vars = [], $value = '', $attributes = '') {
@@ -2137,7 +2137,7 @@
 			$rs       = $this->plug($this->app_table_one['codeAppscheme_base'], $this->app_table_one['codeAppscheme'])->find($vars, $fields);
 			$totcount = $rs->count();
 			$rs->sort([$this->app_field_name_top => -1, $this->app_field_name_nom => 1]);
-			$rs->skip($page * $rppage)->limit($rppage);
+			$rs->skip((int)$page * (int)$rppage)->limit((int)$rppage);
 
 			return $rs;
 		}

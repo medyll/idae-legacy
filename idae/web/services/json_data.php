@@ -127,14 +127,14 @@
 	$rs = $APP->query($vars + $where);
 	$max_count = $rs->count();
 	$rs->sort(array($sortBy => $sortDir));
-	$rs->limit($nbRows)->skip($page * $nbRows);
+	$rs->limit((int)$nbRows)->skip((int)$page * (int)$nbRows);
 //
 //
 	if ($PIECE == 'table_groupby'):
 		$rs_dist    = $APP->distinct($groupBy, $vars + $where);
 		$dist_count = $rs_dist->count();
 		// $nbRows = (ceil($nbRows / $dist_count));
-		$rs_dist->limit(30)->skip($page * 30);
+		$rs_dist->limit(30)->skip((int)$page * 30);
 		
 		$JSON_STR = []; 
 		foreach ($rs_dist as $arr_dist):

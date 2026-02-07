@@ -354,7 +354,7 @@
 		}
 	}
 
-	$rs       = $APP->find($vars + $where)->sort([$sortBy => $sortDir, $sortBySecond => $sortDirSecond])->skip(($nbRows * $page))->limit($nbRows);
+	$rs       = $APP->find($vars + $where)->sort([$sortBy => $sortDir, $sortBySecond => $sortDirSecond])->skip(((int)$nbRows * (int)$page))->limit((int)$nbRows);
 	$count    = $rs->count();
 	$maxcount = $rs->count(false);
 	$count    = ($count > $nbRows) ? $nbRows : $count;
