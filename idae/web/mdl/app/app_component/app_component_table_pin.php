@@ -20,9 +20,9 @@
 
 	$arrT = $APP->findOne(['idagent' => (int)$_SESSION['idagent'], 'codeAgent_table' => $table, 'valeurAgent_table' => $table_value]);
 
-	$add_vars = "reloadModule[app/app_component/app_component_table_pin]=$table";
+	 $add_vars = "reloadModule[app/app_component/app_component_table_pin]=$table";
 
-	if (sizeof($arrT) == 0):
+	if (empty($arrT) || sizeof($arrT) == 0):
 		?>
 		<a class="textgris   inline "
 		   onclick="ajaxValidation('app_create','mdl/app/','<?= $add_vars ?>&table=agent_table&vars[idagent]=<?= $_SESSION['idagent'] ?>&vars[codeAgent_table]=<?= $table ?>&vars[valeurAgent_table]=<?= $table_value ?>&vars[nomAgent_table]=<?= strtolower(niceUrl($ARR['nom' . $Table])) ?>')"
