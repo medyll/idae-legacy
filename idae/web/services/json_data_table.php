@@ -192,13 +192,11 @@
 	# champ = 'null'
 
 	foreach ($vars as $key_vars => $value_vars):
-		if (strtolower($value_vars) == 'null') {
+		if (is_string($value_vars) && strtolower($value_vars) == 'null') {
 			unset($vars[$key_vars]);
 			$where['$or'][]          = [$key_vars => ['$exists' => false]];
 			$where[$key_vars]['$in'] = [null, ''];
-
 		}
-
 	endforeach;
 
 	if (!empty($_POST['search'])) { // un champ de recherche unique
