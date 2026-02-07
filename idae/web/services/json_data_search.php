@@ -134,7 +134,7 @@
 			$where['idagent'] = (int)$_SESSION['idagent'];
 		};
 
-		$rssc       = $APPSC->query([$id => ['$ne' => 0]] + $vars + $where)->sort([$nom => 1])->limit($nbRows)->skip($page * $nbRows);
+		$rssc       = $APPSC->query([$id => ['$ne' => 0]] + $vars + $where)->sort([$nom => 1])->limit((int)$nbRows)->skip((int)$page * (int)$nbRows);
 		$rssc_count = $rssc->count();
 
 		if ($rssc->count() != 0):
