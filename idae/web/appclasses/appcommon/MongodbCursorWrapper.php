@@ -123,22 +123,18 @@ class MongodbCursorWrapper implements \Iterator, \Countable {
      * WARNING: This may load all documents into memory
      * @return int
      */
-    public function count($foundOnly = false): int {
-        if ($this->isArray) {
-            return count($this->documents);
-        }
-        
-        // For MongoDB cursor, we need to iterate to count
-        // This is expensive - better to use countDocuments() if possible
-        if ($this->cursor !== null) {
-            $count = 0;
-            foreach ($this->cursor as $doc) {
-                $count++;
+    public function count() {
+        // Always convert to array before counting to avoid rewind errors
+        if (!$this->isArray && $this->cursor !== null) {
+            try {
+                $this->documents = iterator_to_array($this->cursor);
+                $this->isArray = true;
+            } catch (\Exception $e) {
+                $this->documents = [];
+                $this->isArray = true;
             }
-            return $count;
         }
-        
-        return 0;
+        return count($this->documents);
     }
     
     /**
@@ -175,7 +171,7 @@ class MongodbCursorWrapper implements \Iterator, \Countable {
     }
     
     // Iterator interface implementation
-    public function rewind(): void {
+    public function rewind() {
         $this->position = 0;
         $this->hasStarted = false;
         if (!$this->isArray && $this->cursor !== null) {
@@ -191,9 +187,9 @@ class MongodbCursorWrapper implements \Iterator, \Countable {
         }
     }
     
-    public function current(): mixed {
+    public function current() {
         if ($this->isArray) {
-            return $this->documents[$this->position] ?? null;
+            return isset($this->documents[$this->position]) ? $this->documents[$this->position] : null;
         }
         
         if ($this->cursor !== null && $this->cursorIterator !== null) {
@@ -203,18 +199,18 @@ class MongodbCursorWrapper implements \Iterator, \Countable {
         return null;
     }
     
-    public function key(): mixed {
+    public function key() {
         return $this->position;
     }
     
-    public function next(): void {
+    public function next() {
         ++$this->position;
         if (!$this->isArray && $this->cursorIterator !== null) {
             $this->cursorIterator->next();
         }
     }
     
-    public function valid(): bool {
+    public function valid() {
         if ($this->isArray) {
             return isset($this->documents[$this->position]);
         }
