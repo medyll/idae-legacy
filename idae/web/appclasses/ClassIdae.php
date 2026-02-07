@@ -360,9 +360,13 @@
 					$COLLECT['group']['appscheme_fields'][$codeAppscheme_has_field]['value_html'] = $this->draw_field(['field_name_raw' => $codeAppscheme_field,
 						                                                                                                'table'          => $tbl,
 						                                                                                                'field_value'    => $ARR[$codeAppscheme_has_field]]);
-					$COLLECT['group']['appscheme_fields'][$codeAppscheme_has_field]['value_input'] = $this->draw_field_input(['field_name_raw' => $codeAppscheme_field,
-					                                                                                                   'table'          => $tbl,
-					                                                                                                   'field_value'    => ($ARR_FIELD['codeAppscheme_field'] != 'password') ? $ARR[$codeAppscheme_field] : !empty($vars[$codeAppscheme_field]) ? $vars[$codeAppscheme_field] : '']);
+					$COLLECT['group']['appscheme_fields'][$codeAppscheme_has_field]['value_input'] = $this->draw_field_input([
+						'field_name_raw' => $codeAppscheme_field,
+						'table'          => $tbl,
+						'field_value'    => ($ARR_FIELD['codeAppscheme_field'] != 'password')
+							? $ARR[$codeAppscheme_field]
+							: (!empty($vars[$codeAppscheme_field]) ? $vars[$codeAppscheme_field] : '')
+					]);
 
 				}
 
