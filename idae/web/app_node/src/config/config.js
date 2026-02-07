@@ -23,3 +23,8 @@ export const config = {
     },
     env: process.env.NODE_ENV || 'development'
 };
+
+// Log config at startup
+console.log('[CONFIG] Environment:', config.env);
+console.log('[CONFIG] Port:', config.port);
+console.log('[CONFIG] MongoDB Host:', config.mongo.host);

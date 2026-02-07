@@ -6,26 +6,50 @@ var conn_options = {
 };
 
 
+// Determine WebSocket host and port for different environments
+var socketHost, socketPort;
+
 switch (document.domain) {
 	case "idaertys-preprod.mydde.fr":
-		var port = 3006;
-		break;
 	case "tactac_idae.preprod.mydde.fr":
-		var port = 3006;
-		break;
 	case "appcrfr.idaertys-preprod.mydde.fr":
-		var port = 3006;
-		break;
 	case "appmaw-idaertys-preprod.mydde.fr":
-		var port = 3006;
+		socketPort = 3006;
+		socketHost = document.domain;
 		break;
 	default:
-		var port = 3005;
+		// For local development: use localhost instead of host.docker.internal for browser compatibility
+		socketPort = 3005;
+		if (document.domain === 'host.docker.internal' || document.domain.includes('docker')) {
+			socketHost = 'localhost'; // Browser can't resolve host.docker.internal
+		} else {
+			socketHost = document.domain;
+		}
 		break;
-
 }
-console.log(document.location.protocol + '//' + document.domain + ':' + port, conn_options);
-var socket = io.connect (document.location.protocol + '//' + document.domain + ':' + port, conn_options);
+
+var socketUrl = document.location.protocol + '//' + socketHost + ':' + socketPort;
+console.log('[SOCKET] Connecting to:', socketUrl, conn_options);
+console.log('[SOCKET] Document cookies:', document.cookie);
+console.log('[SOCKET] Local storage PHPSESSID:', localStorage.getItem('PHPSESSID'));
+
+// Ensure cookies are sent with WebSocket connection
+conn_options.withCredentials = true;
+conn_options.forceNew = true;
+
+var socket = io.connect(socketUrl, conn_options);
+
+// Add connection error handling
+socket.on('connect', function() {
+	console.log('[SOCKET] ✓ Connected successfully:', socket.id);
+});
+
+socket.on('connect_error', function(error) {
+	console.error('[SOCKET] ✗ Connection failed:', error);
+	console.error('[SOCKET] Attempted URL:', socketUrl);
+	console.error('[SOCKET] Available cookies:', document.cookie);
+	console.error('[SOCKET] Connection options:', conn_options);
+});
 
 socket.on ('message', function (data) {
 	console.log('message on socket',data);
@@ -39,6 +63,12 @@ socket.on ('notify', function (data) {
 	var options       = {};
 	options.className = 'myddeNotifierBottom';
 	a                 = new myddeNotifier (options);
+	// Add the missing growl call to actually display the notification
+	try {
+		a.growl(data.msg || data.message || 'Notification', options);
+	} catch(e) {
+		console.error('[NOTIFY] Error displaying notification:', e);
+	}
 }.bind (this));
 //
 

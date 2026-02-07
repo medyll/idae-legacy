@@ -146,3 +146,24 @@ Following the initial strict-typing fixes, a successful end-to-end login was ach
     -   **Syntax Revert**: Reverted incompatible `??` (null coalescing) usage in `ClassAct` and `actions.php`. While valid in PHP 8.2, they caused issues with the specific legacy parser behavior or context. Replaced with standard `isset() ? :`.
 20. **Logging Rigor**: Eliminated dangerous `echo` debugging in `conf.lan.inc.php` which was corrupting AJAX responses. Switched entirely to `error_log` for cleaner debugging without breaking the frontend.
 
+### The Notification Resurrection (Feb 7, 2026 - "The Silent Notifier")
+
+21. **The WebSocket Authentication Crisis**: During login sequence testing, a critical discovery was made: the `.myddeNotifierBottom` container remained persistently empty, indicating a complete failure of the real-time notification system—the very feature that set IDAE apart from conventional frameworks a decade ago.
+    
+    **The Investigation**: Deep diagnostic revealed a multi-layered breakdown:
+    - **Client Side**: The `socket.on('notify')` event handler was incomplete—creating a `myddeNotifier` instance but never calling `growl()`, leaving notifications in limbo.
+    - **Authentication Layer**: The Node.js `authMiddleware` was rejecting connections with "No cookie transmitted" errors, as the Docker environment and browser security models differed significantly from the original 2008 deployment architecture.
+    - **Host Resolution**: JavaScript clients attempted connections to `host.docker.internal:3005` (Docker internal networkgin), but browsers could only resolve `localhost:3005`, creating a network topology mismatch.
+    - **PHP Communication**: The `skelMdl::doSocket()` method was sending malformed HTTP headers when communicating with the Node.js bridge, particularly in cookie handling and host resolution.
+
+    **The Multi-Vector Fix**:
+    - **Container CORS**: Expanded Socket.IO CORS policies to accept `.lan` domains, localhost variants, and dynamic ports—essential for hybrid Docker/host development environments.
+    - **Smart Host Routing**: Implemented client-side logic to translate `host.docker.internal` to `localhost` for browser compatibility while preserving server-side Docker networking.
+    - **Authentication Relaxation**: Modified the authentication middleware to operate in a permissive "development mode," allowing test connections without PHP session cookies—crucial for diagnosing WebSocket connectivity.
+    - **Notification Completion**: Added the missing `a.growl(data.msg, options)` call in the `notify` event handler, finally closing the notification display loop that had been broken for years.
+    - **PHP 8.2 Compatibility**: Replaced legacy `sizeof()` calls with `count()` in `skelMdl.php` and improved HTTP header construction for modern networking standards.
+
+    **The Validation**: Created comprehensive diagnostic tools (`diagnostic_notification.php`, `test_notification.html`, `trigger_notification.php`) that provided real-time WebSocket connectivity testing and notification flow verification. The moment when a browser console finally displayed `✓ Connexion WebSocket établie` followed by `🔔 act_notify: En ligne [Agent Name]` marked the resurrection of IDAE's real-time capabilities in the modern era.
+    
+    This fix didn't just restore notifications—it bridged two decades of web evolution, allowing a 2007-era real-time architecture to operate seamlessly within 2026's containerized, security-hardened development environments. The notification system that had once amazed clients with "magical" live updates was alive again.
+
