@@ -189,3 +189,22 @@ This is not just a technical fix—it is a resurrection. The IDAE framework, bor
 **Onward:**
 With the login barrier broken and the compat layer victorious, the path is clear for new features, new integrations, and a new era of development. The saga continues!
 
+## 2026-02-07: Local dev — Asset URL & image-serving fixes
+
+Résumé rapide:
+- Corrigé la construction d'URLs d'assets/images pour inclure le port quand l'application est servie via Docker sur un port non-standard (ex. :8080). Ceci évite les requêtes vers le port 80 (ERR_CONNECTION_REFUSED).
+
+Modifications principales:
+- `idae/web/conf.lan.inc.php` et `idae/web/conf.inc.php`: les constantes d'assets (`HTTPCSS`, `HTTPJAVASCRIPT`, `HTTPIMAGES`, `ACTIONMDL`) utilisent désormais `HTTPCUSTOMERSITE` (port inclus quand présent).
+- `idae/web/mdl/app/app_user_pref/actions.php`: construction du `url()` wallpaper via `HTTPCUSTOMERSITE`.
+- `idae/web/javascript/app/app_functions.js`: `changeCnameTrick()` renvoyant `HTTPCUSTOMERSITE` pour éviter les hôtes malformés côté client.
+- `idae/web/mdl/business/cruise/app/app_xml_csv/xml_launch.php`: exemple de commentaire d'URL mis à jour pour utiliser `HTTPCUSTOMERSITE`.
+
+Tests effectués:
+- Vérification du container Docker (`idae-legacy`) — mapping `0.0.0.0:8080->80/tcp` présent.
+- Requêtes rapides avec `curl -I`:
+    - `/` → 302 vers `reindex.php?retry=1` (comportement attendu en session non initialisée)
+    - `/images/appimg-...jpg` → 200 OK
+    - `/css/fontawesome/css/font-awesome.css` → 200 OK
+    - `/javascript/main_bag.js` → 200 OK
+s
