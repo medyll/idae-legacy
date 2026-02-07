@@ -41,7 +41,7 @@ class MongoCompat {
             }
             
             // Legacy MongoId (v1.x driver)
-            if (class_exists('MongoId') && $value instanceof \MongoId) {
+            if (class_exists('MongoId', false) && $value instanceof \MongoId) {
                 return new ObjectId((string)$value);
             }
             
@@ -71,7 +71,7 @@ class MongoCompat {
         
         try {
             // Legacy MongoRegex
-            if (class_exists('MongoRegex') && $pattern instanceof \MongoRegex) {
+            if (class_exists('MongoRegex', false) && $pattern instanceof \MongoRegex) {
                 $str = (string)$pattern;
                 // Extract pattern and flags from /pattern/flags format
                 if (preg_match('#^/(.*)/([imsx]*)$#', $str, $matches)) {
@@ -105,7 +105,7 @@ class MongoCompat {
             }
             
             // Legacy MongoDate (v1.x driver)
-            if (class_exists('MongoDate') && $value instanceof \MongoDate) {
+            if (class_exists('MongoDate', false) && $value instanceof \MongoDate) {
                 $dt = new DateTime();
                 $dt->setTimestamp($value->sec);
                 return $dt;
@@ -234,11 +234,11 @@ class MongoCompat {
                 $result[$key] = self::toObjectId($value);
             }
             // Convert MongoRegex to Regex
-            else if (class_exists('MongoRegex') && $value instanceof \MongoRegex) {
+            else if (class_exists('MongoRegex', false) && $value instanceof \MongoRegex) {
                 $result[$key] = self::toRegex($value);
             }
             // Convert MongoDate to DateTime
-            else if (class_exists('MongoDate') && $value instanceof \MongoDate) {
+            else if (class_exists('MongoDate', false) && $value instanceof \MongoDate) {
                 $result[$key] = self::toDate($value);
             }
             // Recursive array conversion
