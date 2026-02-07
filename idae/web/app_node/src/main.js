@@ -38,7 +38,13 @@ async function bootstrap() {
     // 3. Setup Socket.IO
     const io = new Server(server, {
         cors: {
-            origin: ["http://localhost:8080", "http://127.0.0.1:8080", "http://localhost"],
+            origin: [
+                "http://localhost:8080", "http://127.0.0.1:8080", "http://localhost",
+                "http://localhost:80", "http://127.0.0.1:80", "http://127.0.0.1",
+                /^http:\/\/.*\.lan(:\d+)?$/, // Allow .lan domains with optional port
+                /^http:\/\/localhost(:\d+)?$/, // Allow localhost with any port
+                /^http:\/\/127\.0\.0\.1(:\d+)?$/ // Allow 127.0.0.1 with any port
+            ],
             methods: ["GET", "POST"],
             credentials: true
         },

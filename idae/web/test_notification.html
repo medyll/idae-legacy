@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Miniature WebSocket / Notification</title>
+    <meta charset="utf-8">
+    <style>
+        body { font-family: monospace; padding: 20px; }
+        .ok { color: green; }
+        .error { color: red; }
+        .info { color: blue; }
+        .button { padding: 8px 16px; margin: 4px; background: #f0f0f0; border: 1px solid #ccc; cursor: pointer; }
+        .log { background: #f9f9f9; border: 1px solid #ddd; padding: 10px; margin: 10px 0; max-height: 300px; overflow-y: auto; }
+    </style>
+</head>
+<body>
+    <h2>Test Miniature - Système de Notification</h2>
+    
+    <div>
+        <button class="button" onclick="initSocket()">1. Connexion WebSocket</button>
+        <button class="button" onclick="testLogin()">2. Simuler Login</button>
+        <button class="button" onclick="testNotifyPHP()">3. Déclencher Notification PHP</button>
+        <button class="button" onclick="testNotifyDirect()">4. Test Notify Direct</button>
+        <button class="button" onclick="clearLogs()">Effacer logs</button>
+    </div>
+    
+    <div id="status" class="info"></div>
+    <div id="logs" class="log"></div>
+    
+    <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+    <script>
+        let socket = null;
+        
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const div = document.createElement('div');
+            div.className = type;
+            div.innerHTML = `[${timestamp}] ${message}`;
+            document.getElementById('logs').appendChild(div);
+            document.getElementById('logs').scrollTop = document.getElementById('logs').scrollHeight;
+        }
+        
+        function status(message, type = 'info') {
+            document.getElementById('status').innerHTML = `<span class="${type}">${message}</span>`;
+        }
+        
+        function clearLogs() {
+            document.getElementById('logs').innerHTML = '';
+        }
+        
+        function initSocket() {
+            if (socket) {
+                socket.disconnect();
+            }
+            
+            // Reproduction de la logique de app_socket.js
+            var socketHost, socketPort;
+            
+            switch (document.domain) {
+                case "idaertys-preprod.mydde.fr":
+                case "tactac_idae.preprod.mydde.fr": 
+                case "appcrfr.idaertys-preprod.mydde.fr":
+                case "appmaw-idaertys-preprod.mydde.fr":
+                    socketPort = 3006;
+                    socketHost = document.domain;
+                    break;
+                default:
+                    socketPort = 3005;
+                    if (document.domain === 'host.docker.internal' || document.domain.includes('docker')) {
+                        socketHost = 'localhost';
+                    } else {
+                        socketHost = document.domain;
+                    }
+                    break;
+            }
+            
+            const socketUrl = document.location.protocol + '//' + socketHost + ':' + socketPort;
+            log(`Connexion à: ${socketUrl}`);
+            
+            socket = io.connect(socketUrl, {
+                'sync disconnect on unload': true
+            });
+            
+            socket.on('connect', function() {
+                log('✓ WebSocket connecté - ID: ' + socket.id, 'ok');
+                status('WebSocket connecté', 'ok');
+            });
+            
+            socket.on('connect_error', function(error) {
+                log('✗ Erreur connexion: ' + error.message, 'error');
+                status('Erreur WebSocket: ' + error.message, 'error');
+            });
+            
+            socket.on('disconnect', function() {
+                log('WebSocket déconnecté', 'error');
+                status('WebSocket déconnecté', 'error');
+            });
+            
+            // Événements de notification
+            socket.on('receive_cmd', function(data) {
+                log('📨 receive_cmd: ' + JSON.stringify(data), 'ok');
+                
+                if (data.cmd === 'act_notify') {
+                    const msg = data.vars?.msg || 'Pas de message';
+                    log('🔔 act_notify: ' + msg, 'ok');
+                    // Simuler myddeNotifier
+                    showNotification('act_notify', msg, 'myddeNotifier');
+                }
+            });
+            
+            socket.on('notify', function(data) {
+                log('📨 notify (événement direct): ' + JSON.stringify(data), 'ok');
+                const msg = data.msg || data.message || 'Notification';
+                showNotification('notify', msg, 'myddeNotifierBottom');
+            });
+            
+            socket.on('message', function(data) {
+                log('📨 message: ' + data);
+            });
+            
+            socket.on('heartbeat_app', function(data) {
+                log('💓 heartbeat: ' + data);
+            });
+        }
+        
+        function testLogin() {
+            if (!socket || !socket.connected) {
+                log('WebSocket pas connecté', 'error');
+                return;
+            }
+            
+            const loginData = {
+                DOCUMENTDOMAIN: document.domain,
+                IDAGENT: 999,
+                SESSID: 999,
+                PHPSESSID: 'test-session-' + Date.now()
+            };
+            
+            log(`Envoi grantIn: ${JSON.stringify(loginData)}`);
+            
+            socket.emit('grantIn', loginData, function(response) {
+                log(`✓ Réponse grantIn: ${response}`, 'ok');
+            });
+        }
+        
+        function testNotifyPHP() {
+            // Déclenche une notification via PHP (appel AJAX)
+            log('Déclenchement notification via PHP...');
+            
+            fetch('trigger_notification.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: 'action=test_notify'
+            })
+            .then(response => response.text())
+            .then(data => {
+                log('✓ Réponse PHP: ' + data, 'ok');
+            })
+            .catch(error => {
+                log('✗ Erreur PHP: ' + error, 'error');
+            });
+        }
+        
+        function testNotifyDirect() {
+            if (!socket || !socket.connected) {
+                log('WebSocket pas connecté', 'error');
+                return;
+            }
+            
+            // Test émission directe d'un événement notify (normalement fait par le serveur)
+            log('Test direct de l\'événement notify...');
+            socket.emit('test', { msg: 'Test notify direct depuis client' });
+        }
+        
+        function showNotification(type, message, className) {
+            // Simuler l'affichage de notification
+            const notifDiv = document.createElement('div');
+            notifDiv.style.cssText = `
+                position: fixed; 
+                top: 20px; 
+                right: 20px; 
+                background: ${type === 'notify' ? '#ff9800' : '#4caf50'}; 
+                color: white; 
+                padding: 10px 15px; 
+                border-radius: 4px; 
+                z-index: 9999;
+                max-width: 300px;
+                word-wrap: break-word;
+            `;
+            notifDiv.innerHTML = `
+                <strong>${type} (${className}):</strong><br>
+                ${message}
+            `;
+            
+            document.body.appendChild(notifDiv);
+            
+            setTimeout(() => {
+                notifDiv.remove();
+            }, 5000);
+        }
+        
+        // Auto-init au chargement
+        window.onload = function() {
+            log('Page chargée - Prêt pour les tests');
+            log('Domain: ' + document.domain + ' | Protocol: ' + document.location.protocol);
+        };
+    </script>
+</body>
+</html>

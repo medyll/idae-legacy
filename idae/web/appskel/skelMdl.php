@@ -140,7 +140,7 @@
 
 			$crlf       = "\r\n";
 			$parts      = parse_url($url);
-			$cookie_str = session_name() . "=" . session_id() . "; path=" . session_save_path();
+			$cookie_str = session_name() . "=" . session_id();
 
 			// Fix: Use host from URL if present (needed for Docker networking), otherwise fallback to current host
 			$host = !empty($parts['host']) ? $parts['host'] : explode(':', $_SERVER['HTTP_HOST'])[0];
@@ -152,21 +152,20 @@
 
 			if (!$fp) {
 				// skelMdl::send_cmd('act_notify', ['msg' => 'ERREUR ' . $errstr . '  $errno ' . $errno, session_id()]);
-				error_log("skelMdl::doSocket Connection Failed: " . $errstr . " (" . $errno . ")");
+				error_log("skelMdl::doSocket Connection Failed: " . $errstr . " (" . $errno . ") to " . $url);
 				return false;
 			} else {
 				stream_set_timeout($fp,2);
 				$out = "POST " . $parts['path'] . " HTTP/1.0" . $crlf;
-				$out .= "Host: " . $_SERVER['HTTP_HOST'] . $crlf;
+				// Use the actual host we're connecting to, not the client's HTTP_HOST
+				$out .= "Host: " . $host . (isset($parts['port']) ? ":" . $parts['port'] : "") . $crlf;
 				$out .= "User-Agent: Mozilla" . $crlf;
 				$out .= "Content-Type: application/x-www-form-urlencoded" . $crlf;
 				$out .= "Content-Length: " . strlen($query) . $crlf;
 				$out .= "Connection: Close" . $crlf;
 				
 				if (!empty($cookie_str)) {
-					// Fix: Cookie header must be before the empty line. Also removing substr -2 if logic was wrong,
-					// but keeping legacy behavior if it was intended for some reason, just moving position.
-					// Actually, strictly speaking, path should not be sent in Cookie header, but we preserve logic.
+					// Fix: Proper cookie header format
 					$out .= 'Cookie: ' . $cookie_str . $crlf; 
 				}
 				
@@ -205,7 +204,9 @@
 			return;
 			$arrjson = ['timeStamp' => (int)time(), 'cmd' => $cmd];
 			//
-			if (sizeof($vars) != 0) {
+			// PHP 8.2: sizeof/count requires array or Countable - handle stdClass objects  
+			$varsCount = is_array($vars) ? count($vars) : (is_object($vars) ? count((array)$vars) : 0);
+			if ($varsCount != 0) {
 				$arrjson['vars'] = $vars;
 			}
 
