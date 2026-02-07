@@ -229,7 +229,7 @@
 			$grid = $con->getGridFs();
 			// Modern MongoDB driver: create index on files collection directly
 			try {
-				$filesCollection = $con->getDatabase()->selectCollection($con->getGridFsBucketName() . ".files");
+				$filesCollection = $con->getInnerDatabase()->selectCollection($con->getGridFsBucketName() . ".files");
 				$filesCollection->createIndex(['filename' => 1]);
 			} catch (\Exception $e) {
 				error_log("GridFS index creation failed: " . $e->getMessage());
@@ -489,8 +489,7 @@
 		}
 
 		static function imgApp($famille, $id, $size = 'small', $reflect = '') {
-			error_log("DEBUG: ClassAct::imgApp START famille=$famille id=$id size=$size reflect=$reflect");
-			ini_set('display_errors', 0);
+			error_log("DEBUG: ClassAct::imgApp START famille=$famille id=$id size=$size reflect=$reflect"); 
 
 			$APP = new App();
 

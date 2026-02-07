@@ -2,7 +2,7 @@
 	include_once($_SERVER['CONF_INC']);
 
 array_walk_recursive($_POST, 'CleanStr',$_POST); 
-ini_set('display_errors',55);
+
 if(isset($_POST['F_action'])){ $F_action =$_POST['F_action'];} else{exit;}
 	$APP = new App();
 switch ($F_action){	
@@ -29,11 +29,10 @@ switch ($F_action){
 		$_id 	=   $dsp->file['_id'];
 		?>
 		<script> 
-		url_w = "url(http://<?=DOCUMENTDOMAIN?>/images/appimg-<?=$_id?>.jpg)";
+		// Use HTTPCUSTOMERSITE (includes port when present) to build image URL
+		url_w = "url(" + "<?= rtrim(HTTPCUSTOMERSITE, '/') ?>" + "/images/appimg-<?=$_id?>.jpg)";
 		localStorage.setItem('wallpaper',url_w);
 		$('body').setStyle({backgroundImage:url_w}) ;
-		// $('decobar').setStyle({backgroundImage:url_w});
-		//$('ssupbar').setStyle({backgroundImage:url_w})  ;
 		</script>
 		<? 
 	break;

@@ -327,6 +327,17 @@ class MongoDB {
         }
         return $this->database->$name(...$arguments);
     }
+
+    /**
+     * Return the base GridFS bucket name used for this database.
+     * Legacy code may call getGridFsBucketName() — provide a sensible default.
+     *
+     * @return string
+     */
+    public function getGridFsBucketName() {
+        // Default GridFS bucket name is "fs" unless otherwise configured.
+        return 'fs';
+    }
 }
 
 /**
@@ -549,6 +560,30 @@ class MongoGridFSFile {
     
     public function toArray() {
         return $this->file;
+    }
+
+    /**
+     * Write the file contents to a local path (compat with legacy MongoGridFSFile::write)
+     *
+     * @param string $path Local filesystem path to write to
+     * @return bool True on success, false on failure
+     */
+    public function write($path) {
+        try {
+            $contents = $this->getBytes();
+            if ($contents === null || $contents === false) return false;
+            $dir = dirname($path);
+            if (!is_dir($dir)) {
+                @mkdir($dir, 0777, true);
+            }
+            $written = @file_put_contents($path, $contents);
+            if ($written === false) return false;
+            @chmod($path, 0666);
+            return true;
+        } catch (\Exception $e) {
+            error_log('MongoGridFSFile::write error: ' . $e->getMessage());
+            return false;
+        }
     }
 }
 
