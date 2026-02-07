@@ -37,9 +37,6 @@
 		<!--<script type="riot/tag" src="appcomponents/datatable.tag"></script>-->
 		<?  include_once('lessc.inc.php');  ?>
 		<script src="javascript/vendor/bag.js" type="text/javascript"></script>
-		<script>
-            try { localStorage.clear(); } catch(e){}
-		</script>
 	</head>
 	<body id="body" style="background-size:cover;background-repeat: no-repeat;background-color:#333;height:100%;width:100%;overflow:hidden;max-height:100%" class="skin_default">
 		<div id="inBody" style="width:100%;height:100%;position:relative;z-index:0;overflow:hidden;"></div>
