@@ -1,6 +1,6 @@
-if(typeof bag !== 'undefined') bag.clear();
+/* if(typeof bag !== 'undefined') bag.clear();
 if(typeof localforage !== 'undefined') localforage.clear();
-localStorage.clear();
+localStorage.clear(); */
 var HTTPCSS = "css/";
 
 var require_trame = {
