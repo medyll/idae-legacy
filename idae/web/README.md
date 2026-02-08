@@ -233,6 +233,32 @@ if ('lan' === end($host_parts) || $host === 'localhost') {
 - **`config/prod-hosts.json`** - Production hosts & connections
 - **`config/lan-hosts.json`** - Local dev hosts & connections
 
+## Scheme collections relationship (quick reference)
+
+This short section shows how the main scheme collections relate to each other. For a complete, neutral description see `SCHEMA.md` at the project root.
+
+- `appscheme`: top-level entity definition (table metadata). references: `codeAppscheme_base` (the base/namespace) and arrays such as `grilleFK`.
+- `appscheme_base`: base/host/namespace for schemes — used to resolve the physical database or collection prefix.
+- `appscheme_field`: reusable field definitions (type, label, icon, group).
+- `appscheme_has_field`: per-entity binding that lists which fields are declared on an `appscheme` (order, mini flags).
+- `appscheme_has_table_field`: cross-table column declarations used to include fields from other schemes in grids/columns.
+- `appscheme_field_group`: logical grouping (tabs/sections) for fields; referenced by `appscheme_field` entries.
+- `appscheme_field_type`: registry of field types that map `codeAppscheme_field_type` to rendering/validation rules.
+
+Mermaid (conceptual):
+
+```mermaid
+flowchart TB
+  AS[appscheme] -->|has fields| AHF[appscheme_has_field]
+  AHF -->|refers to| AF[appscheme_field]
+  AF -->|grouped by| AG[appscheme_field_group]
+  AS -->|base/namespace| AB[appscheme_base]
+  AS -->|inter-table cols| AHTF[appscheme_has_table_field]
+  AF -->|typed by| AT[appscheme_field_type]
+```
+
+Use `services/json_scheme.php` (or `services/json_scheme.php?piece=fields`) to retrieve the server-assembled JSON that joins these collections for client consumption.
+
 ### Key Constants
 
 ```php
