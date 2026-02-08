@@ -69,11 +69,11 @@ if (!empty($groupBy)):
     $dist_count = $rs_dist->count();
     // echo "=>".(ceil($nbRows/$dist_count));
     $nbRows = (ceil($nbRows / $dist_count));
-    $rs_dist->limit(20)->skip($page * 20);
+    $rs_dist = $rs_dist; // pagination handled upstream; keep cursor as-is
 
 endif;
 //
-$rs->limit($nbRows)->skip($page * $nbRows);
+$rs = $APP->query($vars + $where, (int)$page, (int)$nbRows);
 //
 ?>
 <table

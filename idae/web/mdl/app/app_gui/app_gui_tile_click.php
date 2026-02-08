@@ -24,7 +24,7 @@
 ?>
 <div class="inline">
 	<?
-		if (sizeof($arrT) == 0):
+		if (empty($arrT)):
 			?>
 			<a class="textgris"
 			   onclick="ajaxValidation('app_create','mdl/app/','<?= $add_vars ?>&table=agent_tuile&vars[idagent]=<?= $_SESSION['idagent'] ?>&vars[codeAgent_tuile]=<?= $table ?>&vars[valeurAgent_tuile]=<?= $table_value ?>&vars[nomAgent_tuile]=<?= strtolower(niceUrl($ARR['nom' . $Table])) ?>')"

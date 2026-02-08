@@ -19,7 +19,7 @@
 		$or = ['$or' => [['idproduit' => (int)$_POST['search']], ['arrTag.word' => ['$all' => $out]]]];
 	}
 
-	$rs = skelMongo::connect('skel_builder_size', 'sitebase_skelbuilder')->find($whereT + $vars)->sort(['typeInput' => 1])->limit(50);
+	$rs = skelMongo::connect('skel_builder_size', 'sitebase_skelbuilder')->find($whereT + $vars, ['sort' => ['typeInput' => 1], 'limit' => 50]);
 ?>
 <div class="relative applink applinkblock toggler" style="max-height:350px;overflow:auto;">
 	<? while ($arr = $rs->getNext()) {

@@ -38,9 +38,9 @@
 
 	$baseDevis = $APP->plug('devis', 'sitebase_devis');
 
-	$rsOri = $APP->plug('sitebase_email', 'email_contact')->find()->sort(['last_email_time' => -1, 'email_sent' => 1])->limit(10);
-	$rs    = $APP->plug('sitebase_devis', 'client')->find($add)->limit(10);
-	$rs2   = $APP->plug('sitebase_email', 'email_contact')->find($add2)->limit(10);
+	$rsOri = $APP->plug('sitebase_email', 'email_contact')->find([], ['sort' => ['last_email_time' => -1, 'email_sent' => 1], 'limit' => 10]);
+	$rs    = $APP->plug('sitebase_devis', 'client')->find($add, ['limit' => 10]);
+	$rs2   = $APP->plug('sitebase_email', 'email_contact')->find($add2, ['limit' => 10]);
 
 ?>
 <?

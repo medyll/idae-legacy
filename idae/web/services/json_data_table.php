@@ -75,7 +75,7 @@
 
 		return array_merge(['html' => $out, 'md5' => md5(json_encode($out)), 'vars' => $trvars], $out_more);
 		$vars['idagent'] = (int)$_SESSION['idagent'];
-	endif;
+	}
 	if (!droit_table($_SESSION['idagent'], 'R', $table) && droit_table($_SESSION['idagent'], 'L', $table) && !$APP->has_agent()):
 		$_POST['vars']['idagent'] = (int)$_SESSION['idagent'];
 	endif;
@@ -323,7 +323,7 @@
 		$APP_STATUT = new App($table . '_statut');
 		$ARR_STATUT = $APP_STATUT->findOne(['code' . $Table . '_statut' => 'END']);
 		if (empty($ARR_STATUT['id' . $table . '_statut'])) {
-			$RS_STATUT  = $APP_STATUT->find()->sort(['ordre' . $Table . '_statut' => -1]);
+			$RS_STATUT  = $APP_STATUT->find([], ['sort' => ['ordre' . $Table . '_statut' => -1]]);
 			$ARR_STATUT = $RS_STATUT->getNext();
 		}
 		if (!empty($ARR_STATUT['id' . $table . '_statut'])) {
@@ -338,7 +338,7 @@
 		}
 	}
 
-	$rs       = $APP->find($vars + $where)->sort([$sortBy => $sortDir, $sortBySecond => $sortDirSecond])->skip(((int)$nbRows * (int)$page))->limit((int)$nbRows);
+	$rs       = $APP->find($vars + $where, ['sort' => [$sortBy => $sortDir, $sortBySecond => $sortDirSecond], 'skip' => ((int)$nbRows * (int)$page), 'limit' => (int)$nbRows]);
 	$count    = $rs->count();
 	$maxcount = $rs->count(false);
 	$count    = ($count > $nbRows) ? $nbRows : $count;
@@ -440,7 +440,7 @@
 					$table_value = $arr_dist;
 					break;
 			endswitch;
-			$rs = $APP->find(array_merge($vars_groupBy,$vars, $where))->limit($nbRows/sizeof($rs_dist))->sort([$sortBy => $sortDir]);
+			$rs = $APP->find(array_merge($vars_groupBy,$vars, $where), ['limit' => (int)($nbRows/sizeof($rs_dist)), 'sort' => [$sortBy => $sortDir]]);
 			if ($DEBUG && droit('DEV') ) {
 				skelMdl::send_cmd('act_notify', ['msg' => '<pre>Group <br> '.$groupBy_mode.' '.$table_value .  ' : ' . vardump(array_merge($vars_groupBy,$vars, $where), true) .' total : '.$rs->count(). '</pre>', 'options' => ['sticky' => 1, 'id' => 'json_debug']], session_id());
 			}
@@ -523,7 +523,7 @@
 		// pas dans distinc : sans groupBy
 		$data_main    = $strm = [];
 		$vars_rfk     = [];
-		$rs_noGroupBy = $APP->find($vars + $where + ['id' . $groupBy => ['$exists' => false]])->sort([$sortBy => $sortDir])->skip($page)->limit($nbRows);
+		$rs_noGroupBy = $APP->find($vars + $where + ['id' . $groupBy => ['$exists' => false]], ['sort' => [$sortBy => $sortDir], 'skip' => $page, 'limit' => $nbRows]);
 		if ($rs_noGroupBy->count() != 0):
 			$z           = '<div class="flex_h"><div class="aligncenter padding margin  border4"  style="width:32px;"><i class="fa fa-' . $APP->iconAppscheme . '  fa-2x"></i ></div><div class="padding uppercase bold">Sans ' . $groupBy . '<br>' . $rs_noGroupBy->count() . '</div></div>';//skelMdl::cf_module('app/app/app_fiche_entete_group', ['groupBy' => $groupBy, 'vars' => $vars_rfk, 'table' => $groupBy, 'table_value' => '0']);
 			$groupBy_key = 'groupby_'. $groupBy.'_idx_'.$i;
@@ -539,7 +539,7 @@
 				unset($strm);
 			endif;
 		endif;
-		$rs    = $APP->find($vars + $where + ['id' . $groupBy => ['$exists' => false]])->sort([$sortBy => $sortDir])->skip($page)->limit($nbRows);
+		$rs    = $APP->find($vars + $where + ['id' . $groupBy => ['$exists' => false]], ['sort' => [$sortBy => $sortDir], 'skip' => $page, 'limit' => $nbRows]);
 		$count = $rs->count();
 		$count = ($count > $nbRows) ? $nbRows : $count;
 		unset($groupBy);

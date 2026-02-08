@@ -1010,9 +1010,10 @@
 			//
 			if ($mode == 'full'):
 
-				$rs_dist = $this->plug($base, $groupBy)->find(['id' . $groupBy => ['$in' => $first_arr_dist]])->sort([$sort_field[0] . ucfirst($groupBy) => $sort_field[1]])->limit($limit);
+				$rs_dist = $this->plug($base, $groupBy)->find(['id' . $groupBy => ['$in' => $first_arr_dist]], ['sort' => [$sort_field[0] . ucfirst($groupBy) => $sort_field[1]], 'limit' => (int)$limit]);
 
 				return $rs_dist;
+			endif;
 			endif;
 
 			return $first_arr_dist;
@@ -1047,9 +1048,9 @@
 			// sort field peut etre count +1 ou count -1
 
 			if ($sort_field[0] != 'count') {
-			$rs_basedist = new MongodbCursorWrapper($base_rs->find($vars, ['_id' => 0])->limit(3000)->sort([$sort_on => $sort_field[1]]));
-		} else
-			$rs_basedist = new MongodbCursorWrapper($base_rs->find($vars, ['_id' => 0])->limit(3000)->sort(['nom' . ucfirst($this->table) => 1]));
+				$rs_basedist = new MongodbCursorWrapper($base_rs->find($vars, array_merge(['_id' => 0], ['limit' => 3000, 'sort' => [$sort_on => $sort_field[1]]])));
+			} else
+				$rs_basedist = new MongodbCursorWrapper($base_rs->find($vars, array_merge(['_id' => 0], ['limit' => 3000, 'sort' => ['nom' . ucfirst($this->table) => 1]])));
 			# boucle dans liste triée
 
 			while ($arr_basedist = $rs_basedist->getNext()) {
@@ -1314,7 +1315,7 @@
 		}
 
 		function get_schemes($arr_vars = [], $page = 0, $rppage = 250) {
-			return $this->app_conn->find($arr_vars)->sort(['nomAppscheme' => 1])->skip((int)$page * (int)$rppage)->limit((int)$rppage);
+			return $this->app_conn->find($arr_vars, ['sort' => ['nomAppscheme' => 1], 'skip' => (int)$page * (int)$rppage, 'limit' => (int)$rppage]);
 		}
 
 		function get_http_mdl($mdl, $vars = [], $value = '', $attributes = '') {
@@ -2132,10 +2133,17 @@
 				die('   [' . $this->table . '-' . $this->app_table_one['codeAppscheme_base'] . '-' . $this->app_table_one['codeAppscheme'] . ']');
 				exit;
 			}
-			$rs       = $this->plug($this->app_table_one['codeAppscheme_base'], $this->app_table_one['codeAppscheme'])->find($vars, $fields);
-			$totcount = $rs->count();
-			$rs->sort([$this->app_field_name_top => -1, $this->app_field_name_nom => 1]);
-			$rs->skip((int)$page * (int)$rppage)->limit((int)$rppage);
+			// Count total before applying pagination
+			$rs0 = $this->plug($this->app_table_one['codeAppscheme_base'], $this->app_table_one['codeAppscheme'])->find($vars, $fields);
+			$totcount = $rs0->count();
+
+			// Build find options for pagination and sorting while preserving any projection in $fields
+			$options = is_array($fields) ? $fields : [];
+			$options['sort'] = [$this->app_field_name_top => -1, $this->app_field_name_nom => 1];
+			$options['skip'] = (int)$page * (int)$rppage;
+			$options['limit'] = (int)$rppage;
+
+			$rs = $this->plug($this->app_table_one['codeAppscheme_base'], $this->app_table_one['codeAppscheme'])->find($vars, $options);
 
 			return $rs;
 		}
