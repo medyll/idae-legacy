@@ -16,7 +16,7 @@
 	$COL = array();
 
 
-	$rs = $col_activity->find(array('vars.table'=>$_POST['table'], 'idagent' => (int)$_SESSION['idagent'] )+$vars)->sort(array( 'heureActivite' => - 1 ))->limit(1000);
+	$rs = $col_activity->find(array('vars.table'=>$_POST['table'], 'idagent' => (int)$_SESSION['idagent'] )+$vars, ['sort' => ['heureActivite' => -1], 'limit' => 1000]);
 
 ?>
 <div class = "applink applinkblock ededed">

@@ -94,7 +94,7 @@
 		$GRILLE_FK = $APPSC->get_grille_fk();
 
 		$rssc_count = $APPSC->query($where)->count();
-		$rssc       = $APPSC->query($vars + $where)->sort(array($nom => 1))->limit($nbRows)->skip($page * $nbRows);
+		$rssc       = $APPSC->query($vars + $where, (int)$page, (int)$nbRows);
 		if ($rssc_count != 0):
 			?>
 			<div class = "">

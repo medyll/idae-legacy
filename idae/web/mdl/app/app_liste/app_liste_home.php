@@ -31,7 +31,7 @@
 		$add = array('$or' => array(array($nom => array('$in' => $out)), array($nom => array('$in' => $out))));
 
 	endif;
-	$rs = $APP->get_schemes($vars+$add)->limit($rppage);
+	$rs = $APP->get_schemes($vars+$add, 0, $rppage);
 
 
 ?>

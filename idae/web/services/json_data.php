@@ -124,24 +124,22 @@
 		exit;
 	}
 
-	$rs = $APP->query($vars + $where);
+	$rs = $APP->query($vars + $where, (int)$page, (int)$nbRows);
 	$max_count = $rs->count();
-	$rs->sort(array($sortBy => $sortDir));
-	$rs->limit((int)$nbRows)->skip((int)$page * (int)$nbRows);
 //
 //
 	if ($PIECE == 'table_groupby'):
 		$rs_dist    = $APP->distinct($groupBy, $vars + $where);
 		$dist_count = $rs_dist->count();
 		// $nbRows = (ceil($nbRows / $dist_count));
-		$rs_dist->limit(30)->skip((int)$page * 30);
+		$rs_dist = $APP->distinct($groupBy, $vars + $where, 30);
 		
 		$JSON_STR = []; 
 		foreach ($rs_dist as $arr_dist):
 		// vardump($arr_dist);
 			$vars_rfk = array();
 			$vars['id' . $groupBy] = (int)$arr_dist['id' . $groupBy];
-			$rs                    = $APP->query($vars + $where)->sort(array($sortBy => $sortDir));
+			$rs                    = $APP->query($vars + $where, 0, 250);
 			//
 			$vars_rfk['table']       = 'id' . $groupBy; 
 			$vars_rfk['vars'] = ['id' . $groupBy => $arr_dist['id' . $groupBy]];

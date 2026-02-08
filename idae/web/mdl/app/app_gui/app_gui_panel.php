@@ -23,7 +23,7 @@
 	$dateStart->modify('-30 day');
 	$DADATE = $dateStart->format('Y-m-d');
 
-	$RS = $APP->find(['codeAgent_history' => $table] + $vars)->sort([$sortBy . 'Agent_history' => -1, 'dateAgent_history' => -1, 'heureAgent_history' => -1])->limit($nbRows);
+	$RS = $APP->find(['codeAgent_history' => $table] + $vars, ['sort' => [$sortBy . 'Agent_history' => -1, 'dateAgent_history' => -1, 'heureAgent_history' => -1], 'limit' => $nbRows]);
 
 	$APP_TMP = new App($table);
 

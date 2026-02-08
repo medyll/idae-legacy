@@ -16,8 +16,8 @@
 	$idproduit_type = (int)$arrP['idproduit_type'];
 
 
-	$rsT  = $APP_GAMME->query()->sort(array( 'ordreGamme' => 1 ))->limit(1); // array( 'idproduit_type' => (int)$idproduit_type )
-	$rsPT = $APP_PT->query(array( 'idproduit' => (int)$idproduit ))->sort(array( 'dateDebutProduit_tarif' => 1 ));
+	$rsT  = $APP_GAMME->query([], 0, 1); // array( 'idproduit_type' => (int)$idproduit_type )
+	$rsPT = $APP_PT->query(array( 'idproduit' => (int)$idproduit ), 0, 250);
 
 	if ( ! empty($arrP['idtransport']) ) {
 		$rsT = $APP_T_G->query(array( 'idtransport' => (int)$arrP['idtransport'] ))->sort(array( 'ordreTransport_gamme' => 1 ,

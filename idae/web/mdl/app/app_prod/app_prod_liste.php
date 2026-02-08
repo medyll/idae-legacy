@@ -38,9 +38,8 @@ $time=time();
 
 	$id = 'id' . $table;
 	$id_type = 'id' . $table.'_type';
-	$rs = $APP->query($vars,'','',array($id=>1));
+	$rs = $APP->query($vars, (int)$page, (int)$nbRows, array($id => 1));
 	$max_count = $rs->count();
-	$rs->limit($nbRows);
 	$total = $rs->count();
 	$nbPage = ceil($total / $nbRows);
 

@@ -18,7 +18,7 @@
 
 	$RS_SCH = $APP_SITE->get_site_scheme();
 
-	$rs = $APP->find()->sort(['estTop' . $Table => -1, 'nom' . $Table => 1])->limit(250);
+	$rs = $APP->find([], ['sort' => ['estTop' . $Table => -1, 'nom' . $Table => 1], 'limit' => 250]);
 ?>
 <div style="height:100%;">
 	<div class="padding_more ededed" style="height:100%;overflow:hidden;">

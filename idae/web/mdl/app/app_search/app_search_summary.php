@@ -42,10 +42,10 @@
 		if (is_int($_POST['search'])):
 			$add['$or'][] = [$id => (int)$_POST['search']];
 		endif;
-		$rs = $APP->find($vars + $add)->sort(['nom' . $Table => 1])->limit(5);
+		$rs = $APP->find($vars + $add, ['sort' => ['nom' . $Table => 1], 'limit' => 5]);
 	// vardump_async(array_merge( $vars , $add),true);
 	else:
-		$rs = $APP->find($vars)->sort(['nom' . $Table => 1])->limit(5);
+		$rs = $APP->find($vars, ['sort' => ['nom' . $Table => 1], 'limit' => 5]);
 	endif;
 
 	if(empty($vars) && empty($add)) return;
