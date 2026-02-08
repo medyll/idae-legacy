@@ -42,8 +42,7 @@ class Session {
 				error_log('[Session::__construct] MongoDB connected successfully to ' . $mongo_host);
 			}
 		} catch (Exception $e) {
-			error_log('[Session::__construct] MongoDB connection FAILED: ' . $e->getMessage());
-			error_log('[Session::__construct] host=' . $mongo_host . ' user=' . $mongo_user);
+			error_log('[Session::__construct] MongoDB connection FAILED: ' . $e->getMessage()); 
 			// Let session_start() fail gracefully instead of crashing
 			throw new Exception('Session storage unavailable: ' . $e->getMessage());
 		}
@@ -96,9 +95,7 @@ class Session {
 			$mongoHost = getenv('MONGO_HOST') ?: (defined('MDB_HOST') ? MDB_HOST : '');
 			$mongoUser = getenv('MDB_USER') ?: (defined('MDB_USER') ? MDB_USER : '');
 			$mongoPrefix = defined('MDB_PREFIX') ? MDB_PREFIX : '';
-			$sitebase = $mongoPrefix . 'sitebase_session' . (defined('ENVIRONEMENT') && ENVIRONEMENT == 'PREPROD' ? '_preprod' : '');
-			error_log('[Session::gc] delete expired sessions');
-			error_log('[Session::gc] host=' . $mongoHost . ' user=' . $mongoUser . ' db=' . $sitebase . ' cutoff=' . $lastAccessed);
+			$sitebase = $mongoPrefix . 'sitebase_session' . (defined('ENVIRONEMENT') && ENVIRONEMENT == 'PREPROD' ? '_preprod' : ''); 
 			$trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 5);
 			foreach ($trace as $i => $row) {
 				$file = isset($row['file']) ? $row['file'] : '';

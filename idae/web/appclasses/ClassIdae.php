@@ -399,8 +399,8 @@
 					                                                                              'table'          => $table,
 					                                                                              'field_value'    => $ARR[$codeAppscheme_field]]);
 					$COLLECT[$key]['appscheme_fields'][$code]['value_input'] = $this->draw_field_input(['field_name_raw' => $ARR_FIELD['codeAppscheme_field'],
-					                                                                                    'table'          => $table,
-					                                                                                    'field_value'    => ($ARR_FIELD['codeAppscheme_field'] != 'password') ? $ARR[$codeAppscheme_field] : !empty($vars[$codeAppscheme_field]) ? $vars[$codeAppscheme_field] : '']);
+																					'table'          => $table,
+																					'field_value'    => ($ARR_FIELD['codeAppscheme_field'] != 'password') ? $ARR[$codeAppscheme_field] : (!empty($vars[$codeAppscheme_field]) ? $vars[$codeAppscheme_field] : '')]);
 
 				}
 			}

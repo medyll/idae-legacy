@@ -1459,9 +1459,7 @@
 		function find($vars = [], $proj = []) {
 
 			if (empty($this->app_table_one['codeAppscheme_base']) || empty($this->app_table_one['codeAppscheme'])) {
-				error_log("[App::find] Missing schema info for table '{$this->table}' - base: " . 
-					($this->app_table_one['codeAppscheme_base'] ?? 'null') . ", schema: " . 
-					($this->app_table_one['codeAppscheme'] ?? 'null'));
+				 
 				return new MongodbCursorWrapper(new \ArrayIterator([]));
 			}
 

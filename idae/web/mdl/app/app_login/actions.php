@@ -1,5 +1,4 @@
 <?php
-	error_log("DEBUG: actions.php START - POST: " . print_r($_POST, true));
 	include_once($_SERVER['CONF_INC']);
 
 	array_walk_recursive($_POST, 'CleanStr');
@@ -23,7 +22,6 @@
 			$phpsessid = isset($_COOKIE['PHPSESSID']) ? $_COOKIE['PHPSESSID'] : '';
 
 			if (!empty($arrAgent)) {
-				error_log("DEBUG: actions.php agent found: " . $arrAgent["id$type"]);
 
 				$idagent             = (int)$arrAgent["id$type"];
 				$_SESSION['type']    = $type;
@@ -43,9 +41,7 @@
 				skelMdl::send_cmd('act_notify', ['msg' => 'En ligne ' . $arrAgent["prenom$Type"], "id$type" => $arrAgent["id$type"], 'PHPSESSID' => $phpsessid, 'SESSID' => $arrAgent["idagent"]]);
 				$APP->update(['idagent' => $idagent], ['PHPSESSID' => $phpsessid]);
 
-				error_log("DEBUG: actions.php calling app_login_success");
 				$mdl = skelMdl::cf_module('app/app_login/app_login_success');//;
-				error_log("DEBUG: actions.php app_login_success done");
 				
 				skelMdl::send_cmd('act_notify', ['msg' => $mdl]);
 				?>
