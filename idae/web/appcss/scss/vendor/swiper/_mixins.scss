@@ -1,0 +1,13 @@
+// _mixins.scss — Swiper mixin library
+// Converted from: vendor/swiper/mixins.less
+// Modified: 2026-03-02
+// Changes: LESS .mixin() → SCSS @mixin
+//          encoded-svg-background: LESS used JS encodeURIComponent backtick eval
+//          → removed; call sites now inline pre-encoded background-image directly.
+
+@mixin preserve3d() {
+    -webkit-transform-style: preserve-3d;
+    -moz-transform-style: preserve-3d;
+    -ms-transform-style: preserve-3d;
+    transform-style: preserve-3d;
+}

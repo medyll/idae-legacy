@@ -35,7 +35,7 @@
 		<meta name="viewport" content="initial-scale=1.0, user-scalable=no"/>
 		<link rel="icon" type="image/png" href="favicon.ico"/>
 		<!--<script type="riot/tag" src="appcomponents/datatable.tag"></script>-->
-		<?  include_once('lessc.inc.php');  ?>
+		<link type='text/css' rel='stylesheet' href='<?= HTTPAPP ?>appcss/dist/main.css'>
 		<script src="javascript/vendor/bag.js" type="text/javascript"></script>
 	</head>
 	<body id="body" style="background-size:cover;background-repeat: no-repeat;background-color:#333;height:100%;width:100%;overflow:hidden;max-height:100%" class="skin_default">

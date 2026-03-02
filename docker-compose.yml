@@ -6,18 +6,24 @@ services:
     volumes:
       - ./idae:/var/www/html/idae
       - ./logs:/var/log/apache2
+    depends_on:
+      - mongo-test
     environment:
       - APACHE_RUN_USER=www-data
       - APACHE_RUN_GROUP=www-data
       - CONF_INC=/var/www/html/idae/web/conf.inc.php
-      - DOCKER_ENV=1# Utilise l'alias DNS interne pour l'hôte
+      - DOCKER_ENV=1
       - MONGO_HOST=host.docker.internal
+      - MONGO_HOST_PORT=27017
       - MDB_USER=${MDB_USER:-}
       - MDB_PASSWORD=${MDB_PASSWORD:-}
       - MDB_PREFIX=${MDB_PREFIX:-}
+      - MONGO_ENV=${MONGO_ENV:-dev}
+      - MONGO_TEST_HOST=mongo-test
+      - MONGO_TEST_PORT=27017
+      - MONGO_TEST_DSN=mongodb://mongo-test:27017
       - DEBUG_DB=1
       - DEBUG_SESSION=1
-      - MONGO_HOST_PORT=27017
       - SOCKET_PORT=3005
     container_name: idae-legacy
     healthcheck:
@@ -27,3 +33,14 @@ services:
       retries: 3
       start_period: 40s
     restart: unless-stopped
+
+  # Isolated MongoDB instance for PHPUnit tests.
+  # Never receives production data. No auth required (test-only).
+  mongo-test:
+    image: mongo:7
+    container_name: idae-mongo-test
+    ports:
+      - "27018:27017"
+    tmpfs:
+      - /data/db
+    restart: "no"
