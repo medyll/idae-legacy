@@ -1,0 +1,88 @@
+project: "Idae Legacy — Code Modernization"
+updated: "2026-03-02"
+recommendation: "/sprint-planning"
+
+# Context: infrastructure is DONE. PHP 8.2 + Docker + mongodb/mongodb v2 are operational.
+# The remaining work is PHP code modernization (ClassApp, services, modules).
+
+phases:
+  - id: 1
+    name: "Infrastructure & Bootstrap"
+    status: done
+    progress: 100
+    notes: >
+      PHP 8.2 in Docker — operational.
+      Login flow functional (actions.php, ClassSession, ClassApp basic path).
+      MongoCompat helper created. Node.js server refactored to ESM (app_node/src/).
+      docker-compose up --build works. Apache serves the app on port 8080.
+
+  - id: 2
+    name: "ClassApp Core Migration"
+    status: in_progress
+    progress: 25
+    artifacts:
+      - "__construct connection refactor — in_progress"
+      - "query() / findOne() — pending"
+      - "create_update / insert / update / remove — pending"
+      - "distinct / aggregate — pending"
+      - "get_grille_fk / get_reverse_grille_fk — pending"
+      - "Unit tests per method — pending"
+      - "json_data.php JSON output regression test — pending"
+    blockers:
+      - "Node.js socket server intermittently unreachable on port 3005"
+    ref: "idae/web/PHASE2_STRATEGY.md"
+
+  - id: 3
+    name: "Services & JSON API"
+    status: upcoming
+    progress: 0
+    artifacts:
+      - "json_data.php modernization"
+      - "json_scheme.php output validation"
+      - "json_data_search.php (MongoCompat::toRegex)"
+      - "json_data_table.php / json_data_table_row.php"
+
+  - id: 4
+    name: "Modules & Templates"
+    status: upcoming
+    progress: 0
+    artifacts:
+      - "mdl/* audit (legacy MongoId/MongoRegex/MongoDate usage)"
+      - "cursorToArray rollout in modules"
+      - "Smarty/Latte template review"
+
+  - id: 5
+    name: "Security & PHP Hardening"
+    status: upcoming
+    progress: 0
+    artifacts:
+      - "declare(strict_types=1) rollout on modified files"
+      - "Input validation / CSRF on actions.php, postAction.php"
+      - "Remove @ error suppression"
+      - "Composer dependency audit & updates"
+
+  - id: 6
+    name: "QA & Regression"
+    status: upcoming
+    progress: 0
+    artifacts:
+      - "Full test suite pass"
+      - "Browser smoke test (login → grid load → CRUD)"
+      - "app_cache_reset() validation after schema changes"
+
+sprints: []
+backlog: []
+
+qa:
+  test_plan: pending
+  coverage: "~0%"
+  last_run: null
+  bugs:
+    - id: BUG-01
+      title: "Node.js socket server refuses connections (port 3005)"
+      severity: medium
+      status: open
+    - id: BUG-02
+      title: "CleanStr signature mismatch (array_walk_recursive)"
+      severity: low
+      status: patched_needs_broader_testing
