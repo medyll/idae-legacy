@@ -143,6 +143,20 @@
 			if (!empty($PERSIST_CON) && $PERSIST_CON instanceof Client) {
 				return $PERSIST_CON;
 			}
+
+			// MONGO_ENV guard: when running tests, connect to the isolated sidecar only.
+			// MONGO_ENV=test is set via phpunit.xml bootstrap; prod/dev never set this value.
+			$mongo_env = getenv('MONGO_ENV') ?: 'dev';
+			if ($mongo_env === 'test') {
+				$test_dsn = getenv('MONGO_TEST_DSN') ?: 'mongodb://mongo-test:27017';
+				$PERSIST_CON = new Client($test_dsn, [], [
+					'typeMap' => ['root' => 'array', 'document' => 'array', 'array' => 'array'],
+					'connectTimeoutMS'         => 5000,
+					'serverSelectionTimeoutMS' => 5000,
+					'socketTimeoutMS'          => 30000,
+				]);
+				return $PERSIST_CON;
+			}
 			
 		// Build connection URL with credentials (only if both user and password are non-empty)
 		$mongo_host = getenv('MONGO_HOST') ?: (getenv('DOCKER_ENV') ? 'mongodb' : MDB_HOST);

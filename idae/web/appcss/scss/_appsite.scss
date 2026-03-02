@@ -1,0 +1,31 @@
+// _appsite.scss — Application site-level layout rules
+// Converted from: appsite.less
+// Modified: 2026-03-02
+// Changes: @import → @use; LESS class-as-mixin calls → inlined CSS
+//          (@extend across @use modules is unsupported in Dart Sass)
+
+// No vars/app_fabric members used — imports omitted
+
+// [data-tpl=liste_produit_small]:
+//   .flex_h         → display:flex; flex-direction:row; box-sizing:border-box
+//   .flex_align_top → align-items:flex-start
+//   .flex_wrap      → flex-wrap:wrap
+//   .flex_align_stretch → align-items:stretch  (overrides .flex_align_top)
+[data-tpl=liste_produit_small] {
+	box-sizing     : border-box;
+	display        : flex;
+	flex-direction : row;
+	align-items    : flex-start;
+	flex-wrap      : wrap;
+	align-items    : stretch;
+}
+
+// Original LESS: .flex_h .flex_main; — ambiguous (compound selector vs mixin chain).
+// Preserved as descendant rule; TODO: verify if .flex_main mixin-inlining was intended.
+[data-tpl=fiche_produit_small] {
+	.flex_main {
+		flex      : 1 1 0;
+		width     : 100%;
+		max-width : 100%;
+	}
+}

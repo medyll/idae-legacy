@@ -1,9 +1,14 @@
 project: "Idae Legacy — Code Modernization"
 updated: "2026-03-02"
-recommendation: "/sprint-planning"
+recommendation: "/dev-story S3-01"
 
-# Context: infrastructure is DONE. PHP 8.2 + Docker + mongodb/mongodb v2 are operational.
-# The remaining work is PHP code modernization (ClassApp, services, modules).
+# HANDOFF NOTE: Sprint 02 is COMPLETE (100%, 13 pts).
+# All SCSS migration work done: LESS → SCSS conversion, entry point wiring, mixin refactoring, lessc removal.
+# ClassApp.__construct already uses MongoDB\Client with modern driver semantics.
+# Next: Phase 3 begins (S3-01) — ClassApp CRUD method refactoring (query, findOne, create_update, etc.)
+
+# Context: SCSS & Bootstrap infrastructure COMPLETE. Ready for Phase 3 ClassApp modernization.
+# Blockers: Node.js socket server (medium severity, not blocking current sprint).
 
 phases:
   - id: 1
@@ -17,30 +22,32 @@ phases:
       docker-compose up --build works. Apache serves the app on port 8080.
 
   - id: 2
-    name: "ClassApp Core Migration"
-    status: in_progress
-    progress: 25
+    name: "SCSS Migration + ClassApp Foundation"
+    status: done
+    progress: 100
     artifacts:
-      - "__construct connection refactor — in_progress"
-      - "query() / findOne() — pending"
-      - "create_update / insert / update / remove — pending"
-      - "distinct / aggregate — pending"
-      - "get_grille_fk / get_reverse_grille_fk — pending"
-      - "Unit tests per method — pending"
-      - "json_data.php JSON output regression test — pending"
-    blockers:
-      - "Node.js socket server intermittently unreachable on port 3005"
-    ref: "idae/web/PHASE2_STRATEGY.md"
+      - "S2-01 — Convert 26 LESS → SCSS ✅"
+      - "S2-02 — Wire entry points with @use/@forward ✅"
+      - "S2-03 — Convert LESS mixins to @mixin/@include ✅"
+      - "S2-04 — Remove lessc.inc.php ✅"
+      - "S2-05 — ClassApp.__construct modernized ✅"
+      - "npm run build:css compiles successfully ✅"
+    notes: "All 5 stories complete. SCSS pipeline fully operational. Ready for Phase 3 (ClassApp CRUD methods)."
+    ref: "bmad/artifacts/sprints/sprint-02.md"
 
   - id: 3
-    name: "Services & JSON API"
-    status: upcoming
-    progress: 0
+    name: "ClassApp CRUD + Testing"
+    status: in_progress
+    progress: 5
     artifacts:
-      - "json_data.php modernization"
-      - "json_scheme.php output validation"
-      - "json_data_search.php (MongoCompat::toRegex)"
-      - "json_data_table.php / json_data_table_row.php"
+      - "S3-01 — Refactor ClassApp::query() (pending)"
+      - "S3-02 — Refactor ClassApp::findOne() (pending)"
+      - "S3-03 — Refactor ClassApp::create_update() (pending)"
+      - "S3-04 — Refactor ClassApp CRUD helpers: insert/update/remove (pending)"
+      - "S3-05 — Unit tests per method (pending)"
+      - "S3-06 — json_data.php regression test (pending)"
+    notes: "Phase 3 begins after S2 completion. Focus: ClassApp CRUD method modernization to use MongoDB\Client driver semantics."
+    ref: "idae/web/PHASE2_STRATEGY.md"
 
   - id: 4
     name: "Modules & Templates"
@@ -70,8 +77,43 @@ phases:
       - "Browser smoke test (login → grid load → CRUD)"
       - "app_cache_reset() validation after schema changes"
 
-sprints: []
-backlog: []
+sprints:
+  - id: 1
+    theme: "Foundation: Test Infrastructure & SCSS Pipeline"
+    dates: "2026-03-02 → 2026-03-13"
+    points: 12
+    status: done
+    file: "artifacts/sprints/sprint-01.md"
+  - id: 2
+    theme: "SCSS Migration Complete + ClassApp Connection"
+    dates: "2026-03-16 → 2026-03-27"
+    points: 13
+    status: done
+    progress: 100
+    file: "artifacts/sprints/sprint-02.md"
+  - id: 3
+    theme: "ClassApp CRUD + ClassAppFk + Unit Tests"
+    dates: "2026-03-30 → 2026-04-10"
+    points: 14
+    status: in_progress
+    file: "artifacts/sprints/sprint-03.md"
+  - id: 4
+    theme: "ClassAppAgg + Integration Tests + JSON Services"
+    dates: "2026-04-13 → 2026-04-24"
+    points: 14
+    status: upcoming
+    file: "artifacts/sprints/sprint-04.md"
+  - id: 5
+    theme: "Modules, Security, Hardening & Regression"
+    dates: "2026-04-27 → 2026-05-08"
+    points: 15
+    status: upcoming
+    file: "artifacts/sprints/sprint-05.md"
+
+backlog:
+  total_points: 68
+  completed_points: 25
+  progress: "37%"
 
 qa:
   test_plan: pending

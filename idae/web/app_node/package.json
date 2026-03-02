@@ -7,7 +7,9 @@
   "scripts": {
     "start": "node src/main.js",
     "dev": "nodemon src/main.js",
-    "logs": "powershell Get-Content ../../../logs/php-error.log -Wait"
+    "logs": "powershell Get-Content ../../../logs/php-error.log -Wait",
+    "build:css": "sass ../appcss/scss/main.scss ../appcss/dist/main.css --style=compressed --no-source-map",
+    "watch:css": "sass --watch ../appcss/scss/main.scss ../appcss/dist/main.css --style=expanded"
   },
   "dependencies": {
     "axios": "^1.6.0",
@@ -21,7 +23,8 @@
     "winston": "^3.11.0"
   },
   "devDependencies": {
-    "nodemon": "^3.0.0"
+    "nodemon": "^3.0.0",
+    "sass": "^1.77.0"
   },
   "engines": {
     "node": ">=18.0.0"
