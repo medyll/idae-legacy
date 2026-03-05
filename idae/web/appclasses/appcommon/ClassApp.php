@@ -1129,21 +1129,24 @@
 
 		#   cds
 
+		// Modified: 2026-03-03
 		function findOne($vars, $out = []) {
 			if (empty($this->app_table_one['codeAppscheme_base'])) {
-				vardump($this->app_table_one);
-				vardump($this->table);
-				vardump($vars);
-
-				return [];
-			}
-			if (sizeof($out) == 0) {
-				$arr = $this->plug($this->app_table_one['codeAppscheme_base'], $this->app_table_one['codeAppscheme'])->findOne($vars);
-			} else {
-				$arr = $this->plug($this->app_table_one['codeAppscheme_base'], $this->app_table_one['codeAppscheme'])->findOne($vars, $out);
+				error_log('[ClassApp::findOne] Missing codeAppscheme_base for table: ' . $this->table);
+				return null;
 			}
 
-			return $arr;
+			$vars = MongoCompat::convertFilter($vars);
+
+			$collection = $this->plug(
+				$this->app_table_one['codeAppscheme_base'],
+				$this->app_table_one['codeAppscheme']
+			);
+
+			if (empty($out)) {
+				return $collection->findOne($vars);
+			}
+			return $collection->findOne($vars, $out);
 		}
 
 		function get_full_titre_vars($arr_vars = []) {
@@ -2139,27 +2142,36 @@
 			return $str;
 		}
 
+		// Modified: 2026-03-03
 		function query($vars = [], $page = 0, $rppage = 40, $fields = []) {
 			if (empty($rppage)) {
 				$rppage = 15;
 			}
 			if (empty($this->app_table_one['codeAppscheme_base'])) {
-				die('   [' . $this->table . '-' . $this->app_table_one['codeAppscheme_base'] . '-' . $this->app_table_one['codeAppscheme'] . ']');
-				exit;
+				error_log('[ClassApp::query] Missing codeAppscheme_base for table: ' . $this->table);
+				return new MongodbCursorWrapper([]);
 			}
-			// Count total before applying pagination
-			$rs0 = $this->plug($this->app_table_one['codeAppscheme_base'], $this->app_table_one['codeAppscheme'])->find($vars, $fields);
-			$totcount = $rs0->count();
 
-			// Build find options for pagination and sorting while preserving any projection in $fields
-			$options = is_array($fields) ? $fields : [];
-			$options['sort'] = [$this->app_field_name_top => -1, $this->app_field_name_nom => 1];
-			$options['skip'] = (int)$page * (int)$rppage;
-			$options['limit'] = (int)$rppage;
+			$vars = MongoCompat::convertFilter($vars);
 
-			$rs = $this->plug($this->app_table_one['codeAppscheme_base'], $this->app_table_one['codeAppscheme'])->find($vars, $options);
+			// Build proper MongoDB options: pagination and sort separate from projection
+			$options = [
+				'sort'  => [$this->app_field_name_top => -1, $this->app_field_name_nom => 1],
+				'skip'  => (int)$page * (int)$rppage,
+				'limit' => (int)$rppage,
+			];
+			if (!empty($fields) && is_array($fields)) {
+				$options['projection'] = $fields;
+			}
 
-			return $rs;
+			// Use raw MongoDB\Collection to pass full options without MongoCollection rewrapping
+			$collection = $this->plug(
+				$this->app_table_one['codeAppscheme_base'],
+				$this->app_table_one['codeAppscheme']
+			);
+			$cursor = $collection->getCollection()->find($vars, $options);
+
+			return new MongodbCursorWrapper($cursor);
 		}
 
 		function get_field_list_raw($in = []) {
