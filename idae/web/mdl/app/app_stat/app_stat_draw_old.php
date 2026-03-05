@@ -1,5 +1,7 @@
 <? 
 include_once($_SERVER['CONF_INC']);
+require_once(__DIR__ . '/../../../appclasses/appcommon/MongoCompat.php');
+use AppCommon\MongoCompat;
 	// nbre par date
 ini_set('display_errors',55); 
 $table = $_POST['table'];
@@ -25,15 +27,15 @@ while ($dateStart-> format('Y-m-d') <= $dateEnd->format('Y-m-d')){
 	//
 	switch($incr){
 		case "day":
-			$ct = $APP->find(array('dateCreation'.$Table=> new MongoRegex('/^'.$DADATE.'/') ))->count();
+			$ct = $APP->find(array('dateCreation'.$Table=> MongoCompat::toRegex('^' . preg_quote($DADATE, '/') . '/', '') ))->count();
 			$INDEX = $DADATE;
 			break;
 		case "month":
-			$ct = $APP->find(array('dateCreation'.$Table=> new MongoRegex('/^'.$DADATE_MONTH.'/') ))->count();
+			$ct = $APP->find(array('dateCreation'.$Table=> MongoCompat::toRegex('^' . preg_quote($DADATE_MONTH, '/') . '/', '') ))->count();
 			$INDEX = $DADATE_MONTH;
 			break;
 		case "year":
-			$ct = $APP->find(array('dateCreation'.$Table=> new MongoRegex('/^'.$DADATE_YEAR.'/') ))->count();
+			$ct = $APP->find(array('dateCreation'.$Table=> MongoCompat::toRegex('^' . preg_quote($DADATE_YEAR, '/') . '/', '') ))->count();
 			$INDEX = $DADATE_YEAR; 
 			break;
 	}

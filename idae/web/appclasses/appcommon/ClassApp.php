@@ -5,88 +5,197 @@
 	 * User: Mydde
 	 * Date: 23/05/14
 	 * Time: 20:26
+	 * 
+	 * MIGRATION NOTE: Migrated from MongoDB driver v1.x to modern driver (2026-02-02)
+	 * - Changed from extending \MongoClient to standalone class
+	 * - Using MongoDB\Client instead of MongoClient
+	 * - Using AppCommon\MongoCompat for type conversions
 	 */
 	//namespace appclasses\appcommon ;
+
+	// Modern MongoDB driver
+	use MongoDB\Client;
+	use AppCommon\MongoDB as LegacyMongoDB;
+	use AppCommon\MongoCollection as LegacyMongoCollection;
+	
+	// MongoCompat helper for type conversions
+	require_once __DIR__ . '/MongoCompat.php';
+	use AppCommon\MongoCompat;
+	
+	// MongodbCursorWrapper for ADODB-style getNext() compatibility
+	require_once __DIR__ . '/MongodbCursorWrapper.php';
+	use AppCommon\MongodbCursorWrapper;
 
 	global $app_conn_nb;
 	global $PERSIST_CON;
 
-	class App extends \MongoClient {
+	#[\AllowDynamicProperties]
+	class App {
 
+		// MongoDB connection objects (modern driver)
+		private $mongoClient;    // MongoDB\Client instance
+		private $database;       // MongoDB\Database instance
+		public $collection;      // MongoDB\Collection instance (for current table)
+		
+		// Legacy properties (kept for backward compatibility)
 		public $app_table_one;
 		public $app_db;
-
-		public $conn;
+		public $conn;            // Kept for compatibility, now holds MongoDB\Client
 		public $app_conn;
 
 		public $obj;
+	private $app_table_one_loaded = false; // Track if table metadata has been loaded
 
-		function set_table($table) {
-			return $this->__construct($table);
+	function set_table($table) {
+		return $this->__construct($table);
+	}
+	
+	/**
+	 * Magic method to lazy-load table metadata on first access
+	 */
+	public function __get($name) {
+		// If accessing table metadata properties, load them if not already loaded
+		$table_metadata_properties = [
+			'app_table_one', 'app_field_name_id', 'app_field_name_nom', 
+			'idappscheme', 'codeAppscheme', 'nomAppscheme', 'grilleFK'
+		];
+		
+		if (in_array($name, $table_metadata_properties) && !$this->app_table_one_loaded) {
+			$this->loadTableMetadata();
+		}
+		
+		// Return the property if it exists
+		if (property_exists($this, $name)) {
+			return $this->$name;
+		}
+		
+		return null;
+	}
+
+	public function __construct($table = '') {
+		global $app_conn_nb;
+		global $PERSIST_CON;
+
+		// Validation
+		if (!defined('MDB_USER')) {
+			return 'Utilisateur DB non defini';
 		}
 
-		public function __construct($table = '') {
-			global $app_conn_nb;
-			global $PERSIST_CON;
-			//
-			if (!defined('MDB_USER')) {
-				return 'Utilisateur DB non defini';
-			}
-			$opt = ['db' => 'admin', 'username' => MDB_USER, 'password' => MDB_PASSWORD];
-			// Détection automatique de l'hôte MongoDB
-			$mongo_host = getenv('MONGO_HOST') ?: (getenv('DOCKER_ENV') ? 'host.docker.internal' : MDB_HOST);
-			$mongo_url = 'mongodb://' . MDB_USER . ':' . MDB_PASSWORD . '@' . $mongo_host;
-			if (empty($PERSIST_CON)) {
-				$PERSIST_CON = $this->conn = new MongoClient($mongo_url, $opt);
-			} else {
-				$this->conn = $PERSIST_CON;
-			}
+		// Modern MongoDB driver connection (singleton pattern)
+		$this->mongoClient = $this->getMongoClient();
+		$this->conn = $this->mongoClient; // Backward compatibility
 
-			$sitebase_app     = MDB_PREFIX . 'sitebase_app';
-			$sitebase_sockets = MDB_PREFIX . 'sitebase_sockets';
+		// Database selection
+		$sitebase_app = MDB_PREFIX . 'sitebase_app';
+		$sitebase_sockets = MDB_PREFIX . 'sitebase_sockets';
 
-			$this->table                     = $table;
-			$this->app_conn                  = $this->conn->$sitebase_app->appscheme;
-			$this->appscheme                 = $this->conn->$sitebase_app->appscheme;
-			$this->appscheme_type            = $this->conn->$sitebase_app->appscheme_type;
-			$this->appscheme_base            = $this->conn->$sitebase_app->appscheme_base;
-			$this->appscheme_field           = $this->conn->$sitebase_app->appscheme_field;
-			$this->appscheme_field_type      = $this->conn->$sitebase_app->appscheme_field_type;
-			$this->appscheme_field_group     = $this->conn->$sitebase_app->appscheme_field_group;
-			$this->appscheme_has_field       = $this->conn->$sitebase_app->appscheme_has_field;
-			$this->appscheme_has_table_field = $this->conn->$sitebase_app->appscheme_has_table_field;
-			$this->APPCACHE                  = $this->conn->$sitebase_sockets->data_activity;
+		$this->database = new LegacyMongoDB($this->mongoClient, $sitebase_app);
+		$database_sockets = new LegacyMongoDB($this->mongoClient, $sitebase_sockets);
 
-			if (!empty($table)) {
-				$this->app_table_one           = $this->app_conn->findOne(['codeAppscheme' => $table]); // si pas reg ?
-				$this->app_field_name_id       = 'id' . $table;
-				$this->app_field_name_id_type  = 'id' . $table . '_type';
-				$this->app_field_name_nom      = $this->app_table_one['nomAppscheme'];
-				$this->app_field_name_nom_type = 'nom' . ucfirst($table) . '_type';
-				$this->app_field_name_top      = 'estTop' . ucfirst($table);
-				$this->app_field_name_actif    = 'estActif' . ucfirst($table);
-				$this->idappscheme             = (int)$this->app_table_one['idappscheme'];
-				$this->codeAppscheme           = $this->app_table_one['codeAppscheme'];
-				$this->iconAppscheme           = $this->app_table_one['iconAppscheme'];
-				$this->colorAppscheme          = $this->app_table_one['colorAppscheme'];
-				$this->nomAppscheme            = $this->app_table_one['nomAppscheme'];
-				$this->codeAppscheme_base      = $this->app_table_one['codeAppscheme_base'];
-				$this->app_table_icon          = $this->app_table_one['icon'];
-				$this->grilleFK                = $this->app_table_one['grilleFK'];
-				$this->hasImageScheme          = $this->app_table_one['hasImageScheme'];
-			}
+		// Collection assignments (schema collections)
+		$this->table = $table;
+		$this->app_conn = $this->database->selectCollection('appscheme');
+		$this->appscheme = $this->database->selectCollection('appscheme');
+		$this->appscheme_type = $this->database->selectCollection('appscheme_type');
+		$this->appscheme_base = $this->database->selectCollection('appscheme_base');
+		$this->appscheme_field = $this->database->selectCollection('appscheme_field');
+		$this->appscheme_field_type = $this->database->selectCollection('appscheme_field_type');
+		$this->appscheme_field_group = $this->database->selectCollection('appscheme_field_group');
+		$this->appscheme_has_field = $this->database->selectCollection('appscheme_has_field');
+		$this->appscheme_has_table_field = $this->database->selectCollection('appscheme_has_table_field');
+		$this->APPCACHE = $database_sockets->selectCollection('data_activity');
 
-			$this->app_default_fields_add  = ['petitNom', 'nom', 'bgcolor', 'code', 'color', 'icon', 'ordre', 'slug', 'actif'];
-			$this->app_default_fields      = ['nom' => '', 'prenom' => '', 'petitNom' => 'nom court', 'code' => '', 'reference' => 'reference', 'description' => '', 'quantite' => '', 'prix' => '', 'total' => '', 'atout' => '', 'valeur' => '', 'rang' => '', 'dateCreation' => 'crée le', 'dateDebut' => 'date debut', 'dateFin' => 'date de fin', 'duree' => '', 'heure' => '', 'email' => '', 'telephone' => '', 'fax' => '', 'adresse' => '', 'url' => '', 'totalHt' => 'total HT', 'totalTtc' => 'total TTC', 'totalMarge' => 'total Marge', 'totalTva' => 'total TVA', 'ordre' => '', 'color' => '', 'image' => ''];
+		// Table-specific initialization
+		if (!empty($table)) {
+			// Select main data collection for this table
+			$this->collection = $this->database->selectCollection($table);
+			$this->table = $table;
+
+			// LAZY LOADING: Don't fetch metadata here to avoid MongoDB queries on every App() instantiation
+			// Metadata will be loaded on first access via __get() magic method
+			$this->app_table_one = null; // Will be loaded lazily
+			$this->app_table_one_loaded = false;
 			$this->app_default_group_field = ['codification' => '', 'identification' => '', 'date' => '', 'prix' => '', 'localisation' => '', 'valeur' => '', 'texte' => '', 'image' => '', 'telephonie' => '', 'heure' => '', 'divers' => 'Autres'];
-
 			//  $this->make_classes_app();
 
+			// Legacy bootstrap expects metadata to be ready immediately (conf_init() checks it).
+			$this->loadTableMetadata();
 		}
+	}
 
-		function make_classes_app() {
-			if (empty($this->table)) return false;
-			if (!is_string($this->table)) return false;
+		public function get_database_name() {
+			if (!empty($this->database) && method_exists($this->database, 'getDatabaseName')) {
+				return $this->database->getDatabaseName();
+			}
+			return '';
+		}
+		
+		/**
+		 * Get MongoDB Client instance (singleton pattern)
+		 * Replaces legacy MongoClient with modern MongoDB\Client
+		 * 
+		 * @return Client MongoDB\Client instance
+		 */
+		private function getMongoClient() {
+			global $PERSIST_CON;
+			
+			// Return existing connection if available (singleton)
+			if (!empty($PERSIST_CON) && $PERSIST_CON instanceof Client) {
+				return $PERSIST_CON;
+			}
+
+			// MONGO_ENV guard: when running tests, connect to the isolated sidecar only.
+			// MONGO_ENV=test is set via phpunit.xml bootstrap; prod/dev never set this value.
+			$mongo_env = getenv('MONGO_ENV') ?: 'dev';
+			if ($mongo_env === 'test') {
+				$test_dsn = getenv('MONGO_TEST_DSN') ?: 'mongodb://mongo-test:27017';
+				$PERSIST_CON = new Client($test_dsn, [], [
+					'typeMap' => ['root' => 'array', 'document' => 'array', 'array' => 'array'],
+					'connectTimeoutMS'         => 5000,
+					'serverSelectionTimeoutMS' => 5000,
+					'socketTimeoutMS'          => 30000,
+				]);
+				return $PERSIST_CON;
+			}
+			
+		// Build connection URL with credentials (only if both user and password are non-empty)
+		$mongo_host = getenv('MONGO_HOST') ?: (getenv('DOCKER_ENV') ? 'mongodb' : MDB_HOST);
+		$mongo_user = getenv('MDB_USER') ?: (defined('MDB_USER') ? MDB_USER : '');
+		$mongo_pass = getenv('MDB_PASSWORD') ?: (defined('MDB_PASSWORD') ? MDB_PASSWORD : '');
+		
+		// Build URI: only include credentials if both present
+		if (!empty($mongo_user) && !empty($mongo_pass)) {
+			$mongo_url = 'mongodb://' . $mongo_user . ':' . $mongo_pass . '@' . $mongo_host;
+		} else {
+			$mongo_url = 'mongodb://' . $mongo_host;
+		}
+		
+		// Prepare auth options (only if credentials provided)
+		$options = [];
+		if (!empty($mongo_user) && !empty($mongo_pass)) {
+			$options['username'] = $mongo_user;
+			$options['password'] = $mongo_pass;
+			$options['authSource'] = 'admin';
+		}
+		
+		// Create new MongoDB\Client instance
+		$PERSIST_CON = new Client($mongo_url, $options, [
+			// TypeMap ensures arrays are returned (not objects) - matches v1 behavior
+			'typeMap' => [
+				'root' => 'array',
+				'document' => 'array',
+				'array' => 'array'
+			],
+			// Connection timeout settings
+			'connectTimeoutMS' => 5000,      // 5 seconds to connect
+			'serverSelectionTimeoutMS' => 5000, // 5 seconds to select server
+			'socketTimeoutMS' => 30000       // 30 seconds for socket operations
+		]);
+		
+		return $PERSIST_CON;
+	}
+
+		public function get_autoload_class() {
 			$table     = $this->table;
 			$file_name = $table;
 			$path      = APPCLASSES_APP . CUSTOMERNAME . '/' . $table . '/';
@@ -111,42 +220,37 @@
 			return $content;
 		}
 
-		function rest($params = ['table', 'action', 'vars']) {
-			//
-			Helper::dump(func_get_args());
-
-			if (strpos($params['vars'], '/') === false) {
-				$value = $params['vars'];
-
-			} else {
-				$value = explode('/', $params['vars']);
+		/**
+		 * Load table metadata lazily (only when needed)
+		 * Called automatically on first access to table properties
+		 */
+		private function loadTableMetadata() {
+			if ($this->app_table_one_loaded || empty($this->table)) {
+				return;
 			}
-			$new_value = array_map(function ($node) {
-				if (strpos($node, ':') === false) {
-
-					return $node;
-				}
-				$tmp = explode(':', $node);
-
-				if (strpos($tmp[0], '[]') === true) {
-					echo "array";
-				}
-
-				return [$tmp[0] => $tmp[1]];
-
-			}, $value);
-			Helper::dump($new_value);
-			$app = new App($params['table']);
-
-			if ($params['action'] == 'remove') {
-				die('verboten');
+			
+			// Fetch table metadata from appscheme collection
+			$this->app_table_one = $this->app_conn->findOne(['codeAppscheme' => $this->table]);
+			$this->app_table_one_loaded = true;
+			
+			if ($this->app_table_one) {
+				$table = $this->table;
+				$this->app_field_name_id       = 'id' . $table;
+				$this->app_field_name_id_type  = 'id' . $table . '_type';
+				$this->app_field_name_nom      = isset($this->app_table_one['nomAppscheme']) ? $this->app_table_one['nomAppscheme'] : '';
+				$this->app_field_name_nom_type = 'nom' . ucfirst($table) . '_type';
+				$this->app_field_name_top      = 'estTop' . ucfirst($table);
+				$this->app_field_name_actif    = 'estActif' . ucfirst($table);
+				$this->idappscheme             = isset($this->app_table_one['idappscheme']) ? (int)$this->app_table_one['idappscheme'] : 0;
+				$this->codeAppscheme           = isset($this->app_table_one['codeAppscheme']) ? $this->app_table_one['codeAppscheme'] : '';
+				$this->iconAppscheme           = isset($this->app_table_one['iconAppscheme']) ? $this->app_table_one['iconAppscheme'] : '';
+				$this->colorAppscheme          = isset($this->app_table_one['colorAppscheme']) ? $this->app_table_one['colorAppscheme'] : '';
+				$this->nomAppscheme            = isset($this->app_table_one['nomAppscheme']) ? $this->app_table_one['nomAppscheme'] : '';
+				$this->codeAppscheme_base      = isset($this->app_table_one['codeAppscheme_base']) ? $this->app_table_one['codeAppscheme_base'] : '';
+				$this->app_table_icon          = isset($this->app_table_one['icon']) ? $this->app_table_one['icon'] : '';
+				$this->grilleFK                = isset($this->app_table_one['grilleFK']) ? $this->app_table_one['grilleFK'] : array();
+				$this->hasImageScheme          = isset($this->app_table_one['hasImageScheme']) ? $this->app_table_one['hasImageScheme'] : false;
 			}
-
-			$rs = $app->$params['action']();
-
-			echo json_encode(iterator_to_array($rs));
-			// $this->$params['action']($value);
-
 		}
 
 		/**
@@ -306,26 +410,43 @@
 			return $out;
 		}
 
-		function  plug($base, $table) {
+		/**
+		 * Plug into a specific database collection (modern driver)
+		 * 
+		 * @param string $base Database name (without prefix)
+		 * @param string $table Collection name
+		 * @return Collection MongoDB\Collection instance
+		 */
+		function plug($base, $table) {
 			if (empty($table) || empty($base) || !defined('MDB_USER')) {
 				return 'choisir une base';
 			}
-			// PREFIX HERE POUR BASE
-			$db         = $this->plug_base($base);
-			$collection = $db->$table;
-
+			
+			// Get database instance
+			$db = $this->plug_base($base);
+			
+			// Return collection instance
+			if ($db === 'choisir une base') {
+				return $db;
+			}
+			
+			$collection = $db->selectCollection($table);
 			return $collection;
 		}
 
-		function  plug_base($base) {
+		/**
+		 * Get database instance (modern driver)
+		 * 
+		 * @param string $base Database name (without prefix)
+		 * @return Database MongoDB\Database instance
+		 */
+		function plug_base($base) {
 			if (empty($base) || !defined('MDB_USER')) {
 				return 'choisir une base';
 			}
-			// PREFIX HERE POUR BASE
-			$base = MDB_PREFIX . $base;
-			$db   = $this->conn->$base;
-
-			return $db;
+			
+			$base_prefixed = MDB_PREFIX . $base;
+			return new LegacyMongoDB($this->mongoClient, $base_prefixed);
 		}
 
 		function query_one($vars, $fields = []) {
@@ -429,7 +550,7 @@
 			$vars['idactivity_expl']            = (int)$this->getNext('idactivity_expl');
 			$vars['idagent']                    = (int)$idagent;
 			$vars['nomActivity_expl']           = $vars['vars']['table'] . ' ' . $vars['vars']['groupBy']; //.' '  .App::get_full_titre_vars($vars['vars']);
-			$this->plug('sitebase_base', 'activity_expl')->update(['uid' => $vars['uid']], ['$set' => $vars], ['upsert' => true]);
+			$this->plug('sitebase_base', 'activity_expl')->updateOne(['uid' => $vars['uid']], ['$set' => $vars], ['upsert' => true]);
 		}
 
 		function getNext($id, $min = 1) {
@@ -438,11 +559,11 @@
 				$test = $this->plug('sitebase_increment', 'auto_increment')->findOne(['_id' => $id]);
 				if (!empty($test['value'])) {
 					if ($test['value'] < $min) {
-						$this->plug('sitebase_increment', 'auto_increment')->update(['_id' => $id], ['value' => (int)$min], ["upsert" => true]);
+						$this->plug('sitebase_increment', 'auto_increment')->updateOne(['_id' => $id], ['value' => (int)$min], ["upsert" => true]);
 					}
 				}
 			}
-			$this->plug('sitebase_increment', 'auto_increment')->update(['_id' => $id], ['$inc' => ['value' => 1]], ["upsert" => true]);
+			$this->plug('sitebase_increment', 'auto_increment')->updateOne(['_id' => $id], ['$inc' => ['value' => 1]], ["upsert" => true]);
 			$ret = $this->plug('sitebase_increment', 'auto_increment')->findOne(['_id' => $id]);
 
 			return (int)$ret['value'];
@@ -462,7 +583,7 @@
 			$upd['table']         = $table;
 			$upd['table_value']   = (int)$table_value;
 			// sitebase_pref // agent activite
-			$this->plug('sitebase_base', 'activity')->update($upd, ['$set' => $upd], ['upsert' => true]);
+			$this->plug('sitebase_base', 'activity')->updateOne($upd, ['$set' => $upd], ['upsert' => true]);
 			// nlle table agent_history
 			$index_upd['idagent']             = (int)$idagent;
 			$index_upd['codeAgent_history']   = $table;
@@ -478,7 +599,7 @@
 			if (empty($test['idagent_history'])) {
 				$index_upd['idagent_history'] = $h_upd['idagent_history'] = (int)App::getNext('idagent_history');
 			}
-			$this->plug('sitebase_pref', 'agent_history')->update($index_upd, ['$set' => $h_upd, '$inc' => ['quantiteAgent_history' => 1]], ['upsert' => true]);
+			$this->plug('sitebase_pref', 'agent_history')->updateOne($index_upd, ['$set' => $h_upd, '$inc' => ['quantiteAgent_history' => 1]], ['upsert' => true]);
 			skelMdl::reloadModule('app/app_gui/app_gui_panel', $table);
 		}
 
@@ -499,7 +620,7 @@
 				if (empty($arr['idagent_pref'])) {
 					$out['idagent_pref'] = (int)$this->getNext('idagent_pref');
 				}
-				$this->plug('sitebase_pref', 'agent_pref')->update(['idagent' => (int)$idagent, 'codeAgent_pref' => $key], ['$set' => $out], ['upsert' => true]);
+				$this->plug('sitebase_pref', 'agent_pref')->updateOne(['idagent' => (int)$idagent, 'codeAgent_pref' => $key], ['$set' => $out], ['upsert' => true]);
 			}
 		}
 
@@ -863,7 +984,7 @@
 
 			if (empty($field)) $field = 'nombreVue' . ucfirst($table);
 			//
-			$this->plug($this->app_table_one['codeAppscheme_base'], $table)->update($vars, ['$inc' => [$field => 1]], ["upsert" => true]);
+			$this->plug($this->app_table_one['codeAppscheme_base'], $table)->updateOne($vars, ['$inc' => [$field => 1]], ["upsert" => true]);
 
 		}
 
@@ -874,7 +995,7 @@
 		}
 
 		function setNext($id, $value) {
-			$this->plug('sitebase_increment', 'auto_increment')->update(['_id' => $id], ['value' => (int)$value], ["upsert" => true]);
+			$this->plug('sitebase_increment', 'auto_increment')->updateOne(['_id' => $id], ['value' => (int)$value], ["upsert" => true]);
 
 			return $value;
 		}
@@ -903,9 +1024,10 @@
 			//
 			if ($mode == 'full'):
 
-				$rs_dist = $this->plug($base, $groupBy)->find(['id' . $groupBy => ['$in' => $first_arr_dist]])->sort([$sort_field[0] . ucfirst($groupBy) => $sort_field[1]])->limit($limit);
+				$rs_dist = $this->plug($base, $groupBy)->find(['id' . $groupBy => ['$in' => $first_arr_dist]], ['sort' => [$sort_field[0] . ucfirst($groupBy) => $sort_field[1]], 'limit' => (int)$limit]);
 
 				return $rs_dist;
+			endif;
 			endif;
 
 			return $first_arr_dist;
@@ -940,10 +1062,9 @@
 			// sort field peut etre count +1 ou count -1
 
 			if ($sort_field[0] != 'count') {
-				$rs_basedist = $base_rs->find($vars, ['_id' => 0])->limit(3000)->sort([$sort_on => $sort_field[1]]);
+				$rs_basedist = new MongodbCursorWrapper($base_rs->find($vars, array_merge(['_id' => 0], ['limit' => 3000, 'sort' => [$sort_on => $sort_field[1]]])));
 			} else
-				$rs_basedist = $base_rs->find($vars, ['_id' => 0])->limit(3000)->sort(['nom' . ucfirst($this->table) => 1]);
-
+				$rs_basedist = new MongodbCursorWrapper($base_rs->find($vars, array_merge(['_id' => 0], ['limit' => 3000, 'sort' => ['nom' . ucfirst($this->table) => 1]])));
 			# boucle dans liste triée
 
 			while ($arr_basedist = $rs_basedist->getNext()) {
@@ -964,7 +1085,7 @@
 				$arr_collect_rs[$arr_basedist[$field]] = $arr_dist + $arr_basedist + ['nomAppscheme' => $groupBy_table, 'count' => 0, 'groupBy' => $groupBy_table, $field => $arr_basedist[$field], $this->app_field_name_id => (int)$arr_basedist[$this->app_field_name_id], $sort_field[0] => $arr_basedist[$sort_field[0] . ucfirst($this->table)]];
 
 				$tmp_iddistinct[] = (int)$arr_basedist[$this->app_field_name_id];;
-				$rs_base_rs_tmp                                 = $base_rs->find($vars + [$idgroupBy_table => (int)$arr_basedist[$idgroupBy_table]], ['_id' => 0]);
+				$rs_base_rs_tmp                                 = new MongodbCursorWrapper($base_rs->find($vars + [$idgroupBy_table => (int)$arr_basedist[$idgroupBy_table]], ['_id' => 0]));
 				$rs_base_rs_count                               = $rs_base_rs_tmp->count();
 				$arr_collect_rs[$arr_basedist[$field]]['count'] = $rs_base_rs_count;
 				//
@@ -1008,21 +1129,24 @@
 
 		#   cds
 
+		// Modified: 2026-03-03
 		function findOne($vars, $out = []) {
 			if (empty($this->app_table_one['codeAppscheme_base'])) {
-				vardump($this->app_table_one);
-				vardump($this->table);
-				vardump($vars);
-
-				return [];
-			}
-			if (sizeof($out) == 0) {
-				$arr = $this->plug($this->app_table_one['codeAppscheme_base'], $this->app_table_one['codeAppscheme'])->findOne($vars);
-			} else {
-				$arr = $this->plug($this->app_table_one['codeAppscheme_base'], $this->app_table_one['codeAppscheme'])->findOne($vars, $out);
+				error_log('[ClassApp::findOne] Missing codeAppscheme_base for table: ' . $this->table);
+				return null;
 			}
 
-			return $arr;
+			$vars = MongoCompat::convertFilter($vars);
+
+			$collection = $this->plug(
+				$this->app_table_one['codeAppscheme_base'],
+				$this->app_table_one['codeAppscheme']
+			);
+
+			if (empty($out)) {
+				return $collection->findOne($vars);
+			}
+			return $collection->findOne($vars, $out);
 		}
 
 		function get_full_titre_vars($arr_vars = []) {
@@ -1208,7 +1332,7 @@
 		}
 
 		function get_schemes($arr_vars = [], $page = 0, $rppage = 250) {
-			return $this->app_conn->find($arr_vars)->sort(['nomAppscheme' => 1])->skip($page * $rppage)->limit($rppage);
+			return $this->app_conn->find($arr_vars, ['sort' => ['nomAppscheme' => 1], 'skip' => (int)$page * (int)$rppage, 'limit' => (int)$rppage]);
 		}
 
 		function get_http_mdl($mdl, $vars = [], $value = '', $attributes = '') {
@@ -1266,7 +1390,7 @@
 				$idappscheme_base = $APP_BASE->create_update(['codeAppscheme_base' => $ARR['base']], ['nomAppscheme_base' => $ARR['base']]);
 			}
 			if (empty($ARR['iconAppscheme']) && !empty($ARR['icon'])) {
-				$APP_SCH->update(['idappscheme' => $idappscheme], ['iconAppscheme' => $ARR['icon']]);
+				$APP_SCH->update(['idappscheme' => $idappscheme], ['$set' => ['iconAppscheme' => $ARR['icon']]]);
 			}
 			//
 			$arr_has = ['statut', 'type', 'categorie', 'group', 'groupe'];
@@ -1283,7 +1407,7 @@
 				endif;
 				$test = strpos($table, "_$value");
 				if (strpos($table, "_$value") !== false && (empty($ARR['is' . $Value . 'Scheme']) || empty($ARR['grouped_scheme']))):
-					$APP_SCH->update(['idappscheme' => $idappscheme], ['is' . $Value . 'Scheme' => 1, 'grouped_scheme' => 1]);
+					$APP_SCH->update(['idappscheme' => $idappscheme], ['$set' => ['is' . $Value . 'Scheme' => 1, 'grouped_scheme' => 1]]);
 				endif;
 			endforeach;
 
@@ -1313,7 +1437,7 @@
 				$ins['codeAppscheme_has_table_field']     = $ARR_FIELD_NOM['codeAppscheme_field'] . ucfirst($DA_TABLE_CODE);
 				$force                                    = 0;
 				if ($force == 1 || $ins['iconAppscheme_has_table_field'] != $ARR_HAST['iconAppscheme_has_table_field'] || $ins['codeAppscheme_has_table_field'] != $ARR_HAST['codeAppscheme_has_table_field'] || empty($ARR_HAST['codeAppscheme_has_table_field']) || empty($ARR_HAST['nomAppscheme_has_table_field'])) {
-					$APP_SCH_HAS_TABLE->update(['idappscheme_has_table_field' => (int)$ARR_HAST['idappscheme_has_table_field']], $ins);
+					$APP_SCH_HAS_TABLE->update(['idappscheme_has_table_field' => (int)$ARR_HAST['idappscheme_has_table_field']], ['$set' => $ins]);
 				}
 			}
 			$arrSF = $APP_SCH_HAS_TABLE->findOne(['idappscheme' => $idappscheme, 'idappscheme_link' => $idappscheme, 'idappscheme_field' => $IDFIELD_NOM]);
@@ -1333,8 +1457,8 @@
 		function create_update($vars, $fields = []) {
 			if (empty($vars)) return false;
 			$table = $this->app_table_one['codeAppscheme'];
-			$test  = $this->find($vars);
-			if ($test->count() == 0):
+			$existing = $this->findOne($vars);
+			if (empty($existing)):
 				if (empty($vars['id' . $table])) {
 					$id                    = (int)$this->getNext('id' . $table);
 					$fields['id' . $table] = $id;
@@ -1342,8 +1466,7 @@
 				$fields = array_merge($vars, $fields);
 				$id     = $this->insert($fields);
 			else:
-				$arr_c  = $test->getNext();
-				$id     = (int)$arr_c['id' . $table];
+				$id     = (int)$existing['id' . $table];
 				$fields = array_merge($vars, $fields);
 				$this->update(['id' . $table => $id], $fields);
 			endif;
@@ -1353,18 +1476,30 @@
 
 		function find($vars = [], $proj = []) {
 
-			if (empty($this->app_table_one['codeAppscheme_base'])) {
-				vardump($this->table);
-				vardump($vars);
-			}
-			// echo  '<br>'.$this->table.' - '.($this->app_table_one['codeAppscheme_base'].' - '. $this->app_table_one['codeAppscheme']);
-			if (sizeof($proj) == 0) {
-				$rs = $this->plug($this->app_table_one['codeAppscheme_base'], $this->app_table_one['codeAppscheme'])->find($vars);
-			} else {
-				$rs = $this->plug($this->app_table_one['codeAppscheme_base'], $this->app_table_one['codeAppscheme'])->find($vars, $proj);
+			if (empty($this->app_table_one['codeAppscheme_base']) || empty($this->app_table_one['codeAppscheme'])) {
+				 
+				return new MongodbCursorWrapper(new \ArrayIterator([]));
 			}
 
-			return $rs;
+			$collection = $this->plug($this->app_table_one['codeAppscheme_base'], $this->app_table_one['codeAppscheme']);
+			if (!is_object($collection)) {
+				error_log("[App::find] plug() returned non-object for table '{$this->table}': " . var_export($collection, true));
+				return new MongodbCursorWrapper(new \ArrayIterator([]));
+			}
+
+			// echo  '<br>'.$this->table.' - '.($this->app_table_one['codeAppscheme_base'].' - '. $this->app_table_one['codeAppscheme']);
+			if (sizeof($proj) == 0) {
+				$rs = $collection->find($vars);
+			} else {
+				$rs = $collection->find($vars, $proj);
+			}
+
+			// Avoid double wrapping when MongoCompat already returns a cursor wrapper
+			if ($rs instanceof MongodbCursorWrapper) {
+				return $rs;
+			}
+
+			return new MongodbCursorWrapper($rs);
 		}
 
 		function insert($vars = []) {
@@ -1388,7 +1523,7 @@
 			$GRILLE_FK  = $this->get_grille_fk();//$name_table
 			$col        = $this->plug($this->app_table_one['codeAppscheme_base'], $this->app_table_one['codeAppscheme']);
 			$arr_vars   = (empty($table_value)) ? [] : [$name_id => $table_value];
-			$rs         = $col->find($arr_vars);
+			$rs         = new MongodbCursorWrapper($col->find($arr_vars));
 			// table_has_field ?
 			//
 			while ($arr = $rs->getNext()):
@@ -1486,9 +1621,7 @@
 				if ($name_table == 'contrat'):
 					if (!empty($arr['idclient'])):
 						$APP_TMP  = new App('client');
-						$rs_test  = $col->find(['idclient' => (int)$arr['idclient']])->sort(['dateFinContrat' => 1]);
-						$arr_test = $rs_test->getNext();
-						$arr_cl   = $APP_TMP->findOne(['idclient' => (int)$arr['idclient']]);
+					$rs_test  = new MongodbCursorWrapper($col->find(['idclient' => (int)$arr['idclient']])->sort(['dateFinContrat' => 1]));
 
 						if ($arr_cl['dateFinClient'] != $arr_test['dateFinContrat']) $APP_TMP->update(['idclient' => (int)$arr['idclient']], ['dateFinClient' => $arr_test['dateFinContrat']]);
 					endif;
@@ -1623,7 +1756,7 @@
 					$arr_new['heureModification' . $Name_table] = date('H:i:s');
 					$arr_new['timeModification' . $Name_table]  = time();
 
-					$col->update([$name_id => $value_id], ['$set' => $arr_new], ['upsert' => true]);
+					$col->updateOne([$name_id => $value_id], ['$set' => $arr_new], ['upsert' => true]);
 				}
 				if ($rs->count() == 1) {
 					return $arr_new;
@@ -1640,7 +1773,7 @@
 					return;
 				}
 			}
-			$this->plug($this->app_table_one['codeAppscheme_base'], $this->app_table_one['codeAppscheme'])->update($vars, ['$set' => $fields], ['upsert' => $upsert]);
+			$this->plug($this->app_table_one['codeAppscheme_base'], $this->app_table_one['codeAppscheme'])->updateOne($vars, ['$set' => $fields], ['upsert' => $upsert]);
 
 			// $this->consolidate_scheme($table_value);
 		}
@@ -1666,7 +1799,7 @@
 			$fields = $arr_inter;
 			// UPDATE !!!
 			//vardump_async($fields,true);
-			$this->plug($this->app_table_one['codeAppscheme_base'], $this->app_table_one['codeAppscheme'])->update($vars, ['$set' => $fields], ['upsert' => $upsert]);
+			$this->plug($this->app_table_one['codeAppscheme_base'], $this->app_table_one['codeAppscheme'])->updateOne($vars, ['$set' => $fields], ['upsert' => $upsert]);
 			$this->consolidate_scheme($table_value);
 			//
 			$arr_one_after = $this->findOne([$this->app_field_name_id => $table_value]);
@@ -1701,7 +1834,7 @@
 						$APPCONV   = new App($table_rfk);
 						$sd_vars   = ['id' . $table => $table_value];
 						$fields_fk = ['nom' . ucfirst($table) => $fields['nom' . ucfirst($table)]];
-						$APPCONV->update($sd_vars, $fields_fk);
+						$APPCONV->update($sd_vars, ['$set' => $fields_fk]);
 
 					endif;
 				endforeach;
@@ -1904,7 +2037,7 @@
 				unset($options['grilleFK']);
 			}
 			$ins = array_filter($ins);
-			$this->appscheme->update(['idappscheme' => $ins['idappscheme']], ['$set' => $ins], ['upsert' => 1]);
+			$this->appscheme->updateOne(['idappscheme' => $ins['idappscheme']], ['$set' => $ins], ['upsert' => true]);
 
 			$APP_TMP = new App('appscheme');
 			$APP_TMP->consolidate_scheme($ins['idappscheme']);
@@ -2009,20 +2142,36 @@
 			return $str;
 		}
 
+		// Modified: 2026-03-03
 		function query($vars = [], $page = 0, $rppage = 40, $fields = []) {
 			if (empty($rppage)) {
 				$rppage = 15;
 			}
 			if (empty($this->app_table_one['codeAppscheme_base'])) {
-				die('   [' . $this->table . '-' . $this->app_table_one['codeAppscheme_base'] . '-' . $this->app_table_one['codeAppscheme'] . ']');
-				exit;
+				error_log('[ClassApp::query] Missing codeAppscheme_base for table: ' . $this->table);
+				return new MongodbCursorWrapper([]);
 			}
-			$rs       = $this->plug($this->app_table_one['codeAppscheme_base'], $this->app_table_one['codeAppscheme'])->find($vars, $fields);
-			$totcount = $rs->count();
-			$rs->sort([$this->app_field_name_top => -1, $this->app_field_name_nom => 1]);
-			$rs->skip($page * $rppage)->limit($rppage);
 
-			return $rs;
+			$vars = MongoCompat::convertFilter($vars);
+
+			// Build proper MongoDB options: pagination and sort separate from projection
+			$options = [
+				'sort'  => [$this->app_field_name_top => -1, $this->app_field_name_nom => 1],
+				'skip'  => (int)$page * (int)$rppage,
+				'limit' => (int)$rppage,
+			];
+			if (!empty($fields) && is_array($fields)) {
+				$options['projection'] = $fields;
+			}
+
+			// Use raw MongoDB\Collection to pass full options without MongoCollection rewrapping
+			$collection = $this->plug(
+				$this->app_table_one['codeAppscheme_base'],
+				$this->app_table_one['codeAppscheme']
+			);
+			$cursor = $collection->getCollection()->find($vars, $options);
+
+			return new MongodbCursorWrapper($cursor);
 		}
 
 		function get_field_list_raw($in = []) {

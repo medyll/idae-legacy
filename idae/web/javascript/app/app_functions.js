@@ -62,7 +62,8 @@ var timermonitor;
 //
 
 changeCnameTrick = function () {
-	return 'http://<?=DOCUMENTDOMAIN?>/';
+	// Use server-side HTTPCUSTOMERSITE (includes port when served on non-standard ports)
+	return '<?= rtrim(HTTPCUSTOMERSITE, '/') ?>/';
 	return '';
 }
 gereDate         = function (debut, trim) {

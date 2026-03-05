@@ -1,0 +1,5 @@
+# Keep this directory in git but ignore actual backup dumps
+*
+!.gitignore
+!.gitkeep
+!backup.log

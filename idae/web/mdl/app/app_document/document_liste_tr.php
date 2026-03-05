@@ -11,7 +11,7 @@
 	$baseFS = skelMongo::connectBase($base);
 	$fs = $baseFS->getGridFs($collection);
 
-	$rs = $fs->find(array('_id' => new MongoId($_id)))->sort(array('uploadDate' => -1));
+	$rs = $fs->find(array('_id' => MongoCompat::toObjectId($_id)))->sort(array('uploadDate' => -1));
 
 	while ($file = $rs->getNext()) {
 		$arr      = $file->file;

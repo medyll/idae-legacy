@@ -1,6 +1,6 @@
 <?
-	include_once($_SERVER['CONF_INC']);
-
+	include_once($_SERVER['CONF_INC']);	require_once(__DIR__ . '/../../../appclasses/appcommon/MongoCompat.php');
+	use AppCommon\MongoCompat;
 	$APP_SCH           = new APP('appscheme');
 	$APP_SCH_TY        = new APP('appscheme_type');
 	$APP_SCH_FIELD     = new APP('appscheme_field');
@@ -172,7 +172,7 @@
 			//
 			switch ($type_periodicite) {
 				case "day":
-					$vars_date  = [$type_date . $Table => new MongoRegex('/^' . $DADATE . '/')];
+					$vars_date  = [$type_date . $Table => MongoCompat::toRegex('^' . preg_quote($DADATE, '/') . '/', '')];
 					$ct         = $APP->find($vars_date + $vars);
 					$INDEX      = $DADATE;
 					$INDEX_NAME = fonctionsProduction::jourMoisDate_fr_short($DADATE);
@@ -184,19 +184,19 @@
 					$INDEX_NAME = fonctionsProduction::jourMoisDate_fr($DADATE);
 					break;
 				case "month":
-					$vars_date  = [$type_date . $Table => new MongoRegex('/^' . $DADATE_MONTH . '/')];
+					$vars_date  = [$type_date . $Table => MongoCompat::toRegex('^' . preg_quote($DADATE_MONTH, '/') . '/', '')];
 					$ct         = $APP->find($vars_date + $vars);
 					$INDEX      = $DADATE_MONTH;
 					$INDEX_NAME = fonctionsProduction::mois_short_Date_fr($DADATE);
 					break;
 				case "quarter": // 1ere date dans quarter ceil(date('m')/3)
-					$vars_date  = [$type_date . $Table => new MongoRegex('/^' . $DADATE_MONTH . '/')];
+					$vars_date  = [$type_date . $Table => MongoCompat::toRegex('^' . preg_quote($DADATE_MONTH, '/') . '/', '')];
 					$ct         = $APP->find($vars_date + $vars);
 					$INDEX      = $DADATE_MONTH;
 					$INDEX_NAME = fonctionsProduction::mois_short_Date_fr($DADATE);
 					break;
 				case "year":
-					$vars_date  = [$type_date . $Table => new MongoRegex('/^' . $DADATE_YEAR . '/')];
+					$vars_date  = [$type_date . $Table => MongoCompat::toRegex('^' . preg_quote($DADATE_YEAR, '/') . '/', '')];
 					$ct         = $APP->find($vars_date + $vars);
 					$INDEX      = $DADATE_YEAR;
 					$INDEX_NAME = fonctionsProduction::moisDate_fr($DADATE);

@@ -1,0 +1,53 @@
+Voici la traduction de ton fichier `.md` en anglais, Mydde.
+
+---
+
+████████████████████████████████████████████████████████████████
+IDAE SOCKET.IO SERVER - QUICK HELPER
+████████████████████████████████████████████████████████████████
+
+📦 **NPM COMMANDS (Recommended)**
+————————————————————————————————————————————————————————————————
+`pnpm run start`     ✓ Start server (background)
+`pnpm run stop`      ✗ Stop server
+`pnpm run restart`   ↻ Restart server
+`npm run status`    📊 View server status
+`pnpm run logs`      📜 View real-time logs
+`pnpm run dev`       🔧 Development mode (foreground)
+
+⚡ **POWERSHELL SCRIPTS**
+————————————————————————————————————————————————————————————————
+`.\start-socket.ps1`    Start the server
+`.\stop-socket.ps1`     Stop the server
+`.\status-socket.ps1`   View status
+
+📂 **LOGS**
+————————————————————————————————————————————————————————————————
+`logs/socket-out.log`   Standard output
+`logs/socket-err.log`   Errors
+`logs/socket.log`       Combined log
+
+🛠️  **TROUBLESHOOTING**
+————————————————————————————————————————————————————————————————
+Stop all Node.js processes:
+`Stop-Process -Name node -Force`
+
+If forever fails to start:
+`npm run dev`
+
+View Node.js processes:
+`Get-Process -Name node`
+
+🔧 **FIXED CONFIGURATION**
+————————————————————————————————————————————————————————————————
+✓ MongoDB connection fixed
+✓ Forever installed and configured
+✓ NPM scripts added
+✓ Logs configured
+✓ Port: 3005
+
+📝 **MORE INFO**
+————————————————————————————————————————————————————————————————
+See `README_SOCKET.md` for full documentation
+
+---

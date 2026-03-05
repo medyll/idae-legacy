@@ -1,8 +1,12 @@
 <?
+	require_once __DIR__ . '/../appclasses/appcommon/MongoCompat.php';
+	use AppCommon\MongoCompat;
 
 	class skelMdl {
 		static function cf_module($module, $array = [], $value = '', $attributes = '') {
-			require($_SERVER['CONF_INC']);
+			if (file_exists($_SERVER['CONF_INC'])) {
+				include_once($_SERVER['CONF_INC']);
+			}
 
 			$APP = new App();
 			if (empty($array)) $array = [];
@@ -128,41 +132,47 @@
 			}
 			/// echo HTTPHOSTNOPORT . ':' . SOCKETIO_PORT . '/run';
 			// write a socket file
-			skelMdl::doSocket(HTTPHOSTNOPORT . ':' . SOCKETIO_PORT . '/run', $arrjson);
+			$socketHost = defined('SOCKET_HOST') ? SOCKET_HOST : HTTPHOSTNOPORT;
+			skelMdl::doSocket($socketHost . ':' . SOCKETIO_PORT . '/run', $arrjson);
 		}
 
 		static function doSocket($url, $vars = []) {
 
 			$crlf       = "\r\n";
 			$parts      = parse_url($url);
-			$cookie_str = session_name() . "=" . session_id() . "; path=" . session_save_path();
+			$cookie_str = session_name() . "=" . session_id();
 
-			//
-			$fp = fsockopen($_SERVER['HTTP_HOST'], isset($parts['port']) ? $parts['port'] : 80, $errno, $errstr, 30);
+			// Fix: Use host from URL if present (needed for Docker networking), otherwise fallback to current host
+			$host = !empty($parts['host']) ? $parts['host'] : explode(':', $_SERVER['HTTP_HOST'])[0];
+			$fp = fsockopen($host, isset($parts['port']) ? $parts['port'] : 80, $errno, $errstr, 5);
 			// $fp                     = fsockopen($parts['host'], isset($parts['port']) ? $parts['port'] : 80, $errno, $errstr, 30);
 			$vars['DOCUMENTDOMAIN'] = DOCUMENTDOMAIN;
 			$vars['PHPSESSID'] = session_id();
 			$query                  = http_build_query($vars);
 
 			if (!$fp) {
-				skelMdl::send_cmd('act_notify', ['msg' => 'ERREUR ' . $errstr . '  $errno ' . $errno, session_id()]);
-
+				// skelMdl::send_cmd('act_notify', ['msg' => 'ERREUR ' . $errstr . '  $errno ' . $errno, session_id()]);
+				error_log("skelMdl::doSocket Connection Failed: " . $errstr . " (" . $errno . ") to " . $url);
 				return false;
 			} else {
 				stream_set_timeout($fp,2);
 				$out = "POST " . $parts['path'] . " HTTP/1.0" . $crlf;
-				$out .= "Host: " . $_SERVER['HTTP_HOST'] . $crlf;
+				// Use the actual host we're connecting to, not the client's HTTP_HOST
+				$out .= "Host: " . $host . (isset($parts['port']) ? ":" . $parts['port'] : "") . $crlf;
 				$out .= "User-Agent: Mozilla" . $crlf;
 				$out .= "Content-Type: application/x-www-form-urlencoded" . $crlf;
 				$out .= "Content-Length: " . strlen($query) . $crlf;
 				$out .= "Connection: Close" . $crlf;
+				
+				if (!empty($cookie_str)) {
+					// Fix: Proper cookie header format
+					$out .= 'Cookie: ' . $cookie_str . $crlf; 
+				}
+				
 				$out .= $crlf;
 
 				if (isset($query)) {
 					$out .= $query;
-				}
-				if (!empty($cookie_str)) {
-					$out .= 'Cookie: ' . substr($cookie_str, 0, -2) . $crlf;
 				}
 
 				fwrite($fp, $out);
@@ -175,7 +185,9 @@
 		static function send_cmd($cmd, $vars = [], $room = '') {
 			$arrjson = ['timeStamp' => (int)time(), 'cmd' => $cmd];
 			//
-			if (sizeof($vars) != 0) {
+			// PHP 8.2: sizeof/count requires array or Countable - handle stdClass objects
+			$varsCount = is_array($vars) ? count($vars) : (is_object($vars) ? count((array)$vars) : 0);
+			if ($varsCount != 0) {
 				$arrjson['vars'] = $vars;
 			}
 			//
@@ -183,7 +195,8 @@
 				$arrjson['OWN'] = $room;
 			}
 
-			skelMdl::doSocket(HTTPHOSTNOPORT . ':' . SOCKETIO_PORT . '/postReload', $arrjson);
+			$socketHost = defined('SOCKET_HOST') ? SOCKET_HOST : HTTPHOSTNOPORT;
+			skelMdl::doSocket($socketHost . ':' . SOCKETIO_PORT . '/postReload', $arrjson);
 
 		}
 		static function send_cmd_eleph($cmd, $vars = [], $room = '') {
@@ -191,7 +204,9 @@
 			return;
 			$arrjson = ['timeStamp' => (int)time(), 'cmd' => $cmd];
 			//
-			if (sizeof($vars) != 0) {
+			// PHP 8.2: sizeof/count requires array or Countable - handle stdClass objects  
+			$varsCount = is_array($vars) ? count($vars) : (is_object($vars) ? count((array)$vars) : 0);
+			if ($varsCount != 0) {
 				$arrjson['vars'] = $vars;
 			}
 
@@ -233,7 +248,8 @@
 			}
 
 			$arrjson['str_cookie'] = session_name() . "=" . session_id() . "; path=" . session_save_path();
-			skelMdl::doSocket(HTTPHOSTNOPORT . ':' . SOCKETIO_PORT . '/runModule', $arrjson);
+			$socketHost = defined('SOCKET_HOST') ? SOCKET_HOST : HTTPHOSTNOPORT;
+			skelMdl::doSocket($socketHost . ':' . SOCKETIO_PORT . '/runModule', $arrjson);
 		}
 
 		function _construct() {
@@ -340,7 +356,7 @@
 			$pattern  = '/(?:(?<=\>)|(?<=\/\>))(\s+)(?=\<\/?)/';
 			$newfinal = preg_replace($pattern, "", $final);
 
-			$obj             = ['filename' => $moduleid . '.html', 'time' => (int)time(), "module" => $module, 'date' => new MongoDate(), 'uploadDate' => new MongoDate()];
+			$obj             = ['filename' => $moduleid . '.html', 'time' => (int)time(), "module" => $module, 'date' => MongoCompat::toDate(time()), 'uploadDate' => MongoCompat::toDate(time())];
 			$obj['metadata'] = $array;
 			//
 			$Fs->storeBytes($newfinal, $obj);

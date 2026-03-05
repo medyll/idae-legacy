@@ -1,5 +1,7 @@
 <?
 	include_once($_SERVER['CONF_INC']);
+	require_once(__DIR__ . '/../../../appclasses/appcommon/MongoCompat.php');
+	use AppCommon\MongoCompat;
 
 	$APP = new App('appscheme');
 	ini_set('display_errors', 0);
@@ -51,7 +53,7 @@
 
 					if (empty($arr_field['idappscheme_field'])):
 						$arr_field['idappscheme_field'] = (int)$APP->getNext('idappscheme_field');
-						$APP->plug('sitebase_app', 'appscheme_field')->update(['_id' => new MongoId($arr_field['_id'])], ['$set' => ['idappscheme_field' => $arr_field['idappscheme_field']]]);
+						$APP->plug('sitebase_app', 'appscheme_field')->update(['_id' => MongoCompat::toObjectId($arr_field['_id'])], ['$set' => ['idappscheme_field' => $arr_field['idappscheme_field']]]);
 					endif;
 				}*/
 				$rs_field = $APP->plug('sitebase_app', 'appscheme_field')->find()->sort(['field_group' => 1, 'field_raw' => 1]);

@@ -6,12 +6,18 @@ header("Access-Control-Allow-Methods: POST, GET, OPTIONS");
 if (!ini_get('date.timezone')) {
     date_default_timezone_set('GMT');
 }
-ini_set('error_reporting', 'E_ALL & ~E_DEPRECATED & ~E_STRICT');
+ini_set('error_reporting', E_ALL); // Force E_ALL for debugging migration
+ini_set('log_errors', 1);
+// ini_set('error_log', '/var/log/apache2/php-error.log'); // Already set in Dockerfile
 ini_set('short_open_tag', 'On');
 ini_set('scream.enabled', true);
-ini_set('display_errors', 'On');
+ini_set('display_errors', 0); // Disable display errors to client (AJAX safety)
 
 !defined('SOCKET_EMSGSIZE') && DEFINE('SOCKET_EMSGSIZE', 4000000);
+DEFINE('DEBUG_DB', 1);
+/* if (!defined('DEBUG_DB') && getenv('DEBUG_DB')) {
+    DEFINE('DEBUG_DB', getenv('DEBUG_DB'));
+} */
 
 $HTTP_PREFIX = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') ? 'https://' : 'http://';
 $host = str_replace('www.', '', $_SERVER['HTTP_HOST']);
@@ -27,7 +33,7 @@ if ('lan' === end($host_parts) || $host === 'localhost' || $host === '127.0.0.1'
     include_once('conf.lan.inc.php');
     return;
 } else {
-    echo "red";
+    // echo "red"; // Debug output removed (2026-02-06)
     if (strpos($_SERVER['HTTP_HOST'], 'preprod') === false) {
         ini_set('display_errors', 0);
         DEFINE('ENVIRONEMENT', 'PROD');
@@ -522,11 +528,12 @@ DEFINE('HTTPHOST', $HTTP_PREFIX . DOCUMENTDOMAIN);
 DEFINE('HTTPHOSTNOPORT', $HTTP_PREFIX . DOCUMENTDOMAINNOPORT);
 DEFINE('NAMESITE', DOCUMENTDOMAIN);
 DEFINE('MAINSITEHOST', HTTPHOST);
-DEFINE('ACTIONMDL', $HTTP_PREFIX . DOCUMENTDOMAIN . '/mdl/');
-DEFINE('HTTPCSS', $HTTP_PREFIX . DOCUMENTDOMAIN . '/css/');
-DEFINE('HTTPMDL', $HTTP_PREFIX . DOCUMENTDOMAIN . '/mdl/');
-DEFINE('HTTPJAVASCRIPT', $HTTP_PREFIX . DOCUMENTDOMAIN . '/javascript/');
-DEFINE('HTTPIMAGES', $HTTP_PREFIX . DOCUMENTDOMAIN . '/images/');
+// Use HTTPCUSTOMERSITE for asset URLs so the port (if any) is included consistently
+DEFINE('ACTIONMDL', rtrim(HTTPCUSTOMERSITE, '/') . '/mdl/');
+DEFINE('HTTPCSS', rtrim(HTTPCUSTOMERSITE, '/') . '/css/');
+DEFINE('HTTPMDL', rtrim(HTTPCUSTOMERSITE, '/') . '/mdl/');
+DEFINE('HTTPJAVASCRIPT', rtrim(HTTPCUSTOMERSITE, '/') . '/javascript/');
+DEFINE('HTTPIMAGES', rtrim(HTTPCUSTOMERSITE, '/') . '/images/');
 DEFINE('ICONPATH', 'images/icones/');
 
 DEFINE('PATH', DOCUMENTROOT);

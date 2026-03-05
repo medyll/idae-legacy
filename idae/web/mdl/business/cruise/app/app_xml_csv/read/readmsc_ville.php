@@ -40,7 +40,7 @@
 			$nomVille_tmp  = $arr_tmp[0];
 			$nomPays_tmp   = $arr_tmp[1];
 
-			$test_V2 = $APP_VILLE->findOne([ 'nomVille' => new MongoRegex("/" . $nomVille_tmp . "/i") ]);
+			$test_V2 = $APP_VILLE->findOne([ 'nomVille' => MongoCompat::toRegex(MongoCompat::escapeRegex($nomVille_tmp), 'i') ]);
 			//  idxml_ville dans xml_ville avec idville null
 			if ( !empty($ARR_XML_VILLE['idxml_ville']) && !empty($ARR_XML_VILLE['idville']) ):
 				$ARR_VILLE_TEST = $APP_VILLE->findOne([ 'idville' => (int)$ARR_XML_VILLE['idville'] ]);

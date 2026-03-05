@@ -1,5 +1,7 @@
 <?
 	include_once($_SERVER['CONF_INC']);
+	require_once(__DIR__ . '/../../../appclasses/appcommon/MongoCompat.php');
+	use AppCommon\MongoCompat;
 
 	ini_set('display_errors', 55);
 
@@ -17,7 +19,7 @@
 	$APP_SCH_TY = new App('appscheme_type');
 	$APP_GD     = new App('agent_groupe_droit');
 
-	$arr_pref = $APP->plug('sitebase_pref', 'agent_pref')->distinct('codeAgent_pref', ['idagent' => (int)$_SESSION['idagent'], 'valeurAgent_pref' => ['$in' => [true, 'true']], 'codeAgent_pref' => new MongoRegex('/app_menu_/')]);
+	$arr_pref = $APP->plug('sitebase_pref', 'agent_pref')->distinct('codeAgent_pref', ['idagent' => (int)$_SESSION['idagent'], 'valeurAgent_pref' => ['$in' => [true, 'true']], 'codeAgent_pref' => MongoCompat::toRegex('app_menu_', '')]);
 
 	$pattern       = "/app_menu_/i";
 	$DIST_TBL_PREF = preg_replace($pattern, '', $arr_pref);

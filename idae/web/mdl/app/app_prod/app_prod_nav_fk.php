@@ -73,7 +73,7 @@
 				$orphans_vars[$_id]    = ['$in' => [null, '']];
 
 				$rs_orphans = $APP->find($orphans_vars); // ,'$or'=>[$name_id=>['$exists'=>false]]
-				$rs_tmp     = $APP_TMP->find([$_id => ['$in' => $G]])->sort(['dateCreation' . ucfirst($table_fk) => -1])->limit(6);
+				$rs_tmp     = $APP_TMP->find([$_id => ['$in' => $G]], ['sort' => ['dateCreation' . ucfirst($table_fk) => -1], 'limit' => 6]);
 				$count      = $rs_tmp->count();
 
 				$orphan_link = fonctionsJs::app_liste($table, '', ['vars' => [$_id => 'NULL']]);

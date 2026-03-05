@@ -1,5 +1,7 @@
 <?
 	include_once($_SERVER['CONF_INC']);
+	require_once(__DIR__ . '/../appclasses/appcommon/MongoCompat.php');
+	use AppCommon\MongoCompat;
 
 	ini_set('display_errors', 55);
 	$_POST = array_merge($_GET, $_POST);
@@ -51,7 +53,8 @@
 
 	$SEARCH = trim($_POST['search']);
 
-	$RSSCHEME_SEARCH = $APP->find(['codeAppscheme' => new MongoRegex("/$SEARCH/i")]);
+	$search_escaped  = MongoCompat::escapeRegex($SEARCH);
+	$RSSCHEME_SEARCH = $APP->find(['codeAppscheme' => MongoCompat::toRegex($search_escaped, 'i')]);
 	$maxcount        = $RSSCHEME_SEARCH->count();
 	$count           = $RSSCHEME_SEARCH->count(true);
 
@@ -112,7 +115,7 @@
 
 		if (!empty($_POST['search'])) {
 			if (!is_int($_POST['search'])):
-				$regexp = new MongoRegex("/$SEARCH/i");
+				$regexp = MongoCompat::toRegex($search_escaped, 'i');
 
 				if (!empty($APP_TABLE['hasAdresseScheme'])) $where['$or'][] = ['ville' . $Table => $regexp];
 
@@ -131,7 +134,7 @@
 			$where['idagent'] = (int)$_SESSION['idagent'];
 		};
 
-		$rssc       = $APPSC->query([$id => ['$ne' => 0]] + $vars + $where)->sort([$nom => 1])->limit($nbRows)->skip($page * $nbRows);
+		$rssc       = $APPSC->query([$id => ['$ne' => 0]] + $vars + $where, (int)$page, (int)$nbRows);
 		$rssc_count = $rssc->count();
 
 		if ($rssc->count() != 0):

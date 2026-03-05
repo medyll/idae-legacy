@@ -10,7 +10,7 @@
 	ini_set('display_errors', 55);
 	if (!empty($_POST['idclient'])) {
 		$idclient           = (int)$_POST['idclient'];
-		$rs                 = $APP_DV->query(array('idclient' => $idclient))->sort(array('iddevis' => -1))->limit(1);
+		$rs = $APP_DV->query(array('idclient' => $idclient), 0, 1);
 		$arrP               = $rs->getNext();
 		$_POST['idproduit'] = ['idproduit'];
 	}

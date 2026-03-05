@@ -1,6 +1,8 @@
 <?
 
 	include_once($_SERVER['CONF_INC']);
+	require_once __DIR__ . '/appclasses/appcommon/MongoCompat.php';
+	use AppCommon\MongoCompat;
 
 	$APP->init_scheme('sitebase_devis', 'devis_prestation');
 	$APP->init_scheme('sitebase_devis', 'devis_acompte');
@@ -106,7 +108,7 @@
 		}
 
 		if (sizeof($out) != 0) {
-			$APP_MARGE->update(['_id' => new MongoId($arr['_id'])], $out);
+			$APP_MARGE->update(['_id' => MongoCompat::toObjectId($arr['_id'])], $out);
 		}
 
 		?>

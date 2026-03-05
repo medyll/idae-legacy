@@ -1,5 +1,7 @@
 <?
 	include_once($_SERVER['CONF_INC']);
+	require_once(__DIR__ . '/../../../../appclasses/appcommon/MongoCompat.php');
+	use AppCommon\MongoCompat;
 
 	ini_set('display_errors', 55);
 
@@ -21,8 +23,8 @@
 			$qte        = $arr_match[1];
 			$prod       = $arr_match[3];
 			$prod_2     = str_replace('-', ' ', $prod);
-			$reg        = new MongoRegex("/^$prod$/i");
-			$reg2       = new MongoRegex("/^$prod_2$/i");
+			$reg        = MongoCompat::toRegex('^' . MongoCompat::escapeRegex($prod) . '$', 'i');
+			$reg2       = MongoCompat::toRegex('^' . MongoCompat::escapeRegex($prod_2) . '$', 'i');
 			$ARR_PROD   = $APP_PROD->findOne(['codeProduit' => $reg]);
 			$ARR_PROD_2 = $APP_PROD->findOne(['codeProduit' => $reg2]);
 			$ARR_PROD_3 = $APP_PROD->findOne(['nomProduit' => $reg]);

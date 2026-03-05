@@ -29,4 +29,4 @@
 	<div style="width:100%;min-height:350px;border:none;overflow:auto;" id="frame_xmlt" scrolling="auto"></div>
 	<!--<iframe style="width:100%;height:350px;border:none;display:none;overflow:auto;" id="frame_xmlt" scrolling="auto"></iframe>-->
 </div>
-<!--$('frame_xmlt').show().src='http://<?= DOCUMENTDOMAIN ?>/mdl/xml/xml_thread.php?fourn=<?= $_GET['fourn'] ?>';-->
+<!--$('frame_xmlt').show().src='<?= rtrim(HTTPCUSTOMERSITE, '/') ?>/mdl/xml/xml_thread.php?fourn=<?= $_GET['fourn'] ?>';-->

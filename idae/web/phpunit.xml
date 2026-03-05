@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
+         bootstrap="tests/bootstrap.php"
+         colors="true"
+         failOnWarning="true"
+         failOnRisky="true">
+
+    <testsuites>
+        <testsuite name="Unit">
+            <directory>tests/Unit</directory>
+        </testsuite>
+        <testsuite name="Integration">
+            <directory>tests/Integration</directory>
+        </testsuite>
+    </testsuites>
+
+    <php>
+        <!-- Force test DB — ClassApp::getMongoClient() checks this before connecting -->
+        <env name="MONGO_ENV" value="test"/>
+        <env name="MONGO_TEST_DSN" value="mongodb://mongo-test:27017"/>
+        <env name="MONGO_TEST_HOST" value="mongo-test"/>
+        <env name="MONGO_TEST_PORT" value="27017"/>
+    </php>
+
+    <source>
+        <include>
+            <directory>appclasses</directory>
+            <directory>services</directory>
+            <directory>appfunc</directory>
+        </include>
+        <exclude>
+            <directory>vendor</directory>
+            <directory>appfunc/dom2pdf</directory>
+            <directory>appfunc/phpthumb</directory>
+            <directory>adodb</directory>
+        </exclude>
+    </source>
+
+</phpunit>

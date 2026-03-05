@@ -32,7 +32,10 @@
 	$HTTP_VARS = $APP->translate_vars($vars);
 	$zone      = uniqid($table);
 	//
-	$RS_LAST = $APP_HISTORY->find(['codeAgent_history' => $table, 'idagent' => (int)$_SESSION['idagent']])->sort(['quantiteAgent_history' => -1])->limit(5);
+	$RS_LAST = $APP_HISTORY->find(
+		['codeAgent_history' => $table, 'idagent' => (int)$_SESSION['idagent']],
+		['sort' => ['quantiteAgent_history' => -1], 'limit' => 5]
+	);
 
 	$addvarsagent = '';
 	if (!droit_table($_SESSION['idagent'], 'CONF', $table) && $APP->has_agent()):

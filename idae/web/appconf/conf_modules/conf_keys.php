@@ -38,5 +38,6 @@
 				'SMTPPASS'];
 
 	foreach($arr_keys as $index=>$key):
-		$APP->create_update(['codeApp_conf'=>$key],['nomApp_conf'=>strtolower($key),'valeurApp_conf'=>$$key]);
+		$value = defined($key) ? constant($key) : '';
+		$APP->create_update(['codeApp_conf'=>$key],['nomApp_conf'=>strtolower($key),'valeurApp_conf'=>$value]);
 	endforeach;

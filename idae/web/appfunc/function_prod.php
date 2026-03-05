@@ -219,7 +219,7 @@
 			return $arrClean;
 		}
 
-		function isTrueFloat($val)
+		static function isTrueFloat($val)
 		{
 			/*if(is_array($val)) return false;
 			$pattern = '/^[+-]?(\d*\.\d+([eE]?[+-]?\d+)?|\d+[eE][+-]?\d+)$/';

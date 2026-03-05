@@ -1,5 +1,7 @@
 <?
 	include_once($_SERVER['CONF_INC']);
+	require_once(__DIR__ . '/../../appclasses/appcommon/MongoCompat.php');
+	use AppCommon\MongoCompat;
 
 	if (!defined('SMTPHOSTGED')) {
 		// skelMdl::send_cmd('act_notify', ['msg' => 'ged abort']);
@@ -60,7 +62,7 @@
 						$name_fk = $FK;
 						$id      = 'id' . $name_fk;
 						$APP_TMP = new App($FK);
-						$testA   = $APP_TMP->findOne(array('code' . ucfirst($FK) => new MongoRegex('/^' . trim($metadata['subject']) . '^/i')));
+						$testA   = $APP_TMP->findOne(array('code' . ucfirst($FK) => MongoCompat::toRegex('^' . MongoCompat::escapeRegex(trim($metadata['subject'])) . '^', 'i')));
 						if (!empty($testC[$id])) {
 							$metatag[$id]           = $metadata[$id] = (int)$testC[$id];
 							$metatag['table']       = $FK;

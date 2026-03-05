@@ -1,0 +1,37 @@
+project:
+  name: "Idae Legacy — Code Modernization"
+  description: >
+    The infrastructure migration is complete: the app runs on PHP 8.2 in Docker,
+    connects to MongoDB via mongodb/mongodb v2+, and login is functional.
+    Current work: modernizing PHP code (ClassApp, services, modules) to fully
+    replace legacy Mongo v1.x driver patterns with modern equivalents,
+    without breaking the legacy PrototypeJS SPA frontend.
+
+  repo: idae-legacy
+  branch: migration
+  base_branch: main
+
+team:
+  size: 3
+  profile: small
+
+timeline:
+  type: short-term
+  horizon: "< 3 months"
+  started: "2026-02-01"
+
+stack:
+  backend: "PHP 8.2 + Apache (running in Docker)"
+  database: "MongoDB via host.docker.internal:27017"
+  php_driver: "mongodb/mongodb ^2.0 (already active)"
+  node: "Node.js 18 (Socket.IO, ESM — app_node/src/)"
+  frontend: "PrototypeJS 1.7.3 SPA (bag.js loader, IndexedDB cache) — do not touch"
+  infra: "Docker / docker-compose (operational)"
+  php_deps: "Composer (idae/web/composer.json)"
+
+app_root: "idae/web/"
+node_root: "idae/web/app_node/"
+test_scripts:
+  - "php idae/web/test_migration.php"
+  - "php idae/web/test_integration.php"
+  - "php idae/web/test_mongodb_migration.php"

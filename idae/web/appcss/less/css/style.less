@@ -2,7 +2,7 @@
 @import "app_fabric.less";
 * {
 	box-sizing  : border-box;
-	font-family : 'Segoe UI', 'Lucida Grande', 'Ubuntu', 'sans-serif';
+	font-family : @font_inter;
 }
 a {
 	color           : #003366;
@@ -15,7 +15,7 @@ a:hover {
 	text-decoration : underline;
 }
 body {
-	font-size : 12px;
+	font-size : @font-size-base;
 	margin    : 0;
 }
 form {
@@ -33,7 +33,7 @@ hr {
 	margin        : 0.5em 1em;
 }
 html {
-	color      : #333333;
+	color      : @color-text;
 	height     : 100%;
 	margin     : 0px;
 	max-height : 100%;
@@ -398,15 +398,15 @@ label.nolabel:before {
 	width : 75%;
 }
 .titre1 {
-	font-size : 14px;
+	font-size : @font-size-md;
 }
 .titre2 {
 	color     : #1370ab;
-	font-size : 13px;
+	font-size : @font-size-base;
 }
 .titre3 {
 	color     : #1370ab;
-	font-size : 12px;
+	font-size : @font-size-sm;
 }
 .transpblanc {
 	background : rgba(255, 255, 255, 0.8);

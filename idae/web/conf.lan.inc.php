@@ -3,9 +3,9 @@
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: POST, GET, OPTIONS");
 
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
+ini_set('display_errors', 0);
+ini_set('display_startup_errors', 0);
+error_reporting(E_ALL & ~E_DEPRECATED & ~E_STRICT & ~E_WARNING & ~E_NOTICE);
 
 // Set timezone if not already set
 if (!ini_get('date.timezone')) {
@@ -28,9 +28,10 @@ $webDir = realpath(__DIR__);
 $projectRoot = realpath($webDir . DIRECTORY_SEPARATOR . '..') . DIRECTORY_SEPARATOR;
 
 // Host detection
-$host      = str_replace('www.', '', $_SERVER['HTTP_HOST']);
-$host      = explode(':', $host)[0];
-$host_name = explode('.', $_SERVER['HTTP_HOST'])[0];
+$http_host = str_replace('www.', '', $_SERVER['HTTP_HOST']);
+$host      = explode(':', $http_host)[0];
+$host_port = explode(':', $http_host)[1] ?? '';
+$host_name = explode('.', $host)[0];
 $host_parts = explode('.', $host);
 
 // Only allow .lan hosts
@@ -102,22 +103,26 @@ DEFINE('REPFONCTIONS', SITEPATH . 'appfunc' . DIRECTORY_SEPARATOR);
 // URLs and domain related constants
 DEFINE('DOCUMENTDOMAIN', $host);
 DEFINE('DOCUMENTDOMAINNOPORT', $host);
-DEFINE('DOCUMENTDOMAINPORT', '');
-DEFINE('HTTPCUSTOMERSITE', $HTTP_PREFIX . $host . '/');
-DEFINE('HTTPAPP', $HTTP_PREFIX . $host . '/');
+DEFINE('DOCUMENTDOMAINPORT', $host_port);
+$host_port_part = !empty($host_port) ? ':' . $host_port : '';
+DEFINE('HTTPCUSTOMERSITE', $HTTP_PREFIX . $host . $host_port_part . '/');
+DEFINE('HTTPAPP', $HTTP_PREFIX . $host . $host_port_part . '/');
 DEFINE('FLATTENIMGDIR', CUSTOMERPATH . 'images_base' . DIRECTORY_SEPARATOR . CUSTOMERNAME . DIRECTORY_SEPARATOR);
 DEFINE('FLATTENIMGHTTP', HTTPCUSTOMERSITE . 'images_base/' . CUSTOMERNAME . '/');
 DEFINE('SOCKETIO_PORT', 3005);
+// Use host.docker.internal if running in Docker container (inferred from MONGO_HOST), otherwise default to DOCUMENTDOMAINNOPORT
+DEFINE('SOCKET_HOST', getenv('MONGO_HOST') ? 'host.docker.internal' : DOCUMENTDOMAINNOPORT);
 
-DEFINE('HTTPHOST', $HTTP_PREFIX . DOCUMENTDOMAIN);
+DEFINE('HTTPHOST', $HTTP_PREFIX . DOCUMENTDOMAIN . $host_port_part);
 DEFINE('HTTPHOSTNOPORT', $HTTP_PREFIX . DOCUMENTDOMAINNOPORT);
 DEFINE('NAMESITE', DOCUMENTDOMAIN);
 DEFINE('MAINSITEHOST', HTTPHOST);
-DEFINE('ACTIONMDL', $HTTP_PREFIX . DOCUMENTDOMAIN . '/mdl/');
-DEFINE('HTTPCSS', $HTTP_PREFIX . DOCUMENTDOMAIN . '/css/');
-DEFINE('HTTPMDL', $HTTP_PREFIX . DOCUMENTDOMAIN . '/mdl/');
-DEFINE('HTTPJAVASCRIPT', $HTTP_PREFIX . DOCUMENTDOMAIN . '/javascript/');
-DEFINE('HTTPIMAGES', $HTTP_PREFIX . DOCUMENTDOMAIN . '/images/');
+// Use HTTPCUSTOMERSITE for asset URLs so the port (if any) is included consistently
+DEFINE('ACTIONMDL', rtrim(HTTPCUSTOMERSITE, '/') . '/mdl/');
+DEFINE('HTTPCSS', rtrim(HTTPCUSTOMERSITE, '/') . '/css/');
+DEFINE('HTTPMDL', rtrim(HTTPCUSTOMERSITE, '/') . '/mdl/');
+DEFINE('HTTPJAVASCRIPT', rtrim(HTTPCUSTOMERSITE, '/') . '/javascript/');
+DEFINE('HTTPIMAGES', rtrim(HTTPCUSTOMERSITE, '/') . '/images/');
 DEFINE('ICONPATH', 'images/icones/');
 
 DEFINE('PATH', DOCUMENTROOT);
@@ -137,10 +142,42 @@ if (isset($hostConf['smtp'])) {
 }
 // MongoDB config
 if (isset($hostConf['mdb'])) {
+    // Allow runtime override (Docker or native)
+    $envMongoHost = getenv('MONGO_HOST');
+    $envMongoUser = getenv('MDB_USER');
+    $envMongoPass = getenv('MDB_PASSWORD');
+    $envMongoPrefix = getenv('MDB_PREFIX');
+    if (!empty($envMongoHost)) {
+        $hostConf['mdb']['host'] = $envMongoHost;
+    }
+    if (!empty($envMongoUser)) {
+        $hostConf['mdb']['user'] = $envMongoUser;
+    }
+    if (!empty($envMongoPass)) {
+        $hostConf['mdb']['password'] = $envMongoPass;
+    }
+    if (!empty($envMongoPrefix)) {
+        $hostConf['mdb']['prefix'] = $envMongoPrefix;
+    }
+    // DEBUG PRINT: Show resolved MongoDB connection info
+    if (!empty(getenv('DEBUG_DB'))) {
+        // header('Content-Type: text/plain; charset=UTF-8');
+        error_log("[DEBUG] MONGO_HOST (env): ".$envMongoHost);
+        error_log("[DEBUG] MDB_HOST (final): ".$hostConf['mdb']['host']);
+        error_log("[DEBUG] MDB_USER: ".$hostConf['mdb']['user']);
+        error_log("[DEBUG] MDB_PASSWORD: ".($hostConf['mdb']['password'] ? '***' : ''));
+        error_log("[DEBUG] MDB_PREFIX: ".$hostConf['mdb']['prefix']);
+        error_log("[DEBUG] configFile: $configFile");
+        error_log("[DEBUG] host: $host");
+        // exit;
+    }
     define_if_exists('host', $hostConf['mdb'], 'MDB_HOST');
     define_if_exists('user', $hostConf['mdb'], 'MDB_USER');
     define_if_exists('password', $hostConf['mdb'], 'MDB_PASSWORD');
     define_if_exists('prefix', $hostConf['mdb'], 'MDB_PREFIX');
+    // Aliases pour compatibilité avec le nouveau driver
+    if (!defined('MONGO_USER') && defined('MDB_USER')) define('MONGO_USER', MDB_USER);
+    if (!defined('MONGO_PASS') && defined('MDB_PASSWORD')) define('MONGO_PASS', MDB_PASSWORD);
 }
 // SQL config
 if (isset($hostConf['sql'])) {
@@ -217,9 +254,13 @@ if (!function_exists("my_autoloader")) {
     spl_autoload_register('my_autoloader');
 }
 
+// --- MongoDB Compatibility Layer (must load before ClassSession) ---
+require_once(__DIR__ . '/appclasses/appcommon/MongoCompat.php');
+
 // --- Session class include ---
 include_once('appclasses/ClassSession.php');
 
+// die("Configuration loaded. Session class included. You can now start the application.");
 
 // --- Debug helper ---
 if (!function_exists('myddeDebug')) {

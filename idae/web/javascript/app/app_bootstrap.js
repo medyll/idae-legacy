@@ -1,16 +1,16 @@
 
 switch (window.document.location.hostname) {
 	case 'localhost':
-		var HTTPJAVASCRIPT = window.document.location.href.replace (location.hash , "") + '/javascript/';
-		var HTTPCSS        = window.document.location.href.replace (location.hash , "") + '/css/';
+		var HTTPJAVASCRIPT = document.location.protocol + '//' + window.document.location.host + '/javascript/';
+		var HTTPCSS        = document.location.protocol + '//' + window.document.location.host + '/css/';
 		break;
 	case '192.168.11.44':
-		var HTTPJAVASCRIPT = window.document.location.href.replace (location.hash , "") + '/javascript/';
-		var HTTPCSS        = window.document.location.href.replace (location.hash , "") + '/css/';
+		var HTTPJAVASCRIPT = document.location.protocol + '//' + window.document.location.host + '/javascript/';
+		var HTTPCSS        = document.location.protocol + '//' + window.document.location.host + '/css/';
 		break;
 	case '127.0.0.1':
-		var HTTPJAVASCRIPT = window.document.location.href.replace (location.hash , "") + '/javascript/';
-		var HTTPCSS        = window.document.location.href.replace (location.hash , "") + '/css/';
+		var HTTPJAVASCRIPT = document.location.protocol + '//' + window.document.location.host + '/javascript/';
+		var HTTPCSS        = document.location.protocol + '//' + window.document.location.host + '/css/';
 		break;
 
 	default:

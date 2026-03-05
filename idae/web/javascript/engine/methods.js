@@ -74,17 +74,7 @@ Element.addMethods({
 		return element;
 	},
 	socketModule: function (node, file, davars, options) {
-		switch (window.document.location.hostname) {
-			case 'localhost':
-				var DOCUMENTDOMAIN = window.document.location.href.replace(location.hash, "").replace('http://', "");
-				break;
-			case '192.168.11.44':
-				var DOCUMENTDOMAIN = window.document.location.href.replace(location.hash, "").replace('http://', "");
-				break;
-			default:
-				var DOCUMENTDOMAIN = window.document.location.host;
-				break;
-		}
+		var DOCUMENTDOMAIN = window.document.location.host;
 		var request_id = uniqid('app_cache_load');
 		if (!$(node)) {
 			console.log('pas node', node);

@@ -1,5 +1,7 @@
 <?
 	include_once($_SERVER['CONF_INC']);
+	require_once(__DIR__ . '/../../../appclasses/appcommon/MongoCompat.php');
+	use AppCommon\MongoCompat;
 
 	$vars    = empty($_POST['vars']) ? [] : fonctionsProduction::cleanPostMongo($_POST['vars'], 1);
 	$table   = $_POST['table'];
@@ -14,7 +16,7 @@
 	$APP_TMP  = new App($table_fk);
 	//
 	if (!empty($_POST['search'])) { // un champ de recherche unique
-		$regexp         = new MongoRegex("/" . $_POST['search'] . "/i");
+		$regexp         = MongoCompat::toRegex(MongoCompat::escapeRegex($_POST['search']), 'i');
 
 		if(is_int($_POST['search'])) $vars['$or'][] = [$idtable_fk => (int)$_POST['search']];
 
@@ -23,7 +25,7 @@
 		if ($APP->has_field('email'))   $vars['$or'][] = array('email' . $Table_fk => $regexp);
 		if ($APP->has_field('code'))    $vars['$or'][] = array('code' . $Table_fk => $regexp);
 		if ($APP->has_field('reference')) $vars['$or'][] = array('reference' . $Table_fk => $regexp);
-		if ($APP->has_field('telephone')) $vars['$or'][] = array('telephone' . $Table_fk => new MongoRegex("/" . cleanTel($_POST['search']) . "/i"));
+		if ($APP->has_field('telephone')) $vars['$or'][] = array('telephone' . $Table_fk => MongoCompat::toRegex(MongoCompat::escapeRegex(cleanTel($_POST['search'])), 'i'));
 
 
 
