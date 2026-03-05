@@ -1,5 +1,7 @@
 <?
 	include_once($_SERVER['CONF_INC']);
+	require_once(__DIR__ . '/../../../appclasses/appcommon/MongoCompat.php');
+	use AppCommon\MongoCompat;
 	// $_POST['table'] = 'client';
 
 	$vars = empty($_POST['vars']) ? array() : fonctionsProduction::cleanPostMongo($_POST['vars'], 1);
@@ -10,7 +12,8 @@
 	$where = array();
 	//
 	if (!empty($_POST['search'])) {
-		$regexp         = new MongoRegex("/.*" . $_POST['search'] . "*./i");
+		$search_escaped = MongoCompat::escapeRegex($_POST['search']);
+		$regexp         = MongoCompat::toRegex(".*" . $search_escaped . "*.", 'i');
 		$whereT         = array('$or' => array(array($nom => $regexp), array($id => (int)$_POST['search'])));
 		$where['$or'][] = array($nom => $regexp);
 		$where['$or'][] = array($id => (int)$_POST['search']);
@@ -18,7 +21,8 @@
 		if (sizeof($GRILLE_FK) != 0) {
 			foreach ($GRILLE_FK as $field):
 				$nom_fk         = 'nom' . ucfirst($field['table_fk']);
-				$regexp         = new MongoRegex("/." . $nom_fk . "*./i");
+				$nom_fk_escaped = MongoCompat::escapeRegex($nom_fk);
+				$regexp         = MongoCompat::toRegex("." . $nom_fk_escaped . "*.", 'i');
 				$where['$or'][] = array($nom_fk => $regexp);
 			endforeach;
 		}
@@ -68,7 +72,8 @@
 		//
 		$where = array();
 		if (!empty($_POST['search'])) {
-			$regexp         = new MongoRegex("/.*" . $_POST['search'] . "*./i");
+			$search_escaped = MongoCompat::escapeRegex($_POST['search']);
+			$regexp         = MongoCompat::toRegex(".*" . $search_escaped . "*.", 'i');
 			$where['$or'][] = array($nom => $regexp);
 			$where['$or'][] = array($email => $regexp);
 			$where['$or'][] = array($code => $regexp);
@@ -78,7 +83,8 @@
 			if (sizeof($GRILLE_FK) != 0) {
 				foreach ($GRILLE_FK as $field):
 					$nom_fk         = 'nom' . ucfirst($field['table_fk']);
-					$regexp         = new MongoRegex("/." . $nom_fk . "*./i");
+					$nom_fk_escaped = MongoCompat::escapeRegex($nom_fk);
+					$regexp         = MongoCompat::toRegex("." . $nom_fk_escaped . "*.", 'i');
 					$where['$or'][] = array($nom_fk => $regexp);
 				endforeach;
 			}
@@ -88,7 +94,7 @@
 		$GRILLE_FK = $APPSC->get_grille_fk();
 
 		$rssc_count = $APPSC->query($where)->count();
-		$rssc       = $APPSC->query($vars + $where)->sort(array($nom => 1))->limit($nbRows)->skip($page * $nbRows);
+		$rssc       = $APPSC->query($vars + $where, (int)$page, (int)$nbRows);
 		if ($rssc_count != 0):
 			?>
 			<div class = "">

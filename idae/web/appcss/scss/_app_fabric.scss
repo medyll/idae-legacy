@@ -1,0 +1,41 @@
+// _app_fabric.scss — Mixin library (converted from app_fabric.less)
+// Modified: 2026-03-02
+// Changes: LESS .mixin() → SCSS @mixin; @border_color → $border_color
+
+@use "vars" as *;
+
+// --- Border mixins ---
+@mixin border4   { border        : 1px solid $border_color; }
+@mixin borderb   { border-bottom : 1px solid $border_color; }
+@mixin borderl   { border-left   : 1px solid $border_color; }
+@mixin borderr   { border-right  : 1px solid $border_color; }
+@mixin bordert   { border-top    : 1px solid $border_color; }
+@mixin bordertb  { border        : 1px 0 1px 0 solid $border_color; }
+@mixin borderu   { border        : 0 1px 1px 1px solid $border_color; }
+@mixin bordertlb { border        : 1px 1px 1px 0 solid $border_color; }
+
+// --- Margin mixins ---
+@mixin margin        { margin        : 0.25em !important; }
+@mixin marginb       { margin-bottom : 0.25em !important; }
+@mixin margint       { margin-top    : 0.25em !important; }
+@mixin margin_more   { margin        : 0.5em  !important; }
+@mixin margin_moreb  { margin-bottom : 0.5em  !important; }
+@mixin margin_moret  { margin-top    : 0.5em  !important; }
+
+// --- Padding mixins ---
+@mixin padding       { padding        : 0.25em; }
+@mixin paddingt      { padding-top    : 0.25em; }
+@mixin paddingb      { padding-bottom : 0.25em; }
+@mixin paddingl      { padding-left   : 0.25em; }
+@mixin paddingr      { padding-right  : 0.25em; }
+@mixin padding_more  { padding        : 0.5em; }
+@mixin padding_morel { padding-left   : 0.5em; }
+@mixin padding_morer { padding-right  : 0.5em; }
+
+// --- Alignment / position mixins ---
+@mixin absolute    { position       : absolute; }
+@mixin alignright  { text-align     : right; }
+@mixin alignleft   { text-align     : left; }
+@mixin aligntop    { vertical-align : text-top; }
+@mixin alignmiddle { vertical-align : middle; }
+@mixin alignbottom { vertical-align : text-bottom; }

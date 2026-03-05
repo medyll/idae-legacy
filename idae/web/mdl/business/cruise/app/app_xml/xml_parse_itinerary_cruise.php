@@ -1,6 +1,8 @@
 <?
 
 	include_once($_SERVER['CONF_INC']);
+	require_once(__DIR__ . '/../../../../../../appclasses/appcommon/MongoCompat.php');
+	use AppCommon\MongoCompat;
 
 	$APP = new App('feed_header');
 
@@ -124,7 +126,8 @@
 					$PortName = $arr_c[0];
 					// skelMdl::send_cmd('act_notify', array('msg' => ' $PortName ' . $PortName . ' ' ), session_id());
 					//$PortName = $iti['PortName'];
-					$test_V   = $APP_VILLE->findOne(array('nomVille' =>  new MongoRegex("/^$PortName^/i")));
+					$PortName_escaped = MongoCompat::escapeRegex($PortName);
+					$test_V   = $APP_VILLE->findOne(array('nomVille' =>  MongoCompat::toRegex("^" . $PortName_escaped . "^", 'i')));
 					$idville  = (int)$test_V['idville'];
 					$nomVille = $test_V['nomVille'];
 				}

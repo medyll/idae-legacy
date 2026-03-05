@@ -1,5 +1,7 @@
 <?
 include_once($_SERVER['CONF_INC']);
+	require_once(__DIR__ . '/../../appclasses/appcommon/MongoCompat.php');
+	use AppCommon\MongoCompat;
 
 if (empty($_POST['table']))
     return;
@@ -47,14 +49,14 @@ $FIELDS = array_merge(array_keys($APP_DATE_FIELDS), array_values($APP_FIELD_BOOL
 //
 $where = array();
 if (!empty($_POST['search'])) {
-    $regexp = new MongoRegex("/.*" . $_POST['search'] . "*./i");
+    $regexp = MongoCompat::toRegex(".*" . MongoCompat::escapeRegex($_POST['search']) . "*.", 'i');
     $where['$or'][] = array($nom => $regexp);
     $where['$or'][] = array($id => (int)$_POST['search']);
     // tourne ds fk
     if (sizeof($GRILLE_FK) != 0) {
         foreach ($GRILLE_FK as $field):
             $nom_fk = 'nom' . ucfirst($field['table_fk']);
-            $regexp = new MongoRegex("/." . $nom_fk . "*./i");
+            $regexp = MongoCompat::toRegex("." . MongoCompat::escapeRegex($nom_fk) . "*.", 'i');
             $where['$or'][] = array($nom_fk => $regexp);
         endforeach;
     }
@@ -67,11 +69,11 @@ if (!empty($groupBy)):
     $dist_count = $rs_dist->count();
     // echo "=>".(ceil($nbRows/$dist_count));
     $nbRows = (ceil($nbRows / $dist_count));
-    $rs_dist->limit(20)->skip($page * 20);
+    $rs_dist = $rs_dist; // pagination handled upstream; keep cursor as-is
 
 endif;
 //
-$rs->limit($nbRows)->skip($page * $nbRows);
+$rs = $APP->query($vars + $where, (int)$page, (int)$nbRows);
 //
 ?>
 <table

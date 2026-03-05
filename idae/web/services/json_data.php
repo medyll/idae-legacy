@@ -5,9 +5,13 @@
 	 * Date: 07/07/14
 	 * Time: 04:04
 	 * return array of raw data queried
+	 * 
+	 * MIGRATION NOTE: MongoId/MongoRegex converted to MongoCompat (2026-02-02)
 	 */
 
 	include_once($_SERVER['CONF_INC']);
+	require_once(__DIR__ . '/../appclasses/appcommon/MongoCompat.php');
+	use AppCommon\MongoCompat;
 	$_POST = array_merge($_POST,$_GET);
 	ini_set('display_errors', 55);
 	$table = $_POST['table'];
@@ -41,7 +45,7 @@
 	$nbRows  = (empty($_POST['nbRows'])) ? empty($settings_nbRows) ? 1000 : (int)$settings_nbRows : $_POST['nbRows'];
 	//
 	if (!empty($_POST['vars']['_id'])) {
-		$vars['_id'] = new MongoId($_POST['vars']['_id']);
+		$vars['_id'] = MongoCompat::toObjectId($_POST['vars']['_id']);
 	}
 	//
 	// vardump($vars);
@@ -65,14 +69,15 @@
 	//
 	$where = array();
 	if (!empty($_POST['search'])) {
-		$regexp         = new MongoRegex("/.*" . $_POST['search'] . "*./i");
+		$search_escaped = MongoCompat::escapeRegex($_POST['search']);
+		$regexp         = MongoCompat::toRegex(".*" . $search_escaped . "*.", 'i');
 		$where['$or'][] = array($nom => $regexp);
 		$where['$or'][] = array($id => (int)$_POST['search']);
 		// tourne ds fk
 		if (sizeof($GRILLE_FK) != 0) {
 			foreach ($GRILLE_FK as $field):
 				$nom_fk         = 'nom' . ucfirst($field['table_fk']);
-				$regexp         = new MongoRegex("/." . $nom_fk . "*./i");
+				$regexp         = MongoCompat::toRegex("." . $nom_fk . "*.", 'i');
 				$where['$or'][] = array($nom_fk => $regexp);
 			endforeach;
 		}
@@ -119,24 +124,22 @@
 		exit;
 	}
 
-	$rs = $APP->query($vars + $where);
+	$rs = $APP->query($vars + $where, (int)$page, (int)$nbRows);
 	$max_count = $rs->count();
-	$rs->sort(array($sortBy => $sortDir));
-	$rs->limit($nbRows)->skip($page * $nbRows);
 //
 //
 	if ($PIECE == 'table_groupby'):
 		$rs_dist    = $APP->distinct($groupBy, $vars + $where);
 		$dist_count = $rs_dist->count();
 		// $nbRows = (ceil($nbRows / $dist_count));
-		$rs_dist->limit(30)->skip($page * 30);
+		$rs_dist = $APP->distinct($groupBy, $vars + $where, 30);
 		
 		$JSON_STR = []; 
 		foreach ($rs_dist as $arr_dist):
 		// vardump($arr_dist);
 			$vars_rfk = array();
 			$vars['id' . $groupBy] = (int)$arr_dist['id' . $groupBy];
-			$rs                    = $APP->query($vars + $where)->sort(array($sortBy => $sortDir));
+			$rs                    = $APP->query($vars + $where, 0, 250);
 			//
 			$vars_rfk['table']       = 'id' . $groupBy; 
 			$vars_rfk['vars'] = ['id' . $groupBy => $arr_dist['id' . $groupBy]];

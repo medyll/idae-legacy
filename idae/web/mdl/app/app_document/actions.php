@@ -104,7 +104,7 @@
 			$fs         = $baseF->getGridFs($collection);
 			//
 			foreach ($_POST['_id'] as $_id):
-				$fs->update(array('_id' => new MongoId($_id)), array('$push' => array('metatag' => $tag)));
+				$fs->update(array('_id' => MongoCompat::toObjectId($_id)), array('$push' => array('metatag' => $tag)));
 			endforeach;
 			break;
 		case "setmetadata":
@@ -116,12 +116,12 @@
 			$fs         = $baseF->getGridFs($collection);
 			//
 			foreach ($_POST['_id'] as $_id):
-				$fs->update(array('_id' => new MongoId($_id)), array('$push' => array('metatag' => $tag)));
+				$fs->update(array('_id' => MongoCompat::toObjectId($_id)), array('$push' => array('metatag' => $tag)));
 			endforeach;
 			break;
 		case 'deleteDoc':
 			if (empty($_POST['base']) || empty($_POST['collection'])) break;
-			$_id  = new MongoId($_POST['_id']);
+			$_id  = MongoCompat::toObjectId($_POST['_id']);
 			$db   = $APP->plug_base($_POST['base']);
 			$grid = $db->getGridFS($_POST['collection']);
 			$grid->remove(array('_id' => $_id), array('multiple' => false));
@@ -133,7 +133,7 @@
 			// dropped element
 			$db          = $APP->plug_base($arrDrop['base']);
 			$grid        = $db->getGridFS($arrDrop['collection']);
-			$dropped     = $grid->findOne(array('_id' => new MongoId($arrDrop['_id'])));
+			$dropped     = $grid->findOne(array('_id' => MongoCompat::toObjectId($arrDrop['_id'])));
 			$arrdropped  = $dropped->file;
 			$dropped_src = $dropped->getBytes();
 			// on deplace
@@ -142,7 +142,7 @@
 			$arrTag = empty($arrTarget['tag']) ? array() : array('metatag' => $arrTarget['tag']);
 			$grid2->storeBytes($dropped_src, $arrTag + array("filename" => $arrdropped['filename'], "metadata" => $arrdropped['metadata']));
 			// on enleve ancien
-			$grid->remove(array('_id' => new MongoId($arrDrop['_id'])), array('multiple' => false));
+			$grid->remove(array('_id' => MongoCompat::toObjectId($arrDrop['_id'])), array('multiple' => false));
 			$_POST['deleteModule'][] = array('trfilename' => $arrDrop['_id']);
 			break;
 		case "multiDoc":
@@ -154,7 +154,7 @@
 				foreach ($arr_id as $value_id) {
 					$db   = $APP->plug_base($_POST['base']);
 					$grid = $db->getGridFS($_POST['collection']);
-					$grid->remove(array('_id' => new MongoId($value_id)), array('multiple' => false));
+					$grid->remove(array('_id' => MongoCompat::toObjectId($value_id)), array('multiple' => false));
 
 					$_POST['deleteModule'][] = array('trfilename' => $value_id);
 				}
@@ -166,10 +166,10 @@
 				foreach ($arr_id as $value_id) {
 					$db       = $APP->plug_base($_POST['base']);
 					$grid     = $db->getGridFS($_POST['collection']);
-					$rs       = $grid->findOne(array('_id' => new MongoId($value_id)));
+					$rs       = $grid->findOne(array('_id' => MongoCompat::toObjectId($value_id)));
 					$arrDatas = $rs->file['metadata'];
 					$toInsert = array_merge($arrDatas, $varsdata);
-					$grid->update(array('_id' => new MongoId($value_id)), array('$set' => array('metadata' => $toInsert)), array('upsert' => true));
+					$grid->update(array('_id' => MongoCompat::toObjectId($value_id)), array('$set' => array('metadata' => $toInsert)), array('upsert' => true));
 
 				}
 				break;

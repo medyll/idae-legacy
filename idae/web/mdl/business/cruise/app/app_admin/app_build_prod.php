@@ -95,13 +95,15 @@ endif;
 		if ( $testEtape->count() == 0 ):
 			$arrClean['estActifProduit'] = 0;
 		else:
-			$arrLastVille                = $testEtape->sort(array( 'ordreProduit_etape' => - 1 ))->limit(1)->getNext();
+			$tmpLast = $APP_ETAPE->query(array('idproduit' => $idproduit), 0, 1);
+			$arrLastVille = $tmpLast->getNext();
 			$arrClean['nomVilleArrivee'] = $arrLastVille['nomVille'];
 			$arrClean['idvilleArrivee'] = (int)$arrLastVille['idville'];
 		endif;
 		if(empty($arrP['idville'])){
 			$testEtape->reset();
-			$arrFirstVille                = $testEtape->sort(array( 'ordreProduit_etape' =>   1 ))->limit(1)->getNext();
+			$tmpFirst = $APP_ETAPE->query(array('idproduit' => $idproduit), 0, 1);
+			$arrFirstVille = $tmpFirst->getNext();
 			$arrClean['nomVille'] = $arrFirstVille['nomVille'];
 			$arrClean['idville'] = (int)$arrFirstVille['idville'];
 		}
@@ -151,7 +153,7 @@ endif;
 		// endwhile;
 
 
-		$rs_tarifgamme = $APP_TARIF_GAMME->query(array( 'idproduit' => $idproduit ))->sort(array( 'prixProduit_tarif_gamme' => 1 ))->limit(1);
+		$rs_tarifgamme = $APP_TARIF_GAMME->query(array( 'idproduit' => $idproduit ), 0, 1);
 		//
 		if ( $rs_tarifgamme->hasNext() ) {
 			$arr_tarif               = $rs_tarifgamme->getNext();

@@ -1,8 +1,10 @@
 <?
 include_once ($_SERVER['CONF_INC']);
+require_once(__DIR__ . '/../../../appclasses/appcommon/MongoCompat.php');
+use AppCommon\MongoCompat;
 ini_set('display_errors', 55);
 $APP = new App();
-$_POST['_id'] = new MongoId($_POST['_id']);
+$_POST['_id'] = MongoCompat::toObjectId($_POST['_id']);
 $arr = $APP -> plug('sitebase_app', 'appscheme') -> findOne(array('_id' => $_POST['_id']));
 $table = $arr['collection'];
 $Table = ucfirst($table);

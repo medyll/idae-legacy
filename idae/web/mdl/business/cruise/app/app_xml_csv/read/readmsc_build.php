@@ -66,10 +66,11 @@
 		$arr_grilleDate                = $db->produit_tarif->distinct('dateDebutProduit_tarif', ['idproduit' => $idproduit]); // ,'dateDebutProduit_tarif'=>array('gt'=>date('Y-m-d'))
 		$arrClean['grilleDateProduit'] = $arr_grilleDate;
 		// dateDebutProduit
-		$arr_firstDate                = $db->produit_tarif->find(['idproduit' => $idproduit])->sort(['dateDebutProduit_tarif' => 1])->getNext(); // ,'dateDebutProduit_tarif'=>array('gt'=>date('Y-m-d'))
+		$tmpDate = $db->produit_tarif->find(['idproduit' => $idproduit], ['sort' => ['dateDebutProduit_tarif' => 1], 'limit' => 1]);
+		$arr_firstDate = $tmpDate->getNext(); // ,'dateDebutProduit_tarif'=>array('gt'=>date('Y-m-d'))
 		$arrClean['dateDebutProduit'] = $arr_firstDate['dateDebutProduit_tarif'];
 		// des prix ?
-		$rs_tarifgamme = $APP_TARIF_GAMME->find(['idproduit' => $idproduit,'prixProduit_tarif_gamme'=>['$nin'=>[null,'',0]]])->sort(['prixProduit_tarif_gamme' => 1])->limit(1);
+		$rs_tarifgamme = $APP_TARIF_GAMME->find(['idproduit' => $idproduit,'prixProduit_tarif_gamme'=>['$nin'=>[null,'',0]]], ['sort' => ['prixProduit_tarif_gamme' => 1], 'limit' => 1]);
 		//
 		if ($rs_tarifgamme->hasNext()) {
 			$arrClean['estActifProduit'] = 1;
@@ -86,7 +87,7 @@
 			$arrClean['estActifProduit'] = 0;
 		}
 		// des dates  ?
-		$rs_tarif = $APP_TARIF->find(['idproduit' => $idproduit])->limit(1);
+		$rs_tarif = $APP_TARIF->find(['idproduit' => $idproduit], ['limit' => 1]);
 		if ($rs_tarif->count() == 0) {
 			$arrClean['estActifProduit'] = 0;
 		}

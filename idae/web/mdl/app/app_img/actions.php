@@ -1,5 +1,7 @@
 <?
 	include_once($_SERVER['CONF_INC']);
+	require_once(__DIR__ . '/../../appclasses/appcommon/MongoCompat.php');
+	use AppCommon\MongoCompat;
 	global $buildArr;
 	global $IMG_SIZE_ARR;
 
@@ -240,7 +242,7 @@
 			$fs         = $baseF->getGridFs($collection);
 			//
 			foreach ($_POST['_id'] as $_id):
-				$fs->update(['_id' => new MongoId($_id)], ['$push' => ['metatag' => $tag]]);
+				$fs->update(['_id' => MongoCompat::toObjectId($_id)], ['$push' => ['metatag' => $tag]]);
 			endforeach;
 			break;
 		case "setmetadata":
@@ -254,7 +256,7 @@
 			$fs         = $baseF->getGridFs($collection);
 			//
 			foreach ($_POST['_id'] as $_id):
-				$fs->update(['_id' => new MongoId($_id)], ['$push' => ['metatag' => $tag]]);
+				$fs->update(['_id' => MongoCompat::toObjectId($_id)], ['$push' => ['metatag' => $tag]]);
 			endforeach;
 			break;
 		case 'deleteDoc':
@@ -262,7 +264,7 @@
 			if (empty($_POST['base']) || empty($_POST['collection'])) {
 				break;
 			}
-			$_id  = new MongoId($_POST['_id']);
+			$_id  = MongoCompat::toObjectId($_POST['_id']);
 			$db   = $APP->plug_base($_POST['base']);
 			$grid = $db->getGridFS($_POST['collection']);
 			$grid->remove(['_id' => $_id], ['multiple' => false]);
@@ -274,7 +276,7 @@
 			// dropped element
 			$db          = skelMongo::connectBase($arrDrop['base']);
 			$grid        = $db->getGridFS($arrDrop['collection']);
-			$dropped     = $grid->findOne(['_id' => new MongoId($arrDrop['_id'])]);
+			$dropped     = $grid->findOne(['_id' => MongoCompat::toObjectId($arrDrop['_id'])]);
 			$arrdropped  = $dropped->file;
 			$dropped_src = $dropped->getBytes();
 			// on deplace
@@ -283,7 +285,7 @@
 			$arrTag = empty($arrTarget['tag']) ? [] : ['metatag' => $arrTarget['tag']];
 			$grid2->storeBytes($dropped_src, $arrTag + ["filename" => $arrdropped['filename'], "metadata" => $arrdropped['metadata']]);
 			// on enleve ancien
-			$grid->remove(['_id' => new MongoId($arrDrop['_id'])], ['multiple' => false]);
+			$grid->remove(['_id' => MongoCompat::toObjectId($arrDrop['_id'])], ['multiple' => false]);
 			$_POST['deleteModule'][] = ['trfilename' => $arrDrop['_id']];
 			break;
 		case "multiDoc":
@@ -297,7 +299,7 @@
 				foreach ($arr_id as $value_id) {
 					$db   = skelMongo::connectBase($_POST['base']);
 					$grid = $db->getGridFS($_POST['collection']);
-					$grid->remove(['_id' => new MongoId($value_id)], ['multiple' => false]);
+					$grid->remove(['_id' => MongoCompat::toObjectId($value_id)], ['multiple' => false]);
 
 					$_POST['deleteModule'][] = ['trfilename' => $value_id];
 				}
@@ -309,10 +311,10 @@
 				foreach ($arr_id as $value_id) {
 					$db       = skelMongo::connectBase($_POST['base']);
 					$grid     = $db->getGridFS($_POST['collection']);
-					$rs       = $grid->findOne(['_id' => new MongoId($value_id)]);
+					$rs       = $grid->findOne(['_id' => MongoCompat::toObjectId($value_id)]);
 					$arrDatas = $rs->file['metadata'];
 					$toInsert = array_merge($arrDatas, $varsdata);
-					$grid->update(['_id' => new MongoId($value_id)], ['$set' => ['metadata' => $toInsert]], ['upsert' => true]);
+					$grid->update(['_id' => MongoCompat::toObjectId($value_id)], ['$set' => ['metadata' => $toInsert]], ['upsert' => true]);
 
 				}
 				break;

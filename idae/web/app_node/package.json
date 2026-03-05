@@ -1,34 +1,34 @@
 {
   "name": "app_idae",
-  "version": "0.0.1",
-  "description": "Application crm",
+  "version": "1.0.0",
+  "description": "Idae Legacy Node Server (Modernized)",
+  "type": "module",
+  "main": "src/main.js",
+  "scripts": {
+    "start": "node src/main.js",
+    "dev": "nodemon src/main.js",
+    "logs": "powershell Get-Content ../../../logs/php-error.log -Wait",
+    "build:css": "sass ../appcss/scss/main.scss ../appcss/dist/main.css --style=compressed --no-source-map",
+    "watch:css": "sass --watch ../appcss/scss/main.scss ../appcss/dist/main.css --style=expanded"
+  },
   "dependencies": {
-    "commander": "^14.0.0",
-    "connect": "3.3.3",
-    "cookie": "^1.0.2",
-    "cron": "1.2.1",
-    "fs": "0.0.2",
-    "http": "0.0.0",
-    "https": "1.0.0",
-    "mongodb": "2.2.10",
-    "path": "0.12.7",
-    "qs": "6.2.1",
-    "request": "2.75.0",
-    "socket.io": "1.4.8",
-    "socket.io-cookie": "0.0.1",
-    "socket.io-cookie-parser": "1.0.0",
-    "url": "0.11.0"
+    "axios": "^1.6.0",
+    "commander": "^11.0.0",
+    "cookie": "^0.6.0",
+    "cron": "^3.1.0",
+    "dotenv": "^16.3.1",
+    "mongodb": "^6.3.0",
+    "qs": "^6.11.0",
+    "socket.io": "^4.7.0",
+    "winston": "^3.11.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.0",
+    "sass": "^1.77.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   },
   "author": "Mydde",
-  "main": "app_idae.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "keywords": [
-    "base",
-    "module",
-    "for",
-    "idae"
-  ],
   "license": "ISC"
 }

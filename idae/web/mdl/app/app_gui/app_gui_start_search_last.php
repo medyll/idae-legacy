@@ -26,7 +26,7 @@
 
 	$sort = ['dateCreationAgent_recherche' => -1, 'heureCreationAgent_recherche' => -1];
 	if ($mode == 'more') $sort['valeurAgent_recherche'] = -1;
-	$RS = $APP->find(['idagent' => (int)$_SESSION['idagent']] + $vars)->sort($sort)->skip(($page * $nbRows))->limit($nbRows);
+	$RS = $APP->find(['idagent' => (int)$_SESSION['idagent']] + $vars, ['sort' => $sort, 'skip' => ($page * $nbRows), 'limit' => $nbRows]);
 
 	$APP_TMP = new App($table);
 

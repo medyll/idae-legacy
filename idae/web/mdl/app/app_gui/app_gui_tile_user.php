@@ -1,5 +1,7 @@
 <?
 	include_once($_SERVER['CONF_INC']);
+	require_once(__DIR__ . '/../../../appclasses/appcommon/MongoCompat.php');
+	use AppCommon\MongoCompat;
 	//
 	ini_set('display_errors', 55);
 	$APP  = new App();
@@ -8,7 +10,7 @@
 	$code = $_POST['code'];
 	$text = empty($_POST['text']) ? '' : $_POST['text'];
 	$css  = empty($_POST['css']) ? '' : $_POST['css'];
-	$test = $coll->find(['idagent' => (int)$_SESSION['idagent'], 'valeurAgent_pref' => 'true', 'codeAgent_pref' => new MongoRegex("/.*" . $code . "*./i")]);
+	$test = $coll->find(['idagent' => (int)$_SESSION['idagent'], 'valeurAgent_pref' => 'true', 'codeAgent_pref' => MongoCompat::toRegex(".*" . MongoCompat::escapeRegex($code) . "*.", 'i')]);
 ?>
 <div class="inline">
 	<div class="flex_h flex_align_middle">

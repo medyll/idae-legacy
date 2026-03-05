@@ -1,3 +1,4 @@
+
 var searchtimer;
 quickFind = function (value, where, tag, spy) {
 	clearTimeout(searchtimer);
@@ -259,7 +260,8 @@ ajaxValidation = function (action, path, pars) {
 runSocketModule = function () {
 
 }
-ajaxFormValidation = function (form) {
+ajaxFormValidation = function (form) { 
+	console.log('ajaxFormValidation', form);
 	if (form.readAttribute('auto_close')) {
 		$(form).makeLoading();
 	}
@@ -268,6 +270,7 @@ ajaxFormValidation = function (form) {
 	}, 300);
 }
 ajaxFormValidationReal = function (form) {
+	console.log('ajaxFormValidationReal', form);
 	var vars
 	this.loadingform = $(form);
 	/*valid = new Validation (form, {immediate: true, useTitles: true});
@@ -303,7 +306,7 @@ ajaxFormValidationReal = function (form) {
 	}
 	options.postBody = Form.serialize($(form))
 	lodaj = new Ajax.Updater($('div_form_validation'), url, options);
-
+	console.log(lodaj)
 	return true;
 }
 

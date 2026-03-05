@@ -1,5 +1,7 @@
 <?
 	include_once($_SERVER['CONF_INC']);
+	require_once(__DIR__ . '/../../../appclasses/appcommon/MongoCompat.php');
+	use AppCommon\MongoCompat;
 	$APP     = new App('appscheme');
 	$arr_tbl = ['client', 'prospect', 'contact', 'tache', 'affaire', 'financement', 'contrat', 'opportunite', 'intervention', 'materiel'];
 
@@ -17,7 +19,7 @@
 
 	$RSNOSCHEME = $APP_SCH->find(['idappscheme_type' => ['$in' => [null, 0, '']]])->sort(['nomAppscheme' => 1]);
 
-	$arr_pref = $APP->plug('sitebase_pref', 'agent_pref')->distinct('codeAgent_pref', ['idagent' => (int)$_SESSION['idagent'], 'valeurAgent_pref' => ['$in' => [true, 'true']], 'codeAgent_pref' => new MongoRegex('/app_menu_start_/')]);
+	$arr_pref = $APP->plug('sitebase_pref', 'agent_pref')->distinct('codeAgent_pref', ['idagent' => (int)$_SESSION['idagent'], 'valeurAgent_pref' => ['$in' => [true, 'true']], 'codeAgent_pref' => MongoCompat::toRegex('app_menu_start_', '')]);
 
 	$pattern       = "/app_menu_start_/i";
 	$DIST_TBL_PREF = preg_replace($pattern, '', $arr_pref);

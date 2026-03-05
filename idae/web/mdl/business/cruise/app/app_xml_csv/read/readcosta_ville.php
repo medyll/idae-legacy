@@ -7,6 +7,8 @@
 	 */
 
 	include_once($_SERVER['CONF_INC']);
+	require_once(__DIR__ . '/../../../../../../../appclasses/appcommon/MongoCompat.php');
+	use AppCommon\MongoCompat;
 
 	$CODE_FOURNISSEUR = 'COSTA';
 
@@ -40,7 +42,7 @@
 				// VILLE
 				$ARR_XML_VILLE = $APP_XML_VILLE->findOne([ 'codeFournisseur' => $CODE_FOURNISSEUR , 'codeXml_ville' => trim($codeXml_ville) ]);
 				$test_V        = $APP_VILLE->findOne([ 'codeVille' => $codeXml_ville ]);
-				$test_V2       = $APP_VILLE->findOne([ 'nomVille' => new MongoRegex("/" . $nomXml_ville . "/i") ]);
+				$test_V2       = $APP_VILLE->findOne([ 'nomVille' => MongoCompat::toRegex(MongoCompat::escapeRegex($nomXml_ville), 'i') ]);
 				//
 				$msg        = '';
 				$arr_insert = [ ];

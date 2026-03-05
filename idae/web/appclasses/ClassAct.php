@@ -1,4 +1,6 @@
 <?php
+	require_once __DIR__ . '/appcommon/MongoCompat.php';
+	use AppCommon\MongoCompat;
 
 	/**
 	 * Created by PhpStorm.
@@ -220,11 +222,18 @@
 			if (empty($file_extension)) {
 				$image_name .= '.jpg';
 			};
+			$reflect = isset($reflect) ? $reflect : ''; // Fix undefined variable
 			$type = empty($reflect) ? 'jpg' : 'png';
 
 			$con  = $APP->plug_base('sitebase_image');
 			$grid = $con->getGridFs();
-			$grid->ensureIndex(['filename' => 1]);
+			// Modern MongoDB driver: create index on files collection directly
+			try {
+				$filesCollection = $con->getInnerDatabase()->selectCollection($con->getGridFsBucketName() . ".files");
+				$filesCollection->createIndex(['filename' => 1]);
+			} catch (\Exception $e) {
+				error_log("GridFS index creation failed: " . $e->getMessage());
+			}
 			//
 			$image = $grid->findOne(['filename' => $image_name]);
 			if (empty($image)) {
@@ -480,7 +489,7 @@
 		}
 
 		static function imgApp($famille, $id, $size = 'small', $reflect = '') {
-			ini_set('display_errors', 0);
+			error_log("DEBUG: ClassAct::imgApp START famille=$famille id=$id size=$size reflect=$reflect"); 
 
 			$APP = new App();
 
@@ -489,7 +498,7 @@
 			}
 			$con  = $APP->plug_base('sitebase_image');
 			$grid = $con->getGridFs();
-
+			
 			if ($size == 'smallest') {
 				global $IMG_SIZE_ARR, $buildArr;
 				$arr_size = array_merge(array_keys($buildArr), array_keys($IMG_SIZE_ARR));
@@ -525,17 +534,33 @@
 			$nude_name = strtolower($famille) . '-' . $size . '-' . $id . $zen;
 
 			$fullNameImg = $nameImage . '.' . $type;
-			$image       = $grid->findOne($nude_name . '.' . $type);
-			if (empty($image)) {
-				$image = $grid->findOne($nude_name);
+			error_log("DEBUG: ClassAct::imgApp query nude_name=$nude_name type=$type");
+			try {
+				$image = $grid->findOne($nude_name . '.' . $type);
+				if (empty($image)) {
+					error_log("DEBUG: ClassAct::imgApp not found with ext, trying bare");
+					$image = $grid->findOne($nude_name);
+				}
+			} catch (Exception $e) {
+				error_log("ERROR: ClassAct::imgApp EXCEPTION: " . $e->getMessage());
+				return "http://www.notfound.com/images/error.png";
 			}
+			
+			if (empty($image)) {
+				error_log("DEBUG: ClassAct::imgApp image empty, returning 404 placeholder");
+				return "http://www.notfound.com/images/blank.png?f=" . $nude_name;
+			}
+			
 			//	vardump($image);
 			// echo " $nude_name. $type , $nude_name  ";
 			// $dir  = $image->file['metadata']['tag'] . '/';
 			$dir  = $famille . '/';
-			$file = $image->file;
+			
+			error_log("DEBUG: ClassAct::imgApp image found, processing file data");
+			$file = isset($image->file) ? $image->file : []; // Safety check
 
-			switch ($file['metadata']['contentType']) {
+			$contentType = isset($file['metadata']['contentType']) ? $file['metadata']['contentType'] : '';
+			switch ($contentType) {
 				case "image/jpeg":
 					$ext = 'jpg';
 					break;
@@ -562,12 +587,14 @@
 			//echo " what 00 ";
 			if (!empty($image) || !file_exists($image_file)) { // && 3 == 8
 				//	echo " what 11 ";
-				// on écrit image
-				$id   = $image->file['_id'];
-				$file = $image->file;
-				$sdir = $image->file['metadata']['tag'];
+				// on écrit image ?? null;
+				$file = isset($image->file) ? $image->file : [];
+				$sdir = isset($file['metadata']['tag']) ? $file['metadata']['tag'] : 'default';
+				
+				if (empty($sdir)) $sdir = 'default';
+				
 				if (is_array($sdir)) {
-					$sdir = $sdir[0];
+					$sdir = isset($sdir[0]) ? $sdir[0] : 'default';
 				}
 				//	echo " what 22 ";
 				$dir = FLATTENIMGDIR . $sdir . '/';
@@ -1132,7 +1159,7 @@
 				$mois  = substr($arrIn['dateDebutProduit_tarif'], 4, 2);
 				$annee = substr($arrIn['dateDebutProduit_tarif'], 0, 4);
 
-				$arrIn['grilleDateProduit'] = new MongoRegex("/^" . $annee . "-" . $mois . "/i"); // array('$gte' => $annee . '-' . $mois . '-01', '$lte' => $annee . '-' . $mois . '-31');
+				$arrIn['grilleDateProduit'] = MongoCompat::toRegex('^' . preg_quote($annee . '-' . $mois, '/'), 'i'); // array('$gte' => $annee . '-' . $mois . '-01', '$lte' => $annee . '-' . $mois . '-31');
 				//print_r($arrIn['grilleDateProduit']);
 				unset($arrIn['dateDebutProduit_tarif']);
 
@@ -1160,7 +1187,7 @@
 				//
 				$mois    = substr($arrV['dateDebutVacance'], 5, 2);
 				$annee   = substr($arrV['dateDebutVacance'], 0, 4);
-				$out_d[] = new MongoRegex("/$annee-$mois-*/i");
+				$out_d[] = MongoCompat::toRegex(preg_quote($annee . '-' . $mois, '/') . '-*', 'i');
 
 				//$mois                                         = substr($arrV['dateFinVacance'], 5, 2);
 				//$annee                                        = substr($arrV['dateFinVacance'], 0, 4);
@@ -1169,7 +1196,7 @@
 				// myddeDebug($out_d);
 				//
 				// $arrIn['grilleDateProduit.dateProduit_tarif'] = array('$gte' => $dateDebutVacance, '$lte' => $dateFinVacance);
-				$arrIn['grilleDateProduit.dateDebutProduit_tarif'] = new MongoRegex("/$annee-$mois-*/i");
+				$arrIn['grilleDateProduit.dateDebutProduit_tarif'] = MongoCompat::toRegex(preg_quote($annee . '-' . $mois, '/') . '-*', 'i');
 				unset($arrIn['idvacance']);
 			endif;
 			if (!empty($arrIn['idtransport_gamme'])):

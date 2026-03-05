@@ -2,6 +2,8 @@
 
 	// ob_end_clean();
 	include_once($_SERVER['CONF_INC']);
+	require_once(__DIR__ . '/../appclasses/appcommon/MongoCompat.php');
+	use AppCommon\MongoCompat;
 	//ini_set('display_errors', 0);
 	if (empty($_SESSION['idagent'])) {
 		// skelMdl::send_cmd('act_notify', ['msg' => 'Agent non connecté', 'options' => $_GET + ['mdl' => 'app/app_login/app_login', 'sticky' => 1, 'id' => 'json_debug']], session_id());
@@ -13,82 +15,98 @@
 	//
 	if ($DEBUG && droit('DEV') ) {
 		skelMdl::send_cmd('act_notify', ['msg' => '<pre>  POST  => ' . json_encode($_POST, JSON_PRETTY_PRINT) . '</pre>', 'options' => ['sticky' => 1, 'id' => 'json_debug']], session_id());
-	}
-	//
-	if ($DEBUG && droit('DEV') ) {
-		parse_str($_POST['url_data'], $out_url);
-		skelMdl::send_cmd('act_notify', ['msg' => '<pre>url_data => ' . json_encode($out_url, JSON_PRETTY_PRINT) . '</pre>', 'options' => ['sticky' => 1, 'id' => 'json_debug']], session_id());
-	}
+		// Continue processing using safe locals populated above
+		$APP = isset($GLOBALS['APP']) ? $GLOBALS['APP'] : null;
+		$APP_TABLE = isset($GLOBALS['APP_TABLE']) ? $GLOBALS['APP_TABLE'] : [];
+		$arrFields_all = isset($GLOBALS['arrFields_all']) ? $GLOBALS['arrFields_all'] : [];
+		$GRILLE_FK = isset($GLOBALS['GRILLE_FK']) ? $GLOBALS['GRILLE_FK'] : [];
+		$BASE_APP = isset($GLOBALS['BASE_APP']) ? $GLOBALS['BASE_APP'] : '';
+		$GRILLE_COUNT = isset($GLOBALS['GRILLE_COUNT']) ? $GLOBALS['GRILLE_COUNT'] : [];
+		$sortBy = isset($GLOBALS['sortBy']) ? $GLOBALS['sortBy'] : null;
+		$key_date = isset($GLOBALS['key_date']) ? $GLOBALS['key_date'] : null;
+		$MDL = isset($GLOBALS['MDL']) ? $GLOBALS['MDL'] : null;
 
-	// keep url_data
-	if (!empty($_POST['url_data'])) {
-		parse_str($_POST['url_data'], $arr_data);
-		if (empty($arr_data['vars'])) {
-			$arr_data['vars'] = [];
+		// Build summary info
+		$out_more = ['icon' => $APP_TABLE['iconAppscheme'] ?? null, 'value' => $trvars['id' . $table], 'table_value' => $trvars['table_value'], 'table' => $table];
+
+		// Fields already processed above; ensure $out contains them
+		// Handle foreign keys (GRILLE_FK)
+		foreach ($GRILLE_FK as $field) {
+			$id_fk = $field['idtable_fk'] ?? null;
+			$val_fk = isset($arr[$id_fk]) ? $arr[$id_fk] : null;
+			$arrq = [];
+			if ($APP && !empty($field['base_fk']) && !empty($field['table_fk']) && !is_null($val_fk)) {
+				$arrq = $APP->plug($field['base_fk'], $field['table_fk'])->findOne([$field['idtable_fk'] => (int)$val_fk], [$field['idtable_fk'] => 1, $field['nomtable_fk'] => 1]);
+				if (is_array($arrq)) unset($arrq['_id']);
+			}
+			$dsp_name = isset($arrq['nom' . ucfirst($field['table_fk'])]) ? $arrq['nom' . ucfirst($field['table_fk'])] : null;
+			$out['id' . $field['table_fk']] = (int)($val_fk ?: 0);
+			$out['nom' . ucfirst($field['table_fk'])] = $dsp_name;
+			$out['grille_FK'][$field['table_fk']] = $arrq;
 		}
-		if (!empty($arr_data['vars_search_fk'])) {
-			$arr_data['vars_search_fk'] = array_filter($arr_data['vars_search_fk']);
+
+		// Handle counts (GRILLE_COUNT)
+		foreach ($GRILLE_COUNT as $key_count => $field) {
+			$APP_TMP = new App($key_count);
+			$RS_TMP = $APP_TMP->find([$id => $trvars['table_value']], [$id => 1, "id$key_count" => 1]);
+			$count_ct = $RS_TMP->count();
+			$link = fonctionsJs::app_liste($key_count, '', ['vars' => [$id => $trvars['table_value']]]);
+			if ($count_ct == 1) {
+				$ARR_TMP = $RS_TMP->getNext();
+				$link = fonctionsJs::app_fiche($key_count, $ARR_TMP["id$key_count"], ['vars' => [$id => $trvars['table_value']]]);
+			}
+			$attr = " data-count='data-count' data-table='$key_count' data-vars='vars[$id]={$trvars['table_value']}' ";
+			$count_grille = (empty($count_ct)) ? '' : $count_ct;
+			$out['count_' . $key_count] = '<a onclick="' . $link . '"  ' . $attr . ' >' . $count_grille . '</a>' . ((!empty($count_ct)) ? "<span class='count_title'> $key_count</span>" : '');
 		}
-		unset($arr_data['stream_to'], $arr_data['PHPSESSID'], $arr_data['SESSID']);
-		$url_data = http_build_query($arr_data);
-	} else {
-		$tppost = $_POST;
-		unset($tppost['PHPSESSID'], $tppost['SESSID'], $tppost['stream_to'], $tppost['url_data']);
-		$url_data = http_build_query($tppost);
-	}
-	//
-	if (empty($_POST['table'])) {
-		return;
-	}
-	if (!empty($_POST['stream_to'])) {
-		if (!empty($_POST['url_data'])) {
-			$_POST['url_data'] .= '&stream_to=' . $_POST['stream_to'];
+
+		if (!empty($key_date)) {
+			$out[$key_date] = '';
 		}
-	}
-	if (!empty($_POST['url_data'])) {
-		parse_str($_POST['url_data'], $_POST);
-	}
-	$uniqid = uniqid();
-	//
-	$table = $_POST['table'];
-	$Table = ucfirst($_POST['table']);
-	//
-	$APP = new App($table);
-	//
-	if (!empty($_SESSION['idagent'])) {
-		$vars_hist['table']   = $_POST['table'];
-		$vars_hist['groupBy'] = empty($_POST['groupBy']) ? '' : $_POST['groupBy'];
-		$vars_hist['search']  = empty($_POST['search']) ? '' : $_POST['search'];
-		$uid                  = md5(http_build_query($vars_hist));
-		$APP->set_hist($_SESSION['idagent'], ['uid' => $uid] + ['vars' => $vars_hist]);
-	}
-	//
-	$id       = 'id' . $table;
-	$nom      = 'nom' . ucfirst($table);
-	$id_type  = 'id' . $table . '_type';
-	$nom_type = 'nom' . ucfirst($table) . '_type';
-	$top      = 'estTop' . ucfirst($table);
-	$actif    = 'estActif' . ucfirst($table);
-	$visible  = 'estVisible' . ucfirst($table);
 
-	//
-	$vars            = empty($_POST['vars']) ? [] : fonctionsProduction::cleanPostMongo(array_filter($_POST['vars'], "my_array_filter_fn"), 1);
-	$vars_search     = empty($_POST['vars_search']) ? [] : fonctionsProduction::cleanPostMongo(array_filter($_POST['vars_search'], "my_array_filter_fn"), 1);
-	$vars_search_fk  = empty($_POST['vars_search_fk']) ? [] : fonctionsProduction::cleanPostMongo(array_filter($_POST['vars_search_fk'], "my_array_filter_fn"), 1);
-	$vars_search_rfk = empty($_POST['vars_search_rfk']) ? [] : fonctionsProduction::cleanPostMongo(array_filter($_POST['vars_search_rfk'], "my_array_filter_fn"), 1);
+		if (!empty($MDL)) $out_more['mdl'] = skelMdl::cf_module($MDL, ['table' => $table, 'table_value' => $trvars['table_value']]);
 
-	if ($DEBUG && droit('DEV') ) {
-		skelMdl::send_cmd('act_notify', ['msg' => '<pre>  $vars after INIT=> ' . json_encode($vars, JSON_PRETTY_PRINT) . '</pre>', 'options' => ['sticky' => 1, 'id' => 'json_debug']], session_id());
-	}
+		if (function_exists('droit') && droit('DEV') && $table == 'ville') {
+			if ((empty($arr['nomVille']) && !empty($arr['codeVille'])) && isset($APP) && isset($APP->codeAppscheme)) {
+				skelMdl::send_cmd('act_notify', ['msg' => '<br>' . $APP->codeAppscheme . ' ' . $arr['codeVille'] . ' => ' . $arr['nomVille'], 'options' => ['sticky' => 1], 'id' => 'json_debug'], session_id());
+				$APP->update(['id' . $APP->codeAppscheme => (int)$arr['id' . $APP->codeAppscheme]], ['nomVille' => ucfirst(strtolower($arr['codeVille']))]);
+			}
+		}
 
-	if (!droit_table($_SESSION['idagent'], 'CONF', $table) && $APP->has_agent()):
+		return array_merge(['html' => $out, 'md5' => md5(json_encode($out)), 'vars' => $trvars], $out_more);
 		$vars['idagent'] = (int)$_SESSION['idagent'];
-	endif;
+	}
 	if (!droit_table($_SESSION['idagent'], 'R', $table) && droit_table($_SESSION['idagent'], 'L', $table) && !$APP->has_agent()):
 		$_POST['vars']['idagent'] = (int)$_SESSION['idagent'];
 	endif;
 	//
 	$APP_TABLE       = $APP->app_table_one;
+	
+	// Handle missing schema with silent fail and error logging
+	if (empty($APP_TABLE) || is_null($APP_TABLE)) {
+		error_log("[json_data_table] Missing schema for table '$table' - silent fail");
+		
+		// Return empty result to avoid breaking the frontend
+		$empty_response = [
+			'data_main' => [],
+			'maxcount' => 0,
+			'url_data' => isset($url_data) ? $url_data : '',
+			'table' => $table
+		];
+		
+		if (!empty($_POST['stream_to'])) {
+			$strm_vars = [
+				'stream_to' => $_POST['stream_to'],
+				'data_size' => 0,
+				'data' => $empty_response
+			];
+			skelMdl::send_cmd('act_stream_to', $strm_vars, session_id());
+		} else {
+			echo json_encode($empty_response);
+		}
+		exit;
+	}
+	
 	$GRILLE_FK       = $APP->get_fk_tables();
 	$GRILLE_COUNT    = $APP->get_grille_count($table);
 	$APP_DATE_FIELDS = $APP->get_date_fields($table);
@@ -160,17 +178,16 @@
 	# champ = 'null'
 
 	foreach ($vars as $key_vars => $value_vars):
-		if (strtolower($value_vars) == 'null') {
+		if (is_string($value_vars) && strtolower($value_vars) == 'null') {
 			unset($vars[$key_vars]);
 			$where['$or'][]          = [$key_vars => ['$exists' => false]];
 			$where[$key_vars]['$in'] = [null, ''];
-
 		}
-
 	endforeach;
 
 	if (!empty($_POST['search'])) { // un champ de recherche unique
-		$regexp = new MongoRegex("/" . $_POST['search'] . "/i");
+		$search_escaped = MongoCompat::escapeRegex($_POST['search']);
+		$regexp = MongoCompat::toRegex($search_escaped, 'i');
 
 		if (is_int($_POST['search'])) $where['$or'][] = [$id => (int)$_POST['search']];
 		/*$out[] = new MongoRegex("/" . (string)$_POST['search'] . "/i");
@@ -183,7 +200,10 @@
 		if ($APP->has_field('email')) $where['$or'][] = ['email' . $Table => $regexp];
 		if ($APP->has_field('code')) $where['$or'][] = ['code' . $Table => $regexp];
 		if ($APP->has_field('reference')) $where['$or'][] = ['reference' . $Table => $regexp];
-		if ($APP->has_field('telephone')) $where['$or'][] = ['telephone' . $Table => new MongoRegex("/" . cleanTel($_POST['search']) . "/i")];
+		if ($APP->has_field('telephone')) {
+			$tel_escaped = MongoCompat::escapeRegex(cleanTel($_POST['search']));
+			$where['$or'][] = ['telephone' . $Table => MongoCompat::toRegex($tel_escaped, 'i')];
+		}
 
 		// tourne ds fk
 		if (sizeof($GRILLE_FK) != 0) {
@@ -200,7 +220,8 @@
 	}
 
 	if (!empty($_POST['search_start'])) {
-		$regexp = new MongoRegex("/^" . $_POST['search_start'] . "./i");
+		$search_start_escaped = MongoCompat::escapeRegex($_POST['search_start']);
+		$regexp = MongoCompat::toRegex("^" . $search_start_escaped . ".", 'i');
 		// $where['$or'][] = [$nom => $regexp];
 		if ($APP->has_field('nom')) {
 			$vars[$nom] = $regexp;
@@ -213,7 +234,8 @@
 		foreach ($vars_search as $key_field => $field_value):
 			if (empty($field_value)) continue;
 			// tourne ds fields
-			$regexp         = new MongoRegex("/" . $field_value . "/i");
+			$field_value_escaped = MongoCompat::escapeRegex($field_value);
+			$regexp         = MongoCompat::toRegex($field_value_escaped, 'i');
 			$where['$or'][] = [$key_field => $regexp];
 
 		endforeach;
@@ -245,7 +267,8 @@
 			// tourne ds fields
 			foreach ($APP_TABLE_SCHEME as $key_field => $field_scheme):
 				$tmp_name          = $field_scheme['field_name'];
-				$regexp            = new MongoRegex("/" . $val_search . "/i");
+				$val_search_escaped = MongoCompat::escapeRegex($val_search);
+				$regexp            = MongoCompat::toRegex($val_search_escaped, 'i');
 				$where_fk['$or'][] = [$tmp_name => $regexp];
 			endforeach;
 			// query distinct id
@@ -277,7 +300,8 @@
 				if ($testid == 'id') continue;
 				$tmp_name           = $field_scheme['nomAppscheme_field'];
 				$tmp_name_raw       = $field_scheme['codeAppscheme_field'];
-				$regexp             = new MongoRegex("/" . $val_search . "/i");
+				$val_search_escaped = MongoCompat::escapeRegex($val_search);
+				$regexp             = MongoCompat::toRegex($val_search_escaped, 'i');
 				$where_rfk['$or'][] = [$tmp_name => $regexp];
 				if ($tmp_name_raw == 'adresse') {
 					$where_rfk['$or'][] = ['adresse1' . ucfirst($table_key) => $regexp];
@@ -299,7 +323,7 @@
 		$APP_STATUT = new App($table . '_statut');
 		$ARR_STATUT = $APP_STATUT->findOne(['code' . $Table . '_statut' => 'END']);
 		if (empty($ARR_STATUT['id' . $table . '_statut'])) {
-			$RS_STATUT  = $APP_STATUT->find()->sort(['ordre' . $Table . '_statut' => -1]);
+			$RS_STATUT  = $APP_STATUT->find([], ['sort' => ['ordre' . $Table . '_statut' => -1]]);
 			$ARR_STATUT = $RS_STATUT->getNext();
 		}
 		if (!empty($ARR_STATUT['id' . $table . '_statut'])) {
@@ -314,7 +338,7 @@
 		}
 	}
 
-	$rs       = $APP->find($vars + $where)->sort([$sortBy => $sortDir, $sortBySecond => $sortDirSecond])->skip(($nbRows * $page))->limit($nbRows);
+	$rs       = $APP->find($vars + $where, ['sort' => [$sortBy => $sortDir, $sortBySecond => $sortDirSecond], 'skip' => ((int)$nbRows * (int)$page), 'limit' => (int)$nbRows]);
 	$count    = $rs->count();
 	$maxcount = $rs->count(false);
 	$count    = ($count > $nbRows) ? $nbRows : $count;
@@ -399,21 +423,24 @@
 					$table_value = $arr_dist[$groupBy_field];
 					break;
 				case 'date':
-					$vars_groupBy[$groupBy_field] =  new MongoRegex("/^" . $arr_dist . "/i");
-					$table_value = $arr_dist;
-					break;
-				case 'email':
-					$vars_groupBy[$groupBy_field] =  new MongoRegex("/" . $arr_dist . "/i");;
-					$table_value = $arr_dist;
-					break;
-				case 'field':
-				case 'integer':
-				case 'string':
-					$vars_groupBy[$groupBy_field] =  new MongoRegex("/^" . $arr_dist . "/i");;
+				$arr_dist_escaped = MongoCompat::escapeRegex($arr_dist);
+				$vars_groupBy[$groupBy_field] =  MongoCompat::toRegex("^" . $arr_dist_escaped, 'i');
+				$table_value = $arr_dist;
+				break;
+			case 'email':
+				$arr_dist_escaped = MongoCompat::escapeRegex($arr_dist);
+				$vars_groupBy[$groupBy_field] =  MongoCompat::toRegex($arr_dist_escaped, 'i');
+				$table_value = $arr_dist;
+				break;
+			case 'field':
+			case 'integer':
+			case 'string':
+				$arr_dist_escaped = MongoCompat::escapeRegex($arr_dist);
+				$vars_groupBy[$groupBy_field] =  MongoCompat::toRegex("^" . $arr_dist_escaped, 'i');
 					$table_value = $arr_dist;
 					break;
 			endswitch;
-			$rs = $APP->find(array_merge($vars_groupBy,$vars, $where))->limit($nbRows/sizeof($rs_dist))->sort([$sortBy => $sortDir]);
+			$rs = $APP->find(array_merge($vars_groupBy,$vars, $where), ['limit' => (int)($nbRows/sizeof($rs_dist)), 'sort' => [$sortBy => $sortDir]]);
 			if ($DEBUG && droit('DEV') ) {
 				skelMdl::send_cmd('act_notify', ['msg' => '<pre>Group <br> '.$groupBy_mode.' '.$table_value .  ' : ' . vardump(array_merge($vars_groupBy,$vars, $where), true) .' total : '.$rs->count(). '</pre>', 'options' => ['sticky' => 1, 'id' => 'json_debug']], session_id());
 			}
@@ -496,7 +523,7 @@
 		// pas dans distinc : sans groupBy
 		$data_main    = $strm = [];
 		$vars_rfk     = [];
-		$rs_noGroupBy = $APP->find($vars + $where + ['id' . $groupBy => ['$exists' => false]])->sort([$sortBy => $sortDir])->skip($page)->limit($nbRows);
+		$rs_noGroupBy = $APP->find($vars + $where + ['id' . $groupBy => ['$exists' => false]], ['sort' => [$sortBy => $sortDir], 'skip' => $page, 'limit' => $nbRows]);
 		if ($rs_noGroupBy->count() != 0):
 			$z           = '<div class="flex_h"><div class="aligncenter padding margin  border4"  style="width:32px;"><i class="fa fa-' . $APP->iconAppscheme . '  fa-2x"></i ></div><div class="padding uppercase bold">Sans ' . $groupBy . '<br>' . $rs_noGroupBy->count() . '</div></div>';//skelMdl::cf_module('app/app/app_fiche_entete_group', ['groupBy' => $groupBy, 'vars' => $vars_rfk, 'table' => $groupBy, 'table_value' => '0']);
 			$groupBy_key = 'groupby_'. $groupBy.'_idx_'.$i;
@@ -506,13 +533,13 @@
 			if (!empty($_POST['stream_to'])):
 
 				$out_model = ['data_main' => $strm, 'maxcount' => $maxcount, 'url_data' => $url_data, 'table' => $table]; // 'columnModel' => $columnModel,
-				$strm_vars = ['stream_to' => $_POST['stream_to'], 'data' => $out_model, 'data_size' => sizeof($strm)];
+				$strm_vars = ['stream_to' => $_POST['stream_to'], 'data' => $out_model, 'data_size' => is_array($strm) ? sizeof($strm) : 0];
 
 				skelMdl::send_cmd('act_stream_to', json_decode(json_encode($strm_vars, JSON_FORCE_OBJECT)), session_id());
 				unset($strm);
 			endif;
 		endif;
-		$rs    = $APP->find($vars + $where + ['id' . $groupBy => ['$exists' => false]])->sort([$sortBy => $sortDir])->skip($page)->limit($nbRows);
+		$rs    = $APP->find($vars + $where + ['id' . $groupBy => ['$exists' => false]], ['sort' => [$sortBy => $sortDir], 'skip' => $page, 'limit' => $nbRows]);
 		$count = $rs->count();
 		$count = ($count > $nbRows) ? $nbRows : $count;
 		unset($groupBy);
@@ -523,7 +550,7 @@
 		$z = " Pas de résultats";
 
 		$strm_vars = ['stream_to' => $_POST['stream_to'],
-		              'data_size' => sizeof($strm),
+		              'data_size' => is_array($strm) ? sizeof($strm) : 0,
 		              'table'     => $table,
 		              'data'      => ['data_main' => ['html' => $z, 'table' => $table, 'vars' => $vars, 'groupBy' => 1],
 		                              'maxcount'  => $maxcount,
@@ -610,6 +637,40 @@
 	//
 	//
 	function dotr($table, $arr) {
+		if (!is_array($arr)) {
+			error_log("[dotr] Expected array, got " . gettype($arr) . " for table $table");
+			return [];
+		}
+		// Defensive: ensure all array accesses are safe
+		$out = [];
+		$id  = 'id' . $table;
+		$trvars = [];
+		$trvars['id' . $table] = isset($arr[$id]) ? $arr[$id] : null;
+		$trvars['_id']         = isset($arr['_id']) ? (string)$arr['_id'] : null;
+		$trvars['table']       = $table;
+		$trvars['table_value'] = isset($arr[$id]) ? $arr[$id] : null;
+		$trvars['sortBy']      = isset($GLOBALS['sortBy']) ? $GLOBALS['sortBy'] : null;
+		$trvars['key_date']    = isset($GLOBALS['key_date']) ? $GLOBALS['key_date'] : null;
+		$APP_TABLE = isset($GLOBALS['APP_TABLE']) ? $GLOBALS['APP_TABLE'] : [];
+		$out_more = ['icon' => isset($APP_TABLE['iconAppscheme']) ? $APP_TABLE['iconAppscheme'] : null, 'value' => isset($arr[$id]) ? $arr[$id] : null, 'table_value' => isset($arr[$id]) ? $arr[$id] : null, 'table' => $table];
+		$arrFields_all = isset($GLOBALS['arrFields_all']) ? $GLOBALS['arrFields_all'] : [];
+		foreach ($arrFields_all as $key_f => $value_f):
+			$field_name = isset($value_f['field_name']) ? $value_f['field_name'] : null;
+			if (!$field_name) continue;
+			$field_value = (is_array($arr) && isset($arr[$field_name])) ? (is_array($arr[$field_name]) ? explode(',', $arr[$field_name]) : $arr[$field_name]) : null;
+			$field_name_raw = isset($value_f['field_name_raw']) ? $value_f['field_name_raw'] : null;
+			$codeAppscheme_field_type = isset($value_f['codeAppscheme_field_type']) ? $value_f['codeAppscheme_field_type'] : null;
+			$arr_cast = ['field_name' => $field_name, 'field_name_raw' => $field_name_raw, 'field_value' => $field_value, 'codeAppscheme_field_type' => $codeAppscheme_field_type];
+			$arr_cast['table'] = $table;
+			$arr_cast['table_value'] = isset($arr[$id]) ? $arr[$id] : null;
+			$out[$field_name] = isset($GLOBALS['APP']) ? $GLOBALS['APP']->cast_field($arr_cast) : null;
+			if ($codeAppscheme_field_type == 'bool') {
+				$set_value = empty($field_value) ? 1 : 0;
+				$uri = "table=$table&table_value=" . (isset($arr[$id]) ? $arr[$id] : '') . "&vars[$field_name]=";
+				$out[$field_name] = "<span value='$set_value' class='cursor click_up' onclick='ajaxValidation(\"app_update\",\"mdl/app/\",\"$uri\"+set_value)' >" . $out[$field_name] . "</span>";
+			}
+		endforeach;
+		// ...existing code...
 
 		global $APP, $APP_TABLE, $arrFields_all, $GRILLE_FK, $BASE_APP, $GRILLE_COUNT, $sortBy, $key_date, $MDL;
 		$out = [];

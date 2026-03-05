@@ -1,5 +1,7 @@
 <?php
 	include_once($_SERVER['CONF_INC']);
+	require_once(__DIR__ . '/../../../appclasses/appcommon/MongoCompat.php');
+	use AppCommon\MongoCompat;
 
 	$vars   = empty($_POST['vars']) ? [] : fonctionsProduction::cleanPostMongo($_POST['vars'], 1);
 	$vars   = array_filter($vars);
@@ -30,19 +32,20 @@
 		$search    = trim($_POST['search']);
 		$arrSearch = explode(' ', trim($search));
 		foreach ($arrSearch as $key => $value) {
-			// $out[] = new MongoRegex("/.*" . (string)$arrSearch[$key] . "*./i");
+			// $out[] = MongoCompat::toRegex(".*" . (string)$arrSearch[$key] . "*.", 'i');
 		}
-		$out[] = new MongoRegex("/" . (string)$search . "/i");
+		$search_escaped = MongoCompat::escapeRegex((string)$search);
+		$out[] = MongoCompat::toRegex($search_escaped, 'i');
 		if (sizeof($out) == 1) {
 			$add = ['$or' => [[$nom => ['$all' => $out]], [$id => (int)$_POST['search']], ['code' . $Table => ['$in' => $out]], [$prenom => ['$in' => $out]]]];
 		}
 		if (is_int($_POST['search'])):
 			$add['$or'][] = [$id => (int)$_POST['search']];
 		endif;
-		$rs = $APP->find($vars + $add)->sort(['nom' . $Table => 1])->limit(5);
+		$rs = $APP->find($vars + $add, ['sort' => ['nom' . $Table => 1], 'limit' => 5]);
 	// vardump_async(array_merge( $vars , $add),true);
 	else:
-		$rs = $APP->find($vars)->sort(['nom' . $Table => 1])->limit(5);
+		$rs = $APP->find($vars, ['sort' => ['nom' . $Table => 1], 'limit' => 5]);
 	endif;
 
 	if(empty($vars) && empty($add)) return;

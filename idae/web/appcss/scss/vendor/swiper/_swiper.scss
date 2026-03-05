@@ -1,0 +1,12 @@
+// _swiper.scss — Swiper barrel (includes all swiper partials)
+// Converted from: vendor/swiper/swiper.less
+// Modified: 2026-03-02
+// Changes: @import url('*.less') → @use SCSS partials
+
+@use "mixins" as *;
+@use "core";
+@use "navigation";
+@use "effects";
+@use "zoom";
+@use "scrollbar";
+@use "preloader";

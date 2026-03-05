@@ -42,7 +42,7 @@
 			$nomDestination_tmp  = $arr_tmp[0];
 			$nomPays_tmp         = $arr_tmp[1];
 
-			$test_V2 = $APP_DESTINATION->findOne(['nomDestination' => new MongoRegex("/" . $nomDestination_tmp . "/i")]);
+			$test_V2 = $APP_DESTINATION->findOne(['nomDestination' => MongoCompat::toRegex(MongoCompat::escapeRegex($nomDestination_tmp), 'i')]);
 			//  idxml_destination dans xml_destination avec iddestination null
 			if (!empty($ARR_XML_DESTINATION['idxml_destination']) && !empty($ARR_XML_DESTINATION['iddestination'])):
 				$ARR_DESTINATION_TEST = $APP_DESTINATION->findOne(['iddestination' => (int)$ARR_XML_DESTINATION['iddestination']]);

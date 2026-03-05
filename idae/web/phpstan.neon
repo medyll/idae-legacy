@@ -1,0 +1,22 @@
+parameters:
+    level: 6
+    paths:
+        - appclasses
+        - services
+        - appfunc/function.php
+    excludePaths:
+        - vendor
+        - appfunc/dom2pdf
+        - appfunc/phpthumb
+        - adodb
+        - tests
+    # Suppress known legacy noise — tighten over time
+    ignoreErrors:
+        - '#Call to an undefined method MongoCollection::#'
+        - '#Class MongoClient not found#'
+        - '#Class MongoId not found#'
+        - '#Class MongoRegex not found#'
+        - '#Class MongoDate not found#'
+    # Baseline absorbs remaining legacy violations — run: vendor/bin/phpstan analyse --generate-baseline
+    includes:
+        - phpstan-baseline.neon
