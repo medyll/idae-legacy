@@ -3,9 +3,10 @@ updated: "2026-03-06"
 recommendation: "/dev-story S3-02"
 
 # HANDOFF NOTE: S3-01 is COMPLETE (16%, 1/6 stories).
-# ClassApp::query() and findOne() refactored with strict_types=1, full type hints, English PHPDoc.
-# All filters pass through MongoCompat::convertFilter(). PHPStan validation passed.
-# Ready for integration tests in Docker. Next: S3-02 — insert/update/remove refactor.
+# ClassApp::query() and findOne() refactored with strict_types=1, full type hints, English PhPDoc.
+# All filters pass through MongoCompat::convertFilter(). PhPStan validation passed.
+# S3-02 story created. Ready for write-side CRUD refactor (create_update, insert, update, remove).
+# Next: S3-02 — insert/update/remove refactor (3 points).
 
 # Context: SCSS & Bootstrap (Phase 2) complete. Phase 3 ClassApp CRUD modernization in progress.
 # Blockers: Node.js socket server (medium severity, not blocking current sprint).
