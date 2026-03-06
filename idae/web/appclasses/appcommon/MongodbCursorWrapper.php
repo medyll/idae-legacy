@@ -11,6 +11,7 @@
 namespace AppCommon;
 
 class MongodbCursorWrapper implements \Iterator, \Countable {
+    // Temporary attribute markers for deprecated return types suppressed on methods below
     private $cursor;
     private $cursorIterator = null;
     private $currentDoc = null;
