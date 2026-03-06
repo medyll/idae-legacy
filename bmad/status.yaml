@@ -1,13 +1,13 @@
 project: "Idae Legacy — Code Modernization"
-updated: "2026-03-02"
-recommendation: "/dev-story S3-01"
+updated: "2026-03-06"
+recommendation: "/dev-story S3-02"
 
-# HANDOFF NOTE: Sprint 02 is COMPLETE (100%, 13 pts).
-# All SCSS migration work done: LESS → SCSS conversion, entry point wiring, mixin refactoring, lessc removal.
-# ClassApp.__construct already uses MongoDB\Client with modern driver semantics.
-# Next: Phase 3 begins (S3-01) — ClassApp CRUD method refactoring (query, findOne, create_update, etc.)
+# HANDOFF NOTE: S3-01 is COMPLETE (16%, 1/6 stories).
+# ClassApp::query() and findOne() refactored with strict_types=1, full type hints, English PHPDoc.
+# All filters pass through MongoCompat::convertFilter(). PHPStan validation passed.
+# Ready for integration tests in Docker. Next: S3-02 — insert/update/remove refactor.
 
-# Context: SCSS & Bootstrap infrastructure COMPLETE. Ready for Phase 3 ClassApp modernization.
+# Context: SCSS & Bootstrap (Phase 2) complete. Phase 3 ClassApp CRUD modernization in progress.
 # Blockers: Node.js socket server (medium severity, not blocking current sprint).
 
 phases:
@@ -38,15 +38,15 @@ phases:
   - id: 3
     name: "ClassApp CRUD + Testing"
     status: in_progress
-    progress: 5
+    progress: 16
     artifacts:
-      - "S3-01 — Refactor ClassApp::query() (pending)"
+      - "S3-01 — Refactor ClassApp::query() ✅ (2026-03-06)"
       - "S3-02 — Refactor ClassApp::findOne() (pending)"
       - "S3-03 — Refactor ClassApp::create_update() (pending)"
       - "S3-04 — Refactor ClassApp CRUD helpers: insert/update/remove (pending)"
       - "S3-05 — Unit tests per method (pending)"
       - "S3-06 — json_data.php regression test (pending)"
-    notes: "Phase 3 begins after S2 completion. Focus: ClassApp CRUD method modernization to use MongoDB\Client driver semantics."
+    notes: "S3-01 complete: query() and findOne() now have strict_types=1, full type hints, comprehensive PHPDoc, and MongoCompat validation. Ready for integration tests in Docker. Progress: 1/6 stories done (16%)."
     ref: "idae/web/PHASE2_STRATEGY.md"
 
   - id: 4
