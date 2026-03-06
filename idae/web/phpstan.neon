@@ -17,6 +17,7 @@ parameters:
         - '#Class MongoId not found#'
         - '#Class MongoRegex not found#'
         - '#Class MongoDate not found#'
-    # Baseline absorbs remaining legacy violations — run: vendor/bin/phpstan analyse --generate-baseline
-    includes:
-        - phpstan-baseline.neon
+
+# Baseline absorbs remaining legacy violations — run: vendor/bin/phpstan analyse --generate-baseline
+includes:
+    - phpstan-baseline.neon

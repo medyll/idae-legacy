@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 	/**
 	 * Created by PhpStorm.
@@ -10,6 +11,7 @@
 	 * - Changed from extending \MongoClient to standalone class
 	 * - Using MongoDB\Client instead of MongoClient
 	 * - Using AppCommon\MongoCompat for type conversions
+	 * Modified: 2026-03-06 — Added strict_types, type hints, PHPDoc (S3-01)
 	 */
 	//namespace appclasses\appcommon ;
 
@@ -1028,7 +1030,6 @@
 
 				return $rs_dist;
 			endif;
-			endif;
 
 			return $first_arr_dist;
 		}
@@ -1129,8 +1130,20 @@
 
 		#   cds
 
+		/**
+		 * Find a single document in the data collection.
+		 * 
+		 * Executes a MongoDB findOne() query against the table's collection, with automatic
+		 * filter normalization via MongoCompat::convertFilter(). Returns the document as an
+		 * associative array (via typeMap) or null if not found.
+		 * 
+		 * @param array<string, mixed> $vars Query filter (e.g., ['idproduit' => 1], ['nom' => ['$regex' => '...']])
+		 * @param array<string, int> $out Optional projection (e.g., ['idproduit' => 1, 'nomProduit' => 1])
+		 * @return array<string, mixed>|null Document as associative array, or null if not found
+		 * @throws \MongoDB\Driver\Exception\RuntimeException on connection/execution error
+		 */
 		// Modified: 2026-03-03
-		function findOne($vars, $out = []) {
+		function findOne(array $vars, array $out = []): ?array {
 			if (empty($this->app_table_one['codeAppscheme_base'])) {
 				error_log('[ClassApp::findOne] Missing codeAppscheme_base for table: ' . $this->table);
 				return null;
@@ -2144,8 +2157,22 @@
 			return $str;
 		}
 
+		/**
+		 * Execute a paginated query against the data collection.
+		 * 
+		 * Retrieves multiple documents from the table's collection with pagination, sorting,
+		 * and optional projection. Filters are normalized via MongoCompat::convertFilter().
+		 * Results are returned wrapped in MongodbCursorWrapper for ADODB-style iteration.
+		 * 
+		 * @param array<string, mixed> $vars Query filter (default: all documents)
+		 * @param int $page Zero-indexed page number (default: 0, first page)
+		 * @param int $rppage Results per page (default: 40, minimum: 15)
+		 * @param array<string, int> $fields Optional projection (default: all fields)
+		 * @return MongodbCursorWrapper Wrapped cursor supporting toArray(), count(), getNext(), etc.
+		 * @throws \MongoDB\Driver\Exception\RuntimeException on connection/execution error
+		 */
 		// Modified: 2026-03-03
-		function query($vars = [], $page = 0, $rppage = 40, $fields = []) {
+		function query(array $vars = [], int $page = 0, int $rppage = 40, array $fields = []): MongodbCursorWrapper {
 			if (empty($rppage)) {
 				$rppage = 15;
 			}
