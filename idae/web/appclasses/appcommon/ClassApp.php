@@ -1467,23 +1467,44 @@ declare(strict_types=1);
 
 		}
 
-		function create_update($vars, $fields = []) {
+		/**
+		 * Create or update a document (upsert pattern).
+		 *
+		 * Uses updateOne with upsert when possible; ensures id field exists and consolidates schema.
+		 *
+		 * @param array<string, mixed> $vars
+		 * @param array<string, mixed> $fields
+		 * @return int|false ID of inserted/updated document, or false on error
+		 */
+		function create_update(array $vars, array $fields = []): int|false {
 			if (empty($vars)) return false;
 			$table = $this->app_table_one['codeAppscheme'];
-			$existing = $this->findOne($vars);
-			if (empty($existing)):
-				if (empty($vars['id' . $table])) {
-					$id                    = (int)$this->getNext('id' . $table);
-					$fields['id' . $table] = $id;
-				}
-				$fields = array_merge($vars, $fields);
-				$id     = $this->insert($fields);
-			else:
-				$id     = (int)$existing['id' . $table];
-				$fields = array_merge($vars, $fields);
-				$this->update(['id' . $table => $id], $fields);
-			endif;
+			$idField = $this->app_field_name_id;
+			$vars = MongoCompat::convertFilter($vars);
+			$fields = MongoCompat::convertFilter($fields);
 
+			// Ensure an ID is present for upsert
+			if (empty($vars[$idField]) && empty($fields[$idField])) {
+				$newId = (int)$this->getNext($idField);
+				$fields[$idField] = $newId;
+			}
+
+			$col = $this->plug($this->app_table_one['codeAppscheme_base'], $this->app_table_one['codeAppscheme'])->getCollection();
+			$col->updateOne($vars, ['$set' => $fields], ['upsert' => true]);
+
+			// Determine ID to return
+			if (!empty($fields[$idField])) {
+				$id = (int)$fields[$idField];
+			} elseif (!empty($vars[$idField])) {
+				$id = (int)$vars[$idField];
+			} else {
+				$doc = $this->findOne($vars);
+				$id = !empty($doc[$idField]) ? (int)$doc[$idField] : null;
+			}
+
+			if ($id === null) return false;
+
+			$this->consolidate_scheme($id);
 			return (int)$id;
 		}
 
@@ -1515,13 +1536,20 @@ declare(strict_types=1);
 			return new MongodbCursorWrapper($rs);
 		}
 
-		// Modified: 2026-03-03
-		function insert($vars = []) {
+		// Modified: 2026-03-06
+		/**
+		 * Insert a new document into the collection.
+		 *
+		 * @param array<string, mixed> $vars Document fields
+		 * @return int Inserted document logical ID (app field)
+		 */
+		function insert(array $vars = []): int {
 			$vars = MongoCompat::convertFilter($vars);
-			if (empty($vars[$this->app_field_name_id])):
+			if (empty($vars[$this->app_field_name_id])) {
 				$vars[$this->app_field_name_id] = (int)$this->getNext($this->app_field_name_id);
-			endif;
-			$this->plug($this->app_table_one['codeAppscheme_base'], $this->app_table_one['codeAppscheme'])->insert($vars);
+			}
+			$col = $this->plug($this->app_table_one['codeAppscheme_base'], $this->app_table_one['codeAppscheme'])->getCollection();
+			$col->insertOne($vars);
 
 			$this->consolidate_scheme($vars[$this->app_field_name_id]);
 
@@ -1790,7 +1818,7 @@ declare(strict_types=1);
 		}
 
 		// Modified: 2026-03-03
-		function update($vars, $fields = [], $upsert = true) {
+		function update(array $vars, array $fields = [], bool $upsert = true): ?array {
 			$table       = $this->app_table_one['codeAppscheme'];
 			$vars        = MongoCompat::convertFilter($vars);
 			$table_value = (int)$vars[$this->app_field_name_id];
@@ -1929,11 +1957,19 @@ declare(strict_types=1);
 			return $first_arr_dist;
 		}
 
-		// Modified: 2026-03-03
-		function remove($vars = []) {
-			if (empty($vars)) return;
+		// Modified: 2026-03-06
+		/**
+		 * Delete documents matching the filter.
+		 *
+		 * @param array<string, mixed> $vars Query filter
+		 * @return int Number of documents deleted
+		 */
+		function remove(array $vars = []): int {
+			if (empty($vars)) return 0;
 			$vars = MongoCompat::convertFilter($vars);
-			$this->plug($this->app_table_one['codeAppscheme_base'], $this->app_table_one['codeAppscheme'])->remove($vars);
+			$col = $this->plug($this->app_table_one['codeAppscheme_base'], $this->app_table_one['codeAppscheme'])->getCollection();
+			$result = $col->deleteMany($vars);
+			return $result->getDeletedCount();
 		}
 
 		/**
