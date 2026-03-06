@@ -1502,13 +1502,13 @@
 			return new MongodbCursorWrapper($rs);
 		}
 
+		// Modified: 2026-03-03
 		function insert($vars = []) {
+			$vars = MongoCompat::convertFilter($vars);
 			if (empty($vars[$this->app_field_name_id])):
 				$vars[$this->app_field_name_id] = (int)$this->getNext($this->app_field_name_id);
 			endif;
 			$this->plug($this->app_table_one['codeAppscheme_base'], $this->app_table_one['codeAppscheme'])->insert($vars);
-
-			$g_vars = ['table' => $this->app_table_one['codeAppscheme'], 'table_value' => (int)$vars[$this->app_field_name_id]];
 
 			$this->consolidate_scheme($vars[$this->app_field_name_id]);
 
@@ -1765,21 +1765,21 @@
 			endwhile;
 		}
 
+		// Modified: 2026-03-03
 		function update_native($vars, $fields = [], $upsert = true) {
 			$table = $this->app_table_one['codeAppscheme'];
 			if (empty($vars[$this->app_field_name_id]) && empty($vars['_id'])) {
-				if (empty($table_value)) {
-					// vardump_async("$table sans value en update");
-					return;
-				}
+				error_log("[ClassApp::update_native] Missing id filter for table: $table");
+				return;
 			}
+			$vars = MongoCompat::convertFilter($vars);
 			$this->plug($this->app_table_one['codeAppscheme_base'], $this->app_table_one['codeAppscheme'])->updateOne($vars, ['$set' => $fields], ['upsert' => $upsert]);
-
-			// $this->consolidate_scheme($table_value);
 		}
 
+		// Modified: 2026-03-03
 		function update($vars, $fields = [], $upsert = true) {
 			$table       = $this->app_table_one['codeAppscheme'];
+			$vars        = MongoCompat::convertFilter($vars);
 			$table_value = (int)$vars[$this->app_field_name_id];
 			// anciennes valeurs
 			if (empty($table_value)) {
@@ -1790,7 +1790,7 @@
 			$arr_one_before = $this->findOne([$this->app_field_name_id => $table_value]);
 			// differences avec anciennes valeurs
 			$arr_inter = array_diff_assoc($fields, (array)$arr_one_before);
-			if (sizeof($arr_inter) == 0) {
+			if (empty($arr_inter)) {
 				// skelMdl::send_cmd('act_notify', ['msg' => 'Mise à jour inutile'], session_id());
 
 				return;
@@ -1916,8 +1916,10 @@
 			return $first_arr_dist;
 		}
 
+		// Modified: 2026-03-03
 		function remove($vars = []) {
-			if (sizeof($vars) == 0) return;
+			if (empty($vars)) return;
+			$vars = MongoCompat::convertFilter($vars);
 			$this->plug($this->app_table_one['codeAppscheme_base'], $this->app_table_one['codeAppscheme'])->remove($vars);
 		}
 
