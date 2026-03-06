@@ -1818,7 +1818,7 @@ declare(strict_types=1);
 		}
 
 		// Modified: 2026-03-03
-		function update(array $vars, array $fields = [], bool $upsert = true): ?array {
+		function update($vars, $fields = [], $upsert = true) {
 			$table       = $this->app_table_one['codeAppscheme'];
 			$vars        = MongoCompat::convertFilter($vars);
 			$table_value = (int)$vars[$this->app_field_name_id];
@@ -1826,7 +1826,7 @@ declare(strict_types=1);
 			if (empty($table_value)) {
 				//vardump_async("$table sans value en update");
 
-				return;
+				return null;
 			}
 			$arr_one_before = $this->findOne([$this->app_field_name_id => $table_value]);
 			// differences avec anciennes valeurs
