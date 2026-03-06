@@ -187,4 +187,46 @@ class ClassAppTest extends TestCase
         $this->assertNotNull($doc);
         $this->assertSame(2, $doc['idproduit']);
     }
+
+    public function testInsertCreatesDocument(): void
+    {
+        $app = $this->makeApp();
+        $id = $app->insert(['nomProduit' => 'Widget Delta', 'prixProduit' => 5.55, 'estTopProduit' => 0, 'actif' => 1]);
+        $this->assertIsInt($id);
+        $doc = $app->findOne(['idproduit' => $id]);
+        $this->assertNotNull($doc);
+        $this->assertSame('Widget Delta', $doc['nomProduit']);
+    }
+
+    public function testCreateUpdateUpsertsAndUpdates(): void
+    {
+        $app = $this->makeApp();
+        $id = (int)$app->create_update(['nomProduit' => 'Widget Epsilon'], ['prixProduit' => 7.77, 'actif' => 1]);
+        $this->assertIsInt($id);
+        $doc = $app->findOne(['idproduit' => $id]);
+        $this->assertNotNull($doc);
+        $this->assertSame('Widget Epsilon', $doc['nomProduit']);
+
+        // Update same
+        $app->create_update(['idproduit' => $id], ['prixProduit' => 9.99]);
+        $doc2 = $app->findOne(['idproduit' => $id]);
+        $this->assertSame(9.99, $doc2['prixProduit']);
+    }
+
+    public function testUpdateModifiesDocument(): void
+    {
+        $app = $this->makeApp();
+        $id = (int)$app->insert(['nomProduit' => 'Widget Zeta', 'prixProduit' => 1.23, 'actif'=>1]);
+        $app->update(['idproduit' => $id], ['prixProduit' => 2.34]);
+        $doc = $app->findOne(['idproduit' => $id]);
+        $this->assertSame(2.34, $doc['prixProduit']);
+    }
+
+    public function testRemoveDeletesDocument(): void
+    {
+        $app = $this->makeApp();
+        $id = (int)$app->insert(['nomProduit' => 'Widget Theta', 'prixProduit' => 3.21, 'actif'=>1]);
+        $app->remove(['idproduit' => $id]);
+        $this->assertNull($app->findOne(['idproduit' => $id]));
+    }
 }
