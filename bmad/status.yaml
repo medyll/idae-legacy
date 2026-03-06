@@ -39,10 +39,10 @@ phases:
   - id: 3
     name: "ClassApp CRUD + Testing"
     status: in_progress
-    progress: 16
+    progress: 32
     artifacts:
       - "S3-01 — Refactor ClassApp::query() ✅ (2026-03-06)"
-      - "S3-02 — Refactor ClassApp::findOne() (pending)"
+      - "S3-02 — Refactor ClassApp CRUD write methods (in_progress)"
       - "S3-03 — Refactor ClassApp::create_update() (pending)"
       - "S3-04 — Refactor ClassApp CRUD helpers: insert/update/remove (pending)"
       - "S3-05 — Unit tests per method (pending)"
