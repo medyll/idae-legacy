@@ -1635,7 +1635,7 @@ declare(strict_types=1);
 						}
 
 					endif;
-					if (droit('DEV') && !empty($arr_new)) {
+					if (function_exists('droit') && droit('DEV') && !empty($arr_new)) {
 						// skelMdl::send_cmd('act_notify',['msg'=>json_encode($arr_new)],session_id());
 					}
 
