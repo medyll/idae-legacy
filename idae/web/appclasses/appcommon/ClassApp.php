@@ -1840,7 +1840,10 @@ declare(strict_types=1);
 			$fields = $arr_inter;
 			// UPDATE !!!
 			//vardump_async($fields,true);
-			$this->plug($this->app_table_one['codeAppscheme_base'], $this->app_table_one['codeAppscheme'])->updateOne($vars, ['$set' => $fields], ['upsert' => $upsert]);
+			$fields = MongoCompat::convertFilter($fields);
+			if (isset($fields['_id'])) unset($fields['_id']);
+			$col = $this->plug($this->app_table_one['codeAppscheme_base'], $this->app_table_one['codeAppscheme'])->getCollection();
+			$col->updateOne([$this->app_field_name_id => $table_value], ['$set' => $fields], ['upsert' => $upsert]);
 			$this->consolidate_scheme($table_value);
 			//
 			$arr_one_after = $this->findOne([$this->app_field_name_id => $table_value]);
