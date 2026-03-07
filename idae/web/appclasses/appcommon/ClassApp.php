@@ -420,7 +420,7 @@ declare(strict_types=1);
 		 * @return Collection MongoDB\Collection instance
 		 */
 		function plug($base, $table) {
-			if (empty($table) || empty($base) || !defined('MDB_USER')) {
+			if (empty($table) || empty($base)) {
 				return 'choisir une base';
 			}
 			
@@ -443,7 +443,7 @@ declare(strict_types=1);
 		 * @return Database MongoDB\Database instance
 		 */
 		function plug_base($base) {
-			if (empty($base) || !defined('MDB_USER')) {
+			if (empty($base)) {
 				return 'choisir une base';
 			}
 			
