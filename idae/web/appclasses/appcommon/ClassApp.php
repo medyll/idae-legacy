@@ -447,7 +447,7 @@ declare(strict_types=1);
 				return 'choisir une base';
 			}
 			
-			$base_prefixed = MDB_PREFIX . $base;
+			$base_prefixed = (defined('MDB_PREFIX') ? MDB_PREFIX : '') . $base;
 			return new LegacyMongoDB($this->mongoClient, $base_prefixed);
 		}
 
