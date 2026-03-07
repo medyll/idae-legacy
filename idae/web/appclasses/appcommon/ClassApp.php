@@ -1858,7 +1858,9 @@ declare(strict_types=1);
 				$update_diff_cast[$k] = App::cast_field_all($exp, true); // new_vars deviendra vars
 			endforeach;
 
-			skelMdl::send_cmd('act_upd_data', ['table' => $table, 'table_value' => $table_value, 'new_vars' => $update_diff_cast]);
+			if (class_exists('skelMdl')) {
+				skelMdl::send_cmd('act_upd_data', ['table' => $table, 'table_value' => $table_value, 'new_vars' => $update_diff_cast]);
+			}
 
 			// log
 			$R_FK = $this->get_reverse_grille_fk($this->app_table_one['codeAppscheme'], (int)$vars[$this->app_field_name_id]);
