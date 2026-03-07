@@ -42,12 +42,12 @@ phases:
     progress: 32
     artifacts:
       - "S3-01 — Refactor ClassApp::query() ✅ (2026-03-06)"
-      - "S3-02 — Refactor ClassApp CRUD write methods (in_progress)"
+      - "S3-02 — Refactor ClassApp CRUD write methods ✅ (2026-03-07)"
       - "S3-03 — Refactor ClassApp::create_update() (pending)"
       - "S3-04 — Refactor ClassApp CRUD helpers: insert/update/remove (pending)"
       - "S3-05 — Unit tests per method (pending)"
       - "S3-06 — json_data.php regression test (pending)"
-    notes: "S3-01 complete: query() and findOne() now have strict_types=1, full type hints, comprehensive PHPDoc, and MongoCompat validation. Ready for integration tests in Docker. Progress: 1/6 stories done (16%)."
+    notes: "S3-01 & S3-02 complete: query(), findOne(), and write-paths modernized (strict types, type hints, PHPDoc). Unit CRUD tests added; ready for integration tests in Docker. Progress: 2/6 stories done (32%)."
     ref: "idae/web/PHASE2_STRATEGY.md"
 
   - id: 4
