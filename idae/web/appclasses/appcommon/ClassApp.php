@@ -26,6 +26,7 @@ declare(strict_types=1);
 	
 	// MongodbCursorWrapper for ADODB-style getNext() compatibility
 	require_once __DIR__ . '/MongodbCursorWrapper.php';
+require_once __DIR__ . '/ClassAppFk.php';
 	use AppCommon\MongodbCursorWrapper;
 
 	global $app_conn_nb;
@@ -462,54 +463,7 @@ declare(strict_types=1);
 		 * @return array $out
 		 */
 		function get_grille_rfk($table = null, $table_value = '', $add = []) {
-			if (empty($table) || empty($this->table)) return [];
-			$table = empty($table) ? $this->table : $table;
-			$id    = 'id' . $table;
-			$vars  = $out = [];
-			if (!empty($table_value)):
-				$vars[$id] = (int)$table_value;
-			endif;
-			if (empty($add)) {
-				$rs = $this->app_conn->find(['grilleFK.table' => $table]);
-			} else {
-				$rs = $this->app_conn->find($add + ['grilleFK.table' => $table]);
-			}
-			$arr_ty = $this->appscheme->distinct('idappscheme_type', ['grilleFK.table' => $table]);
-			$rs_ty  = $this->appscheme_type->find(['idappscheme_type' => ['$in' => $arr_ty]])->sort(['nomAppscheme_type' => 1]);
-
-			$arr_final = [];
-			while ($arr_ty = $rs_ty->getNext()) {
-				$arr_tmp = $arr_out = [];
-				//
-				$vars_type = ['idappscheme_type' => (int)$arr_ty['idappscheme_type']];
-
-				if (empty($add)) {
-					$rs_det = $this->appscheme->find($vars_type + ['grilleFK.table' => $table]);
-				} else {
-					$rs_det = $this->appscheme->find($vars_type + $add + ['grilleFK.table' => $table]);
-				}
-				while ($arr_det = $rs_det->getNext()) {
-					if (empty($table_value)) {
-						if (str_find('_ligne', $arr_det['codeAppscheme_base'])) continue;
-						$rs_fk = $this->plug($arr_det['codeAppscheme_base'], $arr_det['codeAppscheme'])->find();
-					} else {
-						$rs_fk = $this->plug($arr_det['codeAppscheme_base'], $arr_det['codeAppscheme'])->find([$id => (int)$table_value]);
-					}
-					if ($rs_fk->count() == 0) continue;
-					$arr_det['count']                                = $rs_fk->count();
-					$arr_det['table']                                = $arr_det['codeAppscheme'];
-					$arr_tmp['appscheme'][$arr_det['codeAppscheme']] = $arr_det;
-				}
-
-				if (!empty($arr_tmp['appscheme'])) {
-					$arr_out     = array_merge($arr_ty, $arr_tmp);
-					$arr_final[] = $arr_out;
-				}
-
-			}
-
-			return $arr_final;
-
+			return \AppCommon\ClassAppFk::get_grille_rfk($this, $table, $table_value, $add);
 		}
 
 		function get_table_rfk($table_value = '', $add = []) {
