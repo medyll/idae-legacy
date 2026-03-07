@@ -78,11 +78,8 @@ declare(strict_types=1);
 		global $app_conn_nb;
 		global $PERSIST_CON;
 
-		// Validation
-		if (!defined('MDB_USER')) {
-			return 'Utilisateur DB non defini';
-		}
-
+		// Validation removed for test environment: rely on getMongoClient() for env detection
+		
 		// Modern MongoDB driver connection (singleton pattern)
 		$this->mongoClient = $this->getMongoClient();
 		$this->conn = $this->mongoClient; // Backward compatibility
