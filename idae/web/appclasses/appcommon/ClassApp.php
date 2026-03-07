@@ -85,8 +85,9 @@ declare(strict_types=1);
 		$this->conn = $this->mongoClient; // Backward compatibility
 
 		// Database selection
-		$sitebase_app = MDB_PREFIX . 'sitebase_app';
-		$sitebase_sockets = MDB_PREFIX . 'sitebase_sockets';
+		$prefix = defined('MDB_PREFIX') ? MDB_PREFIX : '';
+		$sitebase_app = $prefix . 'sitebase_app';
+		$sitebase_sockets = $prefix . 'sitebase_sockets';
 
 		$this->database = new LegacyMongoDB($this->mongoClient, $sitebase_app);
 		$database_sockets = new LegacyMongoDB($this->mongoClient, $sitebase_sockets);
