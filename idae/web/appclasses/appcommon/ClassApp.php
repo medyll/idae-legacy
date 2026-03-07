@@ -1851,9 +1851,17 @@ require_once __DIR__ . '/ClassAppFk.php';
 			$value = $vars['field_value'];
 
 			if (empty($vars['codeAppscheme_field_type'])) {
-				$arr_tmp                          = $this->appscheme_has_field->findOne(['codeAppscheme_has_field' => $field_name]);
-				$arr_tmp                          = $this->appscheme_field->findOne(['codeAppscheme_field' => $arr_tmp['codeAppscheme_field']]);
-				$vars['codeAppscheme_field_type'] = $arr_tmp['codeAppscheme_field_type'];
+				$arr_tmp1 = $this->appscheme_has_field->findOne(['codeAppscheme_has_field' => $field_name]);
+				if (!empty($arr_tmp1) && !empty($arr_tmp1['codeAppscheme_field'])) {
+					$arr_tmp = $this->appscheme_field->findOne(['codeAppscheme_field' => $arr_tmp1['codeAppscheme_field']]);
+					if (!empty($arr_tmp) && !empty($arr_tmp['codeAppscheme_field_type'])) {
+						$vars['codeAppscheme_field_type'] = $arr_tmp['codeAppscheme_field_type'];
+					} else {
+						$vars['codeAppscheme_field_type'] = 'valeur';
+					}
+				} else {
+					$vars['codeAppscheme_field_type'] = 'valeur';
+				}
 			}
 
 			switch ($vars['codeAppscheme_field_type']):
