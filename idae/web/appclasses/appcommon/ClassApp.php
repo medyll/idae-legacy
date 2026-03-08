@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 declare(strict_types=1);
 
 	/**
@@ -941,7 +941,7 @@ require_once __DIR__ . '/ClassAppFk.php';
 			try {
     $this->plug($this->app_table_one['codeAppscheme_base'], $this->app_table_one['codeAppscheme'])->updateOne($vars, ['$set' => $fields], ['upsert' => $upsert]);
 } catch (\Throwable $e) {
-    error_log('[ClassApp::update_native] updateOne failed: ' + $e->getMessage());
+    error_log('[ClassApp::update_native] updateOne failed: ' . $e->getMessage());
     return false;
 }
 
@@ -1450,7 +1450,7 @@ require_once __DIR__ . '/ClassAppFk.php';
 			try {
     $col->updateOne($vars, ['$set' => $fields], ['upsert' => true]);
 } catch (\Throwable $e) {
-    error_log('[ClassApp::create_update] updateOne failed: ' + $e->getMessage());
+    error_log('[ClassApp::create_update] updateOne failed: ' . $e->getMessage());
     return false;
 }
 
@@ -1514,7 +1514,7 @@ require_once __DIR__ . '/ClassAppFk.php';
 			try {
     $col->insertOne($vars);
 } catch (\Throwable $e) {
-    error_log('[ClassApp::insert] insertOne failed: ' + $e->getMessage());
+    error_log('[ClassApp::insert] insertOne failed: ' . $e->getMessage());
     return false;
 }
 
@@ -1813,7 +1813,7 @@ require_once __DIR__ . '/ClassAppFk.php';
 			try {
     $col->updateOne([$this->app_field_name_id => $table_value], ['$set' => $fields], ['upsert' => $upsert]);
 } catch (\Throwable $e) {
-    error_log('[ClassApp::update] updateOne failed: ' + $e->getMessage());
+    error_log('[ClassApp::update] updateOne failed: ' . $e->getMessage());
     return null;
 }
 			$this->consolidate_scheme($table_value);
@@ -1956,7 +1956,7 @@ require_once __DIR__ . '/ClassAppFk.php';
 			try {
     $result = $col->deleteMany($vars);
 } catch (\Throwable $e) {
-    error_log('[ClassApp::remove] deleteMany failed: ' + $e->getMessage());
+    error_log('[ClassApp::remove] deleteMany failed: ' . $e->getMessage());
     return 0;
 }
 			return $result->getDeletedCount();
