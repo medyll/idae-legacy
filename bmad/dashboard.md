@@ -1,6 +1,6 @@
 # BMAD Dashboard — Idae Legacy Code Modernization
 
-> Updated: 2026-03-02 | Team: 3 devs | Sprint: 2 weeks | Horizon: ~10 weeks (5 sprints)
+> Updated: 2026-03-08T16:24:23Z | Team: 3 devs | Sprint: 2 weeks | Horizon: ~10 weeks (5 sprints)
 
 ---
 

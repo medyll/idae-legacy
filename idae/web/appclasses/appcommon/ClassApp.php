@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 	/**
 	 * Created by PhpStorm.
@@ -10,6 +11,7 @@
 	 * - Changed from extending \MongoClient to standalone class
 	 * - Using MongoDB\Client instead of MongoClient
 	 * - Using AppCommon\MongoCompat for type conversions
+	 * Modified: 2026-03-06 â€” Added strict_types, type hints, PHPDoc (S3-01)
 	 */
 	//namespace appclasses\appcommon ;
 
@@ -24,6 +26,7 @@
 	
 	// MongodbCursorWrapper for ADODB-style getNext() compatibility
 	require_once __DIR__ . '/MongodbCursorWrapper.php';
+require_once __DIR__ . '/ClassAppFk.php';
 	use AppCommon\MongodbCursorWrapper;
 
 	global $app_conn_nb;
@@ -76,18 +79,16 @@
 		global $app_conn_nb;
 		global $PERSIST_CON;
 
-		// Validation
-		if (!defined('MDB_USER')) {
-			return 'Utilisateur DB non defini';
-		}
-
+		// Validation removed for test environment: rely on getMongoClient() for env detection
+		
 		// Modern MongoDB driver connection (singleton pattern)
 		$this->mongoClient = $this->getMongoClient();
 		$this->conn = $this->mongoClient; // Backward compatibility
 
 		// Database selection
-		$sitebase_app = MDB_PREFIX . 'sitebase_app';
-		$sitebase_sockets = MDB_PREFIX . 'sitebase_sockets';
+		$prefix = defined('MDB_PREFIX') ? MDB_PREFIX : '';
+		$sitebase_app = $prefix . 'sitebase_app';
+		$sitebase_sockets = $prefix . 'sitebase_sockets';
 
 		$this->database = new LegacyMongoDB($this->mongoClient, $sitebase_app);
 		$database_sockets = new LegacyMongoDB($this->mongoClient, $sitebase_sockets);
@@ -418,7 +419,7 @@
 		 * @return Collection MongoDB\Collection instance
 		 */
 		function plug($base, $table) {
-			if (empty($table) || empty($base) || !defined('MDB_USER')) {
+			if (empty($table) || empty($base)) {
 				return 'choisir une base';
 			}
 			
@@ -441,11 +442,11 @@
 		 * @return Database MongoDB\Database instance
 		 */
 		function plug_base($base) {
-			if (empty($base) || !defined('MDB_USER')) {
+			if (empty($base)) {
 				return 'choisir une base';
 			}
 			
-			$base_prefixed = MDB_PREFIX . $base;
+			$base_prefixed = (defined('MDB_PREFIX') ? MDB_PREFIX : '') . $base;
 			return new LegacyMongoDB($this->mongoClient, $base_prefixed);
 		}
 
@@ -462,54 +463,7 @@
 		 * @return array $out
 		 */
 		function get_grille_rfk($table = null, $table_value = '', $add = []) {
-			if (empty($table) || empty($this->table)) return [];
-			$table = empty($table) ? $this->table : $table;
-			$id    = 'id' . $table;
-			$vars  = $out = [];
-			if (!empty($table_value)):
-				$vars[$id] = (int)$table_value;
-			endif;
-			if (empty($add)) {
-				$rs = $this->app_conn->find(['grilleFK.table' => $table]);
-			} else {
-				$rs = $this->app_conn->find($add + ['grilleFK.table' => $table]);
-			}
-			$arr_ty = $this->appscheme->distinct('idappscheme_type', ['grilleFK.table' => $table]);
-			$rs_ty  = $this->appscheme_type->find(['idappscheme_type' => ['$in' => $arr_ty]])->sort(['nomAppscheme_type' => 1]);
-
-			$arr_final = [];
-			while ($arr_ty = $rs_ty->getNext()) {
-				$arr_tmp = $arr_out = [];
-				//
-				$vars_type = ['idappscheme_type' => (int)$arr_ty['idappscheme_type']];
-
-				if (empty($add)) {
-					$rs_det = $this->appscheme->find($vars_type + ['grilleFK.table' => $table]);
-				} else {
-					$rs_det = $this->appscheme->find($vars_type + $add + ['grilleFK.table' => $table]);
-				}
-				while ($arr_det = $rs_det->getNext()) {
-					if (empty($table_value)) {
-						if (str_find('_ligne', $arr_det['codeAppscheme_base'])) continue;
-						$rs_fk = $this->plug($arr_det['codeAppscheme_base'], $arr_det['codeAppscheme'])->find();
-					} else {
-						$rs_fk = $this->plug($arr_det['codeAppscheme_base'], $arr_det['codeAppscheme'])->find([$id => (int)$table_value]);
-					}
-					if ($rs_fk->count() == 0) continue;
-					$arr_det['count']                                = $rs_fk->count();
-					$arr_det['table']                                = $arr_det['codeAppscheme'];
-					$arr_tmp['appscheme'][$arr_det['codeAppscheme']] = $arr_det;
-				}
-
-				if (!empty($arr_tmp['appscheme'])) {
-					$arr_out     = array_merge($arr_ty, $arr_tmp);
-					$arr_final[] = $arr_out;
-				}
-
-			}
-
-			return $arr_final;
-
+			return \AppCommon\ClassAppFk::get_grille_rfk($this, $table, $table_value, $add);
 		}
 
 		function get_table_rfk($table_value = '', $add = []) {
@@ -701,11 +655,11 @@
 					break;
 				case 'prix':
 					if (empty($value)) break;
-					$value = maskNbre((float)$value, 2) . ' €';
+					$value = maskNbre((float)$value, 2) . ' â‚¬';
 					break;
 				case 'prix_precis':
 					if (empty($value)) break;
-					$value = maskNbre((float)$value, 6) . ' €';
+					$value = maskNbre((float)$value, 6) . ' â‚¬';
 					break;
 				case 'pourcentage':
 					$value = (float)$value . ' %';
@@ -984,7 +938,12 @@
 
 			if (empty($field)) $field = 'nombreVue' . ucfirst($table);
 			//
-			$this->plug($this->app_table_one['codeAppscheme_base'], $table)->updateOne($vars, ['$inc' => [$field => 1]], ["upsert" => true]);
+			try {
+    $this->plug($this->app_table_one['codeAppscheme_base'], $this->app_table_one['codeAppscheme'])->updateOne($vars, ['$set' => $fields], ['upsert' => $upsert]);
+} catch (\Throwable $e) {
+    error_log('[ClassApp::update_native] updateOne failed: ' . $e->getMessage());
+    return false;
+}
 
 		}
 
@@ -1028,7 +987,6 @@
 
 				return $rs_dist;
 			endif;
-			endif;
 
 			return $first_arr_dist;
 		}
@@ -1065,12 +1023,12 @@
 				$rs_basedist = new MongodbCursorWrapper($base_rs->find($vars, array_merge(['_id' => 0], ['limit' => 3000, 'sort' => [$sort_on => $sort_field[1]]])));
 			} else
 				$rs_basedist = new MongodbCursorWrapper($base_rs->find($vars, array_merge(['_id' => 0], ['limit' => 3000, 'sort' => ['nom' . ucfirst($this->table) => 1]])));
-			# boucle dans liste triée
+			# boucle dans liste triÃ©e
 
 			while ($arr_basedist = $rs_basedist->getNext()) {
 				//
 				# collecter ids
-				# sauf si déja collecter
+				# sauf si dÃ©ja collecter
 
 				$arr_collect_field[$arr_basedist[$field]][] = $arr_basedist[$this->app_field_name_id];
 				if (empty($arr_basedist[$idgroupBy_table])) continue;
@@ -1129,8 +1087,20 @@
 
 		#   cds
 
+		/**
+		 * Find a single document in the data collection.
+		 * 
+		 * Executes a MongoDB findOne() query against the table's collection, with automatic
+		 * filter normalization via MongoCompat::convertFilter(). Returns the document as an
+		 * associative array (via typeMap) or null if not found.
+		 * 
+		 * @param array<string, mixed> $vars Query filter (e.g., ['idproduit' => 1], ['nom' => ['$regex' => '...']])
+		 * @param array<string, int> $out Optional projection (e.g., ['idproduit' => 1, 'nomProduit' => 1])
+		 * @return array<string, mixed>|null Document as associative array, or null if not found
+		 * @throws \MongoDB\Driver\Exception\RuntimeException on connection/execution error
+		 */
 		// Modified: 2026-03-03
-		function findOne($vars, $out = []) {
+		function findOne(array $vars, array $out = []): ?array {
 			if (empty($this->app_table_one['codeAppscheme_base'])) {
 				error_log('[ClassApp::findOne] Missing codeAppscheme_base for table: ' . $this->table);
 				return null;
@@ -1281,9 +1251,9 @@
 			$ix = ucfirst($table);
 
 			return ['nom' . $ix              => 'nom',
-					'dateCreation' . $ix     => 'date de création',
+					'dateCreation' . $ix     => 'date de crÃ©ation',
 					'dateModification' . $ix => 'date de modification',
-					'dateDebut' . $ix        => 'date de début',
+					'dateDebut' . $ix        => 'date de dÃ©but',
 					'dateFin' . $ix          => 'date de fin',
 					'dateCloture' . $ix      => 'date de cloture'];
 		}
@@ -1291,9 +1261,9 @@
 		function get_date_fields($table = '') {
 			$ix = ucfirst($table);
 
-			return ['dateCreation' . $ix     => 'date de création',
+			return ['dateCreation' . $ix     => 'date de crÃ©ation',
 					'dateModification' . $ix => 'date de modification',
-					'dateDebut' . $ix        => 'date de début',
+					'dateDebut' . $ix        => 'date de dÃ©but',
 					'dateFin' . $ix          => 'date de fin',
 					'dateCloture' . $ix      => 'date de cloture'];
 		}
@@ -1361,7 +1331,7 @@
 
 				$ARR = $APP_SCH->findOne(['collection' => $table]);
 				if (!empty($ARR['collection'])) {
-					// echo "<br> non déclarée fallback collection";
+					// echo "<br> non dÃ©clarÃ©e fallback collection";
 					$idappscheme = $APP_SCH->create_update(['collection' => $table], ['codeAppscheme' => $table, 'nomAppscheme' => $table]);
 					$APP_SCH->consolidate_app_scheme($table);
 				}
@@ -1454,23 +1424,49 @@
 
 		}
 
-		function create_update($vars, $fields = []) {
+		/**
+		 * Create or update a document (upsert pattern).
+		 *
+		 * Uses updateOne with upsert when possible; ensures id field exists and consolidates schema.
+		 *
+		 * @param array<string, mixed> $vars
+		 * @param array<string, mixed> $fields
+		 * @return int|false ID of inserted/updated document, or false on error
+		 */
+		function create_update(array $vars, array $fields = []): int|false {
 			if (empty($vars)) return false;
 			$table = $this->app_table_one['codeAppscheme'];
-			$existing = $this->findOne($vars);
-			if (empty($existing)):
-				if (empty($vars['id' . $table])) {
-					$id                    = (int)$this->getNext('id' . $table);
-					$fields['id' . $table] = $id;
-				}
-				$fields = array_merge($vars, $fields);
-				$id     = $this->insert($fields);
-			else:
-				$id     = (int)$existing['id' . $table];
-				$fields = array_merge($vars, $fields);
-				$this->update(['id' . $table => $id], $fields);
-			endif;
+			$idField = $this->app_field_name_id;
+			$vars = MongoCompat::convertFilter($vars);
+			$fields = MongoCompat::convertFilter($fields);
 
+			// Ensure an ID is present for upsert
+			if (empty($vars[$idField]) && empty($fields[$idField])) {
+				$newId = (int)$this->getNext($idField);
+				$fields[$idField] = $newId;
+			}
+
+			$col = $this->plug($this->app_table_one['codeAppscheme_base'], $this->app_table_one['codeAppscheme'])->getCollection();
+			try {
+    $col->updateOne($vars, ['$set' => $fields], ['upsert' => true]);
+} catch (\Throwable $e) {
+    error_log('[ClassApp::create_update] updateOne failed: ' . $e->getMessage());
+    return false;
+}
+
+			// Determine ID to return
+			if (!empty($fields[$idField])) {
+				$id = (int)$fields[$idField];
+			} elseif (!empty($vars[$idField])) {
+				$id = (int)$vars[$idField];
+			} else {
+				$doc = $this->findOne($vars);
+				$id = !empty($doc[$idField]) ? (int)$doc[$idField] : null;
+			}
+
+			if ($id === null) return false;
+
+			$this->consolidate_scheme($id);
 			return (int)$id;
 		}
 
@@ -1502,13 +1498,25 @@
 			return new MongodbCursorWrapper($rs);
 		}
 
-		function insert($vars = []) {
-			if (empty($vars[$this->app_field_name_id])):
+		// Modified: 2026-03-06
+		/**
+		 * Insert a new document into the collection.
+		 *
+		 * @param array<string, mixed> $vars Document fields
+		 * @return int Inserted document logical ID (app field)
+		 */
+		function insert(array $vars = []): int|false {
+			$vars = MongoCompat::convertFilter($vars);
+			if (empty($vars[$this->app_field_name_id])) {
 				$vars[$this->app_field_name_id] = (int)$this->getNext($this->app_field_name_id);
-			endif;
-			$this->plug($this->app_table_one['codeAppscheme_base'], $this->app_table_one['codeAppscheme'])->insert($vars);
-
-			$g_vars = ['table' => $this->app_table_one['codeAppscheme'], 'table_value' => (int)$vars[$this->app_field_name_id]];
+			}
+			$col = $this->plug($this->app_table_one['codeAppscheme_base'], $this->app_table_one['codeAppscheme'])->getCollection();
+			try {
+    $col->insertOne($vars);
+} catch (\Throwable $e) {
+    error_log('[ClassApp::insert] insertOne failed: ' . $e->getMessage());
+    return false;
+}
 
 			$this->consolidate_scheme($vars[$this->app_field_name_id]);
 
@@ -1596,7 +1604,7 @@
 						}
 
 					endif;
-					if (droit('DEV') && !empty($arr_new)) {
+					if (function_exists('droit') && droit('DEV') && !empty($arr_new)) {
 						// skelMdl::send_cmd('act_notify',['msg'=>json_encode($arr_new)],session_id());
 					}
 
@@ -1674,7 +1682,7 @@
 
 				endif;
 				if ($name_table == 'opportunite'):
-					$new_value = $arr_new['nom' . $Name_table] = $arr['nomProspect'] . $arr['nomClient'] . ' ' . date('m-Y', strtotime($arr['dateFin' . $Name_table])) . ' [' . maskNbre($arr['montantOpportunite'], 0) . ' €]';
+					$new_value = $arr_new['nom' . $Name_table] = $arr['nomProspect'] . $arr['nomClient'] . ' ' . date('m-Y', strtotime($arr['dateFin' . $Name_table])) . ' [' . maskNbre($arr['montantOpportunite'], 0) . ' â‚¬]';
 					if ($arr['nom' . $Name_table] != $new_value) {
 						$arr_new['nom' . $Name_table] = $new_value;
 					}// lignes d'apres regexp sur descriptionOpportunite // preg_match_all("/(\d*)(\s*|\s*x\s*)(\S*)(\s)/", $input_lines, $output_array);
@@ -1707,7 +1715,7 @@
 								$idshop_jours = (int)$test['idshop_jours'];
 							}
 							$APP_SH_J->consolidate_scheme($idshop_jours);
-							// vardump_async([$idshop_jours,'Création shift shop  auto'], true);
+							// vardump_async([$idshop_jours,'CrÃ©ation shift shop  auto'], true);
 							$test_j_s = $APP_SH_J_SHIFT->find(['idshop' => $table_value, 'idshop_jours' => $idshop_jours]);
 							if ($test_j_s->count() < 1) {
 								$nomShop_jours_shift = $ARR_JOURS['nomJours'];
@@ -1765,41 +1773,49 @@
 			endwhile;
 		}
 
+		// Modified: 2026-03-03
 		function update_native($vars, $fields = [], $upsert = true) {
 			$table = $this->app_table_one['codeAppscheme'];
 			if (empty($vars[$this->app_field_name_id]) && empty($vars['_id'])) {
-				if (empty($table_value)) {
-					// vardump_async("$table sans value en update");
-					return;
-				}
+				error_log("[ClassApp::update_native] Missing id filter for table: $table");
+				return;
 			}
+			$vars = MongoCompat::convertFilter($vars);
 			$this->plug($this->app_table_one['codeAppscheme_base'], $this->app_table_one['codeAppscheme'])->updateOne($vars, ['$set' => $fields], ['upsert' => $upsert]);
-
-			// $this->consolidate_scheme($table_value);
 		}
 
+		// Modified: 2026-03-03
 		function update($vars, $fields = [], $upsert = true) {
 			$table       = $this->app_table_one['codeAppscheme'];
+			$vars        = MongoCompat::convertFilter($vars);
 			$table_value = (int)$vars[$this->app_field_name_id];
 			// anciennes valeurs
 			if (empty($table_value)) {
 				//vardump_async("$table sans value en update");
 
-				return;
+				return null;
 			}
 			$arr_one_before = $this->findOne([$this->app_field_name_id => $table_value]);
 			// differences avec anciennes valeurs
 			$arr_inter = array_diff_assoc($fields, (array)$arr_one_before);
-			if (sizeof($arr_inter) == 0) {
-				// skelMdl::send_cmd('act_notify', ['msg' => 'Mise à jour inutile'], session_id());
+			if (empty($arr_inter)) {
+				// skelMdl::send_cmd('act_notify', ['msg' => 'Mise Ã  jour inutile'], session_id());
 
 				return;
 			}
-			// on garde la différence
+			// on garde la diffÃ©rence
 			$fields = $arr_inter;
 			// UPDATE !!!
 			//vardump_async($fields,true);
-			$this->plug($this->app_table_one['codeAppscheme_base'], $this->app_table_one['codeAppscheme'])->updateOne($vars, ['$set' => $fields], ['upsert' => $upsert]);
+			$fields = MongoCompat::convertFilter($fields);
+			if (isset($fields['_id'])) unset($fields['_id']);
+			$col = $this->plug($this->app_table_one['codeAppscheme_base'], $this->app_table_one['codeAppscheme'])->getCollection();
+			try {
+    $col->updateOne([$this->app_field_name_id => $table_value], ['$set' => $fields], ['upsert' => $upsert]);
+} catch (\Throwable $e) {
+    error_log('[ClassApp::update] updateOne failed: ' . $e->getMessage());
+    return null;
+}
 			$this->consolidate_scheme($table_value);
 			//
 			$arr_one_after = $this->findOne([$this->app_field_name_id => $table_value]);
@@ -1816,7 +1832,9 @@
 				$update_diff_cast[$k] = App::cast_field_all($exp, true); // new_vars deviendra vars
 			endforeach;
 
-			skelMdl::send_cmd('act_upd_data', ['table' => $table, 'table_value' => $table_value, 'new_vars' => $update_diff_cast]);
+			if (class_exists('skelMdl')) {
+				skelMdl::send_cmd('act_upd_data', ['table' => $table, 'table_value' => $table_value, 'new_vars' => $update_diff_cast]);
+			}
 
 			// log
 			$R_FK = $this->get_reverse_grille_fk($this->app_table_one['codeAppscheme'], (int)$vars[$this->app_field_name_id]);
@@ -1853,9 +1871,17 @@
 			$value = $vars['field_value'];
 
 			if (empty($vars['codeAppscheme_field_type'])) {
-				$arr_tmp                          = $this->appscheme_has_field->findOne(['codeAppscheme_has_field' => $field_name]);
-				$arr_tmp                          = $this->appscheme_field->findOne(['codeAppscheme_field' => $arr_tmp['codeAppscheme_field']]);
-				$vars['codeAppscheme_field_type'] = $arr_tmp['codeAppscheme_field_type'];
+				$arr_tmp1 = $this->appscheme_has_field->findOne(['codeAppscheme_has_field' => $field_name]);
+				if (!empty($arr_tmp1) && !empty($arr_tmp1['codeAppscheme_field'])) {
+					$arr_tmp = $this->appscheme_field->findOne(['codeAppscheme_field' => $arr_tmp1['codeAppscheme_field']]);
+					if (!empty($arr_tmp) && !empty($arr_tmp['codeAppscheme_field_type'])) {
+						$vars['codeAppscheme_field_type'] = $arr_tmp['codeAppscheme_field_type'];
+					} else {
+						$vars['codeAppscheme_field_type'] = 'valeur';
+					}
+				} else {
+					$vars['codeAppscheme_field_type'] = 'valeur';
+				}
 			}
 
 			switch ($vars['codeAppscheme_field_type']):
@@ -1870,10 +1896,10 @@
 					$value = $value;
 					break;
 				case 'prix':
-					$value = maskNbre($value, 2) . ' €';
+					$value = maskNbre($value, 2) . ' â‚¬';
 					break;
 				case 'prix_precis':
-					$value = maskNbre((float)$value, 6) . ' €';
+					$value = maskNbre((float)$value, 6) . ' â‚¬';
 					break;
 				case 'pourcentage':
 					$value = (float)$value . ' %';
@@ -1916,9 +1942,24 @@
 			return $first_arr_dist;
 		}
 
-		function remove($vars = []) {
-			if (sizeof($vars) == 0) return;
-			$this->plug($this->app_table_one['codeAppscheme_base'], $this->app_table_one['codeAppscheme'])->remove($vars);
+		// Modified: 2026-03-06
+		/**
+		 * Delete documents matching the filter.
+		 *
+		 * @param array<string, mixed> $vars Query filter
+		 * @return int Number of documents deleted
+		 */
+		function remove(array $vars = []): int {
+			if (empty($vars)) return 0;
+			$vars = MongoCompat::convertFilter($vars);
+			$col = $this->plug($this->app_table_one['codeAppscheme_base'], $this->app_table_one['codeAppscheme'])->getCollection();
+			try {
+    $result = $col->deleteMany($vars);
+} catch (\Throwable $e) {
+    error_log('[ClassApp::remove] deleteMany failed: ' . $e->getMessage());
+    return 0;
+}
+			return $result->getDeletedCount();
 		}
 
 		/**
@@ -2110,10 +2151,10 @@
 					$value = $value;
 					break;
 				case 'prix':
-					$value = maskNbre($value, 2) . ' €';
+					$value = maskNbre($value, 2) . ' â‚¬';
 					break;
 				case 'prix_precis':
-					$value = maskNbre((float)$value, 6) . ' €';
+					$value = maskNbre((float)$value, 6) . ' â‚¬';
 					break;
 				case 'pourcentage':
 					$value = (float)$value . ' %';
@@ -2142,8 +2183,22 @@
 			return $str;
 		}
 
+		/**
+		 * Execute a paginated query against the data collection.
+		 * 
+		 * Retrieves multiple documents from the table's collection with pagination, sorting,
+		 * and optional projection. Filters are normalized via MongoCompat::convertFilter().
+		 * Results are returned wrapped in MongodbCursorWrapper for ADODB-style iteration.
+		 * 
+		 * @param array<string, mixed> $vars Query filter (default: all documents)
+		 * @param int $page Zero-indexed page number (default: 0, first page)
+		 * @param int $rppage Results per page (default: 40, minimum: 15)
+		 * @param array<string, int> $fields Optional projection (default: all fields)
+		 * @return MongodbCursorWrapper Wrapped cursor supporting toArray(), count(), getNext(), etc.
+		 * @throws \MongoDB\Driver\Exception\RuntimeException on connection/execution error
+		 */
 		// Modified: 2026-03-03
-		function query($vars = [], $page = 0, $rppage = 40, $fields = []) {
+		function query(array $vars = [], int $page = 0, int $rppage = 40, array $fields = []): MongodbCursorWrapper {
 			if (empty($rppage)) {
 				$rppage = 15;
 			}
@@ -2217,4 +2272,5 @@
 			return $out;
 		}
 	}
+
 

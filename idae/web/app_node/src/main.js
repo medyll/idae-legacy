@@ -69,8 +69,9 @@ async function bootstrap() {
     // 5. HTTP Routes (Inject IO to trigger socket events from Webhooks)
     app.use('/', createRouter(io));
 
-    // Health check
+    // Health checks
     app.get('/', (req, res) => res.send('Idae Socket Server Running'));
+    app.get('/health', (req, res) => res.json({ status: 'ok', uptime: process.uptime(), env: config.env }));
 
     // 6. Start Cron
     cronService.start();
