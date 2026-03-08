@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 declare(strict_types=1);
 
 	/**
@@ -11,7 +11,7 @@ declare(strict_types=1);
 	 * - Changed from extending \MongoClient to standalone class
 	 * - Using MongoDB\Client instead of MongoClient
 	 * - Using AppCommon\MongoCompat for type conversions
-	 * Modified: 2026-03-06 — Added strict_types, type hints, PHPDoc (S3-01)
+	 * Modified: 2026-03-06 â€” Added strict_types, type hints, PHPDoc (S3-01)
 	 */
 	//namespace appclasses\appcommon ;
 
@@ -655,11 +655,11 @@ require_once __DIR__ . '/ClassAppFk.php';
 					break;
 				case 'prix':
 					if (empty($value)) break;
-					$value = maskNbre((float)$value, 2) . ' €';
+					$value = maskNbre((float)$value, 2) . ' â‚¬';
 					break;
 				case 'prix_precis':
 					if (empty($value)) break;
-					$value = maskNbre((float)$value, 6) . ' €';
+					$value = maskNbre((float)$value, 6) . ' â‚¬';
 					break;
 				case 'pourcentage':
 					$value = (float)$value . ' %';
@@ -938,7 +938,12 @@ require_once __DIR__ . '/ClassAppFk.php';
 
 			if (empty($field)) $field = 'nombreVue' . ucfirst($table);
 			//
-			$this->plug($this->app_table_one['codeAppscheme_base'], $table)->updateOne($vars, ['$inc' => [$field => 1]], ["upsert" => true]);
+			try {
+    $this->plug($this->app_table_one['codeAppscheme_base'], $this->app_table_one['codeAppscheme'])->updateOne($vars, ['$set' => $fields], ['upsert' => $upsert]);
+} catch (\Throwable $e) {
+    error_log('[ClassApp::update_native] updateOne failed: ' + $e->getMessage());
+    return false;
+}
 
 		}
 
@@ -1018,12 +1023,12 @@ require_once __DIR__ . '/ClassAppFk.php';
 				$rs_basedist = new MongodbCursorWrapper($base_rs->find($vars, array_merge(['_id' => 0], ['limit' => 3000, 'sort' => [$sort_on => $sort_field[1]]])));
 			} else
 				$rs_basedist = new MongodbCursorWrapper($base_rs->find($vars, array_merge(['_id' => 0], ['limit' => 3000, 'sort' => ['nom' . ucfirst($this->table) => 1]])));
-			# boucle dans liste triée
+			# boucle dans liste triÃ©e
 
 			while ($arr_basedist = $rs_basedist->getNext()) {
 				//
 				# collecter ids
-				# sauf si déja collecter
+				# sauf si dÃ©ja collecter
 
 				$arr_collect_field[$arr_basedist[$field]][] = $arr_basedist[$this->app_field_name_id];
 				if (empty($arr_basedist[$idgroupBy_table])) continue;
@@ -1246,9 +1251,9 @@ require_once __DIR__ . '/ClassAppFk.php';
 			$ix = ucfirst($table);
 
 			return ['nom' . $ix              => 'nom',
-					'dateCreation' . $ix     => 'date de création',
+					'dateCreation' . $ix     => 'date de crÃ©ation',
 					'dateModification' . $ix => 'date de modification',
-					'dateDebut' . $ix        => 'date de début',
+					'dateDebut' . $ix        => 'date de dÃ©but',
 					'dateFin' . $ix          => 'date de fin',
 					'dateCloture' . $ix      => 'date de cloture'];
 		}
@@ -1256,9 +1261,9 @@ require_once __DIR__ . '/ClassAppFk.php';
 		function get_date_fields($table = '') {
 			$ix = ucfirst($table);
 
-			return ['dateCreation' . $ix     => 'date de création',
+			return ['dateCreation' . $ix     => 'date de crÃ©ation',
 					'dateModification' . $ix => 'date de modification',
-					'dateDebut' . $ix        => 'date de début',
+					'dateDebut' . $ix        => 'date de dÃ©but',
 					'dateFin' . $ix          => 'date de fin',
 					'dateCloture' . $ix      => 'date de cloture'];
 		}
@@ -1326,7 +1331,7 @@ require_once __DIR__ . '/ClassAppFk.php';
 
 				$ARR = $APP_SCH->findOne(['collection' => $table]);
 				if (!empty($ARR['collection'])) {
-					// echo "<br> non déclarée fallback collection";
+					// echo "<br> non dÃ©clarÃ©e fallback collection";
 					$idappscheme = $APP_SCH->create_update(['collection' => $table], ['codeAppscheme' => $table, 'nomAppscheme' => $table]);
 					$APP_SCH->consolidate_app_scheme($table);
 				}
@@ -1442,7 +1447,12 @@ require_once __DIR__ . '/ClassAppFk.php';
 			}
 
 			$col = $this->plug($this->app_table_one['codeAppscheme_base'], $this->app_table_one['codeAppscheme'])->getCollection();
-			$col->updateOne($vars, ['$set' => $fields], ['upsert' => true]);
+			try {
+    $col->updateOne($vars, ['$set' => $fields], ['upsert' => true]);
+} catch (\Throwable $e) {
+    error_log('[ClassApp::create_update] updateOne failed: ' + $e->getMessage());
+    return false;
+}
 
 			// Determine ID to return
 			if (!empty($fields[$idField])) {
@@ -1495,13 +1505,18 @@ require_once __DIR__ . '/ClassAppFk.php';
 		 * @param array<string, mixed> $vars Document fields
 		 * @return int Inserted document logical ID (app field)
 		 */
-		function insert(array $vars = []): int {
+		function insert(array $vars = []): int|false {
 			$vars = MongoCompat::convertFilter($vars);
 			if (empty($vars[$this->app_field_name_id])) {
 				$vars[$this->app_field_name_id] = (int)$this->getNext($this->app_field_name_id);
 			}
 			$col = $this->plug($this->app_table_one['codeAppscheme_base'], $this->app_table_one['codeAppscheme'])->getCollection();
-			$col->insertOne($vars);
+			try {
+    $col->insertOne($vars);
+} catch (\Throwable $e) {
+    error_log('[ClassApp::insert] insertOne failed: ' + $e->getMessage());
+    return false;
+}
 
 			$this->consolidate_scheme($vars[$this->app_field_name_id]);
 
@@ -1667,7 +1682,7 @@ require_once __DIR__ . '/ClassAppFk.php';
 
 				endif;
 				if ($name_table == 'opportunite'):
-					$new_value = $arr_new['nom' . $Name_table] = $arr['nomProspect'] . $arr['nomClient'] . ' ' . date('m-Y', strtotime($arr['dateFin' . $Name_table])) . ' [' . maskNbre($arr['montantOpportunite'], 0) . ' €]';
+					$new_value = $arr_new['nom' . $Name_table] = $arr['nomProspect'] . $arr['nomClient'] . ' ' . date('m-Y', strtotime($arr['dateFin' . $Name_table])) . ' [' . maskNbre($arr['montantOpportunite'], 0) . ' â‚¬]';
 					if ($arr['nom' . $Name_table] != $new_value) {
 						$arr_new['nom' . $Name_table] = $new_value;
 					}// lignes d'apres regexp sur descriptionOpportunite // preg_match_all("/(\d*)(\s*|\s*x\s*)(\S*)(\s)/", $input_lines, $output_array);
@@ -1700,7 +1715,7 @@ require_once __DIR__ . '/ClassAppFk.php';
 								$idshop_jours = (int)$test['idshop_jours'];
 							}
 							$APP_SH_J->consolidate_scheme($idshop_jours);
-							// vardump_async([$idshop_jours,'Création shift shop  auto'], true);
+							// vardump_async([$idshop_jours,'CrÃ©ation shift shop  auto'], true);
 							$test_j_s = $APP_SH_J_SHIFT->find(['idshop' => $table_value, 'idshop_jours' => $idshop_jours]);
 							if ($test_j_s->count() < 1) {
 								$nomShop_jours_shift = $ARR_JOURS['nomJours'];
@@ -1784,18 +1799,23 @@ require_once __DIR__ . '/ClassAppFk.php';
 			// differences avec anciennes valeurs
 			$arr_inter = array_diff_assoc($fields, (array)$arr_one_before);
 			if (empty($arr_inter)) {
-				// skelMdl::send_cmd('act_notify', ['msg' => 'Mise à jour inutile'], session_id());
+				// skelMdl::send_cmd('act_notify', ['msg' => 'Mise Ã  jour inutile'], session_id());
 
 				return;
 			}
-			// on garde la différence
+			// on garde la diffÃ©rence
 			$fields = $arr_inter;
 			// UPDATE !!!
 			//vardump_async($fields,true);
 			$fields = MongoCompat::convertFilter($fields);
 			if (isset($fields['_id'])) unset($fields['_id']);
 			$col = $this->plug($this->app_table_one['codeAppscheme_base'], $this->app_table_one['codeAppscheme'])->getCollection();
-			$col->updateOne([$this->app_field_name_id => $table_value], ['$set' => $fields], ['upsert' => $upsert]);
+			try {
+    $col->updateOne([$this->app_field_name_id => $table_value], ['$set' => $fields], ['upsert' => $upsert]);
+} catch (\Throwable $e) {
+    error_log('[ClassApp::update] updateOne failed: ' + $e->getMessage());
+    return null;
+}
 			$this->consolidate_scheme($table_value);
 			//
 			$arr_one_after = $this->findOne([$this->app_field_name_id => $table_value]);
@@ -1876,10 +1896,10 @@ require_once __DIR__ . '/ClassAppFk.php';
 					$value = $value;
 					break;
 				case 'prix':
-					$value = maskNbre($value, 2) . ' €';
+					$value = maskNbre($value, 2) . ' â‚¬';
 					break;
 				case 'prix_precis':
-					$value = maskNbre((float)$value, 6) . ' €';
+					$value = maskNbre((float)$value, 6) . ' â‚¬';
 					break;
 				case 'pourcentage':
 					$value = (float)$value . ' %';
@@ -1933,7 +1953,12 @@ require_once __DIR__ . '/ClassAppFk.php';
 			if (empty($vars)) return 0;
 			$vars = MongoCompat::convertFilter($vars);
 			$col = $this->plug($this->app_table_one['codeAppscheme_base'], $this->app_table_one['codeAppscheme'])->getCollection();
-			$result = $col->deleteMany($vars);
+			try {
+    $result = $col->deleteMany($vars);
+} catch (\Throwable $e) {
+    error_log('[ClassApp::remove] deleteMany failed: ' + $e->getMessage());
+    return 0;
+}
 			return $result->getDeletedCount();
 		}
 
@@ -2126,10 +2151,10 @@ require_once __DIR__ . '/ClassAppFk.php';
 					$value = $value;
 					break;
 				case 'prix':
-					$value = maskNbre($value, 2) . ' €';
+					$value = maskNbre($value, 2) . ' â‚¬';
 					break;
 				case 'prix_precis':
-					$value = maskNbre((float)$value, 6) . ' €';
+					$value = maskNbre((float)$value, 6) . ' â‚¬';
 					break;
 				case 'pourcentage':
 					$value = (float)$value . ' %';
@@ -2247,4 +2272,5 @@ require_once __DIR__ . '/ClassAppFk.php';
 			return $out;
 		}
 	}
+
 
