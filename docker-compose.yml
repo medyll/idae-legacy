@@ -45,8 +45,6 @@ services:
       - "3005:3005"
     env_file:
       - ./idae/web/app_node/.env
-    environment:
-      - MONGO_HOST=mongo-test
     volumes:
       - ./idae/web/app_node:/app:cached
     depends_on:
