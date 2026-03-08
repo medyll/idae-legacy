@@ -24,6 +24,7 @@ final class ClassAppCrudUnitTest extends TestCase
             public function updateOne($filter,$update,$options){ return $this->coll->updateOne($filter,$update,$options); }
             public function deleteMany($vars){ return $this->coll->deleteMany($vars); }
             public function insertOne($doc){ return $this->coll->insertOne($doc); }
+            public function find($filter){ return []; }
         };
 
         $app = new class extends App {
@@ -54,6 +55,7 @@ final class ClassAppCrudUnitTest extends TestCase
             public function __construct($c){$this->coll=$c;}
             public function getCollection(){ return $this->coll; }
             public function updateOne($vars,$update,$opts){ return $this->coll->updateOne($vars,$update,$opts); }
+            public function find($filter){ return []; }
         };
         $app = new class extends App {
             public $plugReturn;
@@ -75,7 +77,7 @@ final class ClassAppCrudUnitTest extends TestCase
         $fakeColl = new class {
             public function deleteMany($vars) { return new class { public function getDeletedCount(){ return 2; } }; }
         };
-        $stubDb = new class($fakeColl){ private $coll; public function __construct($c){$this->coll=$c;} public function getCollection(){ return $this->coll;} };
+        $stubDb = new class($fakeColl){ private $coll; public function __construct($c){$this->coll=$c;} public function getCollection(){ return $this->coll;} public function find($filter){ return []; } };
         $app = new class extends App { public $plugReturn; public $app_table_one = ['codeAppscheme'=>'unit_table','codeAppscheme_base'=>'sitebase_app']; public $app_field_name_id='idunit_table'; public function __construct(){} public function plug($base,$table){ return $this->plugReturn;} };
         $app->plugReturn = $stubDb;
         $app->grilleFK = [];
