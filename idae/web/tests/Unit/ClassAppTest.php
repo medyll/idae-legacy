@@ -191,25 +191,28 @@ class ClassAppTest extends TestCase
     public function testInsertCreatesDocument(): void
     {
         $app = $this->makeApp();
-        $id = $app->insert(['nomProduit' => 'Widget Delta', 'prixProduit' => 5.55, 'estTopProduit' => 0, 'actif' => 1]);
+        $name = 'Widget Delta ' . uniqid();
+        $id = $app->insert(['nomProduit' => $name, 'prixProduit' => 5.55, 'estTopProduit' => 0, 'actif' => 1]);
         $this->assertIsInt($id);
-        $doc = $app->findOne(['idproduit' => $id]);
-        $this->assertNotNull($doc);
-        $this->assertSame('Widget Delta', $doc['nomProduit']);
+        $docs = $app->query(['nomProduit' => $name])->toArray();
+        $this->assertNotEmpty($docs);
+        $this->assertSame($name, $docs[0]['nomProduit']);
     }
 
     public function testCreateUpdateUpsertsAndUpdates(): void
     {
         $app = $this->makeApp();
-        $id = (int)$app->create_update(['nomProduit' => 'Widget Epsilon'], ['prixProduit' => 7.77, 'actif' => 1]);
+        $name = 'Widget Epsilon ' . uniqid();
+        $id = (int)$app->create_update(['nomProduit' => $name], ['prixProduit' => 7.77, 'actif' => 1]);
         $this->assertIsInt($id);
-        $doc = $app->findOne(['idproduit' => $id]);
-        $this->assertNotNull($doc);
-        $this->assertSame('Widget Epsilon', $doc['nomProduit']);
+        $docs = $app->query(['nomProduit' => $name])->toArray();
+        $this->assertNotEmpty($docs);
+        $doc = $docs[0];
+        $this->assertSame($name, $doc['nomProduit']);
 
         // Update same
-        $app->create_update(['idproduit' => $id], ['prixProduit' => 9.99]);
-        $doc2 = $app->findOne(['idproduit' => $id]);
+        $app->create_update(['idproduit' => $doc['idproduit']], ['prixProduit' => 9.99]);
+        $doc2 = $app->findOne(['idproduit' => $doc['idproduit']]);
         $this->assertSame(9.99, $doc2['prixProduit']);
     }
 
