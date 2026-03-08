@@ -137,4 +137,5 @@ class JsonDataRegressionTest extends TestCase
         $this->assertSame('Created via Test', $json['row']['nomProduit']);
     }
 }
+}
 
