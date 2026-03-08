@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Idae\Tests\Integration;
+namespace Idae\Tests\Integration {
 
 use Idae\Tests\TestCase;
 
@@ -137,3 +137,4 @@ class JsonDataRegressionTest extends TestCase
         $this->assertSame('Created via Test', $json['row']['nomProduit']);
     }
 }
+
