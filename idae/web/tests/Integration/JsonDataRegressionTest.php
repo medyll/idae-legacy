@@ -48,8 +48,8 @@ class JsonDataRegressionTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        // Ensure conf.inc.php is found when including services directly from tests
-        $_SERVER['CONF_INC'] = realpath(__DIR__ . '/../../conf.inc.php');
+        // Use lightweight test configuration to avoid full app bootstrap
+        $_SERVER['CONF_INC'] = realpath(__DIR__ . '/conf_test.php');
         $_SERVER['HTTP_HOST'] = 'localhost';
         // Ensure request method present
         if (!isset($_SERVER['REQUEST_METHOD'])) {
