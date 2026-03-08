@@ -8,6 +8,7 @@ services:
       - ./logs:/var/log/apache2
     depends_on:
       - mongo-test
+      - socket
     environment:
       - APACHE_RUN_USER=www-data
       - APACHE_RUN_GROUP=www-data
@@ -26,12 +27,34 @@ services:
       - DEBUG_SESSION=1
       - SOCKET_PORT=3005
     container_name: idae-legacy
+    command: sh -c "sh /var/www/html/idae/web/wait-for-socket.sh && apache2-foreground"
     healthcheck:
       test: ["CMD", "curl", "-f", "-m", "3", "http://localhost/idae/web/check_mongo.php"]
       interval: 30s
       timeout: 5s
       retries: 3
       start_period: 40s
+    restart: unless-stopped
+
+  socket:
+    image: node:18-slim
+    container_name: idae-socket
+    working_dir: /app
+    command: sh -c "npm install --no-audit --no-fund && npm run start"
+    ports:
+      - "3005:3005"
+    env_file:
+      - ./idae/web/app_node/.env
+    volumes:
+      - ./idae/web/app_node:/app:cached
+    depends_on:
+      - mongo-test
+    healthcheck:
+      test: ["CMD-SHELL", "node -e \"const http=require('http');http.get('http://127.0.0.1:3005/health',res=>process.exit(res.statusCode===200?0:1)).on('error',()=>process.exit(1));\""]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
     restart: unless-stopped
 
   # Isolated MongoDB instance for PHPUnit tests.
