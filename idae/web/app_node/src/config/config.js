@@ -18,6 +18,11 @@ export const config = {
         pass: process.env.MONGO_PASS || 'gwetme2011',
         dbName: process.env.MONGO_DB || 'sitebase_sockets',
         url() {
+            // If running against the local test mongo (no auth) or when credentials are not provided,
+            // use an unauthenticated connection string to avoid authentication errors.
+            if (!this.user || this.user === '' || this.host === 'mongo-test') {
+                return `mongodb://${this.host}:27017/${this.dbName}`;
+            }
             return `mongodb://${this.user}:${this.pass}@${this.host}:27017/${this.dbName}?authSource=admin`;
         }
     },
