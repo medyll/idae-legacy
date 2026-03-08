@@ -24,6 +24,37 @@ class JsonDataRegressionTest extends TestCase
         if (!isset($_SERVER['REQUEST_METHOD'])) {
             $_SERVER['REQUEST_METHOD'] = 'POST';
         }
+
+        // Provide lightweight stubs for classes/functions normally provided by the full app
+        if (!class_exists('\App')) {
+            class App {
+                public $app_table_one = ['codeAppscheme' => 'produit', 'codeAppscheme_base' => 'sitebase_pref', 'nomAppscheme' => 'Produit'];
+                private string $table = '';
+                public function __construct(string $table = '') { $this->table = $table; }
+                public function get_schemes() { return []; }
+                public function get_array_field_bool() { return []; }
+                public function get_sort_fields($t = '') { return []; }
+                public function get_date_fields($t = '') { return []; }
+                public function get_bool_fields($t = '') { return []; }
+                public function get_grille_fk() { return []; }
+                public function translate_vars($vars) { return $vars; }
+                public function query($vars = [], $page = 0, $nbRows = 1000) {
+                    $cursor = \Idae\Tests\TestCase::$db->selectCollection($this->table)->find($vars);
+                    return new \AppCommon\MongodbCursorWrapper($cursor);
+                }
+                public function plug($base, $table) { return \Idae\Tests\TestCase::$db->selectCollection($table); }
+                public function findOne($filter, $projection = []) { return \Idae\Tests\TestCase::$db->selectCollection($this->table)->findOne($filter, $projection); }
+                public function distinct($field, $filter, $limit = 0) { return new \AppCommon\MongodbCursorWrapper(\Idae\Tests\TestCase::$db->selectCollection($this->table)->distinct($field, $filter)); }
+            }
+        }
+
+        if (!class_exists('fonctionsProduction')) {
+            class fonctionsProduction { public static function cleanPostMongo($vars, $a = 1) { return $vars; } }
+        }
+
+        if (!class_exists('Act')) {
+            class Act { public static function decodeVars($arr) { return $arr; } public static function imageSite($table, $id, $size, ...$rest) { return ''; } }
+        }
     }
 
     protected function tearDown(): void
