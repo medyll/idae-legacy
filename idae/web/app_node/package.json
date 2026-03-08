@@ -12,19 +12,20 @@
     "watch:css": "sass --watch ../appcss/scss/main.scss ../appcss/dist/main.css --style=expanded"
   },
   "dependencies": {
-    "axios": "^1.6.0",
-    "commander": "^11.0.0",
-    "cookie": "^0.6.0",
-    "cron": "^3.1.0",
-    "dotenv": "^16.3.1",
-    "mongodb": "^6.3.0",
-    "qs": "^6.11.0",
-    "socket.io": "^4.7.0",
-    "winston": "^3.11.0"
+    "axios": "^1.13.6",
+    "commander": "^14.0.3",
+    "cookie": "^1.1.1",
+    "cron": "^4.4.0",
+    "dotenv": "^17.3.1",
+    "mongodb": "^7.1.0",
+    "qs": "^6.15.0",
+    "express": "^4.18.2",
+    "socket.io": "^4.8.3",
+    "winston": "^3.19.0"
   },
   "devDependencies": {
-    "nodemon": "^3.0.0",
-    "sass": "^1.77.0"
+    "nodemon": "^3.1.14",
+    "sass": "^1.97.3"
   },
   "engines": {
     "node": ">=18.0.0"

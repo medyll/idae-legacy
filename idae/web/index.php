@@ -6,8 +6,13 @@
 		if($fileInfo->isDot()) continue;
 		echo $fileInfo->getFilename() . "<br>\n";
 	}*/
- 
-	include_once($_SERVER['CONF_INC']);
+
+	try {
+		include_once($_SERVER['CONF_INC']);
+	} catch (Exception $e) {
+		http_response_code(503);
+		die('<h1>Service Unavailable</h1><p>' . htmlspecialchars($e->getMessage()) . '</p><p>Check MongoDB connection and server logs.</p>');
+	}
 	// die("Configuration loaded. CONF_INC included. You can now start the application.");
 
 	// Redirect loop protection

@@ -1,0 +1,28 @@
+{
+  "sync": "2026-03-08",
+  "generatedAt": "2026-03-08T16:24:23Z",
+  "totalInstances": 1,
+  "instances": [
+    {
+      "package": "idae-legacy",
+      "phase": "ClassApp CRUD + Testing",
+      "progress": 100,
+      "bugs": [
+        "[object Object]",
+        "[object Object]"
+      ],
+      "dashboardPath": "bmad\\artifacts\\dashboard.md"
+    }
+  ],
+  "criticalIssues": [
+    {
+      "package": "idae-legacy",
+      "bug": "[object Object]"
+    },
+    {
+      "package": "idae-legacy",
+      "bug": "[object Object]"
+    }
+  ],
+  "generatedMarkdown": "# 👑 BMAD Master Dashboard\n> **Scope:** Monorepo Root | **Total Instances:** 1 | **Sync:** 2026-03-07\n\n---\n\n## 🏗️ Project Overview\n\n| Package | Phase | Progress | Status | Action |\n| :--- | :--- | :---: | :---: | :--- |\n| **idae-legacy** | ClassApp CRUD + Testing | 100% | 🟢 | [Open Dash](bmad/artifacts/dashboard.md) |\n\n---\n\n## ⚠️ Critical Issues (QA/Bugs)\n- [ ] **idae-legacy**: [object Object]\n- [ ] **idae-legacy**: [object Object]\n\n---\n\n## 🛠️ Global Actions\n- [🔄 Full Rescan](command:bmad.run?%5B%22dashboard%22%5D)\n- [➕ New Package](command:bmad.run?%5B%22init%22%5D)\n"
+}

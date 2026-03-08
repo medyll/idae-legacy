@@ -11,6 +11,7 @@
 namespace AppCommon;
 
 class MongodbCursorWrapper implements \Iterator, \Countable {
+    // Temporary attribute markers for deprecated return types suppressed on methods below
     private $cursor;
     private $cursorIterator = null;
     private $currentDoc = null;
@@ -123,6 +124,7 @@ class MongodbCursorWrapper implements \Iterator, \Countable {
      * WARNING: This may load all documents into memory
      * @return int
      */
+    #[\ReturnTypeWillChange]
     public function count() {
         // Always convert to array before counting to avoid rewind errors
         if (!$this->isArray && $this->cursor !== null) {
@@ -171,6 +173,7 @@ class MongodbCursorWrapper implements \Iterator, \Countable {
     }
     
     // Iterator interface implementation
+    #[\ReturnTypeWillChange]
     public function rewind() {
         $this->position = 0;
         $this->hasStarted = false;
@@ -187,6 +190,7 @@ class MongodbCursorWrapper implements \Iterator, \Countable {
         }
     }
     
+    #[\ReturnTypeWillChange]
     public function current() {
         if ($this->isArray) {
             return isset($this->documents[$this->position]) ? $this->documents[$this->position] : null;
@@ -199,10 +203,12 @@ class MongodbCursorWrapper implements \Iterator, \Countable {
         return null;
     }
     
+    #[\ReturnTypeWillChange]
     public function key() {
         return $this->position;
     }
     
+    #[\ReturnTypeWillChange]
     public function next() {
         ++$this->position;
         if (!$this->isArray && $this->cursorIterator !== null) {
@@ -210,6 +216,7 @@ class MongodbCursorWrapper implements \Iterator, \Countable {
         }
     }
     
+    #[\ReturnTypeWillChange]
     public function valid() {
         if ($this->isArray) {
             return isset($this->documents[$this->position]);

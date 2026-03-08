@@ -29,7 +29,7 @@ if ($mongo_env !== 'test') {
 // ------------------------------------------------------------------
 // 2. Composer autoloader
 // ------------------------------------------------------------------
-$autoload = __DIR__ . '/vendor/autoload.php';
+$autoload = __DIR__ . '/../vendor/autoload.php';
 if (!file_exists($autoload)) {
     fwrite(STDERR,
         "\n[PHPUnit bootstrap] FATAL: vendor/autoload.php not found.\n" .
@@ -42,11 +42,12 @@ require_once $autoload;
 // ------------------------------------------------------------------
 // 3. Path constants (mirrors conf.inc.php minimal set needed by tests)
 // ------------------------------------------------------------------
+$web_root = __DIR__ . '/..';  // tests/ -> idae/web/
 if (!defined('SITEPATH')) {
-    define('SITEPATH', __DIR__ . '/');
+    define('SITEPATH', $web_root . '/');
 }
 if (!defined('APPPATH')) {
-    define('APPPATH', __DIR__ . '/appclasses/');
+    define('APPPATH', $web_root . '/appclasses/');
 }
 if (!defined('MDB_PREFIX')) {
     define('MDB_PREFIX', '');
