@@ -933,19 +933,28 @@ require_once __DIR__ . '/ClassAppFk.php';
 			return $db->getGridFS();
 		}
 
-		function update_inc($vars, $field = '') {
-			$table = $this->app_table_one['codeAppscheme'];
+		/**
+ * Increment a numeric field on documents matching the filter.
+ *
+ * @param array<string,mixed> $vars Filter for documents to update
+ * @param string $field Field to increment (defaults to nombreVue{Table})
+ * @return bool True on success, false on failure
+ */
+function update_inc($vars, $field = '') {
+$table = $this->app_table_one['codeAppscheme'];
 
-			if (empty($field)) $field = 'nombreVue' . ucfirst($table);
-			//
-			try {
-    $this->plug($this->app_table_one['codeAppscheme_base'], $this->app_table_one['codeAppscheme'])->updateOne($vars, ['$set' => $fields], ['upsert' => $upsert]);
+if (empty($field)) $field = 'nombreVue' . ucfirst($table);
+$vars = MongoCompat::convertFilter($vars);
+$col = $this->plug($this->app_table_one['codeAppscheme_base'], $this->app_table_one['codeAppscheme'])->getCollection();
+try {
+$col->updateOne($vars, ['$inc' => [$field => 1]]);
 } catch (\Throwable $e) {
-    error_log('[ClassApp::update_native] updateOne failed: ' . $e->getMessage());
-    return false;
+error_log('[ClassApp::update_inc] updateOne failed: ' . $e->getMessage());
+return false;
 }
 
-		}
+return true;
+}
 
 		function readNext($id) {
 			$arr = $this->plug('sitebase_increment', 'auto_increment')->findOne(['_id' => $id]);
@@ -2272,5 +2281,6 @@ require_once __DIR__ . '/ClassAppFk.php';
 			return $out;
 		}
 	}
+
 
 
