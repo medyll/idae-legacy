@@ -1,10 +1,6 @@
 <?php
 declare(strict_types=1);
 
-namespace Idae\Tests\Integration {
-
-use Idae\Tests\TestCase;
-
 namespace {
     // Lightweight stubs used by tests when including services/json_data.php directly
     if (!class_exists('fonctionsProduction')) {
@@ -37,6 +33,10 @@ namespace {
         }
     }
 }
+
+namespace Idae\Tests\Integration {
+
+use Idae\Tests\TestCase;
 
 /**
  * JsonDataRegressionTest
