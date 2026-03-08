@@ -1,9 +1,7 @@
 <?php
-declare(strict_types=1);
+require_once __DIR__ . '/../../appclasses/appcommon/ClassApp.php';
 
 use PHPUnit\Framework\TestCase;
-
-require_once __DIR__ . '/../../appclasses/appcommon/ClassApp.php';
 
 final class ClassAppCrudUnitTest extends TestCase
 {
@@ -38,6 +36,7 @@ final class ClassAppCrudUnitTest extends TestCase
         };
 
         $app->plugReturn = $stubDb;
+        $app->grilleFK = [];
         $id = $app->insert(['foo'=>'bar']);
         $this->assertEquals(123,$id);
         $this->assertEquals(123,$fakeColl->lastDoc['idunit_table']);
@@ -64,6 +63,7 @@ final class ClassAppCrudUnitTest extends TestCase
             public function getNext($id,$min=1){ return 55; }
         };
         $app->plugReturn = $stubDb;
+        $app->grilleFK = [];
         $res = $app->create_update(['idunit_table'=>55], ['name'=>'x']);
         $this->assertFalse($res);
     }
@@ -76,6 +76,7 @@ final class ClassAppCrudUnitTest extends TestCase
         $stubDb = new class($fakeColl){ private $coll; public function __construct($c){$this->coll=$c;} public function getCollection(){ return $this->coll;} };
         $app = new class extends App { public $plugReturn; public $app_table_one = ['codeAppscheme'=>'unit_table','codeAppscheme_base'=>'sitebase_app']; public $app_field_name_id='idunit_table'; public function __construct(){} public function plug($base,$table){ return $this->plugReturn;} };
         $app->plugReturn = $stubDb;
+        $app->grilleFK = [];
         $count = $app->remove(['idunit_table' => 1]);
         $this->assertEquals(2,$count);
     }
