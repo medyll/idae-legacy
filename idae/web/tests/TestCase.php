@@ -23,7 +23,7 @@ use PHPUnit\Framework\TestCase as PhpUnitTestCase;
 abstract class TestCase extends PhpUnitTestCase
 {
     protected static Client   $mongoClient;
-    protected static Database $db;
+    public static Database $db;
 
     /** Collections wiped between tests — override in subclass to add more. */
     protected array $collectionsToClean = [];
