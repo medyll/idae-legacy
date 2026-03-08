@@ -37,6 +37,7 @@ final class ClassAppCrudUnitTest extends TestCase
 
         $app->plugReturn = $stubDb;
         $app->grilleFK = [];
+        $app->table = 'unit_table';
         $id = $app->insert(['foo'=>'bar']);
         $this->assertEquals(123,$id);
         $this->assertEquals(123,$fakeColl->lastDoc['idunit_table']);
@@ -64,6 +65,7 @@ final class ClassAppCrudUnitTest extends TestCase
         };
         $app->plugReturn = $stubDb;
         $app->grilleFK = [];
+        $app->table = 'unit_table';
         $res = $app->create_update(['idunit_table'=>55], ['name'=>'x']);
         $this->assertFalse($res);
     }
@@ -77,6 +79,7 @@ final class ClassAppCrudUnitTest extends TestCase
         $app = new class extends App { public $plugReturn; public $app_table_one = ['codeAppscheme'=>'unit_table','codeAppscheme_base'=>'sitebase_app']; public $app_field_name_id='idunit_table'; public function __construct(){} public function plug($base,$table){ return $this->plugReturn;} };
         $app->plugReturn = $stubDb;
         $app->grilleFK = [];
+        $app->table = 'unit_table';
         $count = $app->remove(['idunit_table' => 1]);
         $this->assertEquals(2,$count);
     }
