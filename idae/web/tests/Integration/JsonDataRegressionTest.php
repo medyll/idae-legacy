@@ -14,6 +14,25 @@ class JsonDataRegressionTest extends TestCase
 {
     protected array $collectionsToClean = ['produit'];
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+        // Ensure conf.inc.php is found when including services directly from tests
+        $_SERVER['CONF_INC'] = realpath(__DIR__ . '/../../conf.inc.php');
+        $_SERVER['HTTP_HOST'] = 'localhost';
+        // Ensure request method present
+        if (!isset($_SERVER['REQUEST_METHOD'])) {
+            $_SERVER['REQUEST_METHOD'] = 'POST';
+        }
+    }
+
+    protected function tearDown(): void
+    {
+        // Clean up superglobals to avoid bleed between tests
+        $_POST = [];
+        parent::tearDown();
+    }
+
     public function testJsonDataListReturnsExpectedShape(): void
     {
         // Seed a predictable produit document
