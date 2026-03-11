@@ -1,6 +1,6 @@
 project: "Idae Legacy — Code Modernization"
-updated: "2026-03-11T00:00:00Z"
-recommendation: "bmad-master dev story S4-02"
+updated: "2026-03-11T12:00:00Z"
+recommendation: "bmad-master test integration S4-02 --auto"
 
 # HANDOFF NOTE: Sprint 3 COMPLETE (all S3-01..S3-06 done). Sprint 4 in progress.
 # S4-01 done: ClassAppAgg extracted (distinct, distinct_rs, distinct_all) with strict_types, MongoCompat, unit tests.
@@ -55,7 +55,7 @@ phases:
     progress: 20
     artifacts:
       - "S4-01 — Extract ClassAppAgg.php ✅ (2026-03-11)"
-      - "S4-02 — Integration/JsonDataTest.php ⏳"
+      - "S4-02 — Integration/JsonDataTest.php 🟡 IN_PROGRESS (started via bmad-master next --auto 2026-03-11T12:00:00Z)"
       - "S4-03 — Modernize json_scheme.php + json_data_search.php ⏳"
       - "S4-04 — Modernize json_data_table.php + json_data_table_row.php ⏳"
       - "S4-05 — BUG-01 Node.js socket investigation ⏳"

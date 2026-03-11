@@ -1,6 +1,6 @@
 # BMAD Dashboard — Idae Legacy Code Modernization
 
-> Updated: 2026-03-08T16:24:23Z | Team: 3 devs | Sprint: 2 weeks | Horizon: ~10 weeks (5 sprints)
+> Updated: 2026-03-11T12:00:00Z | Team: 3 devs | Sprint: 2 weeks | Horizon: ~10 weeks (5 sprints)
 
 ---
 
@@ -23,7 +23,7 @@
 | S01 | Foundation: Test Infra + SCSS Pipeline | 12 | 2026-03-02 → 03-13 | ✅ **DONE** |
 | S02 | SCSS Complete + ClassApp Connection | 13 | 2026-03-16 → 03-27 | **ACTIVE** |
 | S03 | ClassApp CRUD + ClassAppFk + Unit Tests | 14 | 2026-03-30 → 04-10 | Upcoming |
-| S04 | ClassAppAgg + Integration Tests + Services | 14 | 2026-04-13 → 04-24 | Upcoming |
+| S04 | ClassAppAgg + Integration Tests + Services | 14 | 2026-04-13 → 04-24 | **ACTIVE** |
 | S05 | Modules + Security + Regression | 15 | 2026-04-27 → 05-08 | Upcoming |
 | **Total** | | **68 pts** | **~10 weeks** | |
 
@@ -73,4 +73,4 @@
 
 ## Next Step
 
-**Recommended**: `/dev-story S2-01` — 26 LESS files to convert. **Read `bmad/artifacts/handoff-2026-03-02.md` first** — full file classification and execution order pre-computed.
+**Recommended**: run integration tests for `json_data.php` — `bmad-master test integration S4-02 --auto`. If Docker is not available, start Docker with `docker-compose up` then run `composer test` from `idae/web/`.
