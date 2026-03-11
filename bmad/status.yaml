@@ -1,12 +1,11 @@
 project: "Idae Legacy — Code Modernization"
-updated: "2026-03-08T16:24:23Z"
-recommendation: "/dev-story S3-04"
+updated: "2026-03-11T00:00:00Z"
+recommendation: "bmad-master dev story S4-02"
 
-# HANDOFF NOTE: S3-01 is COMPLETE (16%, 1/6 stories).
-# ClassApp::query() and findOne() refactored with strict_types=1, full type hints, English PhPDoc.
-# All filters pass through MongoCompat::convertFilter(). PhPStan validation passed.
-# S3-02 story created. Ready for write-side CRUD refactor (create_update, insert, update, remove).
-# Next: S3-02 — insert/update/remove refactor (3 points).
+# HANDOFF NOTE: Sprint 3 COMPLETE (all S3-01..S3-06 done). Sprint 4 in progress.
+# S4-01 done: ClassAppAgg extracted (distinct, distinct_rs, distinct_all) with strict_types, MongoCompat, unit tests.
+# Tests not verified (Docker unavailable). Start Docker and run phpunit before merge.
+# Next: S4-02 — Integration/JsonDataTest.php (JSON shape regression tests).
 
 # Context: SCSS & Bootstrap (Phase 2) complete. Phase 3 ClassApp CRUD modernization in progress.
 # Blockers: Node.js socket server (medium severity, not blocking current sprint).
@@ -38,8 +37,8 @@ phases:
 
   - id: 3
     name: "ClassApp CRUD + Testing"
-    status: in_progress
-    progress: 50
+    status: done
+    progress: 100
     artifacts:
       - "S3-01 — Refactor ClassApp::query() ✅ (2026-03-06)"
       - "S3-02 — Refactor ClassApp CRUD write methods ✅ (2026-03-07)"
@@ -47,8 +46,21 @@ phases:
       - "S3-04 — Refactor ClassApp CRUD helpers: insert/update/remove ✅ (2026-03-08)"
       - "S3-05 — Unit tests per method ✅ (2026-03-08)"
       - "S3-06 — json_data.php regression test ✅ (2026-03-08)"
-    notes: "S3-01 & S3-02 complete: query(), findOne(), and write-paths modernized (strict types, type hints, PHPDoc). Unit CRUD tests added; ready for integration tests in Docker. Progress: 2/6 stories done (32%)."
+    notes: "All 6 stories complete. ClassApp fully modernized for read/write paths. Legacy skeleton files (ClassMongoDb, skelMongo, ClassSession_old) updated to MongoClient as interim step. Full MongoDB\\Client migration deferred to Phase 4."
     ref: "idae/web/PHASE2_STRATEGY.md"
+
+  - id: 3.5
+    name: "Sprint 4 — ClassAppAgg + Integration Tests + JSON Services"
+    status: in_progress
+    progress: 20
+    artifacts:
+      - "S4-01 — Extract ClassAppAgg.php ✅ (2026-03-11)"
+      - "S4-02 — Integration/JsonDataTest.php ⏳"
+      - "S4-03 — Modernize json_scheme.php + json_data_search.php ⏳"
+      - "S4-04 — Modernize json_data_table.php + json_data_table_row.php ⏳"
+      - "S4-05 — BUG-01 Node.js socket investigation ⏳"
+    notes: "S4-01 done: ClassAppAgg extracted (distinct/distinct_rs/distinct_all). Tests written; pending Docker run."
+    ref: "bmad/artifacts/sprints/sprint-04.md"
 
   - id: 4
     name: "Modules & Templates"
@@ -96,13 +108,13 @@ sprints:
     theme: "ClassApp CRUD + ClassAppFk + Unit Tests"
     dates: "2026-03-30 → 2026-04-10"
     points: 14
-    status: in_progress
+    status: done
     file: "artifacts/sprints/sprint-03.md"
   - id: 4
     theme: "ClassAppAgg + Integration Tests + JSON Services"
     dates: "2026-04-13 → 2026-04-24"
     points: 14
-    status: upcoming
+    status: in_progress
     file: "artifacts/sprints/sprint-04.md"
   - id: 5
     theme: "Modules, Security, Hardening & Regression"
@@ -113,8 +125,8 @@ sprints:
 
 backlog:
   total_points: 68
-  completed_points: 25
-  progress: "37%"
+  completed_points: 28
+  progress: "41%"
 
 qa:
   test_plan: pending
