@@ -10,7 +10,7 @@
 	 *  description: gestion des sessions par la bdd
 	 *                            -------------------
 	 *   copyright        : F_D_V copyright creative commmon cc by-no :
-	 *                     pas d'utilisation commerciale autorisée, droit de modification, l'auteur doit être cité
+	 *                     pas d'utilisation commerciale autorisï¿½e, droit de modification, l'auteur doit ï¿½tre citï¿½
 	 *                     pour plus d'information http://creativecommons.org/licenses/by-nc/2.0/fr/
 	 ****************************************************************************/
 	class Session {
@@ -26,9 +26,9 @@
 
 		public function open ()//pour l'ouverture
 		{
-			$this->conn =  new Mongo('mongodb://admin:gwetme2011@127.0.0.1');//on se connecte a la bdd
+			$this->conn =  new MongoClient('mongodb://admin:gwetme2011@127.0.0.1');//on se connecte a la bdd
 			$sitebase_app   = 'idaenext_sitebase_session';
-			$this->bdd     = $this->conn->$sitebase_app->session; //on sélectionne la base de données
+			$this->bdd     = $this->conn->$sitebase_app->session; //on sï¿½lectionne la base de donnï¿½es
 			// $this->bdd->insert(['red'=>'cool']);
 			$this->gc();//on appelle la fonction gc
 			return $this->bdd;
@@ -47,7 +47,7 @@
 			}// on retourne la valeur de sess_datas
 		}
 
-		public function write ($sid , $data)//écriture
+		public function write ($sid , $data)//ï¿½criture
 		{
 			$expire = intval(time() + $this->session_time);//calcul de l'expiration de la session
 			// $this->bdd->update(['sess_id'=>$sid],['$set'=>['sess_datas'=>$data],'sess_expire'=>$expire],['upsert'=>true]);
@@ -86,8 +86,9 @@
 
 	}//fin de la classe
 
-	ini_set('session.save_handler' , 'user');//on définit l'utilisation des sessions en personnel
-	$session = new Session();//on déclare la classe
-	session_set_save_handler(array( $session , 'open' ) , array( $session , 'close' ) , array( $session , 'read' ) , array( $session , 'write' ) , array( $session , 'destroy' ) , array( $session ,'gc' ));//on précise les méthodes à employer pour les sessions
-	// session_start();//on démarre la session
+	ini_set('session.save_handler' , 'user');//on dï¿½finit l'utilisation des sessions en personnel
+	$session = new Session();//on dï¿½clare la classe
+	session_set_save_handler(array( $session , 'open' ) , array( $session , 'close' ) , array( $session , 'read' ) , array( $session , 'write' ) , array( $session , 'destroy' ) , array( $session ,'gc' ));//on prï¿½cise les mï¿½thodes ï¿½ employer pour les sessions
+	// session_start();//on dï¿½marre la session
+
 
