@@ -1,14 +1,9 @@
 project: "Idae Legacy — Code Modernization"
 updated: "2026-03-11T12:30:00Z"
-recommendation: "bmad-master test integration S4-02 --auto (queued by next)"
+recommendation: "bmad-master test integration S4-02 --auto (queued)"
 
-# HANDOFF NOTE: Sprint 3 COMPLETE (all S3-01..S3-06 done). Sprint 4 in progress.
-# S4-01 done: ClassAppAgg extracted (distinct, distinct_rs, distinct_all) with strict_types, MongoCompat, unit tests.
-# Tests not verified (Docker unavailable). Start Docker and run phpunit before merge.
-# Next: S4-02 — Integration/JsonDataTest.php (JSON shape regression tests).
-
-# Context: SCSS & Bootstrap (Phase 2) complete. Phase 3 ClassApp CRUD modernization in progress.
-# Blockers: Node.js socket server (medium severity, not blocking current sprint).
+# Snapshot: queued integration run triggered by `bmad-master next` command
+# Created: 2026-03-11T12:30:00Z
 
 phases:
   - id: 1
@@ -131,18 +126,9 @@ backlog:
 qa:
   test_plan: pending
   coverage: "~0%"
-  last_run: "2026-03-11T19:17:33Z"
-  last_run_status: failed
-  last_run_note: >
-    Integration run attempted via orchestrator: 2 tests errored.
-    Error: MongoDB Driver ConnectionTimeoutException — Failed to resolve 'mongo-test'.
-    Tests were executed from the host CLI; the phpunit process cannot resolve the Docker
-    service name 'mongo-test'. Options:
-      1) run phpunit inside the app container where Docker DNS resolves service names;
-      2) set `MONGO_TEST_DSN` to `mongodb://127.0.0.1:27018` or
-         `mongodb://host.docker.internal:27018` when running tests from the host;
-      3) adjust network/hosts so 'mongo-test' resolves from the host.
-    See discussion: bmad/artifacts/discussions/mongo-test-dns-resolution.md
+  last_run: "2026-03-11T12:30:00Z"
+  last_run_status: queued
+  last_run_note: "Queued via bmad-master next; run Docker (docker-compose up) then execute integration tests: vendor/bin/phpunit --testsuite=Integration --filter=JsonDataTest or run full Integration suite."
   bugs:
     - id: BUG-01
       title: "Node.js socket server refuses connections (port 3005)"
@@ -152,7 +138,3 @@ qa:
       title: "CleanStr signature mismatch (array_walk_recursive)"
       severity: low
       status: patched_needs_broader_testing
-    - id: BUG-03
-      title: "Integration tests: 'mongo-test' DNS unresolved from host phpunit run"
-      severity: medium
-      status: open
