@@ -132,8 +132,8 @@ class JsonDataRegressionTest extends TestCase
     public function testProduitDataShapeAndRows(): void
     {
         $this->insertMany('produit', [
-            ['idproduit' => 2001, 'nomProduit' => 'Shape Alpha', 'prixProduit' => 1.11, 'actif' => 1],
-            ['idproduit' => 2002, 'nomProduit' => 'Shape Beta',  'prixProduit' => 2.22, 'actif' => 1],
+            ['idproduit' => 2001, 'nomProduit' => 'Shape Alpha', 'prixProduit' => 1.11, 'actif' => 1, 'descriptionProduit' => '', 'petitNomProduit' => '', 'codeProduit' => ''],
+            ['idproduit' => 2002, 'nomProduit' => 'Shape Beta',  'prixProduit' => 2.22, 'actif' => 1, 'descriptionProduit' => '', 'petitNomProduit' => '', 'codeProduit' => ''],
         ]);
 
         $rows = $this->callJsonData(['table' => 'produit', 'piece' => 'data']);
@@ -164,7 +164,7 @@ class JsonDataRegressionTest extends TestCase
     public function testProduitQueryShapeHasCountAndRs(): void
     {
         $this->insertMany('produit', [
-            ['idproduit' => 2003, 'nomProduit' => 'Query Gamma', 'actif' => 1],
+            ['idproduit' => 2003, 'nomProduit' => 'Query Gamma', 'actif' => 1, 'descriptionProduit' => '', 'petitNomProduit' => '', 'codeProduit' => ''],
         ]);
 
         $result = $this->callJsonData(['table' => 'produit', 'piece' => 'query']);
@@ -184,7 +184,7 @@ class JsonDataRegressionTest extends TestCase
     {
         // agent records already present from seed; add extras for isolation
         $this->insertMany('agent', [
-            ['idagent' => 3001, 'nomAgent' => 'Regress Agent', 'loginAgent' => 'r_agent', 'actif' => 1],
+            ['idagent' => 3001, 'nomAgent' => 'Regress Agent', 'loginAgent' => 'r_agent', 'actif' => 1, 'descriptionAgent' => '', 'petitNomAgent' => '', 'codeAgent' => ''],
         ]);
 
         $rows = $this->callJsonData(['table' => 'agent', 'piece' => 'data']);
@@ -210,7 +210,12 @@ class JsonDataRegressionTest extends TestCase
 
     public function testAppschemeDataShapeAndRows(): void
     {
-        // appscheme already seeded with produit + agent entries; verify shape
+        // Seed appscheme collection so the stub App::query() finds rows
+        $this->insertMany('appscheme', [
+            ['idappscheme' => 1, 'codeAppscheme' => 'produit', 'nomAppscheme' => 'Produit', 'codeAppscheme_base' => 'sitebase_pref', 'actif' => 1, 'descriptionAppscheme' => '', 'petitNomAppscheme' => '', 'codeAppscheme' => 'produit'],
+            ['idappscheme' => 2, 'codeAppscheme' => 'agent',   'nomAppscheme' => 'Agent',   'codeAppscheme_base' => 'sitebase_pref', 'actif' => 1, 'descriptionAppscheme' => '', 'petitNomAppscheme' => '', 'codeAppscheme' => 'agent'],
+        ]);
+
         $rows = $this->callJsonData(['table' => 'appscheme', 'piece' => 'data']);
 
         $this->assertIsArray($rows);
@@ -228,6 +233,10 @@ class JsonDataRegressionTest extends TestCase
 
     public function testAppschemeQueryShapeHasCountAndRs(): void
     {
+        $this->insertMany('appscheme', [
+            ['idappscheme' => 1, 'codeAppscheme' => 'produit', 'nomAppscheme' => 'Produit', 'codeAppscheme_base' => 'sitebase_pref', 'actif' => 1, 'descriptionAppscheme' => '', 'petitNomAppscheme' => ''],
+        ]);
+
         $result = $this->callJsonData(['table' => 'appscheme', 'piece' => 'query']);
 
         $this->assertArrayHasKey('count',    $result);
