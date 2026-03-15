@@ -1,11 +1,12 @@
 project: "Idae Legacy — Code Modernization"
 updated: "2026-03-15T00:06:00Z"
-recommendation: "S5-01..S5-06 done. S5-07 (full regression) requires Docker — run: docker-compose up --build && docker exec idae-legacy composer update && docker exec idae-legacy vendor/bin/phpunit"
+recommendation: "All phases complete. 40 tests pass (0 errors, 0 failures). 2 minor warnings remain in ClassApp null-access. Next: browser smoke test (login → grid → CRUD) or plan Phase 6."
 
-# HANDOFF NOTE: Sprint 3 COMPLETE (all S3-01..S3-06 done). Sprint 4 in progress.
-# S4-01 done: ClassAppAgg extracted (distinct, distinct_rs, distinct_all) with strict_types, MongoCompat, unit tests.
-# Tests not verified (Docker unavailable). Start Docker and run phpunit before merge.
-# Next: S4-02 — Integration/JsonDataTest.php (JSON shape regression tests).
+# HANDOFF NOTE: All 5 phases complete. Sprint 5 S5-07 regression suite verified in Docker.
+# 40 tests, 117 assertions, 0 errors, 0 failures. Key fixes during regression:
+# - MongoCompat find/findOne: separate driver options (sort/skip/limit) from projection
+# - ClassAppAgg tests: seed appscheme in sitebase_app (where real App reads)
+# - Integration tests: #[RunTestsInSeparateProcesses] to avoid class conflict with real App
 
 # Context: SCSS & Bootstrap (Phase 2) complete. Phase 3 ClassApp CRUD modernization in progress.
 # Blockers: Node.js socket server (medium severity, not blocking current sprint).
@@ -64,8 +65,8 @@ phases:
 
   - id: 4
     name: "Modules, Security, Hardening & Regression"
-    status: in_progress
-    progress: 85
+    status: done
+    progress: 100
     artifacts:
       - "S5-01 — mdl/* audit ✅ (2026-03-15) — 0 legacy Mongo, 374 short tags, no @ suppression"
       - "S5-02 — Fix 454 short open tags <?→<?php in mdl/ ✅ (2026-03-15)"
@@ -73,7 +74,7 @@ phases:
       - "S5-04 — Remove extract($_POST) from postAction.php, explicit vars ✅ (2026-03-15)"
       - "S5-05 — Composer audit ✅ (2026-03-15) — 12 CVEs in smarty+latte, bumped to ^3.1.48 and ^2.10.6"
       - "S5-06 — BUG-02 CleanStr fix ✅ (2026-03-15) — removed dead is_array branch, added !is_string guard"
-      - "S5-07 — Full regression suite ⏳ (requires Docker)"
+      - "S5-07 — Full regression suite ✅ (2026-03-15) — 40 tests, 117 assertions, 0 errors, 0 failures; fixed MongoCompat find/findOne projection+options separation, ClassAppAgg test DB seeding, integration test process isolation"
     notes: "Audit found NO legacy MongoDB patterns in mdl/. The real blocker is 374 short open tags (PHP 8.2 incompatible). Security gaps: missing CSRF, extract($_POST), weak CleanStr."
     ref: "bmad/artifacts/sprints/sprint-05.md"
 
@@ -113,24 +114,19 @@ sprints:
 
 backlog:
   total_points: 68
-  completed_points: 55
-  progress: "81%"
+  completed_points: 68
+  progress: "100%"
 
 qa:
   test_plan: pending
   coverage: "~0%"
-  last_run: "2026-03-11T19:17:33Z"
-  last_run_status: failed
+  last_run: "2026-03-15T00:30:00Z"
+  last_run_status: passed
   last_run_note: >
-    Integration run attempted via orchestrator: 2 tests errored.
-    Error: MongoDB Driver ConnectionTimeoutException — Failed to resolve 'mongo-test'.
-    Tests were executed from the host CLI; the phpunit process cannot resolve the Docker
-    service name 'mongo-test'. Options:
-      1) run phpunit inside the app container where Docker DNS resolves service names;
-      2) set `MONGO_TEST_DSN` to `mongodb://127.0.0.1:27018` or
-         `mongodb://host.docker.internal:27018` when running tests from the host;
-      3) adjust network/hosts so 'mongo-test' resolves from the host.
-    See discussion: bmad/artifacts/discussions/mongo-test-dns-resolution.md
+    40 tests, 117 assertions, 0 errors, 0 failures, 2 warnings, 3 skipped.
+    Run inside Docker container: docker exec idae-legacy bash -c "cd /var/www/html/idae/web && MONGO_ENV=test php vendor/phpunit/phpunit/phpunit"
+    Warnings: ClassApp null array access in 2 pre-existing unit tests (minor).
+    Skipped: 3 tests with unresolved dependencies (pre-existing).
   bugs:
     - id: BUG-01
       title: "Node.js socket server refuses connections (port 3005)"
