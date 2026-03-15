@@ -105,7 +105,6 @@
 		}
 
 		public function get_page($code_page, $data_vars = [], $mode = 'template') {
-			ini_set('display_errors', 55);
 			if (empty($this->arr_page_type[$code_page])) return false;
 
 			if (!empty($data_vars['table']) && !empty($data_vars['table_value'])) {
