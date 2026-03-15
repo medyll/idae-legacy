@@ -19,39 +19,47 @@ class ClassAppAggTest extends TestCase
     {
         parent::setUpBeforeClass();
 
-        $db = self::$mongoClient->selectDatabase('idae_test');
+        // The real App constructor reads appscheme from sitebase_app, so seed there
+        $prefix = defined('MDB_PREFIX') ? MDB_PREFIX : '';
+        $appDb = self::$mongoClient->selectDatabase($prefix . 'sitebase_app');
 
-        // Seed produit collection for distinct tests
-        $db->selectCollection('produit')->insertMany([
+        // Appscheme entry for produit (needed by App constructor to resolve codeAppscheme_base)
+        $existing = $appDb->selectCollection('appscheme')->findOne(['codeAppscheme' => 'produit']);
+        if (empty($existing)) {
+            $appDb->selectCollection('appscheme')->insertOne([
+                'idappscheme'        => 1,
+                'codeAppscheme'      => 'produit',
+                'codeAppscheme_base' => $prefix . 'sitebase_pref',
+                'nomAppscheme'       => 'Produit',
+            ]);
+        }
+
+        // Seed produit + categorie into sitebase_pref (where plug() resolves to)
+        $dataDb = self::$mongoClient->selectDatabase($prefix . 'sitebase_pref');
+
+        $dataDb->selectCollection('produit')->insertMany([
             ['idproduit' => 1, 'nomProduit' => 'Prod A', 'idcategorie' => 10],
             ['idproduit' => 2, 'nomProduit' => 'Prod B', 'idcategorie' => 10],
             ['idproduit' => 3, 'nomProduit' => 'Prod C', 'idcategorie' => 20],
         ]);
 
-        // Seed categorie collection so distinct() full-mode can resolve records
-        $db->selectCollection('categorie')->insertMany([
+        $dataDb->selectCollection('categorie')->insertMany([
             ['idcategorie' => 10, 'nomCategorie' => 'Cat Alpha'],
             ['idcategorie' => 20, 'nomCategorie' => 'Cat Beta'],
         ]);
-
-        // Appscheme entry for produit (needed by App constructor)
-        $existing = $db->selectCollection('appscheme')->findOne(['codeAppscheme' => 'produit']);
-        if (empty($existing)) {
-            $db->selectCollection('appscheme')->insertOne([
-                'idappscheme'        => 1,
-                'codeAppscheme'      => 'produit',
-                'codeAppscheme_base' => 'idae_test',
-                'nomAppscheme'       => 'Produit',
-            ]);
-        }
     }
 
     public static function tearDownAfterClass(): void
     {
-        $db = self::$mongoClient->selectDatabase('idae_test');
-        $db->selectCollection('produit')->drop();
-        $db->selectCollection('categorie')->drop();
-        $db->selectCollection('appscheme')->deleteOne(['codeAppscheme' => 'produit']);
+        $prefix = defined('MDB_PREFIX') ? MDB_PREFIX : '';
+
+        $appDb = self::$mongoClient->selectDatabase($prefix . 'sitebase_app');
+        $appDb->selectCollection('appscheme')->deleteOne(['codeAppscheme' => 'produit']);
+
+        $dataDb = self::$mongoClient->selectDatabase($prefix . 'sitebase_pref');
+        $dataDb->selectCollection('produit')->drop();
+        $dataDb->selectCollection('categorie')->drop();
+
         parent::tearDownAfterClass();
     }
 
