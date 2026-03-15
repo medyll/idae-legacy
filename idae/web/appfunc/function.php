@@ -966,16 +966,24 @@
 		$value = "'" . $value . "'";
 	}
 
+	/**
+	 * CleanStr — callback for array_walk_recursive.
+	 * Trims whitespace and converts dd/mm/yyyy date strings to MySQL format.
+	 *
+	 * Note: array_walk_recursive only visits leaf (scalar) nodes, so $value
+	 * is never an array here. The $userdata parameter is accepted but unused
+	 * to satisfy callers that pass a 3rd argument to array_walk_recursive.
+	 *
+	 * Modified: 2026-03-15 — removed dead is_array branch (BUG-02 fix)
+	 */
 	function cleanStr(&$value, $key = '', $userdata = null) {
-		if (is_array($value) || is_object($value)) {
-			array_walk_recursive($value, 'CleanStr', $value);
-
+		if (!is_string($value)) {
 			return;
 		}
 		$value = trim($value);
-		if (stristr($value, '/')) {
+		if (strpos($value, '/') !== false) {
 			$arrTest = explode('/', $value);
-			if (is_numeric($arrTest[0]) && is_numeric($arrTest[1])) {
+			if (count($arrTest) >= 2 && is_numeric($arrTest[0]) && is_numeric($arrTest[1])) {
 				$value = date_mysql($value);
 			}
 		}
