@@ -247,8 +247,8 @@ if (!function_exists("my_autoloader")) {
         $fileName .= str_replace('_', DIRECTORY_SEPARATOR, $class_name) . '.php';
         if (file_exists($folder . $fileName)) require ($folder . $fileName);
         else{
-            $name_class =  "\\$class_name";
-            return new $name_class ;
+            // Class file not found — let PHP handle it (do not try to instantiate)
+            return false;
         }
     }
     spl_autoload_register('my_autoloader');

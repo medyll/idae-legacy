@@ -135,7 +135,7 @@
 						<?php endif; ?>
 					<?php endforeach; ?>
 
-				<?php if (sizeof($GRILLE_FK != 0)): ?>
+				<?php if (!empty($GRILLE_FK) && sizeof($GRILLE_FK) != 0): ?>
 					<div class="padding margin borderb">
 					<?php
 					if (!empty($ARR['idclient'])) unset($GRILLE_FK['prospect']);
