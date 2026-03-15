@@ -1,6 +1,6 @@
 project: "Idae Legacy — Code Modernization"
-updated: "2026-03-15T00:05:00Z"
-recommendation: "S5-01..S5-04 done. Next: S5-05 composer audit, S5-06 CleanStr, S5-07 regression"
+updated: "2026-03-15T00:06:00Z"
+recommendation: "S5-01..S5-06 done. S5-07 (full regression) requires Docker — run: docker-compose up --build && docker exec idae-legacy composer update && docker exec idae-legacy vendor/bin/phpunit"
 
 # HANDOFF NOTE: Sprint 3 COMPLETE (all S3-01..S3-06 done). Sprint 4 in progress.
 # S4-01 done: ClassAppAgg extracted (distinct, distinct_rs, distinct_all) with strict_types, MongoCompat, unit tests.
@@ -65,15 +65,15 @@ phases:
   - id: 4
     name: "Modules, Security, Hardening & Regression"
     status: in_progress
-    progress: 65
+    progress: 85
     artifacts:
       - "S5-01 — mdl/* audit ✅ (2026-03-15) — 0 legacy Mongo, 374 short tags, no @ suppression"
       - "S5-02 — Fix 454 short open tags <?→<?php in mdl/ ✅ (2026-03-15)"
       - "S5-03 — CSRF token: CsrfGuard class + actions.php validation + JS wiring ✅ (2026-03-15)"
       - "S5-04 — Remove extract($_POST) from postAction.php, explicit vars ✅ (2026-03-15)"
-      - "S5-05 — Composer audit ⏳"
-      - "S5-06 — BUG-02 CleanStr broader testing ⏳"
-      - "S5-07 — Full regression suite ⏳"
+      - "S5-05 — Composer audit ✅ (2026-03-15) — 12 CVEs in smarty+latte, bumped to ^3.1.48 and ^2.10.6"
+      - "S5-06 — BUG-02 CleanStr fix ✅ (2026-03-15) — removed dead is_array branch, added !is_string guard"
+      - "S5-07 — Full regression suite ⏳ (requires Docker)"
     notes: "Audit found NO legacy MongoDB patterns in mdl/. The real blocker is 374 short open tags (PHP 8.2 incompatible). Security gaps: missing CSRF, extract($_POST), weak CleanStr."
     ref: "bmad/artifacts/sprints/sprint-05.md"
 
@@ -113,8 +113,8 @@ sprints:
 
 backlog:
   total_points: 68
-  completed_points: 42
-  progress: "62%"
+  completed_points: 55
+  progress: "81%"
 
 qa:
   test_plan: pending
@@ -140,7 +140,8 @@ qa:
     - id: BUG-02
       title: "CleanStr signature mismatch (array_walk_recursive)"
       severity: low
-      status: patched_needs_broader_testing
+      status: fixed
+      fix: "Removed dead is_array branch, added !is_string guard — 2026-03-15"
     - id: BUG-03
       title: "Integration tests: 'mongo-test' DNS unresolved from host phpunit run"
       severity: medium
