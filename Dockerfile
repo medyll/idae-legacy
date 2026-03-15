@@ -73,8 +73,8 @@ EXPOSE 8080
 # Copier le fichier de configuration des hôtes virtuels dans le conteneur
 COPY ./config/apache/httpd-vhosts.conf /etc/apache2/sites-available/httpd-vhosts.conf
 
-# Activer la configuration des hôtes virtuels
-RUN a2ensite httpd-vhosts.conf
+# Activer la configuration des hôtes virtuels and disable default
+RUN a2ensite httpd-vhosts.conf && a2dissite 000-default
 
 # Remplacer la commande CMD pour démarrer Apache sans charger envvars
 CMD ["apache2-foreground"]

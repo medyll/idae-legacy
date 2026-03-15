@@ -45,6 +45,8 @@ services:
       - "3005:3005"
     env_file:
       - ./idae/web/app_node/.env
+    environment:
+      - PHP_BRIDGE_HOST=idae-legacy
     volumes:
       - ./idae/web/app_node:/app:cached
     depends_on:
