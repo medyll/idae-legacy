@@ -13,10 +13,15 @@ export const phpBridge = {
      */
     buildHeaders(data) {
         const PHPSESSID = data.PHPSESSID || "";
-        return {
+        const headers = {
             "Cookie": "PHPSESSID=" + PHPSESSID + "; path=/",
             "content-type": "application/x-www-form-urlencoded"
         };
+        // Forward the original client domain as Host header so PHP host detection works
+        if (data.DOCUMENTDOMAIN) {
+            headers["Host"] = data.DOCUMENTDOMAIN;
+        }
+        return headers;
     },
 
     /**

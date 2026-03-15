@@ -1,6 +1,7 @@
 /**
  * Migrated code and structure from Lebrun Meddy 2009
  */
+import { config } from '../config/config.js';
 import { db } from '../db/mongo.js';
 import { sessionManager } from '../services/sessionManager.js';
 import { phpBridge } from '../services/phpBridge.js';
@@ -12,6 +13,7 @@ import qs from 'qs';
 export function registerHandlers(io, socket) {
 
     // Sanitize DOCUMENTDOMAIN from client (strip trailing slashes, paths, query strings)
+    // When running in Docker, rewrite to internal service name so PHP bridge can reach Apache
     function cleanDomain(domain) {
         if (!domain) return domain;
         // Remove trailing slash(es)
@@ -20,6 +22,10 @@ export function registerHandlers(io, socket) {
         const slashIdx = domain.indexOf('/');
         if (slashIdx !== -1) {
             domain = domain.substring(0, slashIdx);
+        }
+        // Rewrite to internal Docker host if configured
+        if (config.phpBridgeHost) {
+            domain = config.phpBridgeHost;
         }
         return domain;
     }
