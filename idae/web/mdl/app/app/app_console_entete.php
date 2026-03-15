@@ -35,7 +35,7 @@
 ?>
 <div style="overflow: hidden;width:100%" class="flex_h ">
 	<div id="<?= $zone ?>" style="width:100%;overflow: hidden;" class="flex_h flex_wrap flex_main">
-		<?
+		<?php
 			$arr_has = ['statut', 'type'];
 			foreach ($arr_has as $key => $value):
 				$Value  = ucfirst($value);
@@ -54,7 +54,7 @@
 						<div class="margin padding"><?= $value ?></div>
 						<div>
 							<div class="flex_h flex_align_middle border4  ">
-								<? while ($arr_tmp = $rs_tmp->getNext()):
+								<?php while ($arr_tmp = $rs_tmp->getNext()):
 									$rs_tmp_ct = $APP->find($vars + [$_id => $arr_tmp[$_id]])->sort(['ordre' . $_Table => 1]);
 									if ($rs_tmp_ct->count() == 0) continue;
 									?>
@@ -65,12 +65,12 @@
 										</div>
 										<div class="textgrisfonce   aligncenter  "><?= $rs_tmp_ct->count(); ?></div>
 									</div>
-								<? endwhile; ?>
+								<?php endwhile; ?>
 							</div>
 						</div>
 					</div>
-				<? endif; ?>
-			<? endforeach; ?>
+				<?php endif; ?>
+			<?php endforeach; ?>
 	</div>
 	<div class="flex_h flex_align_middle padding margin alignright ">
 		<div class="flex_main   borderr padding">
@@ -79,8 +79,8 @@
 			</a>
 		</div>
 		<div class="margin border4 padding"><?= $rs->count() ?> /
-			<?= $rs_vars->count() ?><? if (!empty($TEST_AGENT)): ?>
+			<?= $rs_vars->count() ?><?php if (!empty($TEST_AGENT)): ?>
 				<i class="fa fa-user-secret"></i>
-			<? endif; ?></div>
+			<?php endif; ?></div>
 	</div>
 </div>

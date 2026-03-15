@@ -1,4 +1,4 @@
-<?
+<?php
 include_once($_SERVER['CONF_INC']);
 	$APP = new App();
 $uniqid = uniqid();
@@ -6,7 +6,7 @@ $mail_tmp	= $_POST['mail_tmp'];
 $arr		= $APP->plug('sitebase_email','email_compose_tmp')->findOne(array('mail_tmp'=>$mail_tmp));
 ?>
 <input class="required" type="hidden" value="<?=(sizeof($arr['grilleContact'])==0)? '' :'pass_valid';?>" />
-<? if(!empty($arr['grilleContact'])){ 
+<?php if(!empty($arr['grilleContact'])){ 
   foreach($arr['grilleContact'] as $BR):
   ?>
 
@@ -18,5 +18,5 @@ $arr		= $APP->plug('sitebase_email','email_compose_tmp')->findOne(array('mail_tm
   <li class="fa fa-times"></li>
   </a>
 </div>
-<? endforeach;?> 
-<? }?>
+<?php endforeach;?> 
+<?php }?>

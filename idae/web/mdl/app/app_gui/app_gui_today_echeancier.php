@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 	ini_set('display_errors', 55);
 	$time = time();
@@ -63,15 +63,15 @@
 		<div class="titre_entete_menu none">
 			<a class="ededed padding" data-menu="data-menu"><i class="fa fa-navicon"></i></a>
 			<div class="contextmenu applink applinkblock">
-				<? foreach ($periode as $key => $value): ?>
+				<?php foreach ($periode as $key => $value): ?>
 					<a><?= $value['titre'] ?></a>
-				<? endforeach; ?>
+				<?php endforeach; ?>
 			</div>
 		</div>
 		<div class=" ">
 			<div class="flex_v">
 				<div class="">
-					<? $begin = $arrdate[0];
+					<?php $begin = $arrdate[0];
 						$end  = $arrdate[1];
 
 						for ($i = $begin; $begin <= $end; $i->modify('+1 day')) {
@@ -84,7 +84,7 @@
 									<div class="padding"><i class="fa fa-calendar-o"></i> <?= fonctionsProduction::jourMoisDate_fr($dadate) ?></div>
 								</div>
 								<div class="">
-									<? foreach ($arr_sc as $key => $value) {
+									<?php foreach ($arr_sc as $key => $value) {
 										$dsp = '';
 										// vardump($value);
 										$table      = $value['codeAppscheme'];
@@ -109,35 +109,35 @@
 										<div class="retrait">
 											<div auto_tree class="margin padding "><div><i class="fa fa-<?= $value['icon'] ?> textbleu"></i> <?= ucfirst($value['nomAppscheme']) ?></div></div>
 											<div class="retrait" style="display:<?= $dsp ?>;">
-												<? while ($arr_tmp_deb = $rs_tmp_deb->getNext()) {
+												<?php while ($arr_tmp_deb = $rs_tmp_deb->getNext()) {
 													$value_id = (int)$arr_tmp_deb['id' . $table];
 													?>
 												<a class="hide_gui_pane ellipsis autoToggle" data-contextual="table=<?= $table ?>&table_value=<?= $value_id ?>" act_chrome_gui="app/app/app_fiche"
 												   data-vars="table=<?= $table ?>&table_value=<?= $value_id ?>">
 													<i class="fa fa-plus-circle textvert"></i>    <?= $arr_tmp_deb['nom' . ucfirst($table)]; ?>
-													</a><?
+													</a><?php
 												} ?>
-												<? while ($arr_tmp_fin = $rs_tmp_fin->getNext()) {
+												<?php while ($arr_tmp_fin = $rs_tmp_fin->getNext()) {
 													$value_id = (int)$arr_tmp_fin['id' . $table];
 													?>
 												<a class="hide_gui_pane ellipsis  autoToggle" data-contextual="table=<?= $table ?>&table_value=<?= $value_id ?>" act_chrome_gui="app/app/app_fiche"
 												   data-vars="table=<?= $table ?>&table_value=<?= $value_id ?>">
 													<i class="fa fa-minus-circle textrouge"></i>    <?= $arr_tmp_fin['nom' . ucfirst($table)]; ?>
-													</a><?
+													</a><?php
 												} ?>
 											</div>
 										</div>
-										<?
+										<?php
 										// $dsp='none';
 									}
 
 										if($count_empty == sizeof($arr_sc)){
-											?><style>#eche_empty<?=$datime?> {display:none}</style><?=$datime?><?
+											?><style>#eche_empty<?=$datime?> {display:none}</style><?=$datime?><?php
 										} ;
 									?>
 								</div>
 							</div>
-						<? } ?>
+						<?php } ?>
 				</div>
 			</div>
 		</div>

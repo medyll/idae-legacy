@@ -17,46 +17,46 @@
 	$HTTP_VARS    = $APP->translate_vars($vars);
 	if (empty($_POST['run'])):
 		?>
-		<? if ($display_mode == 'vert') { ?>
+		<?php if ($display_mode == 'vert') { ?>
 		<div class="padding">
 			<?= idioma('Choisir') ?>
 		</div>
-	<? } ?>
+	<?php } ?>
 		<table class="table_form">
 			<tr>
-				<? if ($display_mode == 'horiz') { ?>
+				<?php if ($display_mode == 'horiz') { ?>
 					<td>Ajouter <i class="fa fa-plus"></i></td>
-				<? } ?>
+				<?php } ?>
 				<td class="">
 					<div class="fauxInput inputMedium">
-						<?
+						<?php
 							foreach ($_POST['field'] as $key => $value):
 
 								?>
 								<a onclick="reloadModule('app/app_field_add','<?= $module_value ?>','<?= http_build_query($_POST) ?>&add_field=<?= $value ?>&run=1')"><?= $value ?></a>&nbsp;
-								<?
+								<?php
 
 							endforeach;
 						?></div>
 				</td>
 			</tr>
 		</table>
-		<?
+		<?php
 	else:
 		unset($_POST['run']);
 		?>
-		<? if ($display_mode == 'vert') { ?>
+		<?php if ($display_mode == 'vert') { ?>
 		<div class="padding">
 			<?= ucfirst($add_field) ?>
 		</div>
-	<? } ?>
+	<?php } ?>
 		<table class="table_form" id="loaded_<?= $add_field ?>">
 			<tr>
-				<? if ($display_mode == 'horiz') { ?>
+				<?php if ($display_mode == 'horiz') { ?>
 					<td>
 						<?= ucfirst($add_field) ?>
 					</td>
-				<? } ?>
+				<?php } ?>
 				<td>
 					<input required placeholder="<?= $add_field ?>" datalist_input_name="vars[<?= 'id' . $add_field ?>]" datalist="app/app_select" populate name="vars[<?= 'nom' . ucfirst($add_field) ?>]" paramName="search"
 					       vars="table=<?= $add_field ?>&<?= $HTTP_VARS ?>" type="text" class="inputMedium"/>
@@ -69,5 +69,5 @@
 		<script>
 			$('loaded_<?= $add_field ?>').fire('dom:act_click')
 		</script>
-		<?
+		<?php
 	endif;

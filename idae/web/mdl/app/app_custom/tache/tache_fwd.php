@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 	$APP     = new App('tache');
 	$idtache = (int)$_POST['table_value'];

@@ -24,7 +24,7 @@
 
 ?>
 <div class="flex_v blanc">
-	<?
+	<?php
 		$APPGD->consolidate_scheme();
 		$APPG->consolidate_scheme();
 	?>
@@ -36,9 +36,9 @@
 		<div class="frmCol1 ededed">
 			<div class="titre_entete">Groupes</div>
 			<div class="applink applinkblock toggler">
-			<? while($ARRG = $RSG->getNext()): ?>
+			<?php while($ARRG = $RSG->getNext()): ?>
 			<a class="autoToggle" onclick="$('liste_droit').loadModule('app/app_droit/app_droit_liste','vars[idagent_groupe]=<?=$ARRG['idagent_groupe']?>');$('liste_droit_agent').loadModule('app/app_droit/app_droit_liste_agent','vars[idagent_groupe]=<?=$ARRG['idagent_groupe']?>')"><?=$ARRG['nomAgent_groupe']?></a>
-			<? endwhile; ?>
+			<?php endwhile; ?>
 			</div>
 		</div>
 		<div class="flex_main flex_h">

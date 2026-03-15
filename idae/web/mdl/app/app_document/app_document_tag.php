@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 	$APP = new App('document');
 	$RF_K = $APP->get_grille_fk('document');

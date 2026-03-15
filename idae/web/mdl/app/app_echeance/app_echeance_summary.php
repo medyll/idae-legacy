@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 
 	ini_set('display_errors', 55);
@@ -93,7 +93,7 @@
 	</div>
 	<div class="flex_v padding">
 		<div class="  ">
-		<? foreach ($periode as $code_periode => $val_periode) {
+		<?php foreach ($periode as $code_periode => $val_periode) {
 			$ARR_DATE       = $periode[$code_periode]['dates'];
 			$date_begin     = $ARR_DATE[0];
 			$date_end       = $ARR_DATE[1];
@@ -126,14 +126,14 @@
 					 &nbsp;<?= $titre ?>
 					</div>
 					<div class="flex_h flex_margin flex_main  ">
-					<? if (!empty($_POST['table'])) { ?>
+					<?php if (!empty($_POST['table'])) { ?>
 						<div class="flex_grow_0 padding border4"><span class="bold titre1"> <?= $rs_tot->count() ?></span><i class="fa fa-plus textbleu"></i></div>
 						<div class="flex_grow_0 padding border4"><span class="bold titre1"> <?= $rs_tot_deb->count() ?></span><i class="fa fa-plus-circle textvert"></i></div>
 						<div class="flex_grow_0 padding border4"><span class="bold titre1"> <?= $rs_tot_fin->count() ?> </span><i class="fa fa-minus-square textorange"></i></div>
-					<? } ?>
+					<?php } ?>
 					</div>
 				</div>
 			</div>
-		<? } ?></div>
+		<?php } ?></div>
 	</div>
 </div>

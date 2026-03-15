@@ -51,6 +51,16 @@ schemeLoad = function () {
 	if (!window.APP.APPSCHEMES)window.APP.APPFIELDSBOOL = [];
 	if (!window.APP.APPSCHEMES)window.APP.APPFIELDSBOOL = [];
 
+	// Fetch CSRF token for secure AJAX calls
+	get_data('json_csrf', {}).then(function (res) {
+		try {
+			var data = JSON.parse(res);
+			window.APP.CSRF_TOKEN = data.token || '';
+		} catch (e) {
+			window.APP.CSRF_TOKEN = '';
+		}
+	});
+
 
 	return new RSVP.Promise(function (resolve, reject) {
 		app_init_template().then(function(edd){

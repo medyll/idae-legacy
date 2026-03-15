@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 	//
 	if (empty($_POST['table'])) return;
@@ -29,10 +29,10 @@
 		   title="<?= idioma('Mettre en icone sur le bureau') ?>">
 			<i class="fa fa-desktop"></i>
 		</a>
-	<? else: ?>
+	<?php else: ?>
 		<a style="padding:10px;vertical-align:baseline;" class="fond_noir color_fond_noir inline" onclick="ajaxValidation('app_delete','mdl/app/','<?= $add_vars ?>&table=agent_table&table_value=<?= $arrT['idagent_table'] ?>')" title="<?= idioma('Enlever icone bureau') ?>">
 			<i class="fa fa-desktop  "></i>
 		</a>
-		<?
+		<?php
 	endif;
 ?>

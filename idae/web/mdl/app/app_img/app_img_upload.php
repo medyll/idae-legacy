@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 
 	global $buildArr;
@@ -39,7 +39,7 @@
 
 	// should receive : / table / table_value / image_name
 ?>
-<?
+<?php
 	if (!empty($_POST['multiple'])) {
 		$codeImage .= '-' . time();
 	}
@@ -54,13 +54,13 @@
 				</a>
 			</div>
 			<div class="flex_main">
-				<? if (!empty($_POST['needResize'])) { ?>
+				<?php if (!empty($_POST['needResize'])) { ?>
 					<div class="disinput">
 						<a onclick="needResize()">
 							<i class="fa fa-crop"></i>
 							&nbsp;Retailler cette image
 						</a>
-					</div>                <? } ?></div>
+					</div>                <?php } ?></div>
 			<div class="borderl"  >
 				<div class="disinput">
 					<a onclick="$('image_upload_<?= $time ?>').fire('dom:submit');">
@@ -73,9 +73,9 @@
 	<div class="aligncenter flex_main flex_h flex_align_middle" id="<?= $hoverZone ?>" style="position:relative;background-color:#333;overflow:hidden;">
 		<div style="width:100%">
 			<div id="<?= $listing_img ?>" class="inline fond_noir" style="position:relative;text-align:center;min-width:<?= $width ?>px;min-height:<?= $height ?>px">
-				<? if(!empty($test)){ ?>
+				<?php if(!empty($test)){ ?>
 					<img id="<?= $imgid ?>" src="<?= Act::imgSrc($codeImage); ?>?time=<?= $time ?>"/>
-				<? } ?>
+				<?php } ?>
 			</div>
 
 		</div>
@@ -91,13 +91,13 @@
 	<input type="hidden" name="base" value="<?= $base ?>">
 	<input type="hidden" name="collection" value="<?= $collection ?>">
 	<input type="hidden" name="rw" value="rw">
-	<? foreach ($vars as $key => $input): ?>
+	<?php foreach ($vars as $key => $input): ?>
 		<input type = "hidden" name = "vars[<?= $key ?>]" value = "<?= $input ?>" >
-	<? endforeach; ?>
+	<?php endforeach; ?>
 	<!--<input type="hidden"   name="tag" value="enews">-->
-	<input type="hidden" name="sizeImg" value="<?= $width ?>"> <? if (!empty($height)) { ?>
-		<input type="hidden" name="sizeHeightImg" value="<?= $height ?>">    <? } ?>
-	<? if (!empty($_POST['needResize'])) { ?>
+	<input type="hidden" name="sizeImg" value="<?= $width ?>"> <?php if (!empty($height)) { ?>
+		<input type="hidden" name="sizeHeightImg" value="<?= $height ?>">    <?php } ?>
+	<?php if (!empty($_POST['needResize'])) { ?>
 		<input type="hidden" name="x1" id="x1" value="">
 		<input type="hidden" name="y1" id="y1" value="">
 		<input type="hidden" name="x2" id="x2" value="">
@@ -108,8 +108,8 @@
 		<input type="hidden" id="original_height" name="original_height" value="">
 		<input type="hidden" id="display_width" name="display_width" value="">
 		<input type="hidden" id="display_height" name="display_height" value="">
-		<input type="hidden" name="act_crop" value="needResize">    <? } ?>
-	<? if (!empty($codeImage)) { ?>
+		<input type="hidden" name="act_crop" value="needResize">    <?php } ?>
+	<?php if (!empty($codeImage)) { ?>
 		<input type="hidden" name="reloadModule[app/app_img/app_image_dyn]" value="<?= $codeImage ?>">
 		<input type="hidden" name="afterAction[app/app_img/app_img_upload]" value="close">
 		<input type="hidden" name="mongoImg" value="<?= $codeImage ?>">
@@ -120,7 +120,7 @@
 		<input type="hidden" name="mongoTag"    value="<?= $table ?>">
 		<input type="hidden" name="table"       value="<?= $table ?>">
 		<input type="hidden" name="tag"         value="<?= $table ?>">
-	<? } ?>
+	<?php } ?>
 
 </form>
 <script>
@@ -149,7 +149,7 @@
 			return false;
 		}
 	}
-	<? if(!empty($_POST['needResize']) ){ ?>
+	<?php if(!empty($_POST['needResize']) ){ ?>
 	savResizeeCoords = function (coords, dimensions) {
 		if (!$('<?=$listing_img?>')) return;
 		if (!$('<?=$listing_img?>').show()) return;
@@ -175,7 +175,7 @@
 		$('spy_y2').update(eval(coords.y2) * ratioheight);
 	}
 
-	<? } ?>
+	<?php } ?>
 </script>
 <script>
 	needResize = function () {

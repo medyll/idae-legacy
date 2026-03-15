@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 
 	$_POST['table_value'] = (int)$_POST['idville'];

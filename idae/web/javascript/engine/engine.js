@@ -251,7 +251,7 @@ ajaxValidation = function (action, path, pars) {
 			method: 'post',
 			sanitize: true,
 			requestHeaders: ['Content-type', 'application/x-www-form-urlencoded', 'charset', 'UTF-8', 'Set-Cookie', 'PHPSESSID=' + localStorage.getItem('PHPSESSID') + ';path=/'],
-			postBody: 'F_action=' + action + '&' + pars
+			postBody: 'F_action=' + action + '&_csrf=' + (window.APP && window.APP.CSRF_TOKEN || '') + '&' + pars
 		});
 	// ,onComplete: function(){div.remove()}.bind(this)
 	//requestHeaders: ['Content-type', 'application/x-www-form-urlencoded', 'charset', 'UTF-8','Set-Cookie','PHPSESSID='+localStorage.getItem('PHPSESSID')+';path=/'],
@@ -304,7 +304,7 @@ ajaxFormValidationReal = function (form) {
 	} else {
 		var url = 'actions.php';
 	}
-	options.postBody = Form.serialize($(form))
+	options.postBody = Form.serialize($(form)) + '&_csrf=' + encodeURIComponent(window.APP && window.APP.CSRF_TOKEN || '')
 	lodaj = new Ajax.Updater($('div_form_validation'), url, options);
 	console.log(lodaj)
 	return true;

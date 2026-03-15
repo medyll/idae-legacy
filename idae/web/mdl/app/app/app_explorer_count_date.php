@@ -80,23 +80,23 @@
 	<div class="margin applink applinkblock relative">
 		<a data-menu="data-menu" class="alignright"><i class="fa fa-angle-right"></i><span class="inline padding bordert" id="type_date_<?= $uniqid ?>">Type de date : <?=$nomDate?></span></a>
 		<div class="contextmenu inline" style="display:none;right:0;">
-			<? foreach ($ARR_DATE_FIELD as $key => $val) {
+			<?php foreach ($ARR_DATE_FIELD as $key => $val) {
 				$arrg = $val['group'];
 				$arrf = $val['field'];
 				?>
 				<div class=" applink">
-					<? foreach ($arrf as $keyf => $valf) {
+					<?php foreach ($arrf as $keyf => $valf) {
 						$valdate = $valf['codeAppscheme_field'] . ucfirst($table);
 						$nomdate = $valf['nomAppscheme_field'];
 						?>
 						<a class="autoToggle"
 						   onclick="$('type_date_<?= $uniqid ?>').update('<?= $nomdate .' ' . $table ?>');reloadModule('app/app/app_explorer_count_date','<?=$table?>','nomDate=<?=$nomdate?>&typeDate=<?=$valf['codeAppscheme_field']?>&table=<?=$table?>')">
-							<i class="fa fa-<?= $valf['iconAppscheme_field'] ?>"></i> <?= ucfirst(idioma($valf['nomAppscheme_field'])) . ' ' . $table; ?></a>                                <? } ?>
-				</div>                        <? } ?>
+							<i class="fa fa-<?= $valf['iconAppscheme_field'] ?>"></i> <?= ucfirst(idioma($valf['nomAppscheme_field'])) . ' ' . $table; ?></a>                                <?php } ?>
+				</div>                        <?php } ?>
 		</div>
 	</div>
 	<div class="flex_h flex_margin margin flex_wrap">
-		<? foreach ($periode as $kay => $val):
+		<?php foreach ($periode as $kay => $val):
 			$titre   = $val['titre'];
 			$arrdate = $val['dates'];
 			$color   = $val['color'];
@@ -110,12 +110,12 @@
 			<div class=" flex_main padding" title="<?= fonctionsProduction::jourMoisDate_fr($begin) . ' ' . fonctionsProduction::jourMoisDate_fr($end) ?>">
 				<div class="border4 blanc" style="border-top:1px solid <?= $color ?>;">
 					<div class="padding ellipsîs"><?= $titre ?></div>
-					<? if ($APP->has_agent()) { ?>
+					<?php if ($APP->has_agent()) { ?>
 						<div class="padding"><span class="ms-font-l "><?= $rs_agent->count() ?></span> <span class="textgrisfonce">(<?= $rs->count() ?>)</span></div>
-					<? } else { ?>
+					<?php } else { ?>
 						<div class="padding ms-font-l "><?= $rs->count() ?> </div>
-					<? } ?></div>
+					<?php } ?></div>
 			</div>
-		<? endforeach; ?>
+		<?php endforeach; ?>
 	</div>
 </div>

@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 	$time = time();
 	ini_set('display_errors', 55);
@@ -106,7 +106,7 @@
 			background-color : white; border-right : 1px solid #ccc;
 		}
 	</style>
-<?
+<?php
 	$str_link = '';
 	$str_arr  = [];
 	while ($arr_AG = $rs_AG->getNext()) {
@@ -142,7 +142,7 @@
 			</div>
 			<div class=" " data-table="conge" data-dsp="conge" id="conge_liste_div">
 				<div class="css_table">
-					<?
+					<?php
 						for ($i = $date_begin; $date_begin < $date_end; $i->modify('first day of +1 month')) {
 							$period_month       = $i;
 							$period_clone_month = clone $i;
@@ -152,7 +152,7 @@
 							<div class="css_cell borderr" style="overflow:visible;">
 								<div class="padding_more borderb ededed"><?= fonctionsProduction::moisDate_fr($period_end_month->format("Y-m-d")) ?></div>
 								<div class="  css_table ">
-									<?
+									<?php
 										for ($ai = $period_clone_month; $period_clone_month < $period_end_month; $ai->modify('+8 day')) {
 											$period_week              = $ai;
 											$period_clone_week        = clone $ai;
@@ -167,7 +167,7 @@
 												<div class="">
 													<div class="padding_more borderb"  style="position:sticky;top:0;">Semaine&nbsp;<?= $period_clone_week->format('W') ?></div>
 													<div class="  flex_h">
-														<?
+														<?php
 															for ($aai = $period_clone_week_monday; $period_clone_week_monday <= $period_end_week; $aai->modify('+1 day')) {
 																$period_day = clone $aai;
 																$datedebut  = $period_day->format('d/m/Y');
@@ -193,14 +193,14 @@
 																		<?= implode('', $expl) ?>
 																	</div>
 																</div>
-															<? } ?>
+															<?php } ?>
 													</div>
 												</div>
 											</div>
-										<? } ?>
+										<?php } ?>
 								</div>
 							</div>
-						<? } ?>
+						<?php } ?>
 				</div>
 			</div>
 		</div>
@@ -209,4 +209,4 @@
 		// alert('goo')
 		setTimeout (function () {load_table_in_zone ('table=conge', 'conge_liste_div')}, 1);
 	</script>
-<? // vardump_async('rd'); ?>
+<?php // vardump_async('rd'); ?>

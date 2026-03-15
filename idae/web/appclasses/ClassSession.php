@@ -161,3 +161,7 @@ try {
 	error_log('[Session] session_start() FAILED: ' . $e->getMessage());
 	// Don't propagate exception - let application handle empty session gracefully
 }
+
+// Initialize CSRF token in session (generated once, persists across requests)
+require_once(__DIR__ . '/appcommon/CsrfGuard.php');
+\AppCommon\CsrfGuard::init();

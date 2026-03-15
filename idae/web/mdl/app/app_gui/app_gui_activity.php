@@ -39,7 +39,7 @@
 ?>
 <div class="margin padding titre1 blanc"><i class="fa fa-caret-right"></i><i class="fa fa-<?= $APP->app_table_icon?>"></i> <?=strtoupper($TABLE)?></div>
 <div class="margin applink applinkblock blanc" >
-	<?
+	<?php
 		foreach ($output as $key => $value):
 			$ARR = $APP->query_one([$name_id=>(int)$key]);
 
@@ -48,7 +48,7 @@
 				<div class="padding block flex_main ellipsis"><a  act_chrome_gui = "app/app/app_fiche" vars = "table=<?= $TABLE ?>&table_value=<?= $key ?>" ><?=strtolower($ARR['nom'.$Table])?></a></div>
 				<div class="padding block alignright"> <?=$ARR['code'.$Table]?></div>
 			</div>
-		<?
+		<?php
 		endforeach;
 	?>
 </div>

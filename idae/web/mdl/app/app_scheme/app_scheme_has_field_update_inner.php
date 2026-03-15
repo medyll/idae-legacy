@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 	$APP               = new App('appscheme');
 	$APPHASF           = new App('appscheme_has_field');
@@ -37,7 +37,7 @@
 							</tr>
 						</thead>
 						<tbody>
-							<?
+							<?php
 								$rsF = $APPHASF->find(['idappscheme' => $idappscheme])->sort(['ordreAppscheme_has_field' => 1]);
 								while ($arrf = $rsF->getNext()) {
 									$Key = ucfirst($arrf['codeAppscheme_field']);
@@ -87,7 +87,7 @@
 											</label>
 										</td>
 									</tr>
-								<? } ?>
+								<?php } ?>
 						</tbody>
 					</table>
 				</div>

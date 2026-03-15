@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 	ini_set('display_errors', 55);
 	$APP               = new App('appscheme');
@@ -57,7 +57,7 @@
 						<input type="hidden" value="*" name="reloadModule[app/app_scheme/app_scheme_has_field_update]">
 						<input type="hidden" name="idappscheme" value="<?= $idappscheme ?>"/>
 						<br>
-						<? while ($arrg = $rsG->getNext()) {
+						<?php while ($arrg = $rsG->getNext()) {
 							$rsF = $APP->plug('sitebase_app', 'appscheme_field')->find(['idappscheme_field_group' => $arrg['idappscheme_field_group']])->sort(['ordreAppscheme_field_group' => 1]);
 							?>
 							<div auto_tree style="position:relative;">
@@ -72,7 +72,7 @@
 										<div class="ms-Table-cell  " style="width:100px;"><?= idioma('Trier par defaut') ?></div>
 										<div class="ms-Table-cell"> <?= idioma('Sens du tri') ?></div>
 									</div>
-									<? while ($arrf = $rsF->getNext()) {
+									<?php while ($arrf = $rsF->getNext()) {
 										$Key = ucfirst($arrf['codeAppscheme_field']);
 										// dans appscheme_has_field ?
 										$arrSF = $APPHASF->findOne(['idappscheme' => $idappscheme, 'idappscheme_field' => (int)$arrf['idappscheme_field']]);
@@ -97,10 +97,10 @@
 												</label>
 											</div>
 										</div>
-									<? } ?>
+									<?php } ?>
 								</div>
 								<table class="table_info" data-append="true" dropzone data-vars="vars[idappscheme_field_group]=<?= $arrg['idappscheme_field_group'] ?>">
-									<? while ($arrf = $rsF->getNext()) {
+									<?php while ($arrf = $rsF->getNext()) {
 										$Key = ucfirst($arrf['codeAppscheme_field']);
 										// dans appscheme_has_field ?
 										$arrSF    = $APPHASF->findOne(['idappscheme' => $idappscheme, 'idappscheme_field' => (int)$arrf['idappscheme_field']]);
@@ -123,10 +123,10 @@
 												<input type="radio" name="vars_sort_order[<?= $arrf['idappscheme_field'] ?>]" value="1">
 											</td>
 										</tr>
-									<? } ?>
+									<?php } ?>
 								</table>
 							</div>
-						<? } ?>
+						<?php } ?>
 					</div>
 				</div>
 			</div>

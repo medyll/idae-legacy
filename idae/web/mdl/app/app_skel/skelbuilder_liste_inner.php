@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 	require_once(__DIR__ . '/../../../appclasses/appcommon/MongoCompat.php');
 	use AppCommon\MongoCompat;
@@ -47,7 +47,7 @@
 			</tr>
 			</thead>
 			<tbody id="tbody_web_stat" class="toggler">
-			<?
+			<?php
 				/*$rs_field = $APP->plug('sitebase_app', 'appscheme_field')->find()->sort(['field_group' => 1, 'field_raw' => 1]);
 				while ($arr_field = $rs_field->getNext()) {
 
@@ -106,7 +106,7 @@
 								add
 							</a></td>
 					</tr>
-				<? } ?>
+				<?php } ?>
 			</tbody>
 		</table>
 	</div>

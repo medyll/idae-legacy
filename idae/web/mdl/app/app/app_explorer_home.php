@@ -72,47 +72,47 @@
 			<div class="flex_main padding     ">
 				<div class="padding_more  "><span style="font-size:1.5rem"><?= idioma('Gestion ') ?><?= $APP_TABLE['nomAppscheme'] ?> </span></div>
 				<div class="flex_h     applink applinkbutton     padding">
-					<? if (droit_table($_SESSION['idagent'], 'C', $table)) { ?>
+					<?php if (droit_table($_SESSION['idagent'], 'C', $table)) { ?>
 					<a class="appbutton" onclick="<?= fonctionsJs::app_create($table, $vars) ?>">
 						<i class="fa fa-copy textbleu"></i> <?= idioma('Créer') . ' ' . $APP_TABLE['nomAppscheme'] ?>
-						</a><? } ?>
-					<? if ($table == 'conge') { ?>
+						</a><?php } ?>
+					<?php if ($table == 'conge') { ?>
 						<a class="appbutton" onclick="ajaxInMdl('app/app_conge/app_conge','time_cong','',{onglet:'Absences et congés'})">
 							<i class="fa fa-calendar-o textvert"></i> <?= idioma('Grille des congés') ?>
 						</a>
-					<? } ?>
-					<? if ($table == 'promo_zone') { ?>
+					<?php } ?>
+					<?php if ($table == 'promo_zone') { ?>
 						<a class="appbutton" onclick="ajaxInMdl('app/app_promo_zone/app_promo_zone_build','time_promo_zone','',{onglet:'promo_zone'})">
 							<i class="fa fa-calendar-o textvert"></i> <?= idioma('promo_zone') ?>
 						</a>
-					<? } ?>
-					<? if ($table == 'appscheme') { ?>
+					<?php } ?>
+					<?php if ($table == 'appscheme') { ?>
 						<a class=" " onclick="<?= fonctionsJs::app_mdl('app/app_scheme/app_scheme',[],['title'=>'modèle de données']) ?>">
 							<i class="fa fa-calendar-o textvert"></i> <?= idioma('modèle de données') ?>
 						</a>
-					<? } ?>
-					<? if ($APP->has_field('dateDebut') && !empty($APP->app_table_one['hasStatutScheme'])) { ?>
+					<?php } ?>
+					<?php if ($APP->has_field('dateDebut') && !empty($APP->app_table_one['hasStatutScheme'])) { ?>
 						<a onclick="<?= fonctionsJs::app_console($table) ?>"><i class="fa fa-dashboard textorange"></i> <?= idioma('Console') ?></a>
-					<? } ?>
+					<?php } ?>
 				</div>
 				<div class="padding"><i class="fa fa-history"></i>
 					<?= idioma('Historique') ?> <i class="fa fa-caret-right"></i>
-					<? while ($arr_last = $RS_LAST->getNext()):
+					<?php while ($arr_last = $RS_LAST->getNext()):
 						if (empty($arr_last['nomAgent_history'])) continue;
 						?><span data-contextual="table=<?= $table ?>&table_value=<?= $arr_last['valeurAgent_history'] ?>" class="inline margin">
 						<a act_chrome_gui="app/app/app_fiche" vars="table=<?= $table ?>&table_value=<?= $arr_last['valeurAgent_history'] ?>">
 							<?= strtolower($arr_last['nomAgent_history']) ?></a>
-						</span><?
+						</span><?php
 					endwhile; ?>
 				</div>
 			</div>
-			<? if($APP->has_field(['dateDebut','date'])){ ?>
+			<?php if($APP->has_field(['dateDebut','date'])){ ?>
 				<div class="flex_main" style="max-width: 33%;">
 					<div class=" " style="overflow: hidden;" act_defer mdl="app/app/app_explorer_count_date" vars="table=<?= $table ?>" value="<?= $table ?>">
 					</div>
 				</div>
 
-			<? } ?>
+			<?php } ?>
 		</div>
 	</div>
 	<div class="flex_main relative" style="overflow:hidden;">
@@ -122,7 +122,7 @@
 		</div>
 	</div>
 	<div class="flex_main relative" style="overflow:auto;display:none;">
-		<? if (droit_table($_SESSION['idagent'], 'CONF', $table) && $APP->has_agent()): ?>
+		<?php if (droit_table($_SESSION['idagent'], 'CONF', $table) && $APP->has_agent()): ?>
 			<!--LIEN AGENT / ALL-->
 			<div class="app_onglet toggler sticky blanc" style="position: sticky;top:0;z-index:1;">
 				<a class="autoToggle active" onclick="reloadScope('<?= $scope ?>','*','vars[idagent]=<?= $_SESSION['idagent'] ?>')" title="<?= $table ?> <?= $APP->get_titre_vars($vars); ?>">
@@ -132,7 +132,7 @@
 					<i class="fa fa-globe textorange"></i><?= idioma('tous les agents') ?> <?= $nomAppscheme ?>
 				</a>
 			</div>
-		<? endif; ?>
+		<?php endif; ?>
 		<div class="flex_h" style="position:relative;z-index:0;width:100%;">
 			<div class="flex_main relative" style="width:70%;top:0;">
 				<!--ENTETE-->
@@ -150,11 +150,11 @@
 						<div class="retrait padding">
 							<?= idioma('Voir') . ' ' . $table ?>
 							<i class="fa fa-caret-right"></i>
-							<? foreach ($ARR_LAST as $k_last => $value_last) {
+							<?php foreach ($ARR_LAST as $k_last => $value_last) {
 								$on_click = "load_table_in_zone('table=$table&$HTTP_VARS&nbRows=6&sortBy=$k_last.$Table&sortDir=-1', 'home_last_created_$zone');";
 								?>
 								<a onclick="<?= $on_click ?>"><?= idioma($value_last) ?></a>
-							<? } ?>
+							<?php } ?>
 						</div>
 					</div>
 					<div id="home_last_created_<?= $zone ?>" data-dsp="mdl" data-dsp-mdl="app/app/app_fiche_thumb">

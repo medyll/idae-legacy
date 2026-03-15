@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 	ini_set('display_errors', 55);
 
@@ -12,11 +12,11 @@
 ?>
 <div class="relative padding">
 	<div class="padding">
-		<? if ($_POST['mode'] == 'fk') { ?>
+		<?php if ($_POST['mode'] == 'fk') { ?>
 			<?= skelMdl::cf_module('app/app_field_fk_update', $_POST) ?>
-		<? } else { ?>
+		<?php } else { ?>
 			<?= skelMdl::cf_module('app/app_field_update', $_POST) ?>
-		<? } ?>
+		<?php } ?>
 	</div>
 	<div class="padding">
 		<a class="cancelClose">Fermer</a>

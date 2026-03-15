@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 $time = time(); 
 $idagent= (int)$_POST['table_value'];

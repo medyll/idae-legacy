@@ -1,15 +1,24 @@
 <?php
+/**
+ * postAction.php — Post-action response renderer (outputs <script> for SPA consumption).
+ *
+ * Date: 07/07/14
+ * Modified: 2026-03-15 — removed extract($_POST), removed display_errors, English comments
+ */
 	include_once($_SERVER['CONF_INC']);
 
-	ini_set('display_errors', 0);
 	set_time_limit(10);
-	ini_set('max_execution_time', 10);
-	ini_set('max_input_time', 10);
+	ini_set('max_execution_time', '10');
+	ini_set('max_input_time', '10');
 
-//if(isset($_POST['F_action'])){ $F_action =$_POST['F_action'];} else{exit;} 
 	array_walk_recursive($_POST, 'CleanStr');
 	$msg = '';
 	$APP = new App();
+
+	// Explicit variable extraction — replaces dangerous extract($_POST)
+	$F_action    = $_POST['F_action'] ?? '';
+	$table       = $_POST['table'] ?? '';
+	$table_value = $_POST['table_value'] ?? '';
 ?>
 	<script>
 		options = {}
@@ -21,7 +30,6 @@
 		a.growl('<?=$msg?>');
 		<?php } ?>
 		<?php
-		extract($_POST);
 			switch ($F_action){
 				case "quitter":
 				?>

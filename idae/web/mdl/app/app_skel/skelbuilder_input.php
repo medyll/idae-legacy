@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 	require_once(__DIR__ . '/../../../appclasses/appcommon/MongoCompat.php');
 	use AppCommon\MongoCompat;
@@ -32,7 +32,7 @@ $arr = $APP->plug('sitebase_app','appscheme')->findOne(array('_id' => $_POST['_i
 				</tr>
 				</thead>
 				<tbody id="oio">
-				<?
+				<?php
 				foreach ($arr['grilleFK'] as $key => $arrInput):
 					// skelMongo::connect('skel_builder_type', 'sitebase_skelbuilder')->update(array('typeInput' => $arrInput['typeInput']), array('typeInput' => $arrInput['typeInput']),
 					                                                                       //  array('upsert' => true));
@@ -62,7 +62,7 @@ $arr = $APP->plug('sitebase_app','appscheme')->findOne(array('_id' => $_POST['_i
 								onclick="ajaxMdl('app/app_skel/skelbuilder_input_update','Mise à jour champ','_id=<?= $_POST['_id'] ?>&nomInput=<?= $arrInput['nomInput'] ?>');"><img
 									src="<?= ICONPATH ?>delete16.png"/></a></td>
 					</tr>
-				<?
+				<?php
 				endforeach;
 				?></tbody>
 			</table>

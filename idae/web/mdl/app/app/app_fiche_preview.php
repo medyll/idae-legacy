@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 	// POST
 	$table = $_POST['table'];
@@ -38,7 +38,7 @@
 	<div class="flex_main dark_1" style="overflow-y:auto;overflow-x:hidden;z-index:0;">
 		<div main_auto_tree>
 			<div class="dark_2 flex_h">
-				<?
+				<?php
 					$arr_has = ['categorie', 'statut', 'type'];
 					foreach ($arr_has as $key => $value):
 						$Value  = ucfirst($value);
@@ -50,8 +50,8 @@
 							<div class="padding_more flex_main">
 								<div class="label"><?= ucfirst(idioma($Value)) ?> : <?= $ARR[$_nom] ?></div>
 							</div>
-						<? endif; ?>
-					<? endforeach; ?>
+						<?php endif; ?>
+					<?php endforeach; ?>
 			</div>
 			<div class="dark_1">
 				<div auto_tree right="right" class="dark_3 padding_more" onclick="save_setting_autoNext(this,'<?= $table ?>_preview_grillefk')">
@@ -59,14 +59,14 @@
 				</div>
 				<tr class="dark_1 relative">
 					<table class="table_info">
-						<? foreach ($ARR_COLLECT as $key => $ARR_FIELD_GROUP) {
+						<?php foreach ($ARR_COLLECT as $key => $ARR_FIELD_GROUP) {
 							?>
 							<tr class="none">
 								<td><i class="fa fa-<?= $ARR_FIELD_GROUP['appscheme_field_group']['iconAppscheme_field_group'] ?>"></i>
 									<?= $ARR_FIELD_GROUP['appscheme_field_group']['nomAppscheme_field_group'] ?>
 								</td>
 							</tr>
-							<?
+							<?php
 							foreach ($ARR_FIELD_GROUP['appscheme_fields'] as $CODE_ARR_FIELD => $ARR_FIELD) { ?>
 								<tr>
 									<td class=" dark_2" style="padding-left:1rem;">
@@ -78,12 +78,12 @@
 										<?= $ARR_FIELD['value_html'] ?>
 									</td>
 								</tr>
-							<? } ?>
-						<? } ?>
+							<?php } ?>
+						<?php } ?>
 					</table>
 			</div>
 		</div>
-		<? if (!empty($APP_TABLE['hasLigneScheme'])): ?>
+		<?php if (!empty($APP_TABLE['hasLigneScheme'])): ?>
 			<br>
 			<div class="margin padding">
 				<div class="border4 boxshadow" id="ligne_preview_<?= $table . $table_value ?>" data-classname="table_vertical" data-data_model="defaultModel">
@@ -92,8 +92,8 @@
 					</script>
 				</div>
 			</div>
-		<? endif; ?>
-		<? if (sizeof($GRILLE_FK) != 0): ?>
+		<?php endif; ?>
+		<?php if (sizeof($GRILLE_FK) != 0): ?>
 			<div auto_tree right="right" class="dark_3 padding_more" onclick="save_setting_autoNext(this,'<?= $table ?>_preview_grillefk')">
 				<div class="padding_more titre" auto_tree_click="true"> <?= idioma('Propriétés') ?></div>
 			</div>
@@ -102,7 +102,7 @@
 					<?= skelMdl::cf_module('app/app/app_fiche_fk', ['table' => $table, 'table_value' => $table_value, 'mode' => 'fiche'], $table_value) ?>
 				</div>
 			</div>
-		<? endif; ?>
+		<?php endif; ?>
 		<div auto_tree right="right" class="dark_3 padding_more" onclick="save_setting_autoNext(this,'<?= $table ?>_preview_list')">
 			<div class="padding_more titre" auto_tree_click="true"> <?= idioma('Listes') ?></div>
 		</div>

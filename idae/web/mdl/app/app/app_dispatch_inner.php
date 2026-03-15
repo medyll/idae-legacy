@@ -1,4 +1,4 @@
-<?
+<?php
 	/**
 	 * Created by PhpStorm.
 	 * User: Mydde
@@ -44,7 +44,7 @@
 					<?= $TABLE_TYPE ?>(s)
 				</div>
 				<div class="blanc  flex_h flex_wrap  " style="overflow: auto;">
-					<?
+					<?php
 						$RS_TMP = $APP_TMP->find()->sort(['nom' . ucfirst($TABLE_TYPE) => 1, 'code' . ucfirst($TABLE_TYPE) => 1]);
 						while ($ARR_TMP = $RS_TMP->getNext()) {
 							$value_id = (int)$ARR_TMP[$NAME_ID];
@@ -57,7 +57,7 @@
 									<div class="aligncenter">(<?= $res_det->count(); ?>)</div>
 								</div>
 							</div>
-						<? }
+						<?php }
 						$RS_TMP->reset(); ?>
 				</div>
 				<div class="flex_main">
@@ -76,7 +76,7 @@
 				<div class="padding_more ededed">
 					<input data-quickFind="" data-quickFind-where="dispatch<?= $table ?>" data-quickFind-tag="[draggable]" data-quickFind-parent=".sparent" type="text"/>
 				</div>
-				<?
+				<?php
 					$res_det = $APP->find([$NAME_ID => ['$in' => [null, 0, '']]])->sort(['nom' . $Table => 1, 'code' . $Table => 1]);;
 				?>
 				<div class="flex_main flex_h flex_margin padding_more ededed" style="overflow-y: hidden;overflow-x: auto;" id="dispatch<?= $table ?>">
@@ -85,14 +85,14 @@
 							<?= idioma('Sans ') ?> (<?= $res_det->count(); ?>)
 						</div>
 						<div class="applink applinkblock flex_main " data-append="true" dropzone data-vars="vars[<?= $NAME_ID ?>]=" style="overflow-y:auto;overflow-x:hidden;">
-							<?
+							<?php
 								while ($arr_det = $res_det->getNext()) {
 									?>
 									<a draggable="true" data-vars="table=<?= $table ?>&table_value=<?= $arr_det['id' . $table] ?>"><?= $arr_det['nom' . $Table] ?></a>
-								<? } ?>
+								<?php } ?>
 						</div>
 					</div>
-					<?
+					<?php
 						$RS_TMP = $APP_TMP->find()->sort(['nom' . $Table => 1, 'code' . $Table => 1]);
 						while ($ARR_TMP = $RS_TMP->getNext()) {
 							$value_id = (int)$ARR_TMP[$NAME_ID];
@@ -105,16 +105,16 @@
 									<div class="ellipsis"><?= $name ?> (<?= $res_det->count(); ?>)</div>
 								</div>
 								<div class="applink applinkblock flex_main" data-append="true" dropzone data-vars="vars[<?= $NAME_ID ?>]=<?= $value_id ?>" style="overflow-y:auto;overflow-x:hidden;">
-									<?
+									<?php
 										while ($arr_det = $res_det->getNext()) {
 											?>
 											<a draggable="true" data-vars="table=<?= $table ?>&table_value=<?= $arr_det['id' . $table] ?>"><?= $arr_det['nom' . $Table] ?></a>
-											<?
+											<?php
 										}
 									?>
 								</div>
 							</div>
-						<? } ?>
+						<?php } ?>
 				</div>
 			</div>
 		</div>

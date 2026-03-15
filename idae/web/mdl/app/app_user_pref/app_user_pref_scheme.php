@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 
 
@@ -48,7 +48,7 @@
 	</div>
 	<div id="user_pref_ch_<?=$table?>" class="flex_main applink applinkblock blanc" style="overflow-y:auto;overflow-x:hidden;">
 		<div main_auto_tree>
-			<? while ($arr = $RSTYPE->getNext()) {
+			<?php while ($arr = $RSTYPE->getNext()) {
 				$RSSCHEME = $APP_SCH->get_schemes(['idappscheme_type' => (int)$arr['idappscheme_type']])->sort(['nomAppscheme' => 1]);
 				?>
 				<div class="sparent">
@@ -61,7 +61,7 @@
 					</label>
 				</div>
 				<div class="autoBlock flex_h flex_wrap flex_align_top">
-					<? foreach ($RSSCHEME as $sch):
+					<?php foreach ($RSSCHEME as $sch):
 						$table = $sch['codeAppscheme'];
 						if (!droit_table($_SESSION['idagent'], 'R', $table)) continue;
 						if (!droit_table($_SESSION['idagent'], 'C', $table) && $code == 'app_menu_create') continue;
@@ -75,15 +75,15 @@
 							       value="1" <?= checked($APP->get_settings($_SESSION['idagent'], $code . '_' . $table)); ?>>
 							&nbsp;<?= ucfirst($sch['nomAppscheme']) ?>
 						</label>
-					<? endforeach; ?>
+					<?php endforeach; ?>
 				</div>
 				</div>
-			<? } ?>
+			<?php } ?>
 			<div auto_tree class="padding margin borderb">
 				<label class="bold"><?= idioma('Non classés') ?></label>
 			</div>
 			<div class="autoBlock flex_h flex_wrap flex_align_top">
-				<? foreach ($RSNOSCHEME as $sch):
+				<?php foreach ($RSNOSCHEME as $sch):
 					$table = $sch['codeAppscheme'];
 					if (!droit_table($_SESSION['idagent'], 'R', $table)) continue;
 					if (!droit_table($_SESSION['idagent'], 'C', $table) && $code == 'app_menu_create') continue;
@@ -97,7 +97,7 @@
 						       value="1" <?= checked($APP->get_settings($_SESSION['idagent'], $code . '_' . $table)); ?>>
 						&nbsp;<?= ucfirst($sch['nomAppscheme']) ?>
 					</label>
-				<? endforeach; ?>
+				<?php endforeach; ?>
 			</div>
 		</div>
 	</div>

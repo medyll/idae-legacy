@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 
 	global $buildArr;
@@ -27,8 +27,8 @@
 			</div >
 		</div >
 		<div class = "flex_h flex_wrap flex_align_top  " >
-			<? foreach ($IMG_SIZE_ARR as $key => $value) { ?>
-					<?
+			<?php foreach ($IMG_SIZE_ARR as $key => $value) { ?>
+					<?php
 						if(empty($APP_TABLE['hasImage'.$key.'Scheme'])) continue;
 						// nom de l'image
 						$mongoImg = $table . '-' . $key . '-' . $table_value;
@@ -42,9 +42,9 @@
 					<div class = "margin_more padding_more"  >
 						<?= skelMdl::cf_module('app/app_img/image_dyn' , $vars , $mongoImg); ?>
 				</div >
-			<? } ?>
+			<?php } ?>
 		</div >
-		<?
+		<?php
 			if(!empty($APP_TABLE['hasImagePelemeleScheme'])):
 				$pmvars = array( 'mongoSize'     => 'large' ,
 				                 'mongoTag'      => $table ,
@@ -64,7 +64,7 @@
 				<a onClick = "ajaxMdl('app/app_img/app_img_upload','pele mele ','<?= http_build_query($pmvars) ?>')" >
 					<i class = "fa fa-plus-circle" ></i > <?= idioma('Ajouter une image pele-mele') ?>
 				</a >
-				<?
+				<?php
 				$reg = "/.*" . preg_quote($table, '/') . "-pelemele-large-" . preg_quote((string)$table_value, '/') . "-.*/";
 				$db = $APP->plug_base('sitebase_image'); //$con->sitebase_image;
 				$grid = $db->getGridFS();
@@ -89,7 +89,7 @@
 					<div >
 						<?= skelMdl::cf_module('app/app_img/image_dyn' , $vars , $mongoImg); ?>
 					</div >
-					<?
+					<?php
 					//}
 				}
 			endif;

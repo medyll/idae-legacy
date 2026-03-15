@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 	ini_set('display_errors', 0);
 	if (empty($_POST['table'])) return;
@@ -27,7 +27,7 @@
 	$dateDebut = $dateStart->format('Y-m-d');
 	$dateFin   = $dateEnd->format('Y-m-d');
 ?>
-<!--<input type="hidden" name="table" value="<? /*= $table */ ?>">-->
+<!--<input type="hidden" name="table" value="<?php /*= $table */ ?>">-->
 <div id="form<?= $uniqid ?>" class="parent_form flex_h flex_align_middle  blanc " main_auto_tree>
 	<div class="flex_v  flex_main">
 		<div class="flex_h  flex_align_middle borderb">

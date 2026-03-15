@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 	$APP  = new App('opportunite');
 	$APPS = new App('opportunite_statut');
@@ -36,12 +36,12 @@
 		<input type="hidden" name="proprietaireAgent" value="<?= $_SESSION['idagent']; ?>"/>
 		<input type="hidden" name="idagent_writer" value="<?= $_SESSION['idagent']; ?>"/>
 		<input type="hidden" name="reloadModule[app/app_planning/app_planning_opportunite_reload]" value="*"/>
-		<? if (!empty($_POST['add_table']) && !empty($_POST['add_table_value'])) { ?>
+		<?php if (!empty($_POST['add_table']) && !empty($_POST['add_table_value'])) { ?>
 			<input type="hidden" name="vars[id<?= $_POST['add_table'] ?>]" value="<?= $_POST['add_table_value'] ?>">
-		<? } ?>
-		<? foreach ($vars as $key => $input): ?>
+		<?php } ?>
+		<?php foreach ($vars as $key => $input): ?>
 			<input type="hidden" name="vars[<?= $key ?>]" value="<?= $input ?>">
-		<? endforeach; ?>
+		<?php endforeach; ?>
 		<div class=" ">
 			<div class="relative nth2">
 				<div class="flex_h flex_align_top flex_margin nth2">
@@ -54,13 +54,13 @@
 								</td>
 								<td><?= $selectA ?></td>
 							</tr>
-							<? if (empty($_POST['add_table']) && (empty($_POST['vars']['idclient']) || empty($_POST['vars']['idprospect']))) { ?>
+							<?php if (empty($_POST['add_table']) && (empty($_POST['vars']['idclient']) || empty($_POST['vars']['idprospect']))) { ?>
 								<tr>
 									<td colspan="2" style="padding:0!important;">
 										<?= skelMdl::cf_module('app/app_field_add', array('field' => ['prospect', 'client'],'vars'=>['idagent'=>$_SESSION['idagent']])) ?>
 									</td>
 								</tr>
-							<? } ?></table>
+							<?php } ?></table>
 					</div>
 				</div> 
 				<div class="flex_h flex_align_top flex_margin nth2">
@@ -149,7 +149,7 @@
 								<td>
 									<?= idioma("Commentaires") ?>
 								</td>
-								<td colspan="3"><?//=str_replace(APPMDL,'',__DIR__)?>
+								<td colspan="3"><?php//=str_replace(APPMDL,'',__DIR__)?>
 									<textarea class="inputLarge" name="vars[descriptionOpportunite]" onkeyup="$('oppo_zone').loadModule('app/app_custom/opportunite/opportunite_create_log','table=opportunite&descriptionOpportunite='+this.value)"></textarea>
 								<div id="oppo_zone"></div>
 								</td>
@@ -166,12 +166,12 @@
 	</form>
 </div>
 <div class="enteteFor">
-	<? if (!empty($_POST['add_table']) && !empty($_POST['add_table_value'])) {
+	<?php if (!empty($_POST['add_table']) && !empty($_POST['add_table_value'])) {
 		$APP_TMP = new App($_POST['add_table']);
 		$arr_tmp = $APP_TMP->findOne(['id'.$_POST['add_table']=>(int)$_POST['add_table_value']]);
 		?>
 		<div class=" "><?= skelMdl::cf_module('app/app/app_menu', ['table' => $_POST['add_table'], 'table_value' => $_POST['add_table_value']]) ?></div>
-	<? } ?>
+	<?php } ?>
 	<div class="titre_entete fond_noir color_fond_noir "><?= idioma('Nouvelle opportunité').' '.$arr_tmp['nom'.ucfirst($_POST['add_table'])] ?></div>
 </div>
 <script>

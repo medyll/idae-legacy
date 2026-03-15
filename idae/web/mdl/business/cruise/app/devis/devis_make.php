@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 
 	$path_to_devis = 'business/cruise/app/devis/';
@@ -68,12 +68,12 @@
 		}
 	}*/
 ?>
-<? if ($arr_type['codeDevis_type'] != 'STE'): ?>
+<?php if ($arr_type['codeDevis_type'] != 'STE'): ?>
 	<script>
 		load_table_in_zone ('table=devis_acompte&vars[iddevis]=<?=$iddevis?>', 'zone_a<?=$iddevis?>');
 		load_table_in_zone ('table=devis_passager&vars[iddevis]=<?=$iddevis?>', 'zone_pas<?=$iddevis?>');
 	</script>
-<? endif; ?>
+<?php endif; ?>
 <div class="blanc flex_h" style="overflow:hidden;width:100%;height:100%;" id="mainDevis">
 	<div class="frmCol1  applink applinkblock">
 		<div class="alignright padding borderb flex_h">
@@ -85,7 +85,7 @@
 			<a onclick="$('build<?= $uniqkey ?>').toggleContent()"><i class="fa fa-info-circle"></i> <?= idioma('Détails') ?> </a>
 			<a onclick="$('preview<?= $uniqkey ?>').toggleContent()"><i class="fa fa-eye"></i> <?= idioma('Visualiser version client') ?> </a>
 		</div>
-		<? //  if ($arr_type['codeDevis_type'] != 'STE'): ?>
+		<?php //  if ($arr_type['codeDevis_type'] != 'STE'): ?>
 			<br>
 			<a onclick="act_chrome_gui('app/app_custom/mail/mail_send','iddevis=<?= $arr['iddevis'] ?>')">
 				<i class="fa fa-at"></i>&nbsp;Envoyer un mail
@@ -115,7 +115,7 @@
 					</a>
 				</div>
 			</div>
-		<? // endif; ?>
+		<?php // endif; ?>
 		<div>
 			<div class="padding margin">
 				<div style="position:relative;width:100px;" id="drag_perso">

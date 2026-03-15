@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 
 	$_POST['defer'] = '';
@@ -57,7 +57,7 @@
 				<tbody style="z-index:0;">
 				<tr class="">
 					<td class="borderr ededed aligncenter" style="width: 40px;"><i class="fa fa-calendar-o"></i></td>
-					<?  for ($i = 0; $i < $maxJours; $i++) {
+					<?php  for ($i = 0; $i < $maxJours; $i++) {
 						$witDate = date("Y-m-d", mktime(12, 0, 0, $moisEnCours, $premierJourSemaine + $i, $anneeEnCours));
 						?>
 						<td valign="top" class="">
@@ -69,7 +69,7 @@
 				              </span>
 							</div>
 						</td>
-					<? } ?>
+					<?php } ?>
 					<td class="cccccc" style="width: 17px;"></td>
 				</tr>
 				</tbody>
@@ -83,21 +83,21 @@
 				<tbody style="z-index:0;">
 				<tr class="evenement borderb">
 					<td class="borderr aligncenter" style="width: 40px;">AM</td>
-					<?  for ($i = 0; $i < $maxJours; $i++) {
+					<?php  for ($i = 0; $i < $maxJours; $i++) {
 						$witDate = date("Y-m-d", mktime(12, 0, 0, $moisEnCours, $premierJourSemaine + $i, $anneeEnCours));
 						?>
 						<td data-droptache="dropzone" valign="top" class="evenement  avoid" heuredebut="AM"
 						    dropvalue="<?= date_fr($witDate) ?>"></td>
-					<? } ?>
+					<?php } ?>
 				</tr>
 				<tr class="evenement">
 					<td class="aligncenter" style="width: 40px;">PM</td>
-					<?  for ($i = 0; $i < $maxJours; $i++) {
+					<?php  for ($i = 0; $i < $maxJours; $i++) {
 						$witDate = date("Y-m-d", mktime(12, 0, 0, $moisEnCours, $premierJourSemaine + $i, $anneeEnCours));
 						?>
 						<td data-droptache="dropzone" valign="top" class="evenement  avoid " heuredebut="PM"
 						    dropvalue="<?= date_fr($witDate) ?>"></td>
-					<? } ?>
+					<?php } ?>
 				</tr>
 				</tbody>
 			</table>
@@ -117,7 +117,7 @@
 			       style="width:100%;table-layout:fixed;" cellspacing="0" cellpadding="0">
 				<tbody style="z-index:10;">
 				<tr class="">
-					<td class="borderr" style="width: 40px;"><?
+					<td class="borderr" style="width: 40px;"><?php
 							// de 07 à 20h
 							for ($hr = 7; $hr < 23; $hr++) {
 								if ($hr == 12) {
@@ -146,15 +146,15 @@
 								<div class="hPile<?= $clf ?> calday aligncenter">
 									<?= '45' ?>
 								</div>
-							<? } ?></td>
-					<?
+							<?php } ?></td>
+					<?php
 						/*skelMongo::connect('activity','sitebase_base')->ensureIndex(array('dateActivite'=>1));
 						  skelMongo::connect('activity','sitebase_base')->ensureIndex(array('heureActivite'=>1));
 						  skelMongo::connect('activity','sitebase_base')->ensureIndex(array('idagent'=>1));*/
 						for ($i = 0; $i < $maxJours; $i++) {
 							$witDate = date("Y-m-d", mktime(12, 0, 0, $moisEnCours, $premierJourSemaine + $i, $anneeEnCours));
 							?>
-							<td class="tdcalday"><?
+							<td class="tdcalday"><?php
 									// de 07 à 20h
 									for ($hr = 7; $hr < 23; $hr++) {
 										if ($hr == 12) {
@@ -179,14 +179,14 @@
 											     heuredebut="<?= $hr . ':' . $hour . ':00' ?>"
 											     dropvalue="<?= date_fr($witDate) ?>"> 
 											</div>
-										<? endforeach;
+										<?php endforeach;
 									} ?></td>
-						<? } ?>
+						<?php } ?>
 				</tr>
 				</tbody>
 			</table>
 			<div class="padding">
-				<?//= skelMdl::cf_module('app/app_planning/app_planning_tache_reload', array('defer' => 'true', 'maxJours' => $maxJours, 'tableparent' => 'DIVPlanningHebdo', 'sd' => $_POST['sd']) ); ?>
+				<?php//= skelMdl::cf_module('app/app_planning/app_planning_tache_reload', array('defer' => 'true', 'maxJours' => $maxJours, 'tableparent' => 'DIVPlanningHebdo', 'sd' => $_POST['sd']) ); ?>
 			</div>
 		</div>
 	</div>

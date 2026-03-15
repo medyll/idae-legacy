@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 
 	$tpl_path = 'customer/' . CUSTOMERNAME . '/devis/devis_agent';;

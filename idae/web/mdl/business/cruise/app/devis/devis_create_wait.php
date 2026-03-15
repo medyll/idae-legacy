@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 	$APP          = new App('produit');
 	$APP_PREST    = new App('devis_prestation');
@@ -20,30 +20,30 @@
 		<div class="titre_entete">
 			<i class="fa fa-warning fa-2x"></i>
 		</div>
-		<? if (empty($_POST['vars']['idproduit'])) { ?>
+		<?php if (empty($_POST['vars']['idproduit'])) { ?>
 			<div class="titre_entete ">
 				<?= idioma('Produit manquant') ?>
 			</div>
-		<? } ?>
-		<? if (empty($_POST['vars']['idproduit_tarif'])) { ?>
+		<?php } ?>
+		<?php if (empty($_POST['vars']['idproduit_tarif'])) { ?>
 			<div class="titre_entete ">
 				<?= idioma('Date de départ manquante') ?>
 			</div>
-		<? } ?>
-		<? if (empty($_POST['vars']['idproduit_tarif_gamme'])) { ?>
+		<?php } ?>
+		<?php if (empty($_POST['vars']['idproduit_tarif_gamme'])) { ?>
 			<div class="titre_entete ">
 				<?= idioma('Cabine manquante') ?>
 			</div>
-		<? } ?>
-		<? if (empty($_POST['vars']['idclient'])) { ?>
+		<?php } ?>
+		<?php if (empty($_POST['vars']['idclient'])) { ?>
 			<div class="titre_entete ">
 				<?= idioma('Client manquant') ?>
 			</div>
-		<? } ?>
+		<?php } ?>
 		<div class="titre_entete">
 			<button onclick="$('div_devis_create_wait').hide()">Retour</button>
 		</div>
-		<?
+		<?php
 		return;
 	}
 
@@ -106,13 +106,13 @@
 	<div class="loading  aligncenter  margin   padding">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div>
 </div>
 <script>
-	<?
+	<?php
 	if(empty($_POST['vars']['idproduit']) || empty($_POST['vars']['idproduit_tarif']) || empty($_POST['vars']['idproduit_tarif_gamme']) ||   empty($_POST['vars']['idclient'])){
 			 ?>
 
-	<? }else{ ?>
+	<?php }else{ ?>
 	setTimeout(function () {
 		//	ajaxValidation('app_create', 'mdl/app/', 'table=devis&<?=$APP->translate_vars($_POST['vars'])?>');
 	}.bind(this), 2500);
-	<? } ?>
+	<?php } ?>
 </script>

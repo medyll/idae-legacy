@@ -10,7 +10,7 @@
 
 ?>
 	<style>
-		<? if(!empty($APP->get_settings($_SESSION['idagent'],'app_gui_color'))){
+		<?php if(!empty($APP->get_settings($_SESSION['idagent'],'app_gui_color'))){
 		$app_gui_color = $APP->get_settings($_SESSION['idagent'],'app_gui_color');
 		$co = hex2rgb($app_gui_color);
 		$rgb  = $co[0].','.$co[1].','.$co[2];
@@ -38,8 +38,8 @@
 			position: absolute;width: 100%;height: 2px;display: block;content: " ";background-color: <?=$app_gui_color?>;
 		}
 
-		<?}?>
-		<? if(!empty($APP->get_settings($_SESSION['idagent'],'app_gui_color_gui'))){
+		<?php}?>
+		<?php if(!empty($APP->get_settings($_SESSION['idagent'],'app_gui_color_gui'))){
 		$app_gui_color_gui = $APP->get_settings($_SESSION['idagent'],'app_gui_color_gui');
 		$app_gui_color_gui_contrast = color_contrast($app_gui_color_gui);
 		$app_gui_color_gui_contrast_contrast = color_contrast($app_gui_color_gui_contrast);
@@ -71,6 +71,6 @@
 			background: transparent linear-gradient(45deg, rgba(<?=$rgb?>, 0.7), rgba(<?=$rgb?>, 0.3), rgba(<?=$rgb?>, 0.4)) repeat scroll 0% 0% !important;
 		}
 		.taskBar  .buttonbody{display: table-cell;padding: 0 0.5em;text-shadow:0 0 2px <?=$app_gui_color_gui?>}
-		<?}?>
+		<?php}?>
 	</style>
 

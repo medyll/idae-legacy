@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 
 	ini_set('display_errors', 55);
@@ -91,7 +91,7 @@
 		</div>
 	</div>
 	<div class="flex_h flex_wrap flex_align_top margin retrait">
-		<? foreach ($periode as $code_periode => $val_periode) {
+		<?php foreach ($periode as $code_periode => $val_periode) {
 			$ARR_DATE       = $periode[$code_periode]['dates'];
 			$date_begin     = $ARR_DATE[0];
 			$date_end       = $ARR_DATE[1];
@@ -126,16 +126,16 @@
 							<div class="retrait textgrisfonce"> <?= $titre_period ?></div>
 						</div>
 						<div class="padding none">
-							<? if (!empty($_POST['table'])) { ?>
+							<?php if (!empty($_POST['table'])) { ?>
 								<?= $rs_tot->count() ?> <?= idioma('debut') ?> ,
 								<?= $rs_tot_deb->count() ?> <?= idioma('debut') ?> ,
 								<?= $rs_tot_fin->count() ?> <?= idioma('fin') ?>
-							<? } ?>
+							<?php } ?>
 						</div>
 					</div>
 				</div>
 				<div style="margin-left:45px;overflow:auto;width:auto;" class="flex_h flex_wrap flex_margin">
-					<?
+					<?php
 						for ($i = $date_begin; $date_begin <= $date_end; $i->modify('+1 day')) {
 							$dadate      = $i->format("Y-m-d");
 							$datime      = strtotime($dadate);
@@ -156,7 +156,7 @@
 									<div class="padding ellipsis"><i class="fa fa-calendar-o"></i><?=$test_count?> <?= fonctionsProduction::jourMoisDate_fr_short($dadate) ?></div>
 								</div>
 								<div boucle scheme table class="">
-									<? foreach ($arr_sc as $key => $value) {
+									<?php foreach ($arr_sc as $key => $value) {
 										$dsp = '';
 
 										$table      = $value['codeAppscheme'];
@@ -170,11 +170,11 @@
 										$BIG_ARR[$key]['table'][$key][$dadate] = $table;
 										?>
 										<div>
-											<? if (empty($_POST['table'])) { ?>
+											<?php if (empty($_POST['table'])) { ?>
 												<div auto_tree class="margin padding "><div><i class="fa fa-<?= $value['icon'] ?> textbleu"></i> <?= ucfirst($value['nomAppscheme']) ?></div></div>
-											<? } ?>
-											<div class="" style="display:<?//= $dsp ?>;overflow:hidden;">
-												<? $stille_here = [];
+											<?php } ?>
+											<div class="" style="display:<?php//= $dsp ?>;overflow:hidden;">
+												<?php $stille_here = [];
 
 													foreach ($ARR_TYPE_DATE as $k_date => $val_date) {
 														//$rset           = 'rs_tmp' . $val_date; //
@@ -196,14 +196,14 @@
 														<div class="flex flex_h flex_align_middle bordert edededHover">
 															<div class="flex_h flex_align_middle borderr applink  aligncenter" style="width:30px;">
 																<a onclick="<?= $onclick ?>"><i class="fa fa-eye textbold"></i>
-																	<? if ($count_date != 1) { ?><? } ?>
-																	<? if ($count_date != $count_date_all) { ?>
+																	<?php if ($count_date != 1) { ?><?php } ?>
+																	<?php if ($count_date != $count_date_all) { ?>
 																		<br><?= $count_date ?>
-																	<? } ?></a>
+																	<?php } ?></a>
 																&nbsp;
 															</div>
 															<div class="flex_main" style="overflow: hidden;">
-																<?
+																<?php
 																	while ($arr_tmp = $rset->getNext()) {
 																		$value_id = (int)$arr_tmp['id' . $table];
 																		if (!empty($stille_here[$value_id])) continue;
@@ -213,15 +213,15 @@
 																		   data-vars="table=<?= $table ?>&table_value=<?= $value_id ?>">
 																			<i class="fa fa-<?= $ARR_TYPE_DATE_ICON[$k_date] ?> fa-fw"></i> <?= $arr_tmp['nom' . ucfirst($table)]; ?>
 																		</a>
-																		<?
+																		<?php
 																	}
 																?>
 															</div>
 														</div>
-													<? } ?>
+													<?php } ?>
 											</div>
 										</div>
-										<?
+										<?php
 										// $dsp='none';
 									}
 
@@ -229,18 +229,18 @@
 											<style>/*#eche_table_empty<?=$datime?> {
 													display : none
 												}*/</style>
-										<? } ?>
+										<?php } ?>
 								</div>
 							</div>
-						<? } ?>
+						<?php } ?>
 				</div>
 			</div>
-			<? if ($count_empty_month == 0) { ?>
+			<?php if ($count_empty_month == 0) { ?>
 				<style>/*#month_table_empty<?=$datime?> {
 						display : none
 					}*/</style>
-			<? } ?>
-			<?
+			<?php } ?>
+			<?php
 		} ?>
 	</div>
 </div>
