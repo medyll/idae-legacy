@@ -6,20 +6,20 @@ namespace {
     // Each test resets $_POST['table'] before including the service; the App stub
     // reads that value so query() targets the right collection.
 
-    if (!class_exists('fonctionsProduction')) {
+    if (!class_exists('fonctionsProduction', false)) {
         class fonctionsProduction {
             public static function cleanPostMongo($vars, $a = 1) { return $vars; }
         }
     }
 
-    if (!class_exists('Act')) {
+    if (!class_exists('Act', false)) {
         class Act {
             public static function decodeVars($arr) { return $arr; }
             public static function imageSite($table, $id, $size, ...$rest) { return ''; }
         }
     }
 
-    if (!class_exists('App')) {
+    if (!class_exists('App', false)) {
         class App {
             /** @var array<string,mixed> */
             public array $app_table_one;
@@ -81,6 +81,7 @@ use Idae\Tests\TestCase;
  *  - MONGO_ENV=test and mongo-test sidecar reachable (see BUG-03 / status.yaml)
  *  - json_data.php must use `return` not `exit` to be require-safe (done 2026-03-15)
  */
+#[\PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses]
 class JsonDataRegressionTest extends TestCase
 {
     protected array $collectionsToClean = ['produit', 'agent', 'appscheme'];
