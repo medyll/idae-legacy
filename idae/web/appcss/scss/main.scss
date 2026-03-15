@@ -9,11 +9,18 @@
 // ---- Core modules (CSS output in order) ----
 @use "style" as *;
 @use "css/table";
+@use "css/flex";
 @use "css/global-tokens";
 
 // ---- App modules ----
+@use "interface";
 @use "appsite";
 @use "datatable";
+@use "notifier";
+@use "pikaday";
+@use "sortable";
+@use "swiper-override";
+@use "skin/skin-default";
 
 // ---- Inline rules from main.less -------------------------------------------
 h1,h2,h3,h4 {
