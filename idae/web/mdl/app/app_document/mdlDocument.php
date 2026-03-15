@@ -1,4 +1,4 @@
-<? 
+<?php 
 include_once($_SERVER['CONF_INC']);
 ini_set('display_errors',55);
 $time 	= time();   
@@ -19,7 +19,7 @@ $rs 	= $base->find()->sort(array('metadata.date'=>-1));
       </tr>
     </thead>
     <tbody class="toggler" id="tbody_doc">
-<?
+<?php
 while($do=$rs->getNext()){ 
 	$arr = $do->file;
 ?>
@@ -29,7 +29,7 @@ while($do=$rs->getNext()){
           </a></td>
         <td><?=date_fr($arr['metadata']['date'])?></td>
       </tr>
-      <? }?>
+      <?php }?>
     </tbody>
   </table>
 </div>

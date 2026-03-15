@@ -13,8 +13,8 @@
 	$GRILLE_FK = $APP_TMP->get_grille_fk();
 
 ?>
-<? if (!empty($table)): ?>
-	<? if (droit('ADMIN')): ?>
+<?php if (!empty($table)): ?>
+	<?php if (droit('ADMIN')): ?>
 		<div>
 			<a data-menu="" data-clone="data-clone">
 				<i class="fa fa-cogs textrouge"></i>
@@ -36,5 +36,5 @@
 				</div>
 			</div>
 		</div>
-	<? endif; ?>
-<? endif; ?>
+	<?php endif; ?>
+<?php endif; ?>

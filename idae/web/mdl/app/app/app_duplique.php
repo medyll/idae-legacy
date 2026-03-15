@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 	ini_set('display_errors', 55);
 	// POST
@@ -41,9 +41,9 @@
 		<input type="hidden" name="vars[m_mode]" value="1"/>
 		<div class="flex_h">
 			<div class="padding flex_v" style="max-width:170px">
-				<? if (!empty($APP_TABLE['hasBoolScheme'])): ?>
+				<?php if (!empty($APP_TABLE['hasBoolScheme'])): ?>
 					<div class="aligncenter  padding">
-						<? foreach ($arrFieldsBool as $field => $arr_ico):
+						<?php foreach ($arrFieldsBool as $field => $arr_ico):
 							$fa         = empty($ARR[$field . ucfirst($table)]) ? 'circle-thin' : 'check-circle';
 							$css        = empty($ARR[$field . ucfirst($table)]) ? 'textgris' : 'textvert';
 							$input_name = "vars[" . $field . ucfirst($table) . "]";
@@ -53,10 +53,10 @@
 								&nbsp;
 								<input name="<?= $input_name ?>" type="range" min="0" max="1" value="<?= $ARR[$field . ucfirst($table)] ?>" style="width:40px;height:15px;vertical-align: middle;"/>
 							</div>
-						<? endforeach; ?></div>
-				<? endif ?>
+						<?php endforeach; ?></div>
+				<?php endif ?>
 			</div>
-			<?
+			<?php
 
 				if (file_exists(APPMDL . '/app/app_custom/' . $table . '/' . $table . '_update_fragment.php')) {
 					echo '<div class="">' . skelMdl::cf_module('/app/app_custom/' . $table . '/' . $table . '_update_fragment', $_POST) . '</div>';
@@ -75,7 +75,7 @@
 						</tr>
 					</table>
 					<hr>
-					<? foreach ($ARR_GROUP_FIELD as $key => $val) {
+					<?php foreach ($ARR_GROUP_FIELD as $key => $val) {
 						$arrg = $val['group'];
 						$arrf = $val['field'];
 						?>
@@ -84,7 +84,7 @@
 								<div class="none"><?= $arrg['iconAppscheme_field_group'] ?></div>
 							</div>
 							<div class="flex_h flex_wrap" style="width:550px;">
-								<? foreach ($arrf as $keyf => $valf) {
+								<?php foreach ($arrf as $keyf => $valf) {
 									if($valf['codeAppscheme_field']=='nom'){
 										$ARR[$valf['codeAppscheme_field'] . $Table] = 'copie - '.$ARR[$valf['codeAppscheme_field'] . $Table];
 									}
@@ -101,15 +101,15 @@
 											</tr>
 										</table>
 									</div>
-								<? } ?>
+								<?php } ?>
 							</div>
 						</div>
-					<? } ?>
-					<? if (sizeof($GRILLE_RFK) != 0) { ?>
+					<?php } ?>
+					<?php if (sizeof($GRILLE_RFK) != 0) { ?>
 						<hr>
 						<div class="applink">
 							<table class="table_form table_middle">
-								<?
+								<?php
 									foreach ($GRILLE_RFK as $arr_fk):
 										$vars_rfk['vars']        = ['id' . $table => $table_value];
 										$vars_rfk['table']       = $arr_fk['table'];
@@ -124,15 +124,15 @@
 												</label>
 											</td>
 										</tr>
-									<? endforeach; ?>
+									<?php endforeach; ?>
 							</table>
 						</div>
-					<? } ?>
+					<?php } ?>
 				</div>
 			</div>
 			<div class="ededed borderl">
 				<br>
-				<?
+				<?php
 					$arr_has = ['statut', 'type','group'];
 					foreach ($arr_has as $key => $value):
 						$Value  = ucfirst($value);
@@ -155,12 +155,12 @@
 									       class="inputMedium"/>
 								</div>
 							</div>
-						<? endif; ?>
-					<? endforeach; ?>
+						<?php endif; ?>
+					<?php endforeach; ?>
 
-				<? if (sizeof($GRILLE_FK != 0)): ?>
+				<?php if (sizeof($GRILLE_FK != 0)): ?>
 					<div class="padding margin">
-					<?
+					<?php
 					if (!empty($ARR['idclient'])) unset($GRILLE_FK['prospect']);
 					if (!empty($ARR['idprospect'])) unset($GRILLE_FK['client']);
 
@@ -180,7 +180,7 @@
 							<input datalist_input_name="vars[<?= $id ?>]" datalist_input_value="<?= $ARR[$id] ?>" datalist="app/app_select" populate name="vars[<?= $nom ?>]" paramName="search" vars="table=<?= $field['table_fk'] ?>"
 							       value="<?= $dsp_name ?>" type="text" class="inputMedium"/>
 						</div>
-					<? endforeach; ?></div><? endif; ?>
+					<?php endforeach; ?></div><?php endif; ?>
 			</div>
 		</div>
 		<br>

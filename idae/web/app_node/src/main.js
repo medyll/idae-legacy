@@ -76,9 +76,9 @@ async function bootstrap() {
     // 6. Start Cron
     cronService.start();
 
-    // 7. Listen
-    server.listen(config.port, () => {
-        console.log(`[BOOT] Server listening on port ${config.port}`);
+    // 7. Listen — bind 0.0.0.0 so Docker inter-container traffic can reach us
+    server.listen(config.port, '0.0.0.0', () => {
+        console.log(`[BOOT] Server listening on 0.0.0.0:${config.port}`);
         console.log(`[BOOT] Environment: ${config.env}`);
     });
     

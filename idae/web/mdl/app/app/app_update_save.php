@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 	ini_set('display_errors', 55);
 	// POST
@@ -43,16 +43,16 @@
 		<input type="hidden" name="vars[m_mode]" value="1"/>
 		<div class="flex_h">
 			<div class="padding flex_v" style="max-width:170px">
-				<? if (!empty($APP_TABLE['hasImageScheme'])): ?>
+				<?php if (!empty($APP_TABLE['hasImageScheme'])): ?>
 					<div class="aligncenter">
 						<div class=" ededed inline aligncenter" style="width:150px;height:150px;">
 							<img style="max-width:100%;" src="<?= Act::imgApp($table, $table_value, 'square') ?>">
 						</div>
 					</div>
-				<? endif ?>
-				<? if (!empty($APP_TABLE['hasBoolScheme'])): ?>
+				<?php endif ?>
+				<?php if (!empty($APP_TABLE['hasBoolScheme'])): ?>
 					<div class="aligncenter  padding">
-						<? foreach ($arrFieldsBool as $field => $arr_ico):
+						<?php foreach ($arrFieldsBool as $field => $arr_ico):
 							$fa         = empty($ARR[$field . ucfirst($table)]) ? 'circle-thin' : 'check-circle';
 							$css        = empty($ARR[$field . ucfirst($table)]) ? 'textgris' : 'textvert';
 							$input_name = "vars[" . $field . ucfirst($table) . "]";
@@ -62,12 +62,12 @@
 								&nbsp;
 								<input name="<?= $input_name ?>" type="range" min="0" max="1" value="<?= $ARR[$field . ucfirst($table)] ?>" style="width:40px;height:15px;vertical-align: middle;"/>
 							</div>
-						<? endforeach; ?></div>
-				<? endif ?>
+						<?php endforeach; ?></div>
+				<?php endif ?>
 			</div>
 			<div class="flex_main">
 				<table class="table_info">
-					<? if (!empty($APP_TABLE['hasNomSddcheme'])): ?>
+					<?php if (!empty($APP_TABLE['hasNomSddcheme'])): ?>
 						<tr class="aligncenter">
 							<td colspan="4">
 								<div class="ms-TextField ms-TextField--underlined">
@@ -76,8 +76,8 @@
 								</div>
 							</td>
 						</tr>
-					<? endif ?>
-					<? foreach ($arr_dsp_fields as $key => $value):
+					<?php endif ?>
+					<?php foreach ($arr_dsp_fields as $key => $value):
 						//
 						continue;
 						$title     = $value['title'];
@@ -89,7 +89,7 @@
 							<td>
 								<label class="ms-Label"><?= ucfirst(idioma($title)) ?></label>
 							</td>
-							<?
+							<?php
 								switch ($field_raw):
 									case "description":
 										?>
@@ -98,11 +98,11 @@
 												<textarea name="vars[<?= $field ?>]" class="ms-TextField-field"><?= $val ?></textarea>
 											</div>
 										</td>
-										<?
+										<?php
 										break;
 									case "lpko":
 										?>
-										<?
+										<?php
 										break;
 									default:
 										?>
@@ -111,40 +111,40 @@
 												<input name="vars[<?= $field ?>]" value="<?= $val ?>" class="ms-TextField-field" type="text">
 											</div>
 										</td>
-										<?
+										<?php
 										break;
 								endswitch; ?>
 						</tr>
-					<? endforeach; ?>
+					<?php endforeach; ?>
 				</table>
 				<table class="table_form">
 					<tr class=" marginb">
-						<? if (!empty($APP_TABLE['hasOrdreScheme'])): ?>
+						<?php if (!empty($APP_TABLE['hasOrdreScheme'])): ?>
 							<td class="label">Ordre</td>
 							<td>
 								<input name="vars[ordre<?= $Table ?>]" type="text" class="inputSmall" value="<?= $ARR['ordre' . $Table] ?>">
 							</td>
-						<? endif ?>
-						<? if (!empty($APP_TABLE['hasQuantiteScheme'])): ?>
+						<?php endif ?>
+						<?php if (!empty($APP_TABLE['hasQuantiteScheme'])): ?>
 							<td class="label">Quantite</td>
 							<td>
 								<input name="vars[quantite<?= $Table ?>]" type="text" class="inputSmall" value="<?= $ARR['quantite' . $Table] ?>">
 							</td>
-						<? endif ?>
-						<? if (!empty($APP_TABLE['hasTypeScheme'])): ?>
+						<?php endif ?>
+						<?php if (!empty($APP_TABLE['hasTypeScheme'])): ?>
 							<td class="label">Type <?= $Table ?></td>
 							<td>
 								<input datalist_input_name="vars[<?= $id_type ?>]" datalist_input_value="<?= $arrType[$id_type] ?>" datalist="app/app_select" populate name="vars[<?= $nom_type ?>]" paramName="search" vars="table=<?= $table_type ?>" value="<?= $arrType[$nom_type] ?>"/>
 							</td>
-						<? endif ?>
-						<? if (!empty($APP_TABLE['hasCodeScheme'])):
+						<?php endif ?>
+						<?php if (!empty($APP_TABLE['hasCodeScheme'])):
 							if (is_array($ARR['code' . $Table])) $ARR['code' . $Table] = implode(';', $ARR['code' . $Table]);
 							?>
 							<td class="label">Code</td>
 							<td>
 								<input name="vars[code<?= $Table ?>]" type="text" value="<?= $ARR['code' . $Table] ?>">
 							</td>
-						<? endif ?>
+						<?php endif ?>
 					</tr>
 				</table>
 				<table class="table_form borderb marginb">
@@ -154,40 +154,40 @@
 							<input name="vars[nom<?= $Table ?>]" type="text" class="inputLarge" value="<?= $ARR['nom' . $Table] ?>">
 						</td>
 					</tr>
-					<? if (!empty($APP_TABLE['hasAtoutScheme'])): ?>
+					<?php if (!empty($APP_TABLE['hasAtoutScheme'])): ?>
 						<tr class="text-alert">
 							<td class="label">Atout</td>
 							<td colspan="5">
 								<input name="vars[atout<?= $Table ?>]" type="text" class="inputLarge" value="<?= $ARR['atout' . $Table] ?>">
 							</td>
 						</tr>
-					<? endif ?>
-					<? if (!empty($APP_TABLE['hasPetitNomScheme'])): ?>
+					<?php endif ?>
+					<?php if (!empty($APP_TABLE['hasPetitNomScheme'])): ?>
 						<tr class="" style="width:100%;">
 							<td class="label">Nom court</td>
 							<td colspan="5">
 								<input name="vars[petitNom<?= $Table ?>]" type="text" class="inputMedium" value="<?= $ARR['petitNom' . $Table] ?>">
 							</td>
 						</tr>
-					<? endif ?>
-					<? if (!empty($APP_TABLE['hasPrenomScheme'])): ?>
+					<?php endif ?>
+					<?php if (!empty($APP_TABLE['hasPrenomScheme'])): ?>
 						<tr class="" style="width:100%;">
 							<td class="label">Prénom</td>
 							<td colspan="5">
 								<input name="vars[prenom<?= $Table ?>]" type="text" class="inputLarge" value="<?= $ARR['prenom' . $Table] ?>">
 							</td>
 						</tr>
-					<? endif ?>
-					<? if (!empty($APP_TABLE['hasEmailScheme'])): ?>
+					<?php endif ?>
+					<?php if (!empty($APP_TABLE['hasEmailScheme'])): ?>
 						<tr class="" style="width:100%;">
 							<td class="label">Email</td>
 							<td colspan="5">
 								<input name="vars[email<?= $Table ?>]" type="text" class="inputMedium" value="<?= $ARR['email' . $Table] ?>">
 							</td>
 						</tr>
-					<? endif ?>
+					<?php endif ?>
 				</table>
-				<? if (!empty($APP_TABLE['hasTelephoneScheme'])): ?>
+				<?php if (!empty($APP_TABLE['hasTelephoneScheme'])): ?>
 					<table class="table_form borderb">
 						<tr class="">
 							<td class="label">Téléphone 1</td>
@@ -200,8 +200,8 @@
 							</td>
 						</tr>
 					</table>
-				<? endif ?>
-				<? if (!empty($APP_TABLE['hasAdresseScheme'])): ?>
+				<?php endif ?>
+				<?php if (!empty($APP_TABLE['hasAdresseScheme'])): ?>
 					<table class="table_form borderb">
 						<tr class="">
 							<td class="label">Adresse</td>
@@ -226,11 +226,11 @@
 							</td>
 						</tr>
 					</table>
-				<? endif ?>
-				<? if (!empty($APP_TABLE['hasPrixScheme']) || !empty($APP_TABLE['hasRefScheme'])): ?>
+				<?php endif ?>
+				<?php if (!empty($APP_TABLE['hasPrixScheme']) || !empty($APP_TABLE['hasRefScheme'])): ?>
 					<table class="table_form borderb">
 						<tr>
-							<? if (!empty($APP_TABLE['hasPrixScheme'])): ?>
+							<?php if (!empty($APP_TABLE['hasPrixScheme'])): ?>
 								<td class="label">Prix</td>
 								<td>
 									<input name="vars[prix<?= $Table ?>]" type="text" class="" value="<?= $ARR['prix' . $Table] ?>">
@@ -239,58 +239,58 @@
 								<td>
 									<input name="vars[oldPrix<?= $Table ?>]" type="text" class="" value="<?= $ARR['oldPrix' . $Table] ?>">
 								</td>
-							<? endif ?>
-							<? if (!empty($APP_TABLE['hasRefScheme'])): ?>
+							<?php endif ?>
+							<?php if (!empty($APP_TABLE['hasRefScheme'])): ?>
 								<td class="label">Reference</td>
 								<td>
 									<input name="vars[reference<?= $Table ?>]" type="text" value="<?= $ARR['reference' . $Table] ?>">
 								</td>
-							<? endif ?>
+							<?php endif ?>
 						</tr>
 					</table>
-				<? endif ?>
+				<?php endif ?>
 				<table class="table_form borderb">
-					<? if (!empty($APP_TABLE['hasDateScheme']) || !empty($APP_TABLE['hasHeureScheme'])): ?>
+					<?php if (!empty($APP_TABLE['hasDateScheme']) || !empty($APP_TABLE['hasHeureScheme'])): ?>
 						<tr class="" style="width:100%;">
-							<? if (!empty($APP_TABLE['hasDateScheme'])): ?>
+							<?php if (!empty($APP_TABLE['hasDateScheme'])): ?>
 								<td class="label">Date de début</td>
 								<td>
 									<input class="validate-date-au" name="vars[dateDebut<?= $Table ?>]" type="text" value="<?= date_fr($ARR['dateDebut' . $Table]) ?>">
 								</td>
-							<? endif ?>
-							<? if (!empty($APP_TABLE['hasDateScheme'])): ?>
+							<?php endif ?>
+							<?php if (!empty($APP_TABLE['hasDateScheme'])): ?>
 								<td class="label">Date de fin .</td>
 								<td>
 									<input class="validate-date-au" name="vars[dateFin<?= $Table ?>]" type="text" value="<?= date_fr($ARR['dateFin' . $Table]); ?>">
 								</td>
-							<? endif ?>
+							<?php endif ?>
 						</tr>
 						<tr class="" style="width:100%;">
-							<? if (!empty($APP_TABLE['hasHeureScheme'])): ?>
+							<?php if (!empty($APP_TABLE['hasHeureScheme'])): ?>
 								<td class="label">Heure de début</td>
 								<td>
 									<input class="heure" name="vars[heureDebut<?= $Table ?>]" type="text" value="<?= $ARR['heureDebut' . $Table] ?>">
 								</td>
-							<? endif ?>
-							<? if (!empty($APP_TABLE['hasHeureScheme'])): ?>
+							<?php endif ?>
+							<?php if (!empty($APP_TABLE['hasHeureScheme'])): ?>
 								<td class="label">Heure de fin</td>
 								<td>
 									<input class="heure" name="vars[heureFin<?= $Table ?>]" type="text" value="<?= $ARR['heureFin' . $Table] ?>">
 								</td>
-							<? endif ?>
+							<?php endif ?>
 						</tr>
-					<? endif ?>
+					<?php endif ?>
 
-					<? if (!empty($APP_TABLE['hasDureeScheme'])): ?>
+					<?php if (!empty($APP_TABLE['hasDureeScheme'])): ?>
 						<tr class="" style="width:100%;">
 							<td class="label">Durée</td>
 							<td>
 								<input name="vars[duree<?= $Table ?>]" type="text" class="inputTiny" value="<?= $ARR['duree' . $Table] ?>">
 							</td>
 						</tr>
-					<? endif ?>
+					<?php endif ?>
 				</table>
-				<? if (!empty($APP_TABLE['hasDescriptionScheme'])):
+				<?php if (!empty($APP_TABLE['hasDescriptionScheme'])):
 					$css_desc = '';
 					if ($table == 'newsletter' || $table == 'newsletter_item') $css_desc = 'ext_mce_textarea';
 					?>
@@ -302,8 +302,8 @@
 							</td>
 						</tr>
 					</table>
-				<? endif ?>
-				<? if (!empty($APP_TABLE['hasUrlScheme'])): ?>
+				<?php endif ?>
+				<?php if (!empty($APP_TABLE['hasUrlScheme'])): ?>
 					<br>
 					<table class="table_form border4  ededed">
 						<tr class="" style="width:100%;">
@@ -313,9 +313,9 @@
 							</td>
 						</tr>
 					</table>
-				<? endif ?>
+				<?php endif ?>
 
-				<? if (!empty($APP_TABLE['hasColorScheme'])): ?>
+				<?php if (!empty($APP_TABLE['hasColorScheme'])): ?>
 					<table class="table_form    ">
 						<td class="label    ">Couleur</td>
 						<td class="     ">
@@ -326,11 +326,11 @@
 							<input name="vars[bgcolor<?= $Table ?>]" type="color" class="inputSmall" value="<?= $ARR['bgcolor' . $Table] ?>">
 						</td>
 					</table>
-				<? endif ?>
+				<?php endif ?>
 			</div>
 			<div>
 				<div class="padding margin border4 ededed">
-					<? foreach ($GRILLE_FK as $field):
+					<?php foreach ($GRILLE_FK as $field):
 						$id       = 'id' . $field['table_fk'];
 						$nom      = 'nom' . ucfirst($field['table_fk']);
 						$arr      = $APP->plug($field['base_fk'], $field['table_fk'])->findOne([$field['idtable_fk'] => $ARR[$field['idtable_fk']]]);
@@ -340,11 +340,11 @@
 						<div class="padding">
 							<input datalist_input_name="vars[<?= $id ?>]" datalist_input_value="<?= $ARR[$id] ?>" datalist="app/app_select" populate name="vars[<?= $nom ?>]" paramName="search" vars="table=<?= $field['table_fk'] ?>" value="<?= $dsp_name ?>" type="text" class="inputMedium"/>
 						</div>
-					<? endforeach; ?></div>
+					<?php endforeach; ?></div>
 			</div>
 		</div>
 		<div class="padding margin border4 ededed">
-			<? foreach ($GRILLE as $field):
+			<?php foreach ($GRILLE as $field):
 				$id       = 'id' . $field['table_grille'];
 				$nom      = 'nom' . ucfirst($field['table_grille']);
 				$arr      = $APP->plug($field['base_grille'], $field['table_grille'])->findOne([$field['idtable_grille'] => $ARR[$field['idtable_grille']]]);
@@ -355,7 +355,7 @@
 				</div>
 				<div class="padding">
 				</div>
-			<? endforeach; ?></div>
+			<?php endforeach; ?></div>
 		<div class="buttonZone">
 			<button type="button" class="trash_button left" onclick="<?= fonctionsJs::app_delete($table, $table_value) ?>">
 				<?= idioma('Supprimer') ?>

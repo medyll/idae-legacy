@@ -42,9 +42,9 @@
 ?>
 <div class="flex_v blanc" style="height:100%;overflow:hidden;width:100%;z-index:0;" id="explo_<?= $table ?>" app_gui_explorer>
 	<div class="boxshadow relative flex_h" style="z-index:1;height: 100%;">
-		<? if (!empty($_POST['show_search'])) { ?>
+		<?php if (!empty($_POST['show_search'])) { ?>
 			<div style="width:250px;" class="borderr" id="app_liste_search_<?= $zone ?>"><?= skelMdl::cf_module("app/app/app_explorer_search", $_POST) ?></div>
-		<? } ?>
+		<?php } ?>
 		<div class="flex_v flex_main">
 			<div main_auto_tree>
 				<div class="flex_h flex_align_middle ededed">
@@ -60,31 +60,31 @@
 									<div><span class="bold uppercase"><?= $APP->nomAppscheme ?></span></div>
 									<div><?= $APP->vars_to_titre($_POST); ?></div>
 								</div>
-								<? if (!empty($TEST_AGENT)): ?>
+								<?php if (!empty($TEST_AGENT)): ?>
 									<div style="width:30px;" class="alignright flex_main">
 										<i class="fa fa-user-secret"></i>...
 									</div>
-								<? endif; ?>
+								<?php endif; ?>
 							</div>
 						</div>
 						<div style="display:none;" class="blanc">
-							<? if (sizeof($vars) == 1) {
+							<?php if (sizeof($vars) == 1) {
 								$new_key       = $vars[0];
 								$new_table_arr = array_keys($vars);
 								$new_table     = $new_table_arr[0];
 								$new_table     = substr($new_table, 2);
 								?>
 								<div act_defer mdl="app/app/app_fiche_entete" vars="table=<?= $new_table ?>&table_value=<?= $vars['id' . $new_table] ?>"></div>
-							<? } ?>
+							<?php } ?>
 						</div>
 					</div>
 				</div>
 			</div>
-			<? if (empty($_POST['hide_menu'])): ?>
+			<?php if (empty($_POST['hide_menu'])): ?>
 				<div class="" expl_file_reload mdl="app/app_liste/app_liste_menu" expl_act_target_receiver>
 					<?= skelMdl::cf_module("app/app_liste/app_liste_menu", $_POST) ?>
 				</div>
-			<? endif; ?>
+			<?php endif; ?>
 			<div id="sum_<?= $zone ?>"></div>
 			<div class="flex_h flex_main" style="overflow: hidden;z-index:0;">
 				<div class="flex_main flex_v  " style="overflow: hidden;z-index:0;" expl_file_zone>

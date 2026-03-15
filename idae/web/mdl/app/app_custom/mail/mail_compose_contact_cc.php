@@ -1,11 +1,11 @@
-<?
+<?php
 include_once($_SERVER['CONF_INC']);
 	$APP  = new App();
 $uniqid = uniqid();
 $mail_tmp	= $_POST['mail_tmp']; 
 $arr		= $APP->plug('sitebase_email','email_compose_tmp')->findOne(array('mail_tmp'=>$mail_tmp));
 ?>
-<? if(!empty($arr['grilleContactCC'])){ 
+<?php if(!empty($arr['grilleContactCC'])){ 
   foreach($arr['grilleContactCC'] as $BR):
   ?>
 
@@ -17,5 +17,5 @@ $arr		= $APP->plug('sitebase_email','email_compose_tmp')->findOne(array('mail_tm
   <li class="fa fa-times"></li>
   </a>
 </div>
-<? endforeach;?> 
-<? }?>
+<?php endforeach;?> 
+<?php }?>

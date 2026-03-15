@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 	$APP = new App();
 
@@ -7,7 +7,7 @@
 
 		?>
 
-		<?
+		<?php
 
 		$arr = $APP->plug('sitebase_pref', 'agent_pref')->findOne(array('idagent' => $idagent, 'codeAgent_pref' => 'appgui_windowcolor'));
 		if (!empty($arr['appgui_windowcolor'])) {
@@ -16,7 +16,7 @@
 			<style>
 				.appgui_windowcolor.active {
 					background-color: <?=$wincolor?>
-				}</style>		<?
+				}</style>		<?php
 		}
 		$arr = $APP->plug('sitebase_pref', 'agent_pref')->findOne(array('idagent' => $idagent, 'codeAgent_pref' => 'appgui_windowcolor'));
 		if (!empty($set['appgui_guicolor'])) {
@@ -25,7 +25,7 @@
 			<style>
 				.appgui_guicolor {
 					background-color: <?=$wallp?> !important
-				}</style>		<?
+				}</style>		<?php
 		}
 		$arr = $APP->plug('sitebase_pref', 'agent_pref')->findOne(array('idagent' => $idagent, 'codeAgent_pref' => 'appgui_backgroundcolor'));
 		if (!empty($arr['appgui_backgroundcolor'])) {
@@ -34,6 +34,6 @@
 			<style>
 				.appgui_backgroundcolor {
 					background-color: <?=$bgcol?>
-				}</style>		<? } ?><?
+				}</style>		<?php } ?><?php
 	}
 ?>  

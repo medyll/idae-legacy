@@ -1,4 +1,4 @@
-<?
+<?php
 include_once ($_SERVER['CONF_INC']);
 $time = time();
 ini_set('display_errors',55);
@@ -102,7 +102,7 @@ $DSP_JOURS = 0;
 		<table class="table_conge">
 			<tr >
 				<td class="td_conge_titre"></td>
-				<?  for ($i = 0; $i < $maxJours; $i++) {
+				<?php  for ($i = 0; $i < $maxJours; $i++) {
 				$witDate = date("Y-m-d", mktime(12, 0, 0, $moisEnCours, $premierJourSemaine + $i, $anneeEnCours));
 				$month_run = date("m", mktime(12, 0, 0, $moisEnCours, $premierJourSemaine + $i, $anneeEnCours));
 				$numday_run = date("w", mktime(12, 0, 0, $moisEnCours, $premierJourSemaine + $i, $anneeEnCours));
@@ -111,13 +111,13 @@ $DSP_JOURS = 0;
 					$DSP_JOURS++;
 					?>
 					<td class="td_conge_sep" >&nbsp;</td>
-					<?
+					<?php
 					}
 					if($last_month != $month_run){
 					$DSP_JOURS++;
 					?>
 					 <td class="td_conge_sep fond_noir">&nbsp;</td>  
-					<?
+					<?php
 					$last_month = $month_run;
 					}
 					$DSP_JOURS++;
@@ -127,7 +127,7 @@ $DSP_JOURS = 0;
 					<?= date("m", mktime(12, 0, 0, $moisEnCours, $premierJourSemaine + $i, $anneeEnCours)) ?>
 					 </div 
 				</td> 
-				<? } ?>
+				<?php } ?>
 				<td style="width:17px"></td>
 			</tr>
 			<tr class=""   >
@@ -152,7 +152,7 @@ $DSP_JOURS = 0;
 						</div>
 					</div>					
 				</td>
-				<?  for ($i = 0; $i < $maxJours; $i++) {
+				<?php  for ($i = 0; $i < $maxJours; $i++) {
 				$witDate = date("Y-m-d", mktime(12, 0, 0, $moisEnCours, $premierJourSemaine + $i, $anneeEnCours));
 				$month_run = date("m", mktime(12, 0, 0, $moisEnCours, $premierJourSemaine + $i, $anneeEnCours));
 				$numday_run = date("w", mktime(12, 0, 0, $moisEnCours, $premierJourSemaine + $i, $anneeEnCours));
@@ -160,12 +160,12 @@ $DSP_JOURS = 0;
 				if($numday_run==1){
 					?>
 					<td class="td_conge_sep ededed" title="<?=$week_run ?>">&nbsp;</td>
-					<?
+					<?php
 					}
 					if($last_month != $month_run){
 					?>
 					 <td class="td_conge_sep fond_noir">&nbsp;</td>  
-					<?
+					<?php
 					$last_month = $month_run;
 					}
 				?>
@@ -175,14 +175,14 @@ $DSP_JOURS = 0;
 					<?= date("d", mktime(12, 0, 0, $moisEnCours, $premierJourSemaine + $i, $anneeEnCours)) ?>
 					 </div>
 				</td>
-				<? } ?>
+				<?php } ?>
 				<td style="width:17px">..</td>
 			</tr>
 		</table>
 	</div>
 	<div class="flex_main" data-table="conge" data-dsp="conge" id="conge_liste_div" style="overflow-x:hidden;overflow-y:auto;position:relative;">
 		<table  class="table_conge">
-		<?
+		<?php
 		while ($arr_AG = $rs_AG->getNext()) {
 			$rs_A = $APP_A -> find(array('idagent_groupe'=>$arr_AG['idagent_groupe']));
 		?>
@@ -190,13 +190,13 @@ $DSP_JOURS = 0;
 			<td class=" padding ms-font-l textgrisfonce alignright"><?=$arr_AG['nomAgent_groupe'] ?></td>
 			<td colspan="<?=$DSP_JOURS?>" class=" " >  </td>
 		</tr>	
-		<?
+		<?php
 		while ($arr_A = $rs_A->getNext()) {
 			$idagent = (int)$arr_A['idagent'];
 		?>
 		<tr style="position:relative;" >
 			<td class="td_conge_titre borderr"><a data-idagent="<?=$arr_A['idagent'] ?>" ><?=$arr_A['prenomAgent'] . ' ' . $arr_A['nomAgent'] ?></a></td>
-			<?  for ($i = 0; $i < $maxJours; $i++) {
+			<?php  for ($i = 0; $i < $maxJours; $i++) {
 			$a = rand(0,2);
 			$witDate = date("Y-m-d", mktime(12, 0, 0, $moisEnCours, $premierJourSemaine + $i, $anneeEnCours));
 			$witTime = strtotime($witDate);
@@ -210,12 +210,12 @@ $DSP_JOURS = 0;
 			if($numday_run==1){
 				?>
 				<td class="td_conge_sep ccc">&nbsp;</td>
-				<?
+				<?php
 				}
 				if($last_month != $month_run){
 				?>
 				<td class="td_conge_sep fond_noir">&nbsp;</td>
-				<?
+				<?php
 				$last_month = $month_run;
 				}
 
@@ -240,14 +240,14 @@ $DSP_JOURS = 0;
 					</div>
 				</div>
 			</td>
-			<? } ?>
+			<?php } ?>
 		</tr>
-		<? } ?>
-		<? } ?>
+		<?php } ?>
+		<?php } ?>
 	</table>
 	</div>
 	<div class="fond_noir padding relative none">
-		<?// = skelMdl::cf_module('app/app_conge/app_conge_reload', array('defer' => 'true', 'maxJours' => $maxJours, 'tableparent' => 'conge_liste_div', 'sd' => $_POST['sd']) + $_POST); ?>
+		<?php// = skelMdl::cf_module('app/app_conge/app_conge_reload', array('defer' => 'true', 'maxJours' => $maxJours, 'tableparent' => 'conge_liste_div', 'sd' => $_POST['sd']) + $_POST); ?>
 	</div>
 </div>
 <script>

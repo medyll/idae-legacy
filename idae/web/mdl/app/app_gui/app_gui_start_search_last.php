@@ -42,7 +42,7 @@
 	</div>
 	<div class="" style="width:100%;z-index:200;" data-app_fragment="remenber_search">
 		<div class="flex_h flex_wrap applink applinkblock" data-table="<?=$table?>">
-			<?
+			<?php
 				while ($arr = $RS->getNext()):
 
 					$tr_vars = ['table_value' => (int)$arr['valeurAgent_recherche'], 'table' => $table, 'field_name_raw' => 'nom', 'field_value' => strtolower($arr['nom' . $Table])];
@@ -58,7 +58,7 @@
 							<a class="slaveshow avoid" onclick="ajaxValidation('app_delete','mdl/app/','table=<?=$table?>&table_value=<?=$arr['id' . $table]?>')"><i class="fa f-fw fa-minus textrouge"></i></a>
 						</div>
 					</div>
-					<?
+					<?php
 				endwhile;
 			?>
 		</div>

@@ -1,4 +1,4 @@
-<?
+<?php
 include_once ($_SERVER['CONF_INC']);
 $time = time();
 $_POST['idagent'] = $_SESSION['idagent'];
@@ -29,7 +29,7 @@ if (empty($_POST['sd'])) {
 	<div class="demi relative" style="height:100%;">
 		<?= skelMdl::cf_module('app/app_planning/app_planning_quoti',  array('sd' => $sd, 'valueModule' => $time + 20), $time + 20) ?>
 	</div>
-	<? 	unset($_POST['sd']);
+	<?php 	unset($_POST['sd']);
 		unset($_POST['date']);
 	?>
 	<div class="demi borderr relative" style="height:100%;">

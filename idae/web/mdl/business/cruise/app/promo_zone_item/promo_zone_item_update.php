@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 
 	$table       = $_POST['table'];
@@ -18,12 +18,12 @@
 		<div class="inline  boxshadow margin aligncenter" act_defer mdl="app/app_img/image_dyn"
 		     vars="table=<?= $table ?>&table_value=<?= $table_value ?>&codeTailleImage=large" scope="app_img"
 		     value="<?= $table ?>-large-<?= $table_value ?>"></div>
-		<? foreach ($APPOBJ->ARR_GROUP_FIELD as $key => $val) {
+		<?php foreach ($APPOBJ->ARR_GROUP_FIELD as $key => $val) {
 			$arrg = $val['group'];
 			$arrf = $val['field'];
 			?>
 			<div class="margin ededed flex_h flex_wrap flex_align_stretch">
-				<? foreach ($arrf as $keyf => $valf) {
+				<?php foreach ($arrf as $keyf => $valf) {
 					$field_name     = $exp['field_name'] = $valf['codeAppscheme_field'] . $Table;
 					$field_name_raw = $exp['field_name_raw'] = $valf['codeAppscheme_field'];
 
@@ -38,8 +38,8 @@
 							</div>
 						</div>
 					</div>
-				<? } ?>
+				<?php } ?>
 			</div>
-		<? } ?>
+		<?php } ?>
 	</div>
 </div>

@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 	require_once(__DIR__ . '/../../../appclasses/appcommon/MongoCompat.php');
 	use AppCommon\MongoCompat;
@@ -38,7 +38,7 @@
 
 <div class="flex_h flex_wrap"
      style = "height:100%;width:100%;overflow:auto;">
-	<? foreach ($rs as $arr): ?>
+	<?php foreach ($rs as $arr): ?>
 		<div class = "padding" style = "width: 25%;min-height:150px;overflow:hidden;">
 			<div class="flex_h blanc shadowbox">
 				<div class = "padding bold aligncenter ededed" style="width:50px;"><i class="fa fa-<?= $arr['icon'] ?> fa-2x"></i></div>
@@ -57,6 +57,6 @@
 
 
 		</div>
-	<? endforeach; ?>
+	<?php endforeach; ?>
 
 </div>

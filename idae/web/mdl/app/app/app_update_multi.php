@@ -46,14 +46,14 @@
 		<input type="hidden"
 		       name="table"
 		       value="<?= $table ?>"/>
-		<? foreach ($arr_id as $value) { ?>
+		<?php foreach ($arr_id as $value) { ?>
 			<input name="arr_id[]"
 			       type="hidden"
 			       value="<?= $value ?>">
-		<? } ?>
+		<?php } ?>
 		<div class="titre_entete_menu ">
 			<div class="retrait flex_h flex_align_middle">
-			<? foreach ($arrFieldsBool as $keyBool => $valueBool) {
+			<?php foreach ($arrFieldsBool as $keyBool => $valueBool) {
 				?>
 				<div class="borderr flex_h flex_align_middle">
 					<div class="padding aligncenter">
@@ -67,14 +67,14 @@
 						</div>
 					</div>
 				</div>
-			<? } ?></div>
+			<?php } ?></div>
 		</div>
 		<div class="table" style="width:100%;max-width:800px;">
 			<div class="cell">
 				<div class="margin padding flex_h flex_align_top">
 					<div class=" margin">
 						<div class="flex_h flex_wrap flex_margin flex_wrap">
-							<? foreach ($GRILLE_FK as $field):
+							<?php foreach ($GRILLE_FK as $field):
 								$id  = 'id' . $field['table_fk'];
 								$nom = 'nom' . ucfirst($field['table_fk']);
 								$arr = $APP->plug($field['base_fk'], $field['table_fk'])->findOne([$field['idtable_fk'] => $ARR[$field['idtable_fk']]]);
@@ -96,11 +96,11 @@
 										       class="inputMedium"/>
 									</div>
 								</div>
-							<? endforeach; ?>
+							<?php endforeach; ?>
 						</div>
 					</div>
 					<div class=" margin">
-						<?
+						<?php
 							$arr_has = ['statut', 'type', 'categorie','groupe','group'];
 							foreach ($arr_has as $key => $value):
 								$Value  = ucfirst($value);
@@ -124,8 +124,8 @@
 											       vars="table=<?= $_table ?>" />
 										</div>
 									</div>
-								<? endif; ?>
-							<? endforeach; ?>
+								<?php endif; ?>
+							<?php endforeach; ?>
 					</div>
 				</div>
 			</div>

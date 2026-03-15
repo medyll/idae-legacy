@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 
 	$APP    = new App('conge');
@@ -26,7 +26,7 @@
 	if ($arr_c['codeConge_statut'] == 'END') {
 		?>
 		<div class="padding_more blanc"> Ce congé est déja validé</div>
-		<? return;
+		<?php return;
 	}
 
 ?>
@@ -43,12 +43,12 @@
 						<td style="width:80px;"><?= idioma("Type") ?></td>
 						<td><?= $selectTT ?></td>
 					</tr>
-					<? if ($arr_c['idagent'] == $_SESSION['idagent']) { ?>
+					<?php if ($arr_c['idagent'] == $_SESSION['idagent']) { ?>
 						<tr>
 							<td style="width:80px;"><?= idioma("Statut") ?></td>
 							<td><?= $selectST ?></td>
 						</tr>
-					<? } ?>
+					<?php } ?>
 				</table>
 				<table class="tablemiddle tablepadding" style="width:100%;table-layout:auto">
 					<tr>

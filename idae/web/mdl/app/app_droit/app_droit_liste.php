@@ -46,7 +46,7 @@
 			<br>
 			<div><input type="text" onkeyup="quickFind(this.value,'for_<?= $warp ?>','.ms-Table-row')">&nbsp;<i class="fa fa-search"></i> </div>
 			</div>
-			<? foreach ($ARR_DR as $k => $v) {
+			<?php foreach ($ARR_DR as $k => $v) {
 				// $idagent_groupe_droit = $APPGD->create_update(['idagent_groupe' => $idagent_groupe, 'idappscheme' => $idappscheme], ['init' => true]);
 				?>
 				<div class="ms-Table-cell aligncenter" style="width: 80px;overflow:hidden;">
@@ -54,25 +54,25 @@
 					<br>
 					<input type="checkbox" data-main-ch="<?= $k ?>">
 				</div>
-			<? } ?>
+			<?php } ?>
 		</div>
 	</div>
 	<div id="for_<?= $warp ?>">
 		<div class="ms-Table" style="position:static;">
-		<? while ($arr = $RSTYPE->getNext()) {
+		<?php while ($arr = $RSTYPE->getNext()) {
 			$RSSCHEME = $APP_SCH->get_schemes(['idappscheme_type' => (int)$arr['idappscheme_type']])->sort(['nomAppscheme' => 1]); // , 'codeAppscheme_base' => $base
 			?>
 				<div class=" ms-Table-row ededed">
 					<div class="ms-Table-cell aligncenter" style="width:30px;"></div>
 					<div class="ms-Table-cell aligncenter" style="width: 30px;"><i class="fa fa-caret-down"></i></div>
 					<div class="ms-Table-cell alignright"><?= $arr['nomAppscheme_type'] ?></div>
-					<? foreach ($ARR_DR as $k => $v) { ?>
+					<?php foreach ($ARR_DR as $k => $v) { ?>
 						<div class="ms-Table-cell aligncenter" style="width: 80px;">
 							<input type="checkbox" data-maingroup-ch="<?= $k ?>" data-type-ch="<?= $arr['codeAppscheme_type'] ?>">
 						</div>
-					<? } ?>
+					<?php } ?>
 				</div>
-				<? foreach ($RSSCHEME as $arr_sch):
+				<?php foreach ($RSSCHEME as $arr_sch):
 					$idappscheme          = (int)$arr_sch['idappscheme'];
 					$table    = $arr_sch['codeAppscheme'];
 					$APP_TMP = new App($table);
@@ -92,36 +92,36 @@
 						<div class="ms-Table-cell  borderr">
 							<?= $arr_sch['nomAppscheme'] ?>
 						</div>
-						<? foreach ($ARR_DR as $k => $v) {
+						<?php foreach ($ARR_DR as $k => $v) {
 							$key_dr = $k;
 							?>
 							<div class="ms-Table-cell aligncenter" style="width: 80px;">
-								<? if($key_dr!='CONF'){ ?>
+								<?php if($key_dr!='CONF'){ ?>
 								<input data-droit-value="<?= $idagent_groupe_droit ?>" data-collection="<?= $table ?>" data-collection-value="<?= $idappscheme ?>" data-ch="<?= $k ?>"
 								       data-type-ch="<?= $arr['codeAppscheme_type'] ?>" <?= checked($test_ins[$k]) ?> name="<?= $key_dr ?>"
 								       type="checkbox" onchange="node_validate(this)">
-								<? }elseif($APP_TMP->has_agent() && $key_dr=='CONF' ) { ?>
+								<?php }elseif($APP_TMP->has_agent() && $key_dr=='CONF' ) { ?>
 									<input data-droit-value="<?= $idagent_groupe_droit ?>" data-collection="<?= $table ?>" data-collection-value="<?= $idappscheme ?>" data-ch="<?= $k ?>"
 									       data-type-ch="<?= $arr['codeAppscheme_type'] ?>" <?= checked($test_ins[$k]) ?> name="<?= $key_dr ?>"
 									       type="checkbox" onchange="node_validate(this)">
-									<?
+									<?php
 								}?>
 							</div>
-						<? } ?>
+						<?php } ?>
 					</div>
-				<? endforeach; ?>
-		<? } ?>
+				<?php endforeach; ?>
+		<?php } ?>
 			<div class=" ms-Table-row ededed">
 				<div class="ms-Table-cell aligncenter" style="width:30px;"></div>
 				<div class="ms-Table-cell aligncenter" style="width: 30px;"><i class="fa fa-caret-down"></i></div>
 				<div class="ms-Table-cell alignright"><?=idioma('Sans type') ?></div>
-				<? foreach ($ARR_DR as $k => $v) { ?>
+				<?php foreach ($ARR_DR as $k => $v) { ?>
 					<div class="ms-Table-cell aligncenter" style="width: 80px;">
 						<input type="checkbox" data-maingroup-ch="<?= $k ?>" data-type-ch="NOTYPE">
 					</div>
-				<? } ?>
+				<?php } ?>
 			</div>
-			<? foreach ($RSNOSCHEME as $arr_sch):
+			<?php foreach ($RSNOSCHEME as $arr_sch):
 				$idappscheme          = (int)$arr_sch['idappscheme'];
 				$table    = $arr_sch['codeAppscheme'];
 				$APP_TMP = new App($table);
@@ -140,25 +140,25 @@
 					<div class="ms-Table-cell  borderr">
 						<?= $arr_sch['nomAppscheme'] ?>
 					</div>
-					<? foreach ($ARR_DR as $k => $v) {
+					<?php foreach ($ARR_DR as $k => $v) {
 						$key_dr = $k;
 						?>
 						<div class="ms-Table-cell aligncenter" style="width: 80px;">
-							<? if($key_dr!='CONF'){ ?>
+							<?php if($key_dr!='CONF'){ ?>
 								<input data-droit-value="<?= $idagent_groupe_droit ?>" data-collection="<?= $table ?>" data-collection-value="<?= $idappscheme ?>" data-ch="<?= $k ?>"
 								       data-type-ch="NOTYPE" <?= checked($test_ins[$k]) ?> name="<?= $key_dr ?>"
 								       type="checkbox" onchange="node_validate(this)">
-							<? }elseif($APP_TMP->has_agent() && $key_dr=='CONF' ) { ?>
+							<?php }elseif($APP_TMP->has_agent() && $key_dr=='CONF' ) { ?>
 								<input data-droit-value="<?= $idagent_groupe_droit ?>" data-collection="<?= $table ?>" data-collection-value="<?= $idappscheme ?>" data-ch="<?= $k ?>"
 								       data-type-ch="NOTYPE" <?= checked($test_ins[$k]) ?> name="<?= $key_dr ?>"
 								       type="checkbox" onchange="node_validate(this)">
-								<?
+								<?php
 							}?>
 						</div>
-					<? } ?>
+					<?php } ?>
 				</div>
 
-			<? endforeach; ?>
+			<?php endforeach; ?>
 		</div>
 	</div>
 </div>

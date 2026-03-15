@@ -1,4 +1,4 @@
-<?
+<?php
 
 include_once($_SERVER['CONF_INC']);
 
@@ -12,7 +12,7 @@ $time = time();
 
 
 ?>
-<?
+<?php
 if(empty($_POST['run'])):
 	?>
 	<div style="width:950px;">
@@ -32,7 +32,7 @@ if(empty($_POST['run'])):
 		</div>
 		<div style="width:100%;max-height:350px;border:none;overflow:auto;" id="frame_xmlte_fst" scrolling="auto"></div>
 	</div>
-	<?
+	<?php
 	return;
 endif;
 

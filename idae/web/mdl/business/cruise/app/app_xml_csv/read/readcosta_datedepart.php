@@ -51,7 +51,7 @@ ini_set('display_errors',55);
 	                                           'run'   => 1 ]);*/
 	if ( empty($_POST['run']) ) {
 		?>
-		<div class = "padding"><?= $total ?> dates de départ</div><?
+		<div class = "padding"><?= $total ?> dates de départ</div><?php
 
 	} else {
 		$arr_progress = [ 'progress_parent'  => 'datedepart_iti' ,

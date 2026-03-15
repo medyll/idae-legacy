@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 	require_once(__DIR__ . '/../../../appclasses/appcommon/MongoCompat.php');
 	use AppCommon\MongoCompat;
@@ -37,4 +37,4 @@
 	while ($arr_dist = $rs_dist->getNext()) {
 		?>
 		<a app_button="<?= $table ?>" vars="table=<?= $table ?>&vars[id<?= $table_fk ?>]=<?= $arr_dist['id' . $table_fk] ?>&<?= $tr_vars ?>"><?= $arr_dist['nom' . ucfirst($table_fk)] ?></a>
-	<? } ?>
+	<?php } ?>

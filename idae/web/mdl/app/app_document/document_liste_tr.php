@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 	$uniqid = uniqid();
 	$APP = new App();
@@ -47,7 +47,7 @@
 		  <li class = "fa fa-times"></li>
 	  </a></td>
 </tr>
-<? } ?>
+<?php } ?>
 <input type = "hidden"
        name = "collection"
        value = "<?= $_id ?>"/>

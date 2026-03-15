@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 
 	ini_set('display_errors', 55);
@@ -28,11 +28,11 @@
 	<form onsubmit="ajaxValidation('init_settings', 'mdl/app/', $(this).serialize());return false;">
 		<input type="hidden" name="vars[idagent]" value="<?=$_SESSION['idagent']?>" >
 		<div class="flex_main applink applinkblock blanc" style="overflow-y:auto;overflow-x:hidden;">
-			<? foreach ($arr_code as $key => $value) { ?>
+			<?php foreach ($arr_code as $key => $value) { ?>
 				<div class="padding">
 					<label class="block"><span class="padding"><input name="vars[arr_settings][<?= $key ?>]" type="checkbox"></span> <?= $value ?></label>
 				</div>
-			<? } ?>
+			<?php } ?>
 		</div>
 		<div>
 			<div class="buttonZone">

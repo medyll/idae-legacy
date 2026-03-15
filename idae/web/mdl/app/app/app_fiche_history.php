@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 
 	$table = $_POST['table'];
@@ -24,7 +24,7 @@
 	$nom = 'nom' . ucfirst($table);
 
 ?>
-<?
+<?php
 	$arr_same = [];
 	foreach ($APPOBJ->GRILLE_FK as $field):
 		//	print_r($field);
@@ -44,7 +44,7 @@
 			<div  class="  padding_more" style="overflow:hidden; ">
 				<div class="padding alignright ellipsis  "><?= idioma('Derniers') . ' ' . $table . ' crée(e)s' ?> <i class="fa fa-history    "></i></div>
 				<div class="padding retrait">
-					<?
+					<?php
 						while ($ARR_SAME = $RS_SAME->getNext()):
 
 							?>
@@ -54,7 +54,7 @@
 									<a onclick="<?= fonctionsJs::app_fiche($table, $ARR_SAME[$name_id]) ?>">- <?= strtolower($ARR_SAME['nom' . $Table]); ?></a>
 								</div>
 							</div>
-							<?
+							<?php
 						endwhile;
 						if ($RS_SAME->count() != $RS_SAME->count(true)) {
 							?>
@@ -62,8 +62,8 @@
 								<a onclick="<?= fonctionsJs::app_liste($table, '5', $list_vars . '&sortBy=dateCreation' . $Table . '&sortDir=-1') ?>"><?= idioma('Voir tout') . ' (' . $RS_SAME->count() . ')' ?></a>
 								<div class="textbold none"> <?= $APP->vars_to_titre($arr_same) ?></div>
 							</div>
-						<? } ?>
+						<?php } ?>
 				</div>
 			</div>
-		<? } ?>
-	<? } ?>
+		<?php } ?>
+	<?php } ?>

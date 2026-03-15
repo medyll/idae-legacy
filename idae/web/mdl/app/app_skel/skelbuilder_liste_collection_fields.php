@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 
 	$APP = new App('appscheme');
@@ -26,7 +26,7 @@
 		<div class="flex_h" style="height:100%;overflow:hidden;">
 			<div class="frmCol1 applink applinkblock toggler" style="overflow:auto;">
 				<div main_auto_tree>
-				<?
+				<?php
 					// mainscope_app => groupBy
 					foreach ($arr_scope as $field => $scope) {
 						$rs = $APP->plug('sitebase_app', 'appscheme')->find(['codeAppscheme_base' => $scope])->sort(['nomAppscheme' => 1]);
@@ -37,7 +37,7 @@
 							<div class="trait"><?= $scope ?> </div>
 						</div>
 						<div class="autoBlock"  >
-						<?
+						<?php
 						while ($arr = $rs->getNext()) {
 							$idappscheme = (int)$arr['idappscheme'];
 							$arrSF    = $APPHASF->findOne(['idappscheme' => $idappscheme, 'codeAppscheme_field' =>'nom']);
@@ -50,8 +50,8 @@
 							<a class="autoToggle" onclick="$('inner_col_f').loadModule('app/app_scheme/app_scheme_has_field_update','idappscheme=<?= $arr['idappscheme'] ?>');">
 								<?= $arr['nomAppscheme'] ?>
 							</a>
-						<? } ?></div>
-					<? } ?>
+						<?php } ?></div>
+					<?php } ?>
 				</div>
 			</div>
 			<div class="flex_main" id="inner_col_f" style="height:100%;overflow:auto;"></div>

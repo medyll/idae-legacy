@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 return;
 	$APP = new App();
@@ -24,13 +24,13 @@ return;
 <div class = "searchMdl input-control select size4" >
 	<select name = "vars[dateDebutProduit_tarif]" >
 		<option class = "textegris searchline" value = "" >Date</option >
-		<? foreach ($emptyArr as $key => $arrP):
+		<?php foreach ($emptyArr as $key => $arrP):
 			$extract = explode('-', $arrP);
 			?>
 			<option value = "<?= $extract[0] . $extract[1] ?>" class = "searchline"  <?= selected($vars["date"] == (int)($extract[0] . $extract[1])) ?> >
 				<?= fonctionsSite::mois_fr($extract[1]) . ' ' . $extract[0] ?>
 			</option >
-		<?
+		<?php
 		endforeach;
 		?>
 	</select >

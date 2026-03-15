@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 	// POST
 	$table = $_POST['table'];
@@ -38,12 +38,12 @@
 		<input type="hidden" name="reloadModule[app/app_select]" value="app_select_<?= $table ?>"/>
 		<input type="hidden" name="table" value="<?= $table ?>"/>
 		<input type="hidden" name="vars[m_mode]" value="1"/>
-		<? foreach ($vars as $key => $input): ?>
+		<?php foreach ($vars as $key => $input): ?>
 			<input type="hidden" name="vars[<?= $key ?>]" value="<?= $input ?>">
-		<? endforeach; ?>
+		<?php endforeach; ?>
 		<div class="barre_entete"><?= $APP->vars_to_titre($vars) ?></div>
 		<div class="flex_h flex_main">
-			<?
+			<?php
 
 				if (file_exists(APPMDL . '/app/app_custom/' . $table . '/' . $table . '_create_fragment.php')) {
 					echo '<div class="">' . skelMdl::cf_module('/app/app_custom/' . $table . '/' . $table . '_create_fragment', $_POST) . '</div>';
@@ -51,7 +51,7 @@
 			?>
 			<div class="flex_main padding">
 
-				<? foreach ($ARR_GROUP_FIELD as $key => $val) {
+				<?php foreach ($ARR_GROUP_FIELD as $key => $val) {
 					$arrg = $val['group'];
 					$arrf = $val['field'];
 					?>
@@ -60,7 +60,7 @@
 							<div title="<?= $arrg['nomAppscheme_field_group'] ?>"><i class="fa fa-<?= $arrg['iconAppscheme_field_group'] ?> fa-2x textgris"></i></div>
 						</div>
 						<div class="flex_h flex_wrap" style="width:550px;">
-							<? foreach ($arrf as $keyf => $valf) {
+							<?php foreach ($arrf as $keyf => $valf) {
 								$code = $valf['codeAppscheme_field'];?>
 								<div style="min-width:50%;">
 									<table class="table_form">
@@ -74,14 +74,14 @@
 										</tr>
 									</table>
 								</div>
-							<? } ?>
+							<?php } ?>
 						</div>
 					</div>
-				<? } ?>
+				<?php } ?>
 			</div>
 			<div>
 				<br>
-				<?
+				<?php
 					$arr_has = ['statut', 'type', 'categorie','group','groupe'];
 					foreach ($arr_has as $key => $value):
 						$Value = ucfirst($value);
@@ -105,10 +105,10 @@
 									</div>
 								</div>
 							</div>
-						<? endif; ?>
-					<? endforeach; ?>
+						<?php endif; ?>
+					<?php endforeach; ?>
 				<div class="padding margin borderl ">
-					<?
+					<?php
 						if (!empty($vars['idclient'])) unset($GRILLE_FK['prospect']);
 						if (!empty($vars['idprospect'])) unset($GRILLE_FK['client']);
 
@@ -150,7 +150,7 @@
 									       value="<?= $dsp_name ?>" type="text" class="inputMedium"/>
 								</div>
 							</div>
-						<? endforeach; ?></div>
+						<?php endforeach; ?></div>
 			</div>
 		</div>
 		<div class="buttonZone">

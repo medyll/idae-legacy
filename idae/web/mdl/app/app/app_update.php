@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 	ini_set('display_errors', 55);
 	// POST
@@ -47,28 +47,28 @@
 		<input type="hidden" name="F_action" value="app_update"/>
 		<input type="hidden" name="table" value="<?= $table ?>"/>
 		<input type="hidden" name="table_value" value="<?= $table_value ?>"/>
-		<!--<input type="hidden" name="scope" value="<? /*= $id */ ?>"/>-->
+		<!--<input type="hidden" name="scope" value="<?php /*= $id */ ?>"/>-->
 		<input type="hidden" name="<?= $id ?>" value="<?= $table_value ?>"/>
 		<input type="hidden" name="vars[<?= $id ?>]" value="<?= $table_value ?>"/>
 		<input type="hidden" name="vars[m_mode]" value="1"/>
 		<div class="flex_h">
 			<div class="padding flex_v" style="max-width:170px">
-				<? if (!empty($APP_TABLE['hasImageScheme'])): ?>
+				<?php if (!empty($APP_TABLE['hasImageScheme'])): ?>
 					<div class="aligncenter">
 						<div class=" ededed inline aligncenter" style="width:150px;height:150px;">
 							<img style="max-width:100%;" src="<?= Act::imgApp($table, $table_value, 'square') ?>">
 						</div>
 					</div>
-				<? endif ?>
+				<?php endif ?>
 			</div>
-			<?
+			<?php
 
 				if (file_exists(APPMDL . '/app/app_custom/' . $table . '/' . $table . '_update_fragment.php')) {
 					echo '<div class="">' . skelMdl::cf_module('/app/app_custom/' . $table . '/' . $table . '_update_fragment', $_POST) . '</div>';
 				}
 			?>
 			<div class="flex_main">
-				<? if (!empty($APP_TABLE['hasLigneScheme'])): ?>
+				<?php if (!empty($APP_TABLE['hasLigneScheme'])): ?>
 					<div class="padding"><?= idioma('Composantes') ?></div>
 					<a onclick="<?=fonctionsJs::app_create($table.'_ligne',['vars'=>[$id=>$table_value]])?>">aa</a>
 					<div class="margin border4" id="zone_maxi_ligne<?= $table . $table_value ?>" data-data_model="defaultModel" data-dsp="line">
@@ -76,9 +76,9 @@
 					<script>
 						load_table_in_zone ('table=<?=$table?>_ligne&vars[<?=$id?>]=<?=$table_value?>', 'zone_maxi_ligne<?=$table.$table_value?>');
 					</script>
-				<? endif; ?>
+				<?php endif; ?>
 				<div>
-					<? foreach ($ARR_GROUP_FIELD as $key => $val) {
+					<?php foreach ($ARR_GROUP_FIELD as $key => $val) {
 						$arrg = $val['group'];
 						$arrf = $val['field'];
 						?>
@@ -87,7 +87,7 @@
 								<div class="none"><?= $arrg['iconAppscheme_field_group'] ?></div>
 							</div>
 							<div class="flex_h flex_wrap" style="width:550px;">
-								<? foreach ($arrf as $keyf => $valf) {
+								<?php foreach ($arrf as $keyf => $valf) {
 									?>
 									<div style="min-width:50%;">
 										<table class="table_form">
@@ -101,15 +101,15 @@
 											</tr>
 										</table>
 									</div>
-								<? } ?>
+								<?php } ?>
 							</div>
 						</div>
-					<? } ?>
+					<?php } ?>
 				</div>
 			</div>
 			<div class="borderl ededed">
 				<br>
-				<?
+				<?php
 					$arr_has = ['statut', 'type', 'categorie', 'group'];
 					foreach ($arr_has as $key => $value):
 						$Value  = ucfirst($value);
@@ -132,12 +132,12 @@
 									       class="inputMedium"/>
 								</div>
 							</div>
-						<? endif; ?>
-					<? endforeach; ?>
+						<?php endif; ?>
+					<?php endforeach; ?>
 
-				<? if (sizeof($GRILLE_FK != 0)): ?>
+				<?php if (sizeof($GRILLE_FK != 0)): ?>
 					<div class="padding margin borderb">
-					<?
+					<?php
 					if (!empty($ARR['idclient'])) unset($GRILLE_FK['prospect']);
 					if (!empty($ARR['idprospect'])) unset($GRILLE_FK['client']);
 
@@ -182,7 +182,7 @@
 							       vars="table=<?= $field['table_fk'] ?>&<?= $http_add_vars ?>"
 							       value="<?= $dsp_name ?>" type="text" class="inputMedium"/>
 						</div>
-					<? endforeach; ?></div><? endif; ?>
+					<?php endforeach; ?></div><?php endif; ?>
 			</div>
 		</div>
 		<br>

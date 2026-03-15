@@ -47,11 +47,11 @@
 		<div class="contextmenu" style="position:absolute;display:none;" act_defer mdl="app/app_search/app_search_item_change" vars="from=select&target=<?=$target?>&<?=http_build_query($_POST);?>"></div>
 		<div class="flex_main">
 			<select name="<?=$input_name?>[<?= 'id' . $table ?>]" class="inputFull border4"  >
-				<option value=""><?= $APP_TABLE->nomAppscheme ?></option> <?
+				<option value=""><?= $APP_TABLE->nomAppscheme ?></option> <?php
 					while ($arr = $rs->getNext()):
 
 						?>
-						<option value="<?= $arr['id' . $table] ?>"><?= $arr['nom' . $Table] ?></option>					<?
+						<option value="<?= $arr['id' . $table] ?>"><?= $arr['nom' . $Table] ?></option>					<?php
 					endwhile; ?>
 			</select>
 

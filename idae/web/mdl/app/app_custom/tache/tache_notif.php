@@ -32,7 +32,7 @@
 				</tr>
 				</thead>
 				<tbody class="toggler">
-				<? while($arr = $rs->getNext()): ?>
+				<?php while($arr = $rs->getNext()): ?>
 					<tr class="autoToggle">
 						<td><a onclick="<?=fonctionsJs::app_update('tache',$arrT['idtache']);?>"><?=$arr['nomTache']?> </a>
 						</td>
@@ -57,7 +57,7 @@
 							<a onclick="ajaxValidation('updateTache','mdl/tache/','idtache=<?=$arr['idtache']?>&codeStatut_tache=END')"><img src="<?=ICONPATH?>delete16.png" /></a>
 						</td>
 					</tr>
-				<? endwhile; ?>
+				<?php endwhile; ?>
 				</tbody>
 			</table>
 		</div>

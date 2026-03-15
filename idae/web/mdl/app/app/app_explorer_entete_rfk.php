@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 
 
@@ -21,7 +21,7 @@
 
 		?>
 		<div class="applink applinkblock flex_h flex_wrap">
-			<?
+			<?php
 				foreach ($GRILLE_FK as $arr_fk):
 					$vars_rfk['vars']        = ['id' . $table => $table_value];
 					$_table       = $arr_fk['collection_fk'];
@@ -37,9 +37,9 @@
 						<?=$count?> <?=$_table . (($count < 2) ? '' : 's' ) ?></div>
 
 					</a>
-				<? endforeach; ?>
+				<?php endforeach; ?>
 		</div>
-		<?
+		<?php
 	endif; ?>
 
 

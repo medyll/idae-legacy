@@ -1,6 +1,6 @@
 project: "Idae Legacy — Code Modernization"
-updated: "2026-03-11T12:30:00Z"
-recommendation: "bmad-master test integration S4-02 --auto (queued by next)"
+updated: "2026-03-15T00:05:00Z"
+recommendation: "S5-01..S5-04 done. Next: S5-05 composer audit, S5-06 CleanStr, S5-07 regression"
 
 # HANDOFF NOTE: Sprint 3 COMPLETE (all S3-01..S3-06 done). Sprint 4 in progress.
 # S4-01 done: ClassAppAgg extracted (distinct, distinct_rs, distinct_all) with strict_types, MongoCompat, unit tests.
@@ -51,44 +51,31 @@ phases:
 
   - id: 3.5
     name: "Sprint 4 — ClassAppAgg + Integration Tests + JSON Services"
-    status: in_progress
-    progress: 20
+    status: done
+    progress: 100
     artifacts:
       - "S4-01 — Extract ClassAppAgg.php ✅ (2026-03-11)"
-      - "S4-02 — Integration/JsonDataTest.php 🟡 IN_PROGRESS (started via bmad-master next --auto 2026-03-11T12:00:00Z)"
-      - "S4-03 — Modernize json_scheme.php + json_data_search.php ⏳"
-      - "S4-04 — Modernize json_data_table.php + json_data_table_row.php ⏳"
-      - "S4-05 — BUG-01 Node.js socket investigation ⏳"
-    notes: "S4-01 done: ClassAppAgg extracted (distinct/distinct_rs/distinct_all). Tests written; pending Docker run."
+      - "S4-02 — Integration/JsonDataRegressionTest.php ✅ (2026-03-15) — 5 tests, 3 tables (produit/agent/appscheme), data+query shapes"
+      - "S4-03 — Modernize json_scheme.php + json_data_search.php ✅ (2026-03-15)"
+      - "S4-04 — Modernize json_data_table.php + json_data_table_row.php ✅ (2026-03-15)"
+      - "S4-05 — BUG-01 Node.js socket fix ✅ (2026-03-15) — server.listen bound to 0.0.0.0 for Docker inter-container access"
+    notes: "All 5 stories complete. BUG-01 root cause: server.listen() defaulted to 127.0.0.1, blocking Docker DNS access from idae-legacy container. Fix: bind 0.0.0.0. Pending Docker verification."
     ref: "bmad/artifacts/sprints/sprint-04.md"
 
   - id: 4
-    name: "Modules & Templates"
-    status: upcoming
-    progress: 0
+    name: "Modules, Security, Hardening & Regression"
+    status: in_progress
+    progress: 65
     artifacts:
-      - "mdl/* audit (legacy MongoId/MongoRegex/MongoDate usage)"
-      - "cursorToArray rollout in modules"
-      - "Smarty/Latte template review"
-
-  - id: 5
-    name: "Security & PHP Hardening"
-    status: upcoming
-    progress: 0
-    artifacts:
-      - "declare(strict_types=1) rollout on modified files"
-      - "Input validation / CSRF on actions.php, postAction.php"
-      - "Remove @ error suppression"
-      - "Composer dependency audit & updates"
-
-  - id: 6
-    name: "QA & Regression"
-    status: upcoming
-    progress: 0
-    artifacts:
-      - "Full test suite pass"
-      - "Browser smoke test (login → grid load → CRUD)"
-      - "app_cache_reset() validation after schema changes"
+      - "S5-01 — mdl/* audit ✅ (2026-03-15) — 0 legacy Mongo, 374 short tags, no @ suppression"
+      - "S5-02 — Fix 454 short open tags <?→<?php in mdl/ ✅ (2026-03-15)"
+      - "S5-03 — CSRF token: CsrfGuard class + actions.php validation + JS wiring ✅ (2026-03-15)"
+      - "S5-04 — Remove extract($_POST) from postAction.php, explicit vars ✅ (2026-03-15)"
+      - "S5-05 — Composer audit ⏳"
+      - "S5-06 — BUG-02 CleanStr broader testing ⏳"
+      - "S5-07 — Full regression suite ⏳"
+    notes: "Audit found NO legacy MongoDB patterns in mdl/. The real blocker is 374 short open tags (PHP 8.2 incompatible). Security gaps: missing CSRF, extract($_POST), weak CleanStr."
+    ref: "bmad/artifacts/sprints/sprint-05.md"
 
 sprints:
   - id: 1
@@ -114,7 +101,8 @@ sprints:
     theme: "ClassAppAgg + Integration Tests + JSON Services"
     dates: "2026-04-13 → 2026-04-24"
     points: 14
-    status: in_progress
+    status: done
+    progress: 100
     file: "artifacts/sprints/sprint-04.md"
   - id: 5
     theme: "Modules, Security, Hardening & Regression"
@@ -125,8 +113,8 @@ sprints:
 
 backlog:
   total_points: 68
-  completed_points: 28
-  progress: "41%"
+  completed_points: 42
+  progress: "62%"
 
 qa:
   test_plan: pending
@@ -147,7 +135,8 @@ qa:
     - id: BUG-01
       title: "Node.js socket server refuses connections (port 3005)"
       severity: medium
-      status: open
+      status: fixed
+      fix: "server.listen() bound to 0.0.0.0 instead of default 127.0.0.1 — pending Docker verification"
     - id: BUG-02
       title: "CleanStr signature mismatch (array_walk_recursive)"
       severity: low

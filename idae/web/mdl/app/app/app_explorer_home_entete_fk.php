@@ -50,7 +50,7 @@
 			</div>
 		</div>
 		<div class="flex_h flex_wrap  " data-app_fragment="remenber_search">
-			<?
+			<?php
 
 				$sort_fk = empty($_POST['sort_fk']) ? 'count' : $_POST['sort_fk'];
 				foreach ($GRILLE_FK as $key => $value) {
@@ -102,7 +102,7 @@
 								<div class="bordert aligncenter  color_fond_noir  " title="<?= idioma("Elements sans $_nom ") ?>">
 									<a onclick="<?= $orphan_link ?>" class=""><i class="fa fa-chain-broken textrouge"></i><?= $rs_orphans->count(); ?></a>
 								</div>
-							<? } ?>
+							<?php } ?>
 						</div>
 						<div data-menu="data-menu" data-menu_free="red" data-clone="treu" class="flex_main">
 							<div class="  flex_main   padding_more    ">
@@ -120,7 +120,7 @@
 								<div class="padding_more borderb ededed">
 									<i class="fa fa-star"></i><?=$APP_TMP->nomAppscheme?> <?=idioma('ayant le plus de')?> <?=$APP->nomAppscheme?>
 								</div>
-								<?
+								<?php
 									foreach ($G2 as $value_idfk => $arr_groupBy) {
 										// echo $_id;
 										$afk_tmp = $arr_rfk;
@@ -135,14 +135,14 @@
 												<a onclick="<?= $link ?>"><?= $dsp ?> (<?= $count_in ?>)</a>
 											</div>
 										</div>
-									<? } ?>
+									<?php } ?>
 							</div>
 							<div class="boxshadow">
 								<div class="padding_more borderb no_wrap ededed">
 									<i class="fa fa-star"></i> <?=$APP_TMP->nomAppscheme?> <?=idioma('avec')?> <?=$APP->nomAppscheme?> <?=idioma('dernierement créés')?>
 								</div>
 								<div class="    applink  applinkblock ">
-								<?
+								<?php
 									foreach ($G_groupBy_crea as $value_idfk => $arr_groupBy) {
 										// echo $_id;
 										$afk_tmp = $arr_rfk;
@@ -155,7 +155,7 @@
 											<div class=" " style="overflow:hidden;">
 												<a onclick="<?= $link ?>"><?= $dsp ?> (<?= $count_in ?>)</a>
 											</div>
-									<? } ?>
+									<?php } ?>
 								</div>
 							</div>
 							<div class="boxshadow">
@@ -163,7 +163,7 @@
 									<i class="fa fa-star"></i> <?=$APP_TMP->nomAppscheme?> <?=idioma('avec')?> <?=$APP->nomAppscheme?> <?=idioma('dernierement modifiés')?>
 								</div>
 								<div class="    applink  applinkblock ">
-								<?
+								<?php
 									foreach ($G_groupBy_modif as $value_idfk => $arr_groupBy) {
 										// echo $_id;
 										$afk_tmp = $arr_rfk;
@@ -176,12 +176,12 @@
 											<div  style="overflow:hidden;">
 												<a onclick="<?= $link ?>"><?= $dsp ?> (<?= $count_in ?>)</a>
 											</div>
-									<? } ?>
+									<?php } ?>
 								</div>
 							</div>
 						</div>
 						<div class="ededed"><i class="fa fa-arrow-right"></i></div>
 					</div>
-				<? } ?></div>
+				<?php } ?></div>
 	</div>
 </div>

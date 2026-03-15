@@ -1,4 +1,4 @@
-<?
+<?php
 
 	include_once($_SERVER['CONF_INC']);
 
@@ -7,7 +7,7 @@
 	$time = time(); 
  
 ?>
-<?
+<?php
 	if(empty($_POST['run'])): 
 ?>
 	<div style="width:950px;">
@@ -30,7 +30,7 @@
 		</div>
 		<div style="width:100%;max-height:350px;border:none;overflow:auto;" id="frame_xmlte_ch_ins" scrolling="auto"></div>
 	</div>
-<?
+<?php
 	return;
 endif;
 	set_time_limit(0);
@@ -52,7 +52,7 @@ endif;
 	echo $rs->count();
 	?>
 	<div main_auto_tree>
-	<?
+	<?php
 	$i=0;
 	while ($arr = $rs -> getNext()) { 
 			 do_artis_rows($DATABLE,$arr);

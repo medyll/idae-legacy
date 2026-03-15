@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 	global $buildArr;
 	global $IMG_SIZE_ARR;
@@ -59,15 +59,15 @@
 ?>
 <div style="position:relative;max-width:100%;overflow:hidden;" class="<?= $csssource ?> blanc inline cursor">
 	<div class="flex_h">
-		<div style="width:<?= $width ?>px;height:<?= $height ?>px;" <? if (empty($_POST['noEdit'])){ ?>data-menu="" data-clone="data-clone"<? } ?> class="flex_h flex_align_middle aligncenter color_fond_noir fond_noir">
-			<? if (!empty($test)): ?>
+		<div style="width:<?= $width ?>px;height:<?= $height ?>px;" <?php if (empty($_POST['noEdit'])){ ?>data-menu="" data-clone="data-clone"<?php } ?> class="flex_h flex_align_middle aligncenter color_fond_noir fond_noir">
+			<?php if (!empty($test)): ?>
 				<img src="<?= Act::imgSrc($srcF); ?>?time=<?= time(); ?>" style="width:<?= $width ?>px;height:<?= $height ?>px;max-width:100%;"/>
-			<? else: ?>
+			<?php else: ?>
 				<div title="<?= addslashes(Act::imgSrc($srcF)); ?>" class="aligncenter" style="min-width:50px;min-height:50px;width:100%;"><i class="fa fa-unlink" title="<?= $srcF ?>"></i>
 				</div>
-			<? endif; ?>
+			<?php endif; ?>
 		</div>
-		<? if (empty($_POST['noEdit'])) { ?>
+		<?php if (empty($_POST['noEdit'])) { ?>
 			<div class="applink bordert blanc flex_v flex_wrap absolute boxshadow" style="display:none;width:100%;min-height:100%;bottom:0;right:0;">
 				<div class="applinkblock applink">
 					<a class="flex_main" onclick="load_panel_img('needResize=true&<?= http_build_query($_POST) ?>');">
@@ -78,13 +78,13 @@
 					</a>
 				</div>
 			</div>
-		<? } ?>
+		<?php } ?>
 	</div>
-	<? if (!empty($_POST['show_info'])): ?>
+	<?php if (!empty($_POST['show_info'])): ?>
 		<div class="titre_entete">
 			<?= $srcF ?>
 		</div>
-	<? endif; ?>
+	<?php endif; ?>
 </div>
 <script>
 	load_panel_img = function (vars) {

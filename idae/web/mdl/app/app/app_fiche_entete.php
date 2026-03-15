@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 
 	//
@@ -39,8 +39,8 @@
 		                                           'hide_empty'    => 1,
 		                                           'table_value'   => $table_value]) ?>
 	</div>
-	<? if($table=="service"){ ?>
+	<?php if($table=="service"){ ?>
 		<?= skelMdl::cf_module('app/app/app_fiche_rfk', ['mode' => 'fiche', 'table' => $table, 'table_value' => $table_value], $table_value) ?>
 
-	<? }?>
+	<?php }?>
 </div>

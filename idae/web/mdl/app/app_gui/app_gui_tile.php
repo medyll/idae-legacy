@@ -1,4 +1,4 @@
-<?
+<?php
 
 include_once($_SERVER['CONF_INC']);
 $APP = new App();
@@ -46,9 +46,9 @@ foreach ($OU as $key_gr => $arr_gr):
 
             </div>
         </div>
-    <?
+    <?php
     endforeach;
-?><div class="spacer"></div><?
+?><div class="spacer"></div><?php
 endforeach;
 ?>
 <div class="spacer"></div>

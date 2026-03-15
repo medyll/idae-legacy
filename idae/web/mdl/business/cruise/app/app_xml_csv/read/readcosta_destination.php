@@ -32,7 +32,7 @@
 
 	if ( empty($_POST['run']) ) {
 		?>
-		<div class = "padding"><?= sizeof($xml->CostaCruiseCatalog->Destination) ?> destinations</div><?
+		<div class = "padding"><?= sizeof($xml->CostaCruiseCatalog->Destination) ?> destinations</div><?php
 
 	} else {
 		foreach ($xml->CostaCruiseCatalog->Destination as $key => $Destination) {

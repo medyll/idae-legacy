@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 	ini_set('display_errors', 55);
 
@@ -32,13 +32,13 @@
 		//if (sizeof($final_rfk) == 0) return;
 		?>
 		<div class="">
-			<?
+			<?php
 				foreach ($final_rfk as $key => $arr_final):
 					// vardump($arr_final);
 					?>
 
 					<div class="applink applinkblock">
-						<?
+						<?php
 							foreach ($arr_final as $arr_fk):
 								if (empty($arr_fk['count'])) {
 								  continue;
@@ -54,11 +54,11 @@
 									<span data-count="data-count" data-table="<?=$arr_fk['table']?>" data-vars="<?= http_build_query($vars_rfk); ?>"><?=$count?></span>
 									<?=  $arr_fk['nomAppscheme'] . '' . (($count < 2) ? '' : 's') ?>
 								</a>
-							<? endforeach; ?>
+							<?php endforeach; ?>
 					</div>
-				<? endforeach; ?>
+				<?php endforeach; ?>
 		</div>
-		<?
+		<?php
 	endif; ?>
 
 

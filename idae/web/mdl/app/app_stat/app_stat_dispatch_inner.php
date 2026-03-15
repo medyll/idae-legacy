@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 	// nbre par date
 	ini_set('display_errors', 55);

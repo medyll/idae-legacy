@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 ?>
 <div class="relative flex_v applink" style="height: 100%;overflow:hidden;">
@@ -15,7 +15,7 @@
 				</div>
 			</div>
 		</div>
-		<? if (droit('DEV')) { ?>
+		<?php if (droit('DEV')) { ?>
 			<div class=" demi">
 				<div class="hide_gui_pane  applink ">
 					<div class="appmetro aligncenter">
@@ -28,7 +28,7 @@
 					</div>
 				</div>
 			</div>
-		<? } ?>
+		<?php } ?>
 	</div>
 	<div class="flex_main" style="overflow:auto;">
 		<div style="margin-top:2em;">

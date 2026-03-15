@@ -1,4 +1,4 @@
-<?
+<?php
 if(file_exists('conf.inc.php')) include_once('conf.inc.php'); 
 include_once($_SERVER['CONF_INC']);
 

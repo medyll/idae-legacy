@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 
 	//
@@ -41,14 +41,14 @@
 		<div id="<?= $id_fiche_maxi ?>"  class="flex_h flex_main">
 			<div class="none" style="z-index:200;"><?= skelMdl::cf_module('app/app/app_fiche_entete', ['act_from' => 'fiche', 'table' => $table, 'table_value' => $table_value]) ?></div>
 			<div class="flex_main flex_h flex_wrap">
-				<? foreach ($ARR_GROUP_FIELD as $key => $val) {
+				<?php foreach ($ARR_GROUP_FIELD as $key => $val) {
 					$arrg = $val['group'];
 					$arrf = $val['field'];
 					?>
 					<div>
 						<div class="  autoBlock">
 							<table class="table_info  autoBlock" style="table-layout: fixed;">
-								<? foreach ($arrf as $keyf => $valf) {
+								<?php foreach ($arrf as $keyf => $valf) {
 									if (empty($ARR[$valf['codeAppscheme_field'] . $Table])) continue;
 									?>
 									<tr>
@@ -60,20 +60,20 @@
 											<?= $APP->draw_field(['field_name_raw' => $valf['codeAppscheme_field'], 'table' => $table, 'field_value' => $ARR[$valf['codeAppscheme_field'] . $Table]]) ?>
 										</td>
 									</tr>
-								<? } ?>
+								<?php } ?>
 							</table>
 						</div>
 					</div>
-				<? } ?>
+				<?php } ?>
 			</div>
 			<div class="flex_h flex_wrap">
-				<? if (sizeof($R_FK) != 0): ?>
-					<? foreach ($R_FK as $arr_fk):
+				<?php if (sizeof($R_FK) != 0): ?>
+					<?php foreach ($R_FK as $arr_fk):
 						$final_rfk[$arr_fk['scope']][] = $arr_fk;
-					endforeach; ?><? foreach ($final_rfk as $key => $arr_final):
+					endforeach; ?><?php foreach ($final_rfk as $key => $arr_final):
 						?>
 						<div class="applink applinkblock">
-							<?
+							<?php
 								foreach ($arr_final as $arr_fk):
 									if (empty($arr_fk['count'])) {
 										continue;
@@ -86,12 +86,12 @@
 									<div act_chrome_gui="app/app_liste/app_liste_gui" vars="<?= http_build_query($vars_rfk); ?>" data-link data-table="<?= $vars_rfk['table'] ?>" data-vars="<?= http_build_query($vars_rfk); ?>">
 										<a class="ededed border4 autoToggle"><i class="fa fa-<?= $arr_fk['icon'] ?> textbleu padding"></i> <?= $count . ' ' . $arr_fk['nomAppscheme'] . '' . (($count == 0) ? '' : 's') ?>
 										</a>
-									</div>                        <? endforeach; ?>
-						</div>            <? endforeach; ?>
-					<br>        <? endif; ?>
+									</div>                        <?php endforeach; ?>
+						</div>            <?php endforeach; ?>
+					<br>        <?php endif; ?>
 			</div>
 
-			<? if ($R_FK['document'] && droit('DEV')): ?>
+			<?php if ($R_FK['document'] && droit('DEV')): ?>
 				<div>
 					<div class="padding border4 margin ededed">
 						<div style="position:relative;min-height:100px;width:100px;" id="drag_perso">
@@ -125,7 +125,7 @@
 						new myddeAttach($('fiche_entete_table_<?=$table?>_<?=$table_value?>'), {form: 'form_upload_<?= $table ?>', autoSubmit: true });
 					</script>
 				</div>
-			<? endif; ?>
+			<?php endif; ?>
 		</div>
 	</div>
 </div>
