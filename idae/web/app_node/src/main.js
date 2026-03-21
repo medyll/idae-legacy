@@ -9,6 +9,7 @@ import express from 'express';
 import http from 'http';
 import { Server } from 'socket.io';
 import { config } from './config/config.js';
+import logger from './config/logger.js';
 import { db } from './db/mongo.js';
 import { cronService } from './services/cron.js';
 import { createRouter } from './web/routes.js';
@@ -17,13 +18,13 @@ import { authMiddleware } from './socket/middleware.js';
 import { setupFidelNamespace } from './socket/fidel.js';
 
 async function bootstrap() {
-    console.log('[BOOT] Starting Idae Node Server...');
+    logger.info('[BOOT] Starting Idae Node Server...');
 
     // 1. Connect to Database
     try {
         await db.connect();
     } catch (err) {
-        console.error('[BOOT] Critical: Database connection failed. Exiting.');
+        logger.error('[BOOT] Critical: Database connection failed. Exiting.');
         process.exit(1);
     }
 
@@ -55,7 +56,7 @@ async function bootstrap() {
     io.use(authMiddleware);
 
     io.on('connection', (socket) => {
-        console.log(`[SOCKET] New connection ${socket.id}`);
+        logger.info(`[SOCKET] New connection ${socket.id}`);
 
         socket.onAny((eventName, ...args) => {
            // console.log(`[SOCKET DEBUG] INCOMING: ${eventName}`, args);
@@ -78,21 +79,21 @@ async function bootstrap() {
 
     // 7. Listen — bind 0.0.0.0 so Docker inter-container traffic can reach us
     server.listen(config.port, '0.0.0.0', () => {
-        console.log(`[BOOT] Server listening on 0.0.0.0:${config.port}`);
-        console.log(`[BOOT] Environment: ${config.env}`);
+        logger.info(`[BOOT] Server listening on 0.0.0.0:${config.port}`);
+        logger.info(`[BOOT] Environment: ${config.env}`);
     });
-    
+
     // Graceful Shutdown
     process.on('SIGTERM', async () => {
-        console.log('SIGTERM signal received: closing HTTP server');
+        logger.info('SIGTERM signal received: closing HTTP server');
         server.close(() => {
-            console.log('HTTP server closed');
+            logger.info('HTTP server closed');
             process.exit(0);
         });
     });
 }
 
 bootstrap().catch(err => {
-    console.error('[BOOT] Unhandled Error:', err);
+    logger.error('[BOOT] Unhandled Error: ' + err.message);
     process.exit(1);
 });
