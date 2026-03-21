@@ -1,12 +1,10 @@
-Voici la traduction de ton fichier `.md` en anglais, Mydde.
-
 ---
 
 ████████████████████████████████████████████████████████████████
 IDAE SOCKET.IO SERVER - QUICK HELPER
 ████████████████████████████████████████████████████████████████
 
-📦 **NPM COMMANDS (Recommended)**
+**NPM COMMANDS (Recommended)**
 ————————————————————————————————————————————————————————————————
 `pnpm run start`     ✓ Start server (background)
 `pnpm run stop`      ✗ Stop server
@@ -15,19 +13,18 @@ IDAE SOCKET.IO SERVER - QUICK HELPER
 `pnpm run logs`      📜 View real-time logs
 `pnpm run dev`       🔧 Development mode (foreground)
 
-⚡ **POWERSHELL SCRIPTS**
+**POWERSHELL SCRIPTS**
 ————————————————————————————————————————————————————————————————
 `.\start-socket.ps1`    Start the server
 `.\stop-socket.ps1`     Stop the server
 `.\status-socket.ps1`   View status
 
-📂 **LOGS**
+**LOGS**
 ————————————————————————————————————————————————————————————————
-`logs/socket-out.log`   Standard output
-`logs/socket-err.log`   Errors
-`logs/socket.log`       Combined log
+`/logs/socket-err.log`  Errors only
+`/logs/socket.log`      Combined log (info+errors)
 
-🛠️  **TROUBLESHOOTING**
+**TROUBLESHOOTING**
 ————————————————————————————————————————————————————————————————
 Stop all Node.js processes:
 `Stop-Process -Name node -Force`
@@ -45,9 +42,4 @@ View Node.js processes:
 ✓ NPM scripts added
 ✓ Logs configured
 ✓ Port: 3005
-
-📝 **MORE INFO**
-————————————————————————————————————————————————————————————————
-See `README_SOCKET.md` for full documentation
-
 ---
