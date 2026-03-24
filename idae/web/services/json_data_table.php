@@ -90,7 +90,7 @@ declare(strict_types=1);
 	
 	// Handle missing schema with silent fail and error logging
 	if (empty($APP_TABLE) || is_null($APP_TABLE)) {
-		error_log("[json_data_table] Missing schema for table '$table' - silent fail");
+		// Missing schema — return empty result silently
 		
 		// Return empty result to avoid breaking the frontend
 		$empty_response = [

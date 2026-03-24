@@ -2,22 +2,31 @@
 # Usage: .\docker-logs.ps1 [-Follow] [-Errors] [-Session]
 
 param(
-    [switch]$Follow,
-    [switch]$Errors,
-    [switch]$Session,
-    [int]$Lines = 50
+    [ValidateSet('apache','socket','all')]
+    [string]$Mode = 'all',
+    [int]$Lines = 200
 )
 
-if ($Follow) {
-    Write-Host "📋 Following logs (Ctrl+C to stop)..." -ForegroundColor Cyan
-    docker logs -f idae-legacy
-} elseif ($Errors) {
-    Write-Host "❌ Error logs (last $Lines lines):" -ForegroundColor Red
-    docker logs --tail $Lines idae-legacy 2>&1 | Select-String -Pattern "error|Error|ERROR|fail|Fail|FAIL|fatal|Fatal|FATAL"
-} elseif ($Session) {
-    Write-Host "🔐 Session logs (last $Lines lines):" -ForegroundColor Yellow
-    docker logs --tail $Lines idae-legacy 2>&1 | Select-String -Pattern "Session|session|reindex|retry"
-} else {
-    Write-Host "📋 Recent logs (last $Lines lines):" -ForegroundColor Cyan
-    docker logs --tail $Lines idae-legacy
+switch ($Mode) {
+    'apache' {
+        Write-Host "Apache recent logs (last $Lines lines):" -ForegroundColor Cyan
+        if (Test-Path .\logs\php-error.log) { Get-Content .\logs\php-error.log -Tail $Lines } else { docker logs --tail $Lines idae-legacy }
+    }
+
+    'socket' {
+        Write-Host "Socket recent logs (last $Lines lines):" -ForegroundColor Cyan
+        if (Test-Path .\logs\socket.log) {
+            Get-Content .\logs\socket.log -Tail $Lines
+        } else {
+            docker logs --tail $Lines idae-socket
+        }
+    }
+
+    'all' {
+        Write-Host "Combined recent logs:" -ForegroundColor Cyan
+        ./docker-logs.ps1 apache -Lines $Lines
+        Write-Host '--- SOCKET ---' -ForegroundColor Cyan
+        ./docker-logs.ps1 socket -Lines $Lines
+    }
 }
+

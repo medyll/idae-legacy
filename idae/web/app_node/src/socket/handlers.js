@@ -2,6 +2,7 @@
  * Migrated code and structure from Lebrun Meddy 2009
  */
 import { config } from '../config/config.js';
+import logger from '../config/logger.js';
 import { db } from '../db/mongo.js';
 import { sessionManager } from '../services/sessionManager.js';
 import { phpBridge } from '../services/phpBridge.js';
@@ -64,7 +65,7 @@ export function registerHandlers(io, socket) {
                     );
                 }
             } catch (e) {
-                console.error("Disconnect DB update error", e);
+                logger.error("Disconnect DB update error", e);
             }
             sessionManager.removeBySession(socket.id);
         }
@@ -72,7 +73,7 @@ export function registerHandlers(io, socket) {
 
     // --- GrantIn (Login) ---
     socket.on("grantIn", function (data, fn) {
-        console.log("[SOCKET] grantIn received:", data);
+        logger.info("[SOCKET] grantIn received:", data);
         
         const sess = {
             sessionId: socket.id,
@@ -128,15 +129,15 @@ export function registerHandlers(io, socket) {
         const mdl = data.mdl || "";
         const SESSID = data.SESSID || "";
         
-        console.log(`[loadModule] DOMAIN=${DOCUMENTDOMAIN} mdl=${mdl} SESSID=${SESSID} PHPSESSID=${data.PHPSESSID || 'none'} vars=${data.vars || ''}`);
+        logger.info(`[loadModule] DOMAIN=${DOCUMENTDOMAIN} mdl=${mdl} SESSID=${SESSID} PHPSESSID=${data.PHPSESSID || 'none'} vars=${data.vars || ''}`);
         if (DOCUMENTDOMAIN) socket.join(DOCUMENTDOMAIN);
 
         const url = `http://${DOCUMENTDOMAIN}/mdl/${mdl}.php?SESSID=${SESSID}`;
-        console.log(`[loadModule] -> ${url}`);
+        logger.info(`[loadModule] -> ${url}`);
         
         try {
             const result = await phpBridge.post(url, data);
-            console.log(`[loadModule] <- status=${result.status} size=${result.data ? result.data.length : 0}`);
+            logger.info(`[loadModule] <- status=${result.status} size=${result.data ? result.data.length : 0}`);
             socket.emit("loadModule", {
                 body: result.data,
                 vars: data.vars || "",
@@ -144,29 +145,29 @@ export function registerHandlers(io, socket) {
                 title: data.title || ""
             });
         } catch (e) {
-            console.error(`[loadModule] ERROR: ${e.message}`);
+            logger.error(`[loadModule] ERROR: ${e.message}`);
         }
     });
 
     // socketModule
     socket.on("socketModule", async function (data, fun) {
         const DOCUMENTDOMAIN = cleanDomain(data.DOCUMENTDOMAIN) || "appgem.destinationsreve.com";
-        console.log(`[socketModule] DOMAIN=${DOCUMENTDOMAIN} file=${data.file} element=${data.element || 'none'} PHPSESSID=${data.PHPSESSID || 'none'} SESSID=${data.SESSID || 'none'} vars=${data.vars || ''}`);
+        logger.info(`[socketModule] DOMAIN=${DOCUMENTDOMAIN} file=${data.file} element=${data.element || 'none'} PHPSESSID=${data.PHPSESSID || 'none'} SESSID=${data.SESSID || 'none'} vars=${data.vars || ''}`);
         if (DOCUMENTDOMAIN) socket.join(DOCUMENTDOMAIN);
 
         const url = `http://${DOCUMENTDOMAIN}/mdl/${data.file}.php`;
         
         try {
             const body = typeof data.vars === 'string' ? data.vars : qs.stringify(data.vars);
-            console.log(`[socketModule] -> ${url} body=${body.substring(0, 200)}`);
+            logger.info(`[socketModule] -> ${url} body=${body.substring(0, 200)}`);
             const result = await phpBridge.post(url, data, body);
             const preview = typeof result.data === 'string' ? result.data.substring(0, 150) : JSON.stringify(result.data).substring(0, 150);
-            console.log(`[socketModule] <- status=${result.status} size=${result.data ? result.data.length : 0} preview=${preview}`);
+            logger.info(`[socketModule] <- status=${result.status} size=${result.data ? result.data.length : 0} preview=${preview}`);
             
             socket.emit("socketModule", { body: result.data, out: data });
             if (fun) fun({ body: result.data, data: data });
         } catch (e) {
-            console.error(`[socketModule] ERROR: ${e.message}`);
+            logger.error(`[socketModule] ERROR: ${e.message}`);
         }
     });
 
@@ -194,8 +195,8 @@ export function registerHandlers(io, socket) {
             const extension = data.extension || "php";
             const url = `http://${DOCUMENTDOMAIN}/${directory}/${data.mdl}.${extension}`;
 
-            console.log(`[get_data] DOMAIN=${DOCUMENTDOMAIN} mdl=${data.mdl} PHPSESSID=${data.PHPSESSID || 'none'} SESSID=${data.SESSID || 'none'} vars=${JSON.stringify(data.vars || {})}`);
-            console.log(`[get_data] -> ${url}`);
+            logger.info(`[get_data] DOMAIN=${DOCUMENTDOMAIN} mdl=${data.mdl} PHPSESSID=${data.PHPSESSID || 'none'} SESSID=${data.SESSID || 'none'} vars=${JSON.stringify(data.vars || {})}`);
+            logger.info(`[get_data] -> ${url}`);
             const result = await phpBridge.get(url, data);
             
             // Legacy client expects a JSON string, but Axios automatically parses JSON.
@@ -206,11 +207,11 @@ export function registerHandlers(io, socket) {
             }
 
             const preview = responseData ? responseData.substring(0, 200) : 'empty';
-            console.log(`[get_data] <- size=${responseData ? responseData.length : 0} preview=${preview}`);
+            logger.info(`[get_data] <- size=${responseData ? responseData.length : 0} preview=${preview}`);
 
             if (fn) fn(responseData, options);
         } catch (e) {
-            console.error(`[get_data] ERROR: ${e.message}`);
+            logger.error(`[get_data] ERROR: ${e.message}`);
             if (fn) fn({ error: true, message: e.message }, options);
         }
     });
@@ -220,14 +221,14 @@ export function registerHandlers(io, socket) {
          const DOCUMENTDOMAIN = cleanDomain(data.DOCUMENTDOMAIN) || "appgem.destinationsreve.com";
          const url = `http://${DOCUMENTDOMAIN}/${data.file}.php`;
          
-         console.log(`[runModule] DOMAIN=${DOCUMENTDOMAIN} file=${data.file} PHPSESSID=${data.PHPSESSID || 'none'} vars=${data.vars || ''}`);
-         console.log(`[runModule] -> ${url}`);
+         logger.info(`[runModule] DOMAIN=${DOCUMENTDOMAIN} file=${data.file} PHPSESSID=${data.PHPSESSID || 'none'} vars=${data.vars || ''}`);
+         logger.info(`[runModule] -> ${url}`);
          const body = typeof data.vars === 'string' ? data.vars : qs.stringify(data.vars);
          try {
              await phpBridge.post(url, data, body);
-             console.log(`[runModule] <- done`);
+             logger.info(`[runModule] <- done`);
          } catch (e) {
-             console.error(`[runModule] ERROR: ${e.message}`);
+             logger.error(`[runModule] ERROR: ${e.message}`);
          }
     });
 }

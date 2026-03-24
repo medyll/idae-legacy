@@ -23,8 +23,8 @@ services:
       - MONGO_TEST_HOST=mongo-test
       - MONGO_TEST_PORT=27017
       - MONGO_TEST_DSN=mongodb://mongo-test:27017
-      - DEBUG_DB=1
-      - DEBUG_SESSION=1
+      - DEBUG_DB=
+      - DEBUG_SESSION=
       - SOCKET_PORT=3005
     container_name: idae-legacy
     command: sh -c "sh /var/www/html/idae/web/wait-for-socket.sh && apache2-foreground"
@@ -37,7 +37,7 @@ services:
     restart: unless-stopped
 
   socket:
-    image: node:18-slim
+    image: node:20-slim
     container_name: idae-socket
     working_dir: /app
     command: sh -c "npm install --no-audit --no-fund && npm run start"
@@ -47,8 +47,10 @@ services:
       - ./idae/web/app_node/.env
     environment:
       - PHP_BRIDGE_HOST=idae-legacy
+      - LOG_DIR=/logs
     volumes:
       - ./idae/web/app_node:/app:cached
+      - ./logs:/logs
     depends_on:
       - mongo-test
     healthcheck:
