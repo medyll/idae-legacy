@@ -213,7 +213,7 @@ ajaxInMdl = function (file, element, vars, options) {
 			guivars.mainIdent = this.options.mainIdent;
 		}
 
-		element = JSGUI.add(guivars);
+		element = window.JSGUI.add(guivars);
 
 	}
 	// atrributs !!!
@@ -250,7 +250,7 @@ ajaxValidation = function (action, path, pars) {
 			},
 			method: 'post',
 			sanitize: true,
-			requestHeaders: ['Content-type', 'application/x-www-form-urlencoded', 'charset', 'UTF-8', 'Set-Cookie', 'PHPSESSID=' + localStorage.getItem('PHPSESSID') + ';path=/'],
+			requestHeaders: ['Content-type', 'application/x-www-form-urlencoded', 'charset', 'UTF-8'],
 			postBody: 'F_action=' + action + '&_csrf=' + (window.APP && window.APP.CSRF_TOKEN || '') + '&' + pars
 		});
 	// ,onComplete: function(){div.remove()}.bind(this)

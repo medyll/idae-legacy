@@ -108,7 +108,7 @@ var upd_data = function (file_vars, options) {
 var go_json = function (table, options) {
 	this.options = Object.extend ({}, options || {});
 	// JSGUI onglet
-	red = JSGUI.add ({
+	red = windowJSGUI.add ({
 		title   : table,
 		taskBar : $ ('taskBar')
 	})

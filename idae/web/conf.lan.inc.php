@@ -115,6 +115,17 @@ DEFINE('SOCKET_HOST', getenv('MONGO_HOST') ? 'host.docker.internal' : DOCUMENTDO
 
 DEFINE('HTTPHOST', $HTTP_PREFIX . DOCUMENTDOMAIN . $host_port_part);
 DEFINE('HTTPHOSTNOPORT', $HTTP_PREFIX . DOCUMENTDOMAINNOPORT);
+
+// Development-friendly session cookie settings: support localhost and vhost test domains.
+// If host is localhost, leave cookie domain empty so browser binds cookie to host.
+$cookieDomain = ($host === 'localhost' || $host === '127.0.0.1') ? '' : $host;
+ini_set('session.use_cookies', '1');
+ini_set('session.cookie_httponly', '1');
+ini_set('session.cookie_domain', $cookieDomain);
+// Use Lax for compatibility in dev (None requires Secure + HTTPS)
+ini_set('session.cookie_samesite', 'Lax');
+// In dev over HTTP we keep secure=0; in production conf files should override to 1 when using HTTPS
+ini_set('session.cookie_secure', '0');
 DEFINE('NAMESITE', DOCUMENTDOMAIN);
 DEFINE('MAINSITEHOST', HTTPHOST);
 // Use HTTPCUSTOMERSITE for asset URLs so the port (if any) is included consistently
@@ -158,18 +169,6 @@ if (isset($hostConf['mdb'])) {
     }
     if (!empty($envMongoPrefix)) {
         $hostConf['mdb']['prefix'] = $envMongoPrefix;
-    }
-    // DEBUG PRINT: Show resolved MongoDB connection info
-    if (!empty(getenv('DEBUG_DB'))) {
-        // header('Content-Type: text/plain; charset=UTF-8');
-        error_log("[DEBUG] MONGO_HOST (env): ".$envMongoHost);
-        error_log("[DEBUG] MDB_HOST (final): ".$hostConf['mdb']['host']);
-        error_log("[DEBUG] MDB_USER: ".$hostConf['mdb']['user']);
-        error_log("[DEBUG] MDB_PASSWORD: ".($hostConf['mdb']['password'] ? '***' : ''));
-        error_log("[DEBUG] MDB_PREFIX: ".$hostConf['mdb']['prefix']);
-        error_log("[DEBUG] configFile: $configFile");
-        error_log("[DEBUG] host: $host");
-        // exit;
     }
     define_if_exists('host', $hostConf['mdb'], 'MDB_HOST');
     define_if_exists('user', $hostConf['mdb'], 'MDB_USER');
