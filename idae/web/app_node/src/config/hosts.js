@@ -5,6 +5,7 @@ import { config } from './config.js';
 
 // Default hosts from legacy code
 const DEFAULT_HOSTS = [
+    'localhost',
     'tactac.idae.preprod.lan',
     'maw.idae.preprod.lan',
     'leasys.idae.preprod.lan',

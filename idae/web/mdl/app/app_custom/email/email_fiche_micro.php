@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 
 	$table       = $_POST['table'];
@@ -38,13 +38,13 @@
 			</div>
 			<div class="flex_main alignright padding bold"><?= $ARR['dateCreation' . $Table] ?></div>
 		</div>
-		<? foreach ($ARR_GROUP_FIELD as $key => $val) {
+		<?php foreach ($ARR_GROUP_FIELD as $key => $val) {
 
 			$arrg = $val['group'];
 			$arrf = $val['field'];
 			?>
 			<div class="retrait flex_h flex_wrap flex_align_stretch">
-				<? foreach ($arrf as $keyf => $valf) {
+				<?php foreach ($arrf as $keyf => $valf) {
 					if ($valf['codeAppscheme_field'] == 'nom') continue;
 					if ($valf['codeAppscheme_field'] == 'login') continue;
 					if ($valf['codeAppscheme_field'] == 'password') continue;
@@ -66,7 +66,7 @@
 							</tr>
 						</table>
 					</div>
-				<? } ?>
+				<?php } ?>
 			</div>
-		<? } ?>
+		<?php } ?>
 	</div>

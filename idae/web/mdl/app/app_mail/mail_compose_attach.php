@@ -1,4 +1,4 @@
-<?
+<?php
 include_once($_SERVER['CONF_INC']);  
 $uniqid = uniqid();
 $ARRPOST = fonctionsProduction::cleanPostMongo($_POST,1);
@@ -39,7 +39,7 @@ if(!empty($ARRPOST['idfacture'])){
 ?>
 
 <div class="applink" id="<?=$uniqid?>">
-  <? if(!empty($arr['grilleBrochure'])){ 
+  <?php if(!empty($arr['grilleBrochure'])){ 
   foreach($arr['grilleBrochure'] as $BR):
   ?>
   <div class="inline ededed" title="<?=$BR['filename']?>">
@@ -51,9 +51,9 @@ if(!empty($ARRPOST['idfacture'])){
     <li class="fa fa-times"></li>
     </a>
   </div>
-  <? endforeach;?>
-  <? }?>
-  <? if(!empty($arr['grilleDevis'])){ 
+  <?php endforeach;?>
+  <?php }?>
+  <?php if(!empty($arr['grilleDevis'])){ 
   foreach($arr['grilleDevis'] as $BR):
   ?>
   <div class="inline ededed">
@@ -61,9 +61,9 @@ if(!empty($ARRPOST['idfacture'])){
       <?=$BR['filename']?>
     </li>
   </div>
-  <? endforeach;?>
-  <? }?>
-  <? if(!empty($arr['grilleFacture'])){ 
+  <?php endforeach;?>
+  <?php }?>
+  <?php if(!empty($arr['grilleFacture'])){ 
   foreach($arr['grilleFacture'] as $BR):
   ?>
   <div class="inline ededed">
@@ -71,15 +71,15 @@ if(!empty($ARRPOST['idfacture'])){
       <?=$BR['filename']?>
     </li>
   </div>
-  <? endforeach;?>
-  <? }?>
-  <? if(!empty($arr['grilleFichier'])){ 
+  <?php endforeach;?>
+  <?php }?>
+  <?php if(!empty($arr['grilleFichier'])){ 
   foreach($arr['grilleFichier'] as $BR):
   ?>
   <div class="inline ededed">
     <a deleteFichier="<?=$BR['filename']?>">
        <?=coupeChaineMilieu($BR['filename'])?> <li class="fa fa-times"></li> </a>
   </div>
-  <? endforeach;?>
-  <? }?>
+  <?php endforeach;?>
+  <?php }?>
 </div>  

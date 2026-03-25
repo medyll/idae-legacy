@@ -1,4 +1,4 @@
-<?    
+<?php    
 ob_start();
 include_once($_SERVER['CONF_INC']);
 
@@ -17,6 +17,6 @@ if(!empty($_GET['frameLoaded'])){
   <iframe src="<?=$_SERVER['PHP_SELF']?>?frameLoaded=frameLoaded&uniqid=<?=$uniqid?>" class="flowDown" style="display:block;height:100%;overflow:auto;width:100%;margin:0 auto;" marginheight="0" marginwidth="0" frameborder="0">
   </iframe>
 </div>
-	<?
+	<?php
 	}  
 ?>

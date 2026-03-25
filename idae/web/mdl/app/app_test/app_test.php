@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 	$time = time();
 	$i = 0;
@@ -36,7 +36,7 @@
 
 <div style = "height:100%;overflow-x:auto;overflow-y: hidden;" class = "blanc">
 	<div class = "flex_h flex_nowrap" style = "height:100%;overflow-y: hidden;">
-		<? foreach ($periode as $key => $value) {
+		<?php foreach ($periode as $key => $value) {
 			$titre = $key . " " . $value[0]->format('d/m/Y') . ' au ' . $value[1]->format('d/m/Y');
 			?>
 			<div class = "flex_v">
@@ -45,7 +45,7 @@
 
 				</div>
 				<div class = "flex_h flex_main flex_nowrap">
-					<?  $begin = $value[0];
+					<?php  $begin = $value[0];
 						$end = $value[1];
 
 						for ($i = $begin; $begin <= $end; $i->modify('+1 day')) {
@@ -54,7 +54,7 @@
 							<div class = "flex_v" style = "min-width:200px;">
 								<div class="padding ededed" ><?= fonctionsProduction::date_fr($dadate) ?></div>
 								<div class = "flex_main " style = "overflow:auto;">
-									<? foreach ($arr_sc as $key => $value) {
+									<?php foreach ($arr_sc as $key => $value) {
 										$table      = $value['nomAppscheme'];
 										$Table      = ucfirst($table);
 										$APP_tmp    = new App($value['nomAppscheme']);
@@ -67,29 +67,29 @@
 										<div class="retrait borderr">
 											<div class = "margin padding border4 ededed"><?= $value['nomAppscheme'] ?></div>
 											<div class="retrait">
-												<? while ($arr_tmp_deb = $rs_tmp_deb->getNext()) {
+												<?php while ($arr_tmp_deb = $rs_tmp_deb->getNext()) {
 													$value_id = (int)$arr_tmp_deb['id' . $table];
 													?>
 												<div    vars="table=<?= $table ?>&table_value=<?= $value_id ?>">
 												-	<?=$arr_tmp_deb['nom' . ucfirst($table)];?>
-												</div ><?
+												</div ><?php
 												} ?>
-												<? while ($arr_tmp_fin = $rs_tmp_fin->getNext()) {
+												<?php while ($arr_tmp_fin = $rs_tmp_fin->getNext()) {
 													$value_id = (int)$arr_tmp_fin['id' . $table];
 													?>
 												<div  vars="table=<?= $table ?>&table_value=<?= $value_id ?>">
 												-	<?=$arr_tmp_fin['nom' . ucfirst($table)];?>
-												</div ><?
+												</div ><?php
 												} ?>
 											</div>
 										</div>
-									<? } ?>
+									<?php } ?>
 								</div>
 							</div>
 
-						<? } ?>
+						<?php } ?>
 				</div>
 			</div>
-		<? } ?>
+		<?php } ?>
 	</div>
 </div>

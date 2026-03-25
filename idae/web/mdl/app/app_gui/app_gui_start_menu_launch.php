@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 
 	$table = $_POST['table'];
@@ -17,14 +17,14 @@
 	<div>
 		<div style="width:100%;">
 			<br>
-			<? if (droit_table($_SESSION['idagent'], 'C', $table)) : ?>
+			<?php if (droit_table($_SESSION['idagent'], 'C', $table)) : ?>
 				<div class="alignright padding uppercase  " style="border-color:<?= $ICON_COLOR ?>">
 					<a class="autoToggle hide_gui_pane margin border4" onclick="<?= fonctionsJs::app_create($table, ['idagent' => $_SESSION['idagent']]); ?>">
 						<i class="fa fa-save textbold" style="color:<?= $APP_TMP->colorAppscheme ?>"></i> <?= idioma('Créer ' . $table) ?></a>
 				</div>
-			<? endif; ?>
+			<?php endif; ?>
 			<div class="flex_h">
-				<? if (droit_table($_SESSION['idagent'], 'L', $table)) : ?>
+				<?php if (droit_table($_SESSION['idagent'], 'L', $table)) : ?>
 					<div class=" demi">
 						<div  class="applinkblock">
 							<div class="appmetro aligncenter flex_align_bottom">
@@ -36,8 +36,8 @@
 							</div>
 						</div>
 					</div>
-				<? endif; ?>
-				<? if (droit_table($_SESSION['idagent'], 'R', $table)) : ?>
+				<?php endif; ?>
+				<?php if (droit_table($_SESSION['idagent'], 'R', $table)) : ?>
 					<div class=" demi">
 						<div  class="applinkblock">
 							<div class="appmetro aligncenter">
@@ -50,49 +50,49 @@
 							</div>
 						</div>
 					</div>
-				<? endif; ?>
+				<?php endif; ?>
 			</div>
 			<br>
 			<div class="appmetro ">
 				<div class="flex_h flex_wrap flex_align_top">
-					<? if (droit_table($_SESSION['idagent'], 'L', $table)) : ?>
+					<?php if (droit_table($_SESSION['idagent'], 'L', $table)) : ?>
 						<div class="demi">
 							<a class="autoToggle hide_gui_pane" onclick="ajaxInMdl('app/app_prod/app_prod','tmp_exp_prod','table=<?= $table ?>',{onglet:'Production <?= $table ?>'});"><i class="fa fa-folder-open"></i> Parcourir
 							</a>
 						</div>
-					<? endif; ?>
-					<? if (droit_table($_SESSION['idagent'], 'R', $table)) : ?>
+					<?php endif; ?>
+					<?php if (droit_table($_SESSION['idagent'], 'R', $table)) : ?>
 						<div class=" ">
 							<a class=" autoToggle hide_gui_pane" onclick="ajaxInMdl('app/app/app_compare','app_compare<?= $table ?>','table=<?= $table ?>',{onglet:'<?= idioma('Comparaison ' . $table) ?>'});"><i
 									class="fa fa-list-alt"></i> Comparer
 							</a>
 						</div>
-					<? endif; ?>
-					<? if (droit('ADMIN')) : ?>
+					<?php endif; ?>
+					<?php if (droit('ADMIN')) : ?>
 						<div class="demi">
 							<a class="   autoToggle hide_gui_pane" onclick="ajaxInMdl('app/app/app_dispatch','app_dispatch<?= $table ?>','table=<?= $table ?>',{onglet:'<?= idioma('Tri  ' . $table) ?>'});"><i
 									class="fa fa-list-alt"></i> Trier
 							</a>
 						</div>
-					<? endif; ?>
-					<? if (droit_table($_SESSION['idagent'], 'L', $table)) : ?>
-						<? if ($APP_TMP->has_field('dateDebut') && !empty($APP_TMP->app_table_one['hasStatutScheme'])) { ?>
+					<?php endif; ?>
+					<?php if (droit_table($_SESSION['idagent'], 'L', $table)) : ?>
+						<?php if ($APP_TMP->has_field('dateDebut') && !empty($APP_TMP->app_table_one['hasStatutScheme'])) { ?>
 							<div class="demi mce-i-align none">
 							<a class="  autoToggle hide_gui_pane" onclick="<?= fonctionsJs::app_console($table) ?>"><i class="fa fa-dashboard"></i><?= idioma('console') . ' ' . $table ?></a>
-							</div><? } ?>
-					<? endif; ?>
+							</div><?php } ?>
+					<?php endif; ?>
 					<a class="demi flex_main autoToggle hide_gui_pane  none" onclick="<?= fonctionsJs::app_mdl('app/app_img/app_img', ['table' => $table]) ?>"><i class="fa fa-dashboard"></i><?= idioma('images') . ' ' . $table ?></a>
 				</div>
 			</div>
 			<br>
-			<? if (droit('DEV') && !empty($APP_TMP->app_table_one['hasStatutScheme'])) {
+			<?php if (droit('DEV') && !empty($APP_TMP->app_table_one['hasStatutScheme'])) {
 				$table_statut = $table . '_statut';
 				$Table_statut = $Table . '_statut';
 				$APP_STATUT   = new App($table_statut);
 				$rs_statut    = $APP_STATUT->find()->sort(['ordre' . $Table_statut => 1]);
 				?>
 				<div class="appmetro applinkblock">
-					<?
+					<?php
 						$addvarsagent     = '';
 						$arr_addvarsagent = [];
 						if ($APP_TMP->has_agent()):
@@ -107,10 +107,10 @@
 								<span class=""><i class="fa fa-<?= $arr_statut['icon' . $Table_statut] ?>"></i> <?= $arr_statut['nom' . $Table_statut] ?></span>
 								<span class="flex_main alignright"><?= $rs_tot->count(); ?></span>
 							</a>
-						<? } ?>
+						<?php } ?>
 				</div>
 				<br>
-			<? } ?>
+			<?php } ?>
 		</div>
 	</div>
 	<div class="padding_more" >

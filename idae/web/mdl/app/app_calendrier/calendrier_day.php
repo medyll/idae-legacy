@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 	$time = uniqid();
 	//
@@ -41,13 +41,13 @@
 	<table style="width:100%" border="0" cellpadding=0 cellspacing="1">
 		<thead>
 			<tr>
-				<? for ($i = 0; $i < 7; $i++) { ?>
+				<?php for ($i = 0; $i < 7; $i++) { ?>
 					<td class="aligncenter"><?= $tabjour[$i] ?></td>
-				<? } ?>
+				<?php } ?>
 			</tr>
 		</thead>
 		<tbody class="toggler">
-			<?
+			<?php
 				$num_day = date("w", mktime(0, 0, 0, $moisEnCours, 01, $anneeEnCours));
 				if ($num_day == 0) {
 					$num_day = 7;
@@ -59,7 +59,7 @@
 					$nb_day = date("z", mktime(0, 0, 0, $moisEnCours, $cpt_day - $num_day + 3, $anneeEnCours));
 					$val    = intval($nb_day / 7) + 1; ?>
 					<tr>
-						<?
+						<?php
 							// affiche les jours du mois
 							for ($i = 0; $i < 7; $i++) {
 								$theday    = date("D", mktime(0, 0, 0, $moisEnCours, $cpt_day - $num_day, $anneeEnCours));
@@ -93,8 +93,8 @@
 										<?= $val ?>
 									</a>
 								</td>
-							<? } ?>
+							<?php } ?>
 					</tr>
-				<? } ?></tbody>
+				<?php } ?></tbody>
 	</table>
 </div>

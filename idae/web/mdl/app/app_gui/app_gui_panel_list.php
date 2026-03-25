@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 
 	$_POST = array_merge($_GET,$_POST);
@@ -24,7 +24,7 @@
 ?>
  <div act_defer class="blanc"  mdl="app/app_gui/app_gui_panel" vars="table=<?=$table?>&vars[idagent]=<?=$_SESSION['idagent']?>" value="<?=$table?>"></div>
 
-		<?
+		<?php
 
 		//
 	endforeach;

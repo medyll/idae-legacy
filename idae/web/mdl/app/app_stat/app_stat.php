@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 	ini_set('display_errors',55);
 	$uniqid            = uniqid();
@@ -27,7 +27,7 @@
 		</div>
 		<div class="applink applinkblock padding" main_auto_tree>
 			<div class="toggler">
-				<? while ($ARR_TY = $RS_TY->getNext()) {
+				<?php while ($ARR_TY = $RS_TY->getNext()) {
 					$idappscheme_type = (int)$ARR_TY['idappscheme_type'];
 					$RS_SCH           = $APP_SCH->find(['idappscheme_type' => $idappscheme_type, 'idappscheme' => ['$in' => $arr_sch]])->sort(['nomAppscheme' => 1]);
 					?>
@@ -40,7 +40,7 @@
 						</div>
 					</div>
 					<div class="borderb">
-						<?
+						<?php
 							while ($ARR_SCH = $RS_SCH->getNext()) {
 								$table       = $ARR_SCH['codeAppscheme'];
 								$nom_table   = $ARR_SCH['nomAppscheme'];
@@ -55,10 +55,10 @@
 										<a class="autoToggle" onclick="$('<?= $uniqid ?>').loadModule('app/app_stat/app_stat_dispatch','table=<?= $table ?>');"><?= $nom_table ?></a>
 									</div>
 								</div>
-								<?
+								<?php
 							} ?>
 					</div>
-				<? } ?>
+				<?php } ?>
 			</div>
 		</div>
 		<div class="flex_main ">

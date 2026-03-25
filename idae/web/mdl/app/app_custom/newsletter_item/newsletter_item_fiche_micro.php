@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 	ini_set('display_errors', 55);
 	// POST
@@ -20,12 +20,12 @@
 			<div class="alignright borderb">
 				<a onclick="<?=fonctionsJs::app_update($table,$table_value)?>">Modifier</a>
 			</div>
-			<? foreach ($ARR_GROUP_FIELD as $key => $val) {
+			<?php foreach ($ARR_GROUP_FIELD as $key => $val) {
 				$arrg = $val['group'];
 				$arrf = $val['field'];
 				?>
 				<div class="flex_h flex_wrap flex_align_middle">
-						<? foreach ($arrf as $keyf => $valf) {
+						<?php foreach ($arrf as $keyf => $valf) {
 							//	if($arrg['codeAppscheme_field_group']!='identification' && $arrg['codeAppscheme_field_group']!='codification'&& $arrg['codeAppscheme_field_group']!='valeur')continue;
 							$value = $ARR[$valf['codeAppscheme_field'] . $Table];
 							// if (empty($value)) continue;
@@ -50,9 +50,9 @@
 								</td>
 							</tr>
 					</table></div>
-						<? } ?>
+						<?php } ?>
 				</div>
-			<? } ?>
+			<?php } ?>
 		</div>
 	</div>
 </div>

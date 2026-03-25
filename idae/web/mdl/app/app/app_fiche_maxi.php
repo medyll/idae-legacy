@@ -56,7 +56,7 @@
 			<div class="toolButton applink applinkbig  toggler flex_h flex_main borderb">
 				<a class="autoToggle <?= $mdl1_css ?> boxshadowr" act_target="<?= $zouzou ?>" mdl="app/app/app_fiche_maxi_home" vars="<?= http_build_query($_POST) ?>" onclick="save_settings('<?= $setting_home_save ?>','<?= $mdl1 ?>');">
 					<i class="fa fa-home"></i>
-				</a><? if (sizeof($R_FK) != 0):
+				</a><?php if (sizeof($R_FK) != 0):
 					foreach ($R_FK as $arr_fk):
 						$value_rfk               = $arr_fk['table_value'];
 						$table_rfk               = $arr_fk['table'];
@@ -70,26 +70,26 @@
 						}
 						?>
 					<a act_target="<?= $zouzou ?>" mdl="app/app_liste/app_liste" vars="table=<?= $table_rfk ?>&vars[<?= 'id' . $table ?>]=<?= $table_value ?>&show_search=true" class="autoToggle <?= $css_active ?>"><i class="fa fa-<?= $arr_fk['iconAppscheme'] ?>" style="color:<?= $arr_fk['colorAppscheme'] ?>"></i><?= $arr_fk['nomAppscheme'] ?>
-						</a><? endforeach; ?>
+						</a><?php endforeach; ?>
 				<a act_target="<?= $zouzou ?>" mdl="app/app/app_fiche_maxi_liste" vars="<?= http_build_query($_POST) ?>&model=defaultModel" class="autoToggle <?= $css_active ?>"> Voir
-				                                                                                                                                                                   tout</a><? endif; ?>
-				<? if (!empty($APP_TABLE['hasImageScheme'])) { ?>
+				                                                                                                                                                                   tout</a><?php endif; ?>
+				<?php if (!empty($APP_TABLE['hasImageScheme'])) { ?>
 					<a act_target="<?= $zouzou ?>" mdl="app/app_img/image_app_liste_img" vars="table=<?= $table ?>&table_value=<?= $table_value ?>" class="autoToggle">Images</a>
-				<? } ?>
-				<? if (in_array('gpsData', $HAS_FIELD)): ?>
+				<?php } ?>
+				<?php if (in_array('gpsData', $HAS_FIELD)): ?>
 					<a onclick="<?= fonctionsJs::app_mdl('app/app_custom/app_custom_map', ['table' => $table, 'table_value' => $table_value], '') ?>">
 						<i class="fa fa-map-pin"></i>
 						&nbsp;
 						<?= idioma('Localisation') ?>
 					</a>
-				<? endif; ?>
-				<? if ($table=='secteur'): ?>
+				<?php endif; ?>
+				<?php if ($table=='secteur'): ?>
 					<a onclick="<?= fonctionsJs::app_mdl('app/app_custom/app_custom_map_zone', ['table' => $table, 'table_value' => $table_value], '') ?>">
 						<i class="fa fa-map-pin"></i>
 						&nbsp;
 						<?= idioma('Localisation zone') ?>
 					</a>
-				<? endif; ?>
+				<?php endif; ?>
 			</div>
 		</div>
 		<div id="<?= $zouzou ?>" class="flex_main" style="height:100%;width: 100%;overflow:hidden;">

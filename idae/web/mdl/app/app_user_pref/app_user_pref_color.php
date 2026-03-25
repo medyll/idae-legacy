@@ -8,7 +8,7 @@
 $arrstyle = ['app_gui_color'=>'Interface','app_gui_color_gui'=>'Fenetres'];
 ?>
 <div class="autoBlock" id="color_gui_ch">
-	<? foreach($arrstyle as $key=>$value){ ?>
+	<?php foreach($arrstyle as $key=>$value){ ?>
 	<div id="swcolor" code="<?=$key?>" >
 		<div class="padding uppercase"><?=$value?></div>
 		<div>
@@ -64,7 +64,7 @@ $arrstyle = ['app_gui_color'=>'Interface','app_gui_color_gui'=>'Fenetres'];
 			<span data-color="#798328" style="background-color:#798328;" class="swatch_3d_32"></span>
 		</div>
 	</div>
-	<?}?>
+	<?php}?>
 </div>
 <style>
 	.swatch_3d_32 {

@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 	if (empty($_POST['table'])) return;
 	// if ($_SESSION['idagent'] != 1) return;
@@ -17,7 +17,7 @@
 			<input type="hidden" name="table" value="<?= $table ?>">
 			<div class="flex_h flex_inline flex_align_top">
 				<div class="retrait borderr padding">
-					<?
+					<?php
 						$arr_has = ['statut', 'type', 'group'];
 						foreach ($arr_has as $key => $value):
 							$Value  = ucfirst($value);
@@ -39,11 +39,11 @@
 										       class="noborder borderb inline textgrisfonce"/>
 									</div>
 								</div>
-							<? endif; ?>
-						<? endforeach; ?>
+							<?php endif; ?>
+						<?php endforeach; ?>
 				</div>
-				<div class="flex_h flex_align_middle flex_wrap flex_inline" style="max-width: <? //= ceil(sizeof($GRILLE_FK) / 2) * 205 ?>px;">
-					<? foreach ($GRILLE_FK as $fk):
+				<div class="flex_h flex_align_middle flex_wrap flex_inline" style="max-width: <?php //= ceil(sizeof($GRILLE_FK) / 2) * 205 ?>px;">
+					<?php foreach ($GRILLE_FK as $fk):
 						$table_fk  = $fk['table_fk'];
 						$id_fk   = 'id' . $fk['table_fk'];
 						$rs_dist = $APP->distinct($table_fk, $vars);
@@ -55,9 +55,9 @@
 							<div><?= skelMdl::cf_module('app/app_search/search_item', ['table_main' => $table, 'table' => $table_fk], '', 'table="' . $table_fk . '"') ?></div>
 							<div style="width:40px;"><i class="fa fa-caret-left sortprevious"></i><i class="fa fa-caret-right sortnext"></i></div>
 						</div>
-					<? endforeach; ?>
+					<?php endforeach; ?>
 				</div>
-				<? unset($_POST['MODULE'], $_POST['uniqid']); ?>
+				<?php unset($_POST['MODULE'], $_POST['uniqid']); ?>
 				<div class="ededed padding">
 					<div class="border4 blanc"  act_defer vars="<?= http_build_query($_POST) ?>"
 					     mdl="app/app_prod/app_prod_liste_menu_date">

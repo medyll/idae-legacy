@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 	$uniqid = uniqid();
 	$APP    = new App();
@@ -17,7 +17,7 @@
 		<div><?= idioma('Général') ?></div>
 	</div>
 	<div style="position:relative;min-height:150px;" id="drag_system">
-		<?
+		<?php
 			$base = $APP->plug_base('sitebase_image')->getGridFs('wallpaper');
 			$rs   = $base->find(array('metadata.thumb' => 1, 'metadata.idagent' => ['$exists' => 0]))->sort(array('metadata.date' => -1));
 
@@ -34,13 +34,13 @@
 					</div>
 					<div class="ellipsis"><?= coupeChaineMilieu($file['filename'], 15) ?> </div>
 				</div>
-			<? } ?>
+			<?php } ?>
 	</div>
 	<div class="padding" auto_tree>
 		<div><?= idioma('Personel') ?></div>
 	</div>
 	<div style="position:relative;min-height:150px;" id="drag_perso">
-		<?
+		<?php
 			$base = $APP->plug_base('sitebase_image')->getGridFs('wallpaper');
 			$rs   = $base->find(array('metadata.thumb' => 1, 'metadata.idagent' => $_SESSION['idagent']))->sort(array('metadata.date' => -1));
 
@@ -57,7 +57,7 @@
 					</div>
 					<div class="ellipsis"><?= coupeChaineMilieu($file['filename'], 15) ?> </div>
 				</div>
-			<? } ?>
+			<?php } ?>
 	</div>
 </div>
 <form novalidate id="form_system" action="mdl/app/app_img/actions.php" onsubmit="ajaxFormValidation(this);return false"  >

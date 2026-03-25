@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 	$APP       = new App();
 	$APP_AGENT = new App('agent');
@@ -16,7 +16,7 @@
 	<img src="<?= ICONPATH ?>email16.png"/>
 	&nbsp;Dossier personnel
 </div>
-<?
+<?php
 	// $folders = imap_listmailbox($mbox, "{127.0.0.1:143}", "*");
 
 	$list = imap_getmailboxes($mbox, "{" . SMTPHOST . ":143}", "*");
@@ -33,7 +33,7 @@
 					<?= $out ?>
 				</a>
 			</div>
-			<?
+			<?php
 		}
 	} else {
 		echo "imap_getmailboxes a échoué : " . imap_last_error() . "\n";

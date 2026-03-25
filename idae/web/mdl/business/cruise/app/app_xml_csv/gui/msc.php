@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 
 	$PATH = 'business/' . BUSINESS . '/app/app_xml_csv/';
@@ -70,7 +70,7 @@
 			<div class="titre_entete borderb flex_h">
 				<div class="flex_main">Récupération croisieres</div>
 				<div>
-					<!--<a onclick="$('debug_cruise_msc').loadModule('<?/*= $PATH */?>read/readmsc_cruise','run=1')">debug</a>-->
+					<!--<a onclick="$('debug_cruise_msc').loadModule('<?php/*= $PATH */?>read/readmsc_cruise','run=1')">debug</a>-->
 					<a onclick="runModule('mdl/<?= $PATH ?>read/readmsc_cruise','run=1')">lancer</a>
 				</div>
 			</div>

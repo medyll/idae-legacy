@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 
 	// la valeur et combnien y'en a
@@ -31,7 +31,7 @@
 	$arr_type = ['valeur','prix_precis','prix','pourcentage','heure'];
 ?>
 	<div class="applinkblock  applink toggler padding_more   flex_h flex_wrap flex_margin  ">
-		<?
+		<?php
 
 			// tous les field type
 			$RS_SCH_FIELD_TY = $APP_SCH_FIELD_TY->find(['codeAppscheme_field_type'=>['$in'=>$arr_type]]);
@@ -43,8 +43,8 @@
 				$RS_FIELD       = $APP_SCH_FIELD->find(['idappscheme_field' => ['$in' => $ARR_HAS]])->sort(['ordreAppscheme_field' => 1]);
 				if ($RS_FIELD->count() == 0) continue;
 				?>
-			 		<?// =$ARR_SCH_FIELD_TY['codeAppscheme_field_type']?>
-					<? while ($ARR_FIELD = $RS_FIELD->getNext()) {
+			 		<?php// =$ARR_SCH_FIELD_TY['codeAppscheme_field_type']?>
+					<?php while ($ARR_FIELD = $RS_FIELD->getNext()) {
 						$css                 = (empty($i)) ? '' : '';
 						$i                   = true;
 						$stop                = false;
@@ -76,9 +76,9 @@
 								<div <?= $scope_str ?> act_defer mdl="app/app_stat/app_stat_draw" vars="chart_count_field=<?= $codeAppscheme_field ?>&<?= http_build_query($_POST) ?>&type_stat=summary"></div>
 							</div>
 						</div>
-					<? } ?>
+					<?php } ?>
 
-				<?
+				<?php
 			}
 
 		?>

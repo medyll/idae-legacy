@@ -1,4 +1,4 @@
-<?
+<?php
 
 	include_once($_SERVER['CONF_INC']);
 
@@ -13,7 +13,7 @@
 	$collection_tarif_gamme = $db->produit_tarif_gamme;
 
 ?>
-<?
+<?php
 	if(empty($_POST['run'])): 
 ?>
 	<div style="width:950px;">
@@ -36,7 +36,7 @@
 		</div>
 		<div style="width:100%;max-height:350px;border:none;overflow:auto;" id="frame_xmlte_ch" scrolling="auto"></div>
 	</div>
-<?
+<?php
 	return;
 endif;
 	set_time_limit(0);
@@ -57,7 +57,7 @@ endif;
  
 	?>
 	<div main_auto_tree>
-	<?
+	<?php
 	$i=0;
 	foreach ($arr_tables as $key => $name_table) {
 		$i++;
@@ -88,7 +88,7 @@ endif;
 					 		
 					 	</div>  
 					 </div>
-					 <?  
+					 <?php  
 				 endif;
 			 }
 		}

@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 	$APP = new App();
 	$uniqid = uniqid();
@@ -52,7 +52,7 @@
 		  <li class = "fa fa-times"></li>
 	  </a></td>
 </tr>
-<? } ?>
+<?php } ?>
 <input type = "hidden"
        name = "base"
        value = "<?= $base ?>"/>

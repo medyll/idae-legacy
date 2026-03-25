@@ -1,4 +1,4 @@
-<?
+<?php
 include_once($_SERVER['CONF_INC']);  
 $uniqid 	= uniqid();
 $_POST 		= fonctionsProduction::cleanPostMongo($_POST,1);
@@ -21,4 +21,4 @@ while($file=$rs->getNext()){
     $$('[t_body_file]').first().socketModule('app_document/app_document'_liste_tr','uid=<?=$arr['_id']?>',{insertion:true});
     }
 </script> 
-<? }?> 
+<?php }?> 

@@ -29,7 +29,7 @@
 				<div class="ms-Table-cell" ><?= idioma('Liste des agents') ?></div >
 
 			</div >
-			<?
+			<?php
 				while ($arr = $RSAG->getNext()) {
 					?>
 					<div class="ms-Table-row" >
@@ -37,7 +37,7 @@
 						<div class="ms-Table-cell" ><?= $arr['nomAgent'] ?> <?= $arr['prenomAgent'] ?></div >
 
 					</div >
-				<? } ?>
+				<?php } ?>
 		</div >
 	</div >
 </div >

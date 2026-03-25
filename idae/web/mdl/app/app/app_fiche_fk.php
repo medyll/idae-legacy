@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 
 	$table       = $_POST['table'];
@@ -16,7 +16,7 @@
 	switch ($mode):
 		case 'icone': ?>
 			<div class="flex_h flex_wrap" style="overflow:hidden;">
-				<? foreach ($GRILLE_FK as $field):
+				<?php foreach ($GRILLE_FK as $field):
 					// query for name
 					$arr      = $APP->plug($field['base_fk'], $field['table_fk'])->findOne([$field['idtable_fk'] => $ARR[$field['idtable_fk']]]);
 					$dsp_code = $arr['code' . ucfirst($field['table_fk'])];
@@ -26,13 +26,13 @@
 					<div act_defer mdl="app/app/app_fiche_icone"
 					     data-cache="true"
 					     vars="table=<?= $field['table_fk'] ?>&table_value=<?= $ARR[$field['idtable_fk']] ?>"><?= empty($dsp_name) ? 'Aucun ' : $dsp_name; ?></div>
-				<? endforeach; ?>
+				<?php endforeach; ?>
 			</div>
-			<?
+			<?php
 			break;
 		case 'fiche': ?>
 			<div main_auto_tree auto_tree_accordeon class="">
-				<? foreach ($GRILLE_FK as $field):
+				<?php foreach ($GRILLE_FK as $field):
 					// query for name
 					$arr      = $APP->plug($field['base_fk'], $field['table_fk'])->findOne([$field['idtable_fk'] => $ARR[$field['idtable_fk']]]);
 					$dsp_code = $arr['code' . ucfirst($field['table_fk'])];
@@ -42,23 +42,23 @@
 					<div act_defer mdl="app/app/app_fiche_entete_arbo"
 					     data-cache="true"
 					     vars="table=<?= $field['table_fk'] ?>&table_value=<?= $ARR[$field['idtable_fk']] ?>"><?= empty($dsp_name) ? 'Aucun ' : $dsp_name; ?></div>
-				<? endforeach; ?>
+				<?php endforeach; ?>
 			</div>
-			<?
+			<?php
 			break;
 		case 'fields': ?>
 			<div >
-				<? foreach ($GRILLE_FK as $field):
+				<?php foreach ($GRILLE_FK as $field):
 					if (empty($ARR[$field['idtable_fk']])) continue;
 					$Idae = new Idae($field['table_fk']);
 					echo $Idae->module('app/app/app_fiche_fields',['table'=>$field['table_fk'],'table_value'=>$ARR[$field['idtable_fk']]]);
 				 endforeach; ?>
 			</div>
-			<?
+			<?php
 			break;
 		default : ?>
 			<div class=" ">
-				<? foreach ($GRILLE_FK as $field):
+				<?php foreach ($GRILLE_FK as $field):
 					// query for name
 					$arr      = $APP->plug($field['base_fk'], $field['table_fk'])->findOne([$field['idtable_fk'] => $ARR[$field['idtable_fk']]]);
 					$dsp_name = $arr['nom' . ucfirst($field['table_fk'])];
@@ -70,8 +70,8 @@
 							<i class="fa fa-<?= $field['iconAppscheme'] ?>"></i>
 						</div>
 					</div>
-				<? endforeach; ?>
+				<?php endforeach; ?>
 			</div>
-			<?
+			<?php
 			break;
 	endswitch;

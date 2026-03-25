@@ -1,4 +1,4 @@
-<?
+<?php
 	/**
 	 * Created by PhpStorm.
 	 * User: Mydde
@@ -39,14 +39,14 @@
 			<div class="flex_v" style=" overflow:hidden;width:100%;">
 				<div app_gui_explorer id="<?= $dad_foradzone ?>" class="flex_main flex_v" style="overflow:hidden;">
 								<div class="flex_h flex_align_bottom">
-						<? if (!empty($TEST_AGENT)): ?>
+						<?php if (!empty($TEST_AGENT)): ?>
 							<div class="app_onglet toggler  applink flex_h">
 								<a class="autoToggle textvert" app_button="app_button" vars="<?= $HTTP_VARS ?>&vars[idagent]=<?= $_SESSION['idagent'] ?>"><i class="fa fa-user"></i></a>
 								<a class="autoToggle textorange" app_button="app_button" vars="<?= $HTTP_VARS_NOAGENT ?>"><i class="fa fa-globe"></i></a>
 							</div>
-						<? endif; ?>
+						<?php endif; ?>
 						<div class="app_onglet toggler flex_main">
-							<?
+							<?php
 								$arr_has = ['statut', 'type', 'categorie', 'group'];
 								foreach ($arr_has as $key => $value):
 									$Value = ucfirst($value);
@@ -54,8 +54,8 @@
 										<a class="autoToggle" act_target="<?= $forward_zone ?>" mdl="app/app/app_dispatch_inner" vars="table=<?= $table ?>&type=<?= $value ?>">
 											<?= ucfirst(idioma($Value)) ?>
 										</a>
-									<? endif; ?>
-								<? endforeach; ?>
+									<?php endif; ?>
+								<?php endforeach; ?>
 						</div>
 					</div>
 					<div expl_left_zone id="<?= $forward_zone ?>" class="flex_h flex_margin" style="height:100%;overflow-y: hidden;overflow-x: auto;">

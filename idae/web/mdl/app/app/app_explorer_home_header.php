@@ -55,32 +55,32 @@
 	<div class="flex_main padding     ">
 		<div class="padding_more  "><span style="font-size:1.5rem"><?= idioma('Gestion ') ?><?= $APP_TABLE['nomAppscheme'] ?> </span></div>
 		<div class="flex_h applinkblock     padding">
-			<? if (droit_table($_SESSION['idagent'], 'C', $table)) { ?>
+			<?php if (droit_table($_SESSION['idagent'], 'C', $table)) { ?>
 			<a class="appbutton" onclick="<?= fonctionsJs::app_create($table, $vars) ?>">
 				<i class="fa fa-copy textbleu"></i> <?= idioma('Créer') . ' ' . $APP_TABLE['nomAppscheme'] ?>
-				</a><? } ?>
-			<? if ($table == 'conge') { ?>
+				</a><?php } ?>
+			<?php if ($table == 'conge') { ?>
 				<a onclick="ajaxInMdl('app/app_conge/app_conge','time_cong','',{onglet:'Absences et congés'})">
 					<i class="fa fa-calendar-o textvert"></i> <?= idioma('Grille des congés') ?>
 				</a>
-			<? } ?>
-			<? if ($table == 'promo_zone') { ?>
+			<?php } ?>
+			<?php if ($table == 'promo_zone') { ?>
 				<a onclick="ajaxInMdl('app/app_promo_zone/app_promo_zone_build','time_promo_zone','',{onglet:'promo_zone'})">
 					<i class="fa fa-calendar-o textvert"></i> <?= idioma('promo_zone') ?>
 				</a>
-			<? } ?>
-			<? if ($APP->has_field('dateDebut') && !empty($APP->app_table_one['hasStatutScheme'])) { ?>
+			<?php } ?>
+			<?php if ($APP->has_field('dateDebut') && !empty($APP->app_table_one['hasStatutScheme'])) { ?>
 				<a onclick="<?= fonctionsJs::app_console($table) ?>"><i class="fa fa-dashboard textorange"></i> <?= idioma('Console') ?></a>
-			<? } ?>
+			<?php } ?>
 		</div>
 		<div class="padding"><i class="fa fa-history"></i>
 			<?= idioma('Historique') ?> <i class="fa fa-caret-right"></i>
-			<? while ($arr_last = $RS_LAST->getNext()):
+			<?php while ($arr_last = $RS_LAST->getNext()):
 				if (empty($arr_last['nomAgent_history'])) continue;
 				?><span data-contextual="table=<?= $table ?>&table_value=<?= $arr_last['valeurAgent_history'] ?>" class="inline margin">
 				<a act_chrome_gui="app/app/app_fiche" vars="table=<?= $table ?>&table_value=<?= $arr_last['valeurAgent_history'] ?>">
 					<?= strtolower($arr_last['nomAgent_history']) ?></a>
-				</span><?
+				</span><?php
 			endwhile; ?>
 		</div>
 	</div>

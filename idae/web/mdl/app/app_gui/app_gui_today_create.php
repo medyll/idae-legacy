@@ -1,4 +1,4 @@
-<?
+<?php
 include_once($_SERVER['CONF_INC']);
 $APP = new App('appscheme');
 $arr_tbl = ['client', 'prospect', 'contact', 'tache', 'affaire', 'financement', 'contrat', 'opportunite', 'intervention', 'materiel'];
@@ -18,7 +18,7 @@ $RSSCHEME = $APP->find()->sort(['nomAppscheme' => 1]); // ['codeAppscheme_base' 
                     <div class="borderr"><?= skelMdl::cf_module('app/app_gui/app_gui_tile_user', ['code' => 'app_menu_create']) ?></div>
                 </div>
                 <div class=" toggler applink applinkblock flex_h flex_wrap" style="overflow: hidden;">
-                    <?
+                    <?php
                     foreach ($RSSCHEME as $arr_dist):
                         //
                         $table = $arr_dist['codeAppscheme'];
@@ -35,7 +35,7 @@ $RSSCHEME = $APP->find()->sort(['nomAppscheme' => 1]); // ['codeAppscheme_base' 
                                 <span class="flex_main"><div class="ellipsis"><?= ucfirst(idioma($table_name)) ?></div> </span>
                             </a>
                         </div>
-                        <?
+                        <?php
                     endforeach; ?>
                 </div>
             </div>

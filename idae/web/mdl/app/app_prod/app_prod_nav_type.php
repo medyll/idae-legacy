@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 	$vars          = empty($_POST['vars']) ? [] : $_POST['vars'];
 	$table         = $_POST['table'];
@@ -24,7 +24,7 @@
 
 		?>
 		<div class="autoBlock">
-			<?
+			<?php
 				foreach ($rsType as $row_type):
 					$add_vars             = 'vars[' . $id_type . ']=' . $row_type[$id_type];
 					$auto_tree_count_type = skelMongo::connect($table, $BASE_APP)->find([$id_type => (int)$row_type[$id_type]])->count();
@@ -41,9 +41,9 @@
 						     class="autoBlock toggler"
 						     style="display: none;"></div>
 					</div>
-					<?
+					<?php
 				endforeach; ?>
 		</div>
-		<?
+		<?php
 	endif;
 ?>

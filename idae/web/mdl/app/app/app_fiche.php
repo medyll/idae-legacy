@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 
 	$table = $_POST['table'];
@@ -83,23 +83,23 @@
 									<div class="flex_main">
 										<?= $fiche_fields_mini ?>
 									</div>
-									<? if (!empty($APPOBJ->APP_TABLE['hasLigneScheme'])): ?>
+									<?php if (!empty($APPOBJ->APP_TABLE['hasLigneScheme'])): ?>
 										<div class="padding_more  ededed   ">
 											<div class="border4 blanc">
 												<?= $fuche_ligne ?>
 											</div>
 										</div>
-									<? endif; ?>
+									<?php endif; ?>
 									<div class="padding"></div>
 									<div class="flex_main">
 										<?= $fiche_fields_nomini ?>
 									</div>
 								</div>
 								<div>
-									<? if (sizeof($arr_has_filter) != 0) { ?>
+									<?php if (sizeof($arr_has_filter) != 0) { ?>
 										<div class=" padding_more  " style="min-width:220px;">
 											<div class="padding_more relative   ">
-												<?
+												<?php
 													foreach ($arr_has as $key => $value):
 														$APPTMP = new App($value);
 														$Value  = ucfirst($value);
@@ -113,33 +113,33 @@
 																<div class="bold padding"><?= ucfirst($Value) ?> </div>
 																<div class="padding"><i class="fa fa-<?= $ARR[$_icon] ?>"></i> <?= $ARR[$_nom] ?></div>
 															</div>
-														<? endif; ?>
-													<? endforeach; ?>
+														<?php endif; ?>
+													<?php endforeach; ?>
 											</div>
 										</div>
-									<? } ?>
-									<? if ($table == 'tache') { ?>
+									<?php } ?>
+									<?php if ($table == 'tache') { ?>
 										<div class="blanc"><?= skelMdl::cf_module('app/app/app_fiche_history', ['mode' => 'fiche', 'table' => $table, 'table_value' => $table_value], $table_value) ?></div>
-									<? } ?>
+									<?php } ?>
 								</div>
 							</div>
-							<? if (sizeof($APP->get_grille_fk()) != 0) : ?>
+							<?php if (sizeof($APP->get_grille_fk()) != 0) : ?>
 								<div class="relative ededed padding_more">
 									<div class="padding_more border4 blanc">
 										<?= skelMdl::cf_module('app/app/app_fiche_fk', ['mode' => 'fiche', 'table' => $table, 'table_value' => $table_value], $table_value) ?>
 									</div>
 								</div>
-							<? endif; ?>
+							<?php endif; ?>
 						</div>
 					</div>
 				</div>
-				<? if (sizeof($APP->get_table_rfk()) != 0) : ?>
+				<?php if (sizeof($APP->get_table_rfk()) != 0) : ?>
 					<div class="padding_more ededed   flex_h flex_align_middle">
 						<div class="flex_main ">
 							<?= skelMdl::cf_module('app/app/app_fiche_rfk', ['act_chrome_gui' => 'app/app_liste/app_liste_gui', 'table' => $table, 'table_value' => $table_value], $table_value) ?>
 						</div>
 					</div>
-				<? endif; ?>
+				<?php endif; ?>
 			</div>
 		</div>
 	</div>
@@ -147,11 +147,11 @@
 		<input type="button" class="cancelClose" value="<?= idioma('Fermer') ?>">
 	</div>
 </div>
-<? if (droit('DEV')) { ?>
+<?php if (droit('DEV')) { ?>
 	<div class="footerFor">
-		<div class="padding bordert  ededed none"><?= $_POST['module'] ?><? printr($_POST) ?></div>
+		<div class="padding bordert  ededed none"><?= $_POST['module'] ?><?php printr($_POST) ?></div>
 	</div>
-<? } ?>
+<?php } ?>
 <div class="titreFor">
 	<i class="fa fa-<?= $APPOBJ->ICON ?>" boxshadow style="color:<?= $APPOBJ->COLOR ?>"></i> <?= ucfirst($APPOBJ->NAME_APP) ?> <?= $APPOBJ->ARR[$nom] ?>
 </div>

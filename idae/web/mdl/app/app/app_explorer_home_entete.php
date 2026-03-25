@@ -67,7 +67,7 @@
 			<div class=" " act_defer mdl="app/app/app_explorer_home_entete_rfk" vars="<?= http_build_query($_POST) ?>" scope="<?= $scope ?>"></div>
 		</div>
 	</div>
-	<?
+	<?php
 		$arr_has = ['statut', 'type', 'categorie', 'groupe', 'group'];
 		foreach ($arr_has as $key => $value):
 			$Value  = ucfirst($value);
@@ -104,7 +104,7 @@
 							<a onclick="$(this).up('[main_auto_tree]').toggleClassName('please_show')"><i class="fa fa-fw fa-eye"></i> <?= idioma('Détails') ?></a>
 						</div>
 						<div class="flex_h flex_wrap margin">
-							<? while ($arr_tmp = $rs_tmp->getNext()):
+							<?php while ($arr_tmp = $rs_tmp->getNext()):
 								$rs_tmp_ct = $APP->find($vars + [$_id => $arr_tmp[$_id]])->sort(['ordre' . $_Table => 1]);
 								$count = $rs_tmp_ct->count();
 								$max   = $APP->find($vars + [$_id => ['$exists' => 1]])->count(true);
@@ -130,28 +130,28 @@
 											</div>
 											<div class="ms-font-s">
 												<span class="textgrisfonce"><?= $count . ' sur ' . ($max - $delta); ?> -<//?=$max_no_status?></span>
-												<? if ($value == 'statut') { ?><span class=""><?= (int)(($count / ($max - $delta)) * 100) . '% ' ?>  </span><? } ?>
+												<?php if ($value == 'statut') { ?><span class=""><?= (int)(($count / ($max - $delta)) * 100) . '% ' ?>  </span><?php } ?>
 											</div>
 										</div>
 									</div>
 									<div class="flex_h flex_align_middle ">
 										<div style="width: 40px;" class="  ">&nbsp;</div>
 										<div class="padding flex_main">
-											<? if ($value == 'statut') { ?>
+											<?php if ($value == 'statut') { ?>
 												<div>
 													<div class="border4" style="margin-right:3em;color:<?= $color ?>;">
 														<div class="padding borderr" style="height:12px;background-color: <?= $color ?>;width:<?= ($count / $max) * 100 ?>%;min-width:1px;"></div>
 													</div>
 												</div>
-											<? } ?>
+											<?php } ?>
 											<div style="display:none;" class="bordert ok_show" act_defer mdl="app/app/app_explorer_entete_rfk" vars="table=<?= $table ?>&<?= $http_rfk ?>"></div>
 										</div>
 									</div>
 								</div>
-							<? endwhile; ?>
+							<?php endwhile; ?>
 						</div>
 					</div>
 				</div>
-			<? endif; ?>
-		<? endforeach; ?>
+			<?php endif; ?>
+		<?php endforeach; ?>
 </div>

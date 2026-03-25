@@ -100,7 +100,7 @@
 	$total = $collect_size;
 	if (empty($_POST['run'])) {
 		?>
-		<div class="padding"><?= $total ?> Itinéraires costa</div><?
+		<div class="padding"><?= $total ?> Itinéraires costa</div><?php
 		exit;
 	}
 

@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 	$APP      = new App('promo_zone');
 	$APP_ITEM = new App('promo_zone_item');
@@ -29,7 +29,7 @@
 		     style="max-height:100%;">
 		</div>
 		<div class="toggler" id="<?= $formSearch ?>">
-			<? if (!empty($idpromo_zone)) {
+			<?php if (!empty($idpromo_zone)) {
 
 				$rs_item = $APP_ITEM->find(['idpromo_zone' => (int)$idpromo_zone]);
 				while ($arr_item = $rs_item->getNext()):
@@ -45,16 +45,16 @@
 									<?= $nomPromo_zone_item ?>..
 								</div>
 								<div class="autoBlock" style="display:none;">
-									<? foreach ($arrTag as $key_tag => $key_mdl): ?>
+									<?php foreach ($arrTag as $key_tag => $key_mdl): ?>
 										<a onclick="ajaxMdl('app/app_promo_zone/app_promo_zone_build_module_update','Mise à jour vignette <?= $uid_grille_mdl ?>','idpromo_zone=<?= $idpromo_zone ?>&idpromo_zone_item=<?= $idpromo_zone_item ?>&uid_grille_mdl=<?= $uid_grille_mdl ?>&uid_grille_block=<?= $uid_grille_block ?>&key_tag=<?= $key_tag ?>&key_mdl=<?= $key_mdl ?>');">
-											<? if (!empty($value2[$key_mdl])) { ?>
-												<li class="fa fa-check"></li><? } ?>
+											<?php if (!empty($value2[$key_mdl])) { ?>
+												<li class="fa fa-check"></li><?php } ?>
 											&nbsp; <span act_spy='<?= $uid_grille_mdl ?><?= $key_mdl ?>'>
                   <?= $key_tag ?>
                   </span> &nbsp; <span act_spy='<?= $uid_grille_mdl ?><?= $key_mdl ?>ouinon'>
                   <?= ouiNon(!empty($value2[$key_mdl])); ?>
                   </span></a>
-									<? endforeach; ?>
+									<?php endforeach; ?>
 								</div>
 							</div>
 						</div>
@@ -65,7 +65,7 @@
 							</div>
 						</div>
 					</div>
-					<?
+					<?php
 				endwhile;
 
 				$arr         = $APP->query_one(['idpromo_zone' => $idpromo_zone]);
@@ -84,7 +84,7 @@
 							<?= $type ?>
 						</div>
 						<div class="autoBlock">
-							<? foreach ($value['vignette'] as $key2 => $value2):
+							<?php foreach ($value['vignette'] as $key2 => $value2):
 								$uid_grille_mdl = $value2['uid_grille_mdl'];
 								$md_titre       = empty($value2['mdl_titre']) ? 'Sans titre' : $value2['mdl_titre'];
 								?>
@@ -95,16 +95,16 @@
 												<?= $md_titre ?>
 											</div>
 											<div class="autoBlock" style="display:none;">
-												<? foreach ($arrTag as $key_tag => $key_mdl): ?>
+												<?php foreach ($arrTag as $key_tag => $key_mdl): ?>
 													<a onclick="ajaxMdl('app/app_promo_zone/app_promo_zone_build_module_update','Mise à jour vignette <?= $uid_grille_mdl ?>','idpromo_zone=<?= $idpromo_zone ?>&uid_grille_mdl=<?= $uid_grille_mdl ?>&uid_grille_block=<?= $uid_grille_block ?>&key_tag=<?= $key_tag ?>&key_mdl=<?= $key_mdl ?>');">
-														<? if (!empty($value2[$key_mdl])) { ?>
-															<li class="fa fa-check"></li><? } ?>
+														<?php if (!empty($value2[$key_mdl])) { ?>
+															<li class="fa fa-check"></li><?php } ?>
 														&nbsp; <span act_spy='<?= $uid_grille_mdl ?><?= $key_mdl ?>'>
                   <?= $key_tag ?>
                   </span> &nbsp; <span act_spy='<?= $uid_grille_mdl ?><?= $key_mdl ?>ouinon'>
                   <?= ouiNon(!empty($value2[$key_mdl])); ?>
                   </span></a>
-												<? endforeach; ?>
+												<?php endforeach; ?>
 											</div>
 										</div>
 									</div>
@@ -115,10 +115,10 @@
 										</div>
 									</div>
 								</div>
-							<? endforeach; ?>
+							<?php endforeach; ?>
 						</div>
 					</div>
-				<? endforeach;
+				<?php endforeach;
 			} ?>
 		</div>
 	</div>

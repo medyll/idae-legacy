@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 	$APP     = new App('appscheme');
 	$arr_tbl = ['client', 'prospect', 'contact', 'tache', 'affaire', 'financement', 'contrat', 'opportunite', 'intervention', 'materiel'];
@@ -29,7 +29,7 @@
 		Production
 	</div>
 	<div main_auto_tree auto_tree_accordeon="true" class="applinkblock applink panel_entete flex_main flex_v  " style="overflow:auto;">
-		<? while ($arr = $RS_TY->getNext()) {
+		<?php while ($arr = $RS_TY->getNext()) {
 			$has      = 0;
 			$RSSCHEME = $APP_SCH->get_schemes(['idappscheme_type' => (int)$arr['idappscheme_type']])->sort(['nomAppscheme' => 1]); // , 'codeAppscheme_base' => $sitebase_base
 
@@ -43,7 +43,7 @@
 			<div class="flex_h borderb animated slideInDown    speed" style="display:none;z-index:0;margin-bottom:1.5em;">
 				<div class="retrait" style="order:1;">
 					<div class="flex_h flex_wrap">
-						<? foreach ($RSSCHEME as $sch):
+						<?php foreach ($RSSCHEME as $sch):
 							$table   = $sch['codeAppscheme'];
 							$table_name = $sch['nomAppscheme'];
 							if (!droit_table($_SESSION['idagent'], 'R', $table)) continue;
@@ -57,9 +57,9 @@
 									<span class="flex_main ellipsis"><?= ucfirst(idioma($table_name)) ?></span>
 								</a>
 							</div>
-						<? endforeach; ?></div>
+						<?php endforeach; ?></div>
 				</div>
 			</div>
-		<? } ?>
+		<?php } ?>
 	</div>
 </div>

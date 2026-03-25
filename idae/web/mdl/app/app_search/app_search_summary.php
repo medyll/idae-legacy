@@ -58,7 +58,7 @@
 		<div class="padding_more cursor edededhover"><i class="fa fa-times-circle-o fa-2x textrouge"></i></div>
 	</div>
 	<div class="applink   applinkblock ededed borderb">
-		<? while ($arr = $rs->getNext()) {
+		<?php while ($arr = $rs->getNext()) {
 
 			?>
 			<a title="<?= $arr[$id] ?>" class="autoToggle app_select borderb"
@@ -66,9 +66,9 @@
 				<div data-menu="data-appmenu" data-clone="true" class="    flex_h flex_align_middle">
 					<div style="width:20px;"><i class="fa fa-<?= $APP->iconAppscheme ?>" style="color:<?= $APP->colorAppscheme ?>"></i></div>
 					<div class="flex_main"><span class="ellipsis"><?= $arr[$nom] ?> <?= htmlspecialchars(empty($arr[$prenom]) ? '' : ' ' . $arr[$prenom]); ?></span></div>
-					<? if (array_key_exists('color' . $Table, $ARR_FIELDS) && $arr['color' . $Table]) { ?>
+					<?php if (array_key_exists('color' . $Table, $ARR_FIELDS) && $arr['color' . $Table]) { ?>
 						<div style="width:15px;text-align:center;"><span class="border4" style="background-color: <?= $arr['color' . $Table] ?>">&nbsp;</span></div>
-					<? } ?>
+					<?php } ?>
 				</div>
 				<div class="contextmenu" style="display:none">
 					<div   class= "boxshadow   " act_defer mdl="app/app/app_fiche_thumb"
@@ -76,6 +76,6 @@
 					       value="<?= $arr[$id] ?>"></div>
 				</div>
 			</a>
-		<? } ?>
+		<?php } ?>
 	</div>
 </div>

@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 	ini_set('display_errors', 55);
 	$uniqid = uniqid();
@@ -21,7 +21,7 @@
 		</div>
 	</div>
 </div>
-<div style="display:none"><?//= skelMdl::cf_module('app_document/document_spy', array('document' => $_SESSION['idagent']), $_SESSION['idagent']) ?></div>
+<div style="display:none"><?php//= skelMdl::cf_module('app_document/document_spy', array('document' => $_SESSION['idagent']), $_SESSION['idagent']) ?></div>
 <script>
 	new myddeExplorer($('explorer<?=$uniqid?>'));
 </script>

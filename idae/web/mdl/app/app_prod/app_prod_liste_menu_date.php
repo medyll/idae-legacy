@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 	ini_set('display_errors', 0);
 	if (empty($_POST['table'])) return;
@@ -16,7 +16,7 @@
 	$APP_SORT_FIELDS = $APP->get_date_fields($table);
 
 ?>
-<!--<input type="hidden" name="table" value="<? /*= $table */ ?>">-->
+<!--<input type="hidden" name="table" value="<?php /*= $table */ ?>">-->
 <div id="form<?= $uniqid ?>" class="parent_form flex_h flex_align_middle flex_wrap">
 	<div class="flex_v flex_margin flex_main">
 		<div class="flex_h">
@@ -33,19 +33,19 @@
 			<div class="padding">
 				<a data-menu="data-menu" class="ellipsis"><i class="fa fa-angle-right"></i><span id="type_date_<?= $uniqid ?>">Type de date</span></a>
 				<div class="contextmenu" style="display:none;">
-					<? foreach ($ARR_GROUP_FIELD as $key => $val) {
+					<?php foreach ($ARR_GROUP_FIELD as $key => $val) {
 						$arrg = $val['group'];
 						$arrf = $val['field'];
 						?>
 						<div class="applinkblock applink">
-							<? foreach ($arrf as $keyf => $valf) {
+							<?php foreach ($arrf as $keyf => $valf) {
 								$valdate = $valf['codeAppscheme_field'] . ucfirst($table);
 								$nomdate = $valf['nomAppscheme_field'];
 								?>
 								<a class="autoToggle"
 								   onclick="$('type_date_<?= $uniqid ?>').update('<?= $nomdate ?>');$(this.up('.parent_form').querySelector('#deb')).setAttribute('name','vars_date[<?= $valdate ?>]'+'[$gte]');$(this.up('.parent_form').querySelector('#fin')).setAttribute('name','vars_date[<?= $valdate ?>]'+'[$lte]')">
-									<i class="fa fa-<?= $valf['iconAppscheme_field'] ?>"></i> <?= ucfirst(idioma($valf['nomAppscheme_field'])) . ' ' . $table; ?></a>                                <? } ?>
-						</div>                        <? } ?>
+									<i class="fa fa-<?= $valf['iconAppscheme_field'] ?>"></i> <?= ucfirst(idioma($valf['nomAppscheme_field'])) . ' ' . $table; ?></a>                                <?php } ?>
+						</div>                        <?php } ?>
 				</div>
 			</div>
 		</div>

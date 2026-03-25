@@ -18,14 +18,14 @@
 	//
 	$act_from = empty($_POST['act_from']) ? '' : $_POST['act_from'];
 ?>
-<?
+<?php
 	switch ($table):
 		case 'client':
 			?>
 			<a class="cancelClose" onclick="<?= fonctionsJs::client_big_fiche($table_value); ?>">
 				<i class="textorange fa fa-expand"></i> <?=idioma('Vue complète')?>
 			</a>
-			<?
+			<?php
 			break;
 		case 'produit':
 			?>
@@ -34,7 +34,7 @@
 					<i class="fa fa-cog"></i> <?=idioma('Edition complète')?>
 				</a>
 			</div >
-			<?
+			<?php
 			break;
 		case 'fournisseur':
 			?>
@@ -44,16 +44,16 @@
 					Présentations</a >
 				<a onclick = "ajaxInMdl(" production/fournisseurclause/fournisseurClause",'tmp_cl<?= $time ?>','idfournisseur=<?= $table_value ?>',
 				                                    {onglet:'Clauses <?= $arr['nomFournisseur'] ?>'})">Clauses</a></div >
-			<?
+			<?php
 			break;
 		case 'ville':
 			?>
-			<? if ( $act_from != 'map' ): ?>
+			<?php if ( $act_from != 'map' ): ?>
 			<div class = "applink" >
 			<a vars = "idville=<?= $table_value ?>" act_chrome_gui = "app/app_custom/app_custom_ville_map" >
 				<i class = "fa fa-map-marker" ></i >
-				Cartes</a ></div ><? endif; ?>
-			<?
+				Cartes</a ></div ><?php endif; ?>
+			<?php
 			break;
 	endswitch;
 ?>

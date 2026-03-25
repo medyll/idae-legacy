@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 
 	$APP = new App('opportunite_ligne');
@@ -43,7 +43,7 @@
 <script>
 	$('lg1').cloneCopy($('lg2'),{spy:'lg1'})
 </script>
-<? if (!empty($ARR['idclient'])) {
+<?php if (!empty($ARR['idclient'])) {
 	$add_table = 'client';
 	$add_value = $ARR['idclient'];
 } elseif (!empty($ARR['idprodspect'])) {
@@ -53,9 +53,9 @@
 	$add_table = 'contact';
 	$add_value = $ARR['idcontact'];
 } ?>
-<? if (!empty($add_table)) { ?>
+<?php if (!empty($add_table)) { ?>
 	<div class="enteteFor" >
 		<div style="width:750px;"
 		     class="fond_noir color_fond_noir borderb shadow inline" ><?= skelMdl::cf_module('app/app/app_fiche_mini', ['table' => $add_table, 'table_value' => $add_value]) ?></div >
 	</div >
-<? } ?>
+<?php } ?>

@@ -39,7 +39,7 @@
 			</div>
 		</div>
 	</div>
-<?
+<?php
 
 	$dakeys = ['idproduit'              => 'iprod',
 	           'idproduit_type'         => 'prt',

@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 	// generalement , le nom du container
 	$daCal = 'idcal' . $uniqid;

@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 
 	ini_set('display_errors', 55);
@@ -25,9 +25,9 @@
 ?>
 <div class="flex_v blanc" style="height: 100%;overflow:hidden;">
 	<div id="<?= $zouzou ?>" class="flex_main flex_h" style="width: 100%;overflow-y:hidden;overflow-x: auto;">
-		<? if (sizeof($R_FK) != 0): ?>
+		<?php if (sizeof($R_FK) != 0): ?>
 			<div class="flex_h  ">
-				<? foreach ($R_FK as $arr_fk):
+				<?php foreach ($R_FK as $arr_fk):
 					$value_rfk               = $arr_fk['table_value'];
 					$table_rfk               = $arr_fk['table'];
 					$vars_rfk['vars']        = ['id' . $table => $table_value];
@@ -35,9 +35,9 @@
 					$vars_rfk['table_value'] = $value_rfk;
 					$count                   = $arr_fk['count'];
 					?>
-					<div style="order:-<?= $count ?>" act_defer mdl="app/app/app_fiche_forward_liste" vars="table=<?= $table_rfk ?>&vars[<?= 'id' . $table ?>]=<?= $table_value ?>"></div>                <? endforeach; ?>
+					<div style="order:-<?= $count ?>" act_defer mdl="app/app/app_fiche_forward_liste" vars="table=<?= $table_rfk ?>&vars[<?= 'id' . $table ?>]=<?= $table_value ?>"></div>                <?php endforeach; ?>
 			</div>
-		<? endif; ?>
+		<?php endif; ?>
 	</div>
 </div>
 <script>
