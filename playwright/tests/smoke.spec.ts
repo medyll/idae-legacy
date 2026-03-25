@@ -25,16 +25,20 @@ test('smoke: login and open grid (UI + socket)', async ({ page, request }) => {
     if (m) phpsess = m[1];
   }
 
-  // If we have a PHPSESSID, set it in the browser context so subsequent page loads are authenticated
+  // If we have a server-side PHPSESSID, inject it into localStorage so the SPA bootstraps correctly; otherwise perform a direct UI login
   if (phpsess) {
-    await page.context().addCookies([{
-      name: 'PHPSESSID',
-      value: phpsess,
-      domain: 'localhost',
-      path: '/',
-      httpOnly: true,
-      secure: false
-    }]);
+    // Ensure SPA sees the PHPSESSID (some clients rely on localStorage rather than cookies)
+    await page.addInitScript((val) => { try { localStorage.setItem('PHPSESSID', val); localStorage.setItem('SESSID', val); document.cookie = 'PHPSESSID='+val+'; path=/'; } catch(e){} }, phpsess);
+  } else {
+    const loginPageUrl = base + '/mdl/app/app_login/app_login.php';
+    await page.goto(loginPageUrl);
+    if (await page.locator('input[name=loginAgent]').count() > 0) {
+      await page.fill('input[name=loginAgent]', user);
+      await page.fill('input[name=passwordAgent]', pass);
+      await page.click('input[type=submit], button:has-text("Valider")');
+      await page.waitForLoadState('networkidle').catch(() => {});
+      await page.waitForTimeout(1500);
+    }
   }
 
   // Verify session via JSON endpoint
@@ -50,6 +54,37 @@ test('smoke: login and open grid (UI + socket)', async ({ page, request }) => {
 
   // --- UI flow: load the main page so client-side socket/bootstrap runs ---
   await page.goto(base + '/');
+
+  // Wait briefly for SPA main UI; if not present, perform the in-browser login flow and then wait for the UI
+  try {
+    await page.waitForSelector('#grid, .grid, .app-list, #main, .app-gui', { timeout: 10000 });
+  } catch (e) {
+    const loginSelector = 'input[name=loginAgent], input[name=login], input[placeholder*=Identification], input[placeholder*=Ident]';
+    await page.waitForSelector(loginSelector, { timeout: 15000 });
+    await page.fill('input[name=loginAgent], input[name=login]', user).catch(() => {});
+    await page.fill('input[name=passwordAgent]', pass).catch(() => {});
+    await page.click('input[type=submit], button:has-text("Valider")').catch(() => {});
+    await page.waitForLoadState('networkidle').catch(() => {});
+    // After UI login, fetch session info from the browser context (will include cookies) and set localStorage so SPA bootstraps
+    const sess = await page.evaluate(async () => {
+      try { const r = await fetch('/services/json_ssid.php'); return await r.json(); } catch (e) { return null; }
+    });
+    if (sess && sess.PHPSESSID) {
+      await page.evaluate((s) => { try { localStorage.setItem('PHPSESSID', s.PHPSESSID); localStorage.setItem('SESSID', s.SESSID || s.idagent || ''); localStorage.setItem('APPID', s.PHPSESSID); } catch(e){} }, sess);
+    }
+    await page.waitForSelector('#grid, .grid, .app-list, #main, .app-gui', { timeout: 30000 });
+  }
+
+  // If the page shows a login form (some environments), perform a UI login as a fallback so the browser session is authenticated
+  const loginSelector = 'input[name=loginAgent], input[name=login], input[placeholder*=Identification], input[placeholder*=Ident]';
+  if (await page.locator(loginSelector).count() > 0) {
+    await page.fill('input[name=loginAgent], input[name=login]', user).catch(() => {});
+    await page.fill('input[name=passwordAgent]', pass).catch(() => {});
+    await page.click('button:has-text("Valider"), input[type=submit]').catch(() => {});
+    // allow more time for AJAX login and SPA bootstrap
+    await page.waitForLoadState('networkidle').catch(() => {});
+    await page.waitForTimeout(4000);
+  }
 
   // Wait for SPA to render a known UI element that indicates successful login and module loading
   await page.waitForSelector('#grid, .grid, .app-list, #main, .app-gui', { timeout: 30000 });
