@@ -17,7 +17,7 @@
 	<div class="padding_more ededed" style="height:100%;overflow:hidden;">
 		<div class="blanc border4" style="height:100%;overflow-x:hidden;overflow-y:auto;">
 			<div class="applink applinkblock toggler">
-				<?
+				<?php
 					while ($ARR_SCH = $RS_SCH->getNext()) {
 
 						$table     = $ARR_SCH['codeAppscheme'];
@@ -26,7 +26,7 @@
 						<div class="padding_more borderb">
 							<a class="autoToggle app_site_scheme_link" data-vars="table=<?=$table?>"><?= $table_nom ?></a>
 						</div>
-				<? } ?>
+				<?php } ?>
 			</div>
 		</div>
 	</div>

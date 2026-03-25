@@ -39,11 +39,11 @@
 				</div>
 			</div>
 		</div>
-		<? if (!empty($ARR['codeAgent_note'])) { ?>
+		<?php if (!empty($ARR['codeAgent_note'])) { ?>
 			<div>
 				<?= skelMdl::cf_module('app/app/app_fiche_thumb', ['table' => $ARR['codeAgent_note'], 'table_value' => $ARR['valeurAgent_note']]) ?>
 			</div>
-		<? } ?>
+		<?php } ?>
 		<form action="<?= ACTIONMDL ?>app/actions.php" id="form_testarea_note<?= $table_value ?>">
 			<input type="hidden" name="F_action" value="app_update">
 			<input type="hidden" name="table" value="<?= $table ?>">

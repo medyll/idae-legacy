@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 	$APP = new App('tache');
 	$rand = uniqid();
@@ -48,13 +48,13 @@ $time = time();
 		$witDate = date("Y-m-d", mktime(12, 0, 0, $moisEnCours, $premierJourSemaine + $i, $anneeEnCours));
 		// de 07 à 20h
 		?>
-		<?
+		<?php
 		$_POST['heureDebutTache'] = empty($_POST['heureDebutTache']) ? '' : $_POST['heureDebutTache'];
 		//
 		$rs = $APP->find(array('idagent' => (int)$_SESSION['idagent'], 'dateDebutTache' => $witDate)); // 'idagent' => (int)$_SESSION['idagent'], 
 		?>
 	 
-		<?
+		<?php
 		while ($rs->hasNext()) {
 			$arrT = $rs->getNext();
 			//Définition des heures
@@ -81,5 +81,5 @@ $time = time();
 				</div>
 			</div>
 
-		<? } ?>
-	<? } ?>
+		<?php } ?>
+	<?php } ?>

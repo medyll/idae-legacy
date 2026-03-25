@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 	ini_set('display_errors', 55);
 
@@ -34,7 +34,7 @@
 			<input type="hidden" name="<?= $id ?>" value="<?= $table_value ?>"/>
 			<input type="hidden" name="vars[m_mode]" value="1"/>
 			<div class="relative margin padding" sort_zone_drag="true">
-				<? while ($ARR = $RS->getNext()): ?>
+				<?php while ($ARR = $RS->getNext()): ?>
 					<div draggable="true" data-sort_element="true" sort_zone="sort_zone" class="padding borderb relative flex_h" style="width:100%;">
 						<div class="flex_main">
 							<input type="hidden" name="ordre<?= $Table ?>[]" value="<?= $ARR[$id] ?>">
@@ -49,7 +49,7 @@
 							</div>
 						</div>
 					</div>
-				<? endwhile; ?></div>
+				<?php endwhile; ?></div>
 			<div class="buttonZone">
 				<input class="valid_button" type="submit" value="<?= idioma('Valider') ?>">
 				<input type="button" class="cancelClose" value="<?= idioma('Fermer') ?>">

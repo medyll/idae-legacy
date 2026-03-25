@@ -49,7 +49,7 @@
 					                                           'table_value' => $table_value]) ?></div>
 			</div>
 		</div>
-		<? if ($GRILLE_R_FK['contact']) { ?>
+		<?php if ($GRILLE_R_FK['contact']) { ?>
 			<div class="padding_more ededed  borderb">
 				contacts
 			</div>
@@ -64,8 +64,8 @@
 					</div>
 				</div>
 			</div>
-		<? } ?>
-		<? if ($GRILLE_R_FK['site']) { ?>
+		<?php } ?>
+		<?php if ($GRILLE_R_FK['site']) { ?>
 			<div class="padding_more ededed bordert borderb">
 				sites
 			</div>
@@ -80,8 +80,8 @@
 					</div>
 				</div>
 			</div>
-		<? } ?>
-		<? if ($GRILLE_R_FK['transport']) { ?>
+		<?php } ?>
+		<?php if ($GRILLE_R_FK['transport']) { ?>
 			<div class="padding_more ededed bordert borderb">
 				navires
 			</div>
@@ -96,14 +96,14 @@
 					</div>
 				</div>
 			</div>
-		<? } ?>
-		<? if (sizeof($GRILLE_FK) != 0) { ?>
+		<?php } ?>
+		<?php if (sizeof($GRILLE_FK) != 0) { ?>
 			<br>
 			<div class="flex_h  bordert">
 				<div class="padding_more aligncenter borderr ededed" style="width:50px;"><i class="fa fa-link"></i>
 				</div>
 				<div class="relative flex_main">
-					<? foreach ($GRILLE_FK as $field):
+					<?php foreach ($GRILLE_FK as $field):
 						$id       = 'id' . $field;
 						// query for name
 						$arr      = $APP->plug($field['base_fk'], $field['table_fk'])->findOne([$field['idtable_fk'] => $ARR[$field['idtable_fk']]]);
@@ -115,11 +115,11 @@
 								     mdl="app/app/app_fiche_entete"
 								     vars="table=<?= $field['table_fk'] ?>&table_value=<?= $ARR[$field['idtable_fk']] ?>">&nbsp;</div>
 							</div>
-						<? endif;
+						<?php endif;
 					endforeach; ?>
 				</div>
 			</div>
-		<? } ?>
+		<?php } ?>
 		<div class="flex_h   ededed bordert">
 			<div class="padding_more aligncenter borderr ededed" style="width:50px;"><i class="fa fa-cubes"></i></div>
 			<div
@@ -129,7 +129,7 @@
 	<div style="overflow:hidden;width:50%;" class="flex_v">
 
 			<div class="app_onglet toggler">
-				<?
+				<?php
 					$a=0;
 					foreach ($GRILLE_RFK_BIS as $grp_fk => $arr_type) {
 						$table_rfk = $arr_type['codeAppscheme'];
@@ -138,7 +138,7 @@
 					++$a;
 					$css = ($a==1)? 'active':''; ?>
 					<a act_target="<?= $zone_2 ?>" mdl="app/app/app_fiche_maxi_liste" vars="idappscheme_type=<?=$idappscheme_type?>&table=<?= $table ?>&table_value=<?= $table_value ?>&vars[<?= 'id' . $table ?>]=<?= $table_value ?>" class="autoToggle padding_more <?=$css?>"><i class="fa fa-<?= $arr_type['iconAppscheme_type'] ?>"></i><?= $arr_type['nomAppscheme_type'] ?></a>
-				<? } ?>
+				<?php } ?>
 			</div>
 		<div class="flex_main" id="<?= $zone_2 ?>" vars="<?= $http_post ?>" act_defer mdl="<?= $mdl_load ?>"></div>
 	</div>
@@ -146,5 +146,5 @@
 <div class="bordert ededed boxshadow flex_h none">
 	<div
 		class="flex_main"><?= skelMdl::cf_module('app/app/app_fiche_rfk', $_POST + ['moduleTag' => 'none'], $table); ?></div>
-	<div><? //= skelMdl::cf_module('app/app/app_fiche_analogue', $_POST + ['moduleTag' => 'none'], $table); ?></div>
+	<div><?php //= skelMdl::cf_module('app/app/app_fiche_analogue', $_POST + ['moduleTag' => 'none'], $table); ?></div>
 </div>

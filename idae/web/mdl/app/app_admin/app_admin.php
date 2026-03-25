@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 
 ?>
@@ -18,14 +18,14 @@
 	<a class="hide_gui_pane" act_chrome_gui="app/app_admin/app_admin_revision"><i class="fa fa-external-link"></i>Construire revision</a>
 
 	<a class="" onclick="<?= fonctionsJs::app_mdl('app/app_scheme/app_scheme_export_model',[],['title'=>'app_scheme_export_model']) ?>"> Exporter modele</a>
-	<? if (droit('DEV')) { ?>
-		<a class="hide_gui_pane" onclick="<?= fonctionsJs::app_mdl('app/app_sitebuilder/app_sitebuilder',[],'app_sitebuilder') ?>"><i class="fa fa-wordpress"></i></a><? } ?>
+	<?php if (droit('DEV')) { ?>
+		<a class="hide_gui_pane" onclick="<?= fonctionsJs::app_mdl('app/app_sitebuilder/app_sitebuilder',[],'app_sitebuilder') ?>"><i class="fa fa-wordpress"></i></a><?php } ?>
 </div>
-<? if (droit('DEV')) { ?>
+<?php if (droit('DEV')) { ?>
 	<div class="margin_more">
 		<a onclick="loadModule('dyn/dyn_deploy')"><i class="fa fa-cloud-upload"></i></a>
 	</div>
-<? } ?>
+<?php } ?>
 <div><?= skelMdl::cf_module('business/' . BUSINESS . '/app/app_admin/app_admin'); ?></div>
 <div><?= skelMdl::cf_module('customer/' . CUSTOMERNAME . '/app_admin/app_admin'); ?></div>
 

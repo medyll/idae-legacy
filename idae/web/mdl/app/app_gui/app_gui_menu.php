@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 	require_once(__DIR__ . '/../../../appclasses/appcommon/MongoCompat.php');
 	use AppCommon\MongoCompat;
@@ -31,7 +31,7 @@
 ?>
 <div id="app_menu_dyn" main_auto_tree class="flex_v dark_1">
 	<div class="flex_main" style="overflow:auto;">
-		<? while ($ARR_TY = $RS_TY->getNext()) {
+		<?php while ($ARR_TY = $RS_TY->getNext()) {
 			$idappscheme_type = (int)$ARR_TY['idappscheme_type'];
 			$RS_SCH           = $APP_SCH->find(['idappscheme_type' => $idappscheme_type, 'idappscheme' => ['$in' => $arr_sch]])->sort(['nomAppscheme' => 1]);
 			?>
@@ -42,7 +42,7 @@
 				</div>
 				<div class=" boxshadow  animated fadeIn" style="display: none;">
 					<div class=" ">
-						<?
+						<?php
 							while ($ARR_SCH = $RS_SCH->getNext()) {
 								$table       = $ARR_SCH['codeAppscheme'];
 								$nom_table   = $ARR_SCH['nomAppscheme'];
@@ -60,24 +60,24 @@
 								</div>
 								<div class="dark_3 retrait animated fadeIn" style="display: none;">
 									<div class="retrait applink applinkblock">
-										<? if (droit_table($_SESSION['idagent'], 'R', $table)) : ?>
+										<?php if (droit_table($_SESSION['idagent'], 'R', $table)) : ?>
 											<a class="flex_main" onclick="<?= fonctionsJs::app_explorer($table) ?>;"><span>Espace <?= $APP_TMP->nomAppscheme ?></span><i class="fa fa-home "></i></a>
-										<? else: ?>
-										<? endif; ?>
-										<? if (droit_table($_SESSION['idagent'], 'C', $table)) : ?>
+										<?php else: ?>
+										<?php endif; ?>
+										<?php if (droit_table($_SESSION['idagent'], 'C', $table)) : ?>
 											<a onclick="<?= fonctionsJs::app_create($table) ?>">Créer <?= $APP_TMP->nomAppscheme ?><i class="fa fa-save "></i></a>
-										<? endif; ?>
-										<? if (droit_table($_SESSION['idagent'], 'R', $table)) : ?>
+										<?php endif; ?>
+										<?php if (droit_table($_SESSION['idagent'], 'R', $table)) : ?>
 											<a class="none" onclick="ajaxInMdl('app/app_prod/app_prod','tmp_exp_prod','vars[collection]=<?= $table ?>',{onglet:'Production <?= $table ?>'});">Explorer</a>
-										<? endif; ?>
+										<?php endif; ?>
 									</div>
 								</div>
-								<?
+								<?php
 							} ?>
 					</div>
 				</div>
 			</div>
-		<? } ?>
+		<?php } ?>
 	</div>
 	<div class="alignright margin">
 		<div class="" style="overflow:hidden;"><?= skelMdl::cf_module('app/app_gui/app_gui_tile_user', ['code' => 'app_menu']) ?></div>

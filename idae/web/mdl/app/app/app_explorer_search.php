@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 	if (empty($_POST['table'])) return;
 	//
@@ -59,9 +59,9 @@
 <form id="form<?= $uniqid ?>" onclick="gain_searchbutton(this,event)" onfocus="gain_search_summary(this,event)" onkeyup="$('main_search_<?= $table ?>').loadModule('app/app_search/app_search_summary',$(this).serialize());"
       onsubmit="return false;"
       style="height: 100%;overflow:hidden;">
-	<? foreach ($vars as $key => $input): ?>
+	<?php foreach ($vars as $key => $input): ?>
 		<input type="hidden" name="vars[<?= $key ?>]" value="<?= $input ?>">
-	<? endforeach; ?>
+	<?php endforeach; ?>
 	<input type="hidden" name="table" value="<?= $table ?>">
 	<div class="flex_v">
 		<div class="padding_more borderb ededed  ">
@@ -76,7 +76,7 @@
 		</div>
 		<div class="titre_entete  "><i class="fa fa-search-plus"></i>Affiner la recherche</div>
 		<div class="flex_main ededed" style="overflow:auto;">
-			<?
+			<?php
 				$arr_has = ['statut', 'type', 'categorie', 'group', 'groupe'];
 				foreach ($arr_has as $key => $value):
 					$Value  = ucfirst($value);
@@ -88,12 +88,12 @@
 						<div class="blanc borderb">
 							<?= skelMdl::cf_module('app/app_search/search_item_select', ['table' => $_table, 'search_type' => 'free', 'input_name' => 'vars_search_fk']); ?>
 						</div>
-					<? endif; ?>
-				<? endforeach; ?>
-			<? if (sizeof($GRILLE_FK) != 0): ?>
+					<?php endif; ?>
+				<?php endforeach; ?>
+			<?php if (sizeof($GRILLE_FK) != 0): ?>
 				<br>
 				<div class="   ">
-					<? foreach ($GRILLE_FK as $fk):
+					<?php foreach ($GRILLE_FK as $fk):
 						$table_fk  = $fk['table_fk'];
 						if (!empty($vars["id$table_fk"])) continue;
 						$arr_fk    = $APP->get_fk_id_tables($table_fk);
@@ -102,13 +102,13 @@
 						<div class="borderb">
 							<?= skelMdl::cf_module('app/app_search/search_item', ['table' => $table_fk, 'vars' => $arr_inter, 'search_type' => 'free', 'input_name' => 'vars_search_fk']); ?>
 						</div>
-					<? endforeach; ?>
+					<?php endforeach; ?>
 				</div>
 				<br>
-			<? endif; ?>
-			<? if (sizeof($R_FK) != 0): ?>
+			<?php endif; ?>
+			<?php if (sizeof($R_FK) != 0): ?>
 				<div class=" ">
-					<? foreach ($R_FK as $arr_fk):
+					<?php foreach ($R_FK as $arr_fk):
 						$value_rfk               = $arr_fk['table_value'];
 						$table_rfk               = $arr_fk['table'];
 						$vars_rfk['vars']        = ['id' . $table => $table_value];
@@ -118,23 +118,23 @@
 						<div class="borderb">
 							<?= skelMdl::cf_module('app/app_search/search_item', ['table' => $table_rfk, 'search_type' => 'free', 'input_name' => 'vars_search_rfk']); ?>
 						</div>
-					<? endforeach; ?>
+					<?php endforeach; ?>
 				</div>
-			<? endif; ?>
+			<?php endif; ?>
 		</div>
 		<div class="applink applinkblock toggler   boxshadow blanc flex_h flex_wrap padding_more searchMdl  ">
 			<label style="min-width:9%;" class="autoToggle active">
 				<span style="z-index:10;position:relative;"> ... </span>
 				<input style="position:absolute;visibility: hidden;z-index:-1" type="radio" name="search_start" value="">
 			</label>
-			<? foreach ($alph as $k => $v) {
+			<?php foreach ($alph as $k => $v) {
 				//	$more = (!droits('VOIR_TOUS_CLIENTS'))? '&agent_idagent='.$_SESSION['idagent']: '';
 				?>
 				<label style="min-width:9%;" class="autoToggle padding cursor">
 					<span style="z-index:10;position:relative; "> <?= $v ?></span>
 					<input style="position:absolute;visibility: hidden;z-index:11" type="radio" name="search_start" value="<?= $v ?>">
 				</label>
-			<? } ?>
+			<?php } ?>
 		</div>
 	</div>
 </form>

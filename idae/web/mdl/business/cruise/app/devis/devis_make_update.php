@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 
 	$path_to_devis = 'business/' . BUSINESS . '/app/devis/';
@@ -48,10 +48,10 @@
 					<?= idioma('adultes') ?>
 				</label>
 				<select name="vars[nbreAdulteDevis]" style="width:50%">
-					<? for($i=1;$i<=6;$i++){
+					<?php for($i=1;$i<=6;$i++){
 						?>
 						<option <?=selected($i==$arr['nbreAdulteDevis']);?> value="<?=$i?>"><?=$i?> adulte</option>
-					<? } ?>
+					<?php } ?>
 				</select>
 				<br/>
 				<br/>
@@ -59,9 +59,9 @@
 					<?= idioma('Enfants') ?>
 				</label>
 				<select name="vars[nbreEnfantDevis]" id="nbreEnfantDevis" style="width:50%" >
-					<? for($i=0;$i<=6;$i++){ ?>
+					<?php for($i=0;$i<=6;$i++){ ?>
 						<option <?=selected($i==$arr['nbreEnfantDevis']);?> value="<?=$i?>"><?=$i?> enfants</option>
-					<? } ?>
+					<?php } ?>
 				</select>
 			</div>
 			<div class="flex_h flex_align_top">

@@ -1,8 +1,8 @@
 # Docker Apache Restart Script
-# Usage: .\docker-restart.ps1 [apache|container|full]
+# Usage: .\docker-restart.ps1 [apache|container|full|socket]
 
 param(
-    [ValidateSet('apache', 'container', 'full')]
+    [ValidateSet('apache', 'container', 'full', 'socket')]
     [string]$Mode = 'apache'
 )
 
@@ -19,6 +19,13 @@ switch ($Mode) {
         } else {
             Write-Host "⚠️ Apache restart completed (check logs if issues)" -ForegroundColor Yellow
         }
+    }
+    
+    'socket' {
+        Write-Host "Restarting socket service..." -ForegroundColor Yellow
+        docker compose restart socket
+        Start-Sleep -Seconds 2
+        Write-Host "✅ Socket restart requested (check 'docker logs --follow idae-socket')" -ForegroundColor Green
     }
     
     'container' {
@@ -58,5 +65,5 @@ switch ($Mode) {
 }
 
 # Show recent logs
-Write-Host "`n📋 Recent logs:" -ForegroundColor Cyan
+Write-Host "`nRecent logs:" -ForegroundColor Cyan
 docker logs --tail 10 idae-legacy 2>&1 | Select-Object -Last 10

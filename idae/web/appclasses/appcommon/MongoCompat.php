@@ -357,7 +357,19 @@ class MongoCollection {
     public function find($query = [], $fields = []) {
         $options = [];
         if (!empty($fields)) {
-            $options['projection'] = $fields;
+            // Extract driver options that are not projection fields
+            $driverKeys = ['sort', 'skip', 'limit', 'hint', 'maxTimeMS', 'batchSize'];
+            $projection = [];
+            foreach ($fields as $key => $value) {
+                if (in_array($key, $driverKeys, true)) {
+                    $options[$key] = $value;
+                } else {
+                    $projection[$key] = $value;
+                }
+            }
+            if (!empty($projection)) {
+                $options['projection'] = $projection;
+            }
         }
         $cursor = $this->collection->find($query, $options);
         return new MongoCursor($cursor);
@@ -366,9 +378,20 @@ class MongoCollection {
     public function findOne($query = [], $fields = []) {
         $options = [];
         if (!empty($fields)) {
-            $options['projection'] = $fields;
+            $driverKeys = ['sort', 'skip', 'limit', 'hint', 'maxTimeMS'];
+            $projection = [];
+            foreach ($fields as $key => $value) {
+                if (in_array($key, $driverKeys, true)) {
+                    $options[$key] = $value;
+                } else {
+                    $projection[$key] = $value;
+                }
+            }
+            if (!empty($projection)) {
+                $options['projection'] = $projection;
+            }
         }
-        
+
         return $this->collection->findOne($query, $options);
     }
     

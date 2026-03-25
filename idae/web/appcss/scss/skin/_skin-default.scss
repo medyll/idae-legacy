@@ -640,7 +640,7 @@ $font-family_1: 'FontAwesome';
 			bottom          : 0;
 		}
 		.autoToggle {
-			&:not('.avoid') {
+			&:not(.avoid) {
 				background-color : #fff;
 				color            : $color_12;
 			}
@@ -685,7 +685,7 @@ $font-family_1: 'FontAwesome';
 			bottom          : 0;
 		}
 		.autoToggle {
-			&:not('.avoid') {
+			&:not(.avoid) {
 				background-color : #fff;
 				color            : $color_12;
 			}

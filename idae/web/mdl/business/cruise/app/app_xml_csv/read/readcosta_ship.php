@@ -41,7 +41,7 @@
 
 	if ( empty($_POST['run']) ) {
 		?>
-		<div class = "padding"><?= sizeof($xml->Ships->Ship) ?> Navires</div><?
+		<div class = "padding"><?= sizeof($xml->Ships->Ship) ?> Navires</div><?php
 
 	} else {
 		foreach ($xml_p as $key => $Ships) {

@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 
 	$APP  = new App();
@@ -49,11 +49,11 @@
 			<div class="contexmenu" style="display:none;z-index:8000">
 				<div class="applinkblock applink">
 					<a onclick="bag.clear();window.location.reload();"><i class="fa fa-refresh textvert"></i> Recharger application</a>
-					<? if (droit('DEV')) { ?>
+					<?php if (droit('DEV')) { ?>
 						<a onclick="schemeLoad();"><i class="fa fa-refresh textvert"></i> schemeLoad()</a>
 						<a onclick="runModule('mdl/dyn/dyn_ged');"><i class="fa fa-refresh textrouge"></i> dyn_ged</a>
 						<a onclick="act_chrome_gui('app/app_mobile/app_mobile' );"><i class="fa fa-refresh textrouge"></i> dyn_ged</a>
-					<? } ?>
+					<?php } ?>
 					<a onClick="ajaxValidation('quitter');return false;">
 						<i class="fa fa-power-off textrouge"></i>&nbsp;<?= idioma('Quitter') ?>
 					</a>
@@ -65,19 +65,19 @@
 			<div style="display: none;">
 			</div>
 		</div>
-		<? if (droit('DEV')) { ?>
+		<?php if (droit('DEV')) { ?>
 			<div class="toggler toggler_visible applink">
 				<a class="autoToggle" style="display: <?= $app_cache_mode_on ?>" onclick="localStorage.setItem('cache_mode','on');save_settings('cache_mode','on');"><i class="fa fa-refresh textvert"></i> cache</a>
 				<a class="autoToggle" style="display: <?= $app_cache_mode_off ?>" onclick="localStorage.setItem('cache_mode','off');save_settings('cache_mode','off');"><i class="fa fa-refresh textrouge"></i> cache</a>
 			</div>
-		<? } ?>
+		<?php } ?>
 		<div id="socket_keep_on_status" style="display:none;"></div>
 		<div id="socket_status" style="display:none;"></div>
-		<? if (droit('DEV')) { ?>
+		<?php if (droit('DEV')) { ?>
 			<div class="" data-count="data-count" data-table="agent" data-vars="vars[onlineAgent]=1">&nbsp;</div>
 			<div mdl="app/app_test" value="*" style="width:150px;">&nbsp;</div>
 			<div class="" data-count="data-count" data-table="agent_history" data-vars="vars[idagent]=<?= $_SESSION['idagent'] ?>">&nbsp;</div>
-		<? } ?>
+		<?php } ?>
 		<div class="status blanc"></div>
 	</div>
 	<div class="animated speed slideInDown fadeIn" id="gui_pane" act_defer data-cache="true" mdl="app/app_gui/app_gui_start" value="<?= $_SESSION['idagent'] ?>"
@@ -117,12 +117,12 @@
 <div class="alignright padding margin">
 	<?= skelMdl::cf_module('app/app_user_pref/app_user_pref_css', [], $_SESSION['idagent']) ?>
 </div>
-<? if (droit('DEV')) {
+<?php if (droit('DEV')) {
 	?>
 	<div id="upload_app_gui_main" style="position:absolute;bottom:0em;left:0em;height:100px;width:100%;display:none;" class="fond_noir bordert">
 	</div>
 	<div class="padding blanc">
-		<? if (droit('DEV')): ?>
+		<?php if (droit('DEV')): ?>
 			<div class="padding bordert margin">
 				<div style="position:relative;min-height:100px;width:100%;display:none;" id="drag_perso">
 				</div>
@@ -144,9 +144,9 @@
 			<script>
 				// new myddeAttach($('upload_app_gui_main'), {form: 'form_upload_app_gui_main',show_hide:true, priority:false, autoSubmit: true});
 			</script>
-		<? endif; ?>
+		<?php endif; ?>
 	</div>
-<? } ?>
+<?php } ?>
 <script>
 	window.JSGUI = new appGui ($ ('mainApp'));
 	localStorage.setItem ('cache_mode', 'off');
@@ -188,20 +188,20 @@
 
 	}, 60000);
 
-	<? if(droit('DEV')){ ?>
+	<?php if(droit('DEV')){ ?>
 	/*runModule ('mdl/dyn/dyn_email_agent','start=<?=time()?>');
 	 setInterval (function () {
 	 runModule ('mdl/dyn/dyn_email_agent','start=<?=time()?>');
 
 	 }, 15000);*/
-	<? }?>
+	<?php }?>
 </script>
 <style>
-	<? if(droit('DEV')){ ?>
+	<?php if(droit('DEV')){ ?>
 	.cf_module:hover {
 		/*box-shadow:  0 0 3px  #000  ;*/
 	}
-	<? }?>
+	<?php }?>
 </style>
 <style>
 	.guinext, guiprev, guiclose {

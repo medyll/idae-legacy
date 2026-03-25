@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 	// echéancier, trace les dates de fin et les dates de début ( rouge , vert )
 	$APP = new App();
@@ -32,12 +32,12 @@
 
 ?>
 <div main_auto_tree style="height:100%;overflow-x:auto;overflow-y:hidden;width:9000px;" class="blanc flex_h flex_nowrap" >
-	<? foreach ($periode as $key => $value) {
+	<?php foreach ($periode as $key => $value) {
 		// $value[0];
 		// $value[1];
 	?>
-		<? } ?>
-	<? foreach ($periode as $key => $value) {
+		<?php } ?>
+	<?php foreach ($periode as $key => $value) {
 		// $value[0];
 		// $value[1];
 		?>
@@ -47,7 +47,7 @@
 				Au <?= $value[1]->format('d/m/Y') ?>
 			</div >
 			<div class="retrait padding" >
-				<?
+				<?php
 					$begin = $value[0];
 					$end = $value[1];
 
@@ -56,7 +56,7 @@
 						?>
 						<div auto_tree class="padding borderb" ><?= fonctionsProduction::date_fr($dadate) ?></div >
 						<div class="retrait padding flex_h" >
-							<? foreach ($arr_sc as $key => $value) {
+							<?php foreach ($arr_sc as $key => $value) {
 								// dateDebut
 								if($APP->has_field('dateDebut'));
 								//
@@ -70,24 +70,24 @@
 								<div class="flex_main ededed" style="border-bottom:red;" >
 									<?= $value['nomAppscheme'] ?>
 									<div class="flex_h flex_wrap" >
-										<? while ($arr_tmp_deb = $rs_tmp_deb->getNext()) {
+										<?php while ($arr_tmp_deb = $rs_tmp_deb->getNext()) {
 											$value_id = (int)$arr_tmp_deb['id' . $table];
 											?>
-											<div style="max-width: 25%;" class="padding margin border4 inline" act_defer mdl="app/app/app_fiche_mini" vars="table=<?= $table ?>&table_value=<?= $value_id ?>"></div ><?
+											<div style="max-width: 25%;" class="padding margin border4 inline" act_defer mdl="app/app/app_fiche_mini" vars="table=<?= $table ?>&table_value=<?= $value_id ?>"></div ><?php
 										} ?>
-										<? while ($arr_tmp_fin = $rs_tmp_fin->getNext()) {
+										<?php while ($arr_tmp_fin = $rs_tmp_fin->getNext()) {
 											$value_id = (int)$arr_tmp_fin['id' . $table];
 											?>
-											<div  style="max-width: 25%;" class="padding margin border4  inline" act_defer mdl="app/app/app_fiche_mini" vars="table=<?= $table ?>&table_value=<?= $value_id ?>"></div ><?
+											<div  style="max-width: 25%;" class="padding margin border4  inline" act_defer mdl="app/app/app_fiche_mini" vars="table=<?= $table ?>&table_value=<?= $value_id ?>"></div ><?php
 										} ?>
 									</div >
 								</div >
-								<?
+								<?php
 							} ?>
 						</div >
-					<? } ?>
+					<?php } ?>
 			</div >
 		</div >
 
-	<? } ?>
+	<?php } ?>
 </div >

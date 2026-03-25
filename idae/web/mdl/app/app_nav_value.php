@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 	$vars = empty($_POST['vars']) ? array() : fonctionsProduction::cleanPostMongo($_POST['vars'], 1);
 	$table = $_POST['table'];
@@ -12,7 +12,7 @@
 	$rs = $APP->query($vars,'',50)->sort(array($top => -1, $nom => 1));
 ?>
 <div> nav value
-	<?
+	<?php
 		while ($arr = $rs->getNext()) {
 			?>
 			<a class = "autoToggle ellipsis"
@@ -20,4 +20,4 @@
 			   vars = "table=<?= $table ?>&table_value=<?= $arr[$id] ?>" >
 				<?= $arr[$nom] ?>
 			</a>
-		<? } ?></div>
+		<?php } ?></div>

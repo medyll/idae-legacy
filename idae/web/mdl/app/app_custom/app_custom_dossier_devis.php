@@ -69,7 +69,7 @@
 		</tr>
 	</table>
 	<br/><br/>
-	<?
+	<?php
 		$db = skelMongo::connectBase('sitebase_devis');
 		$rs = $db->command(array("distinct" => "devis_marge_type", "key" => 'groupe_ligne', "query" => array()));
 		$tot = 0;
@@ -81,17 +81,17 @@
 			<td class="uppercase">Dénomination</td>
 			<td style="width:120px;" class="uppercase">Prix achat</td>
 		</tr>
-		<?
+		<?php
 			foreach ($rs['values'] as $key => $value):
 				$rsD = skelMongo::connect('devis', 'sitebase_devis')->find(array('numeroDossierDevis' => $numeroDossierDevis, 'est_signe' => 1))->sort(array('iddevis' => -1));
 				?>
-				<?
+				<?php
 				while ($arrD = $rsD->getNext()):
 					$iddevis = (int)$arrD['iddevis'];
 					$rs      = skelMongo::connect('devis_marge', 'sitebase_devis')->find(array('iddevis' => (int)$iddevis, 'codeMarge' => $value))->sort(array('ordreMarge' => 1));
 					if ($rs->count() != 0):
 						?>
-						<?
+						<?php
 						while ($arr = $rs->getNext()):
 							$idmarge = (int)$arr['idmarge'];
 							$tot += $arr['prixAchatMarge'];
@@ -102,11 +102,11 @@
 								<td class=""><?= $arr['nomMarge'] ?></td>
 								<td class="bold"><?= maskNbre($arr['prixAchatMarge']) . '&nbsp;€' ?></td>
 							</tr>
-						<? endwhile; ?>
-					<?
+						<?php endwhile; ?>
+					<?php
 					endif;
 				endwhile; ?>
-			<?
+			<?php
 			endforeach;  ?>
 		<tr>
 			<td></td>
@@ -122,7 +122,7 @@
 	<?= idioma('Echéancier client') ?>
 </div>
 <div class="autoBlock">
-	<?
+	<?php
 		$rsDevis = skelMongo::connect('devis', 'sitebase_devis')->find(array('numeroDossierDevis' => (int)$numeroDossierDevis, 'est_signe' => 1));
 		while ($arrDevis = $rsDevis->getNext()):
 			$arrAcompte = $arrDevis['grilleAcompteDevis'];
@@ -136,40 +136,40 @@
 			<table class="table_info   " style="width:100%" cellspacing="0">
 				<tr>
 					<td class="borderb"></td>
-					<? foreach ($arrAcompte as $key => $value):
+					<?php foreach ($arrAcompte as $key => $value):
 						$tmp = (!empty($value[0])) ? $value[0] : $value;
 						?>
 						<td style="width:120px;" ><?= $tmp['typeDevisAcompte'] ?></td>
-					<? endforeach; ?>
+					<?php endforeach; ?>
 					<td></td>
 					<td style="width:120px;"  ><?= idioma('Total') ?></td>
 				</tr>
 				<tr>
 					<td class=""><?= idioma('date') ?>
 						&nbsp;</td>
-					<? foreach ($arrAcompte as $key => $value):
+					<?php foreach ($arrAcompte as $key => $value):
 						$tmp = (!empty($value[0])) ? $value[0] : $value;
 						?>
 						<td class="td_cb"><?= date_fr($tmp['dateDevisAcompte']) ?></td>
-					<? endforeach; ?>
+					<?php endforeach; ?>
 					<td></td>
 					<td></td>
 				</tr>
 				<tr>
 					<td class=""><?= idioma('Somme') ?>
 						&nbsp;</td>
-					<? foreach ($arrAcompte as $key => $value):
+					<?php foreach ($arrAcompte as $key => $value):
 						$tmp = (!empty($value[0])) ? $value[0] : $value;
 						?>
 						<td class="td_cb bold"><strong>
 								<?= maskNbre($tmp['sommeDevisAcompte']) . ' €' ?>
 							</strong></td>
-					<? endforeach; ?>
+					<?php endforeach; ?>
 					<td></td>
 					<td class="bold"><?= maskNbre($totalAcpte) . ' €' ?></td>
 				</tr>
 			</table><br/>
-		<? endwhile; ?>
+		<?php endwhile; ?>
 </div>
 <div class="autoNext ededed"><span>
     <?= idioma('Comptabilité client') ?>
@@ -179,9 +179,9 @@
 </div>
 <div class="autoNext ededed">Comptabilité Fournisseur</div>
 <div class="autoBlock">
-	<?
+	<?php
 		$rsD = skelMongo::connect('devis', 'sitebase_devis')->find(array('numeroDossierDevis' => $numeroDossierDevis))->sort(array('iddevis' => -1));
-	?> <?
+	?> <?php
 		$tot = 0;
 		$rsD->reset();
 		while ($arrD = $rsD->getNext()):
@@ -197,7 +197,7 @@
 						<td class="uppercase"><?= idioma('Date') ?></td>
 						<td style="width:120px;" class="uppercase"><?= idioma('Montant') ?></td>
 					</tr>
-					<?
+					<?php
 						while ($arr = $rs->getNext()):
 							$idmarge = (int)$arr['idmarge'];
 							$arrM    = skelMongo::connect('devis_marge', 'sitebase_devis')->findOne(array('idmarge' => (int)$idmarge));
@@ -210,7 +210,7 @@
 								<td><?= date_fr($arr['datePaiement']) ?></td>
 								<td class="bold"><?= maskNbre($arr['montantPaiement']) . ' €' ?></td>
 							</tr>
-						<? endwhile; ?>
+						<?php endwhile; ?>
 					<tr>
 						<td></td>
 						<td class="uppercase bold"></td>
@@ -219,7 +219,7 @@
 						<td class="bold"><?= maskNbre($tot) . ' €' ?></td>
 					</tr>
 				</table>
-			<?
+			<?php
 			endif;
 		endwhile; ?>
 </div>

@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 	ini_set('display_errors', 55);
 	ignore_user_abort(true);
@@ -52,7 +52,7 @@
 
 ?>
 <div class="flowDown" style="overflow:auto;">
-	<?
+	<?php
 		// FTP
 		$vars = array('count'=>0,'total'=>4);
 		skelMdl::reloadModule('xml/xml_bar','*',$vars);

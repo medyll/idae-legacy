@@ -1,4 +1,4 @@
-<?
+<?php
 	if (file_exists('../conf.inc.php')) include_once('../conf.inc.php');
 	if (file_exists('../../conf.inc.php')) include_once('../../conf.inc.php');
 	if (file_exists('../../../conf.inc.php')) include_once('../../../conf.inc.php');
@@ -22,10 +22,10 @@
 	$rs = skelMongo::connect('skel_builder_type', 'sitebase_skelbuilder')->find($whereT + $vars, ['sort' => ['typeInput' => 1], 'limit' => 50]);
 ?>
 <div class="relative applink applinkblock autoToggle" style="max-height:350px;overflow:auto;">
-	<? while ($arr = $rs->getNext()) {
+	<?php while ($arr = $rs->getNext()) {
 		?>
 		<a class="relative inline" onclick='$(this).fire("dom:datechoosen",{value: "<?= addslashes(niceUrl($arr["typeInput"])) ?>",id:"<?= $arr["typeInput"] ?>"})'>
 			<?= $arr["typeInput"] ?>
 		</a>
-	<? } ?>
+	<?php } ?>
 </div>

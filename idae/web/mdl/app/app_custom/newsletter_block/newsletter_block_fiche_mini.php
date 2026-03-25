@@ -25,7 +25,7 @@
 		<?= $APP->draw_field(['field_name_raw' => 'bgcolor', 'table' => $table, 'field_value' => $arr['bgcolor' . $Table]]) ?></a>
 	</div>
 	<div class="flex_h">
-	<? while ($arr_item = $rs_item->getNext()) {
+	<?php while ($arr_item = $rs_item->getNext()) {
 		$img_show = '';
 		switch ($rs_item->count()):
 			case 1:
@@ -58,6 +58,6 @@
 			     value="newsletter_item-<?= $img_size ?>-<?= $arr_item['idnewsletter_item'] ?>"></div>
 			<div><?= skelMdl::cf_module('app/app/app_fiche_micro', ['table' => 'newsletter_item', 'table_value' => $arr_item['idnewsletter_item']]) ?></div>
 		</div>
-		</div><? } ?></div>
+		</div><?php } ?></div>
 </div>
 

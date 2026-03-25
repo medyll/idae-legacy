@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 
 	$PATH = 'business/' . BUSINESS . '/app/app_xml_csv/';
@@ -47,7 +47,7 @@
 				<div class="flex_main">Récupération destinations</div>
 				<div>
 					<a onclick="runModule('mdl/<?= $PATH ?>read/readcosta_destination','run=1')">lancer</a>
-					<!--<a onclick="$('debug_destinations').loadModule('<?/*= $PATH */?>read/readcosta_destination','run=1')">lancer</a>-->
+					<!--<a onclick="$('debug_destinations').loadModule('<?php/*= $PATH */?>read/readcosta_destination','run=1')">lancer</a>-->
 				</div>
 			</div>
 			<div id="debug_destinations" ></div>
@@ -73,7 +73,7 @@
 			<div class="titre_entete borderb flex_h">
 				<div class="flex_main">Récupération dates de depart</div>
 				<div>
-					<!--<a onclick="$('debug_iti_costa').loadModule('<?/*= $PATH */?>read/readcosta_datedepart','run=1')">debug</a>-->
+					<!--<a onclick="$('debug_iti_costa').loadModule('<?php/*= $PATH */?>read/readcosta_datedepart','run=1')">debug</a>-->
 					<a onclick="runModule('mdl/<?= $PATH ?>read/readcosta_datedepart','run=1')">lancer</a>
 				</div>
 			</div>

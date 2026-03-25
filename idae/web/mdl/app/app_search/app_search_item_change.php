@@ -13,10 +13,10 @@
 	unset($_POST['target']);
 	?>
 <div class="padding applink applinkblock">
-	<? foreach ($arr as $key=>$value):
+	<?php foreach ($arr as $key=>$value):
 
 		?>
 		<a onclick="$('<?=$target?>').socketModule('app/app_search/search_item_<?=$key?>','<?=http_build_query($_POST)?>')"><i class="fa fa-caret-right"></i> <?=$value?></a>
-		<?
+		<?php
 	endforeach; ?>
 </div>

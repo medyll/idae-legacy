@@ -64,7 +64,7 @@
 	$total = sizeof($xml_p->Cruises->Cruise);
 	if (empty($_POST['run'])) {
 		?>
-		<div class="padding"><?=$total?> Prix et cabines</div><?
+		<div class="padding"><?=$total?> Prix et cabines</div><?php
 		exit;
 	} elseif (!empty($_POST['run']) && empty($_POST['run_delay'])) {
 

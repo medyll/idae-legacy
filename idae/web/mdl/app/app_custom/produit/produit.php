@@ -26,7 +26,7 @@
 		</div>
 		<div class="flex_main " style="position:relative;overflow:hidden;">
 			<div act_defer mdl="app/app_custom/produit/produit_main" vars="idproduit=<?= $idproduit ?>" class="flex_h" style="height: 100%;width:100%;" id="<?= $uniqid ?>">
-				<? // =skelMdl::cf_module('app/app_custom/produit/produit_main',['idproduit'=>$idproduit],$idproduit);?>
+				<?php // =skelMdl::cf_module('app/app_custom/produit/produit_main',['idproduit'=>$idproduit],$idproduit);?>
 			</div>
 		</div>
 		<div class="padding ededed bordert" table="produit" table_value="<?= $idproduit ?>"><?= $APP->draw_field(['field_name_raw' => 'nombreVue', 'table' => 'produit', 'field_value' => $arr['nombreVueProduit']]) ?></div>

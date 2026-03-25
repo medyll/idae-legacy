@@ -1,4 +1,4 @@
-<?
+<?php
 if(file_exists('../conf.inc.php')) include_once('../conf.inc.php');
 if(file_exists('../../conf.inc.php')) include_once('../../conf.inc.php');
 if(file_exists('../../../conf.inc.php')) include_once('../../../conf.inc.php');
@@ -14,7 +14,7 @@ $arr = skelMongo::connect('skel_builder','sitebase_skelbuilder')->findOne(array(
 </div>
 <div class="padding borderb">  
   <div style="overflow:hidden;max-height:500px;width:750px;" id=" " > 
-     <? 
+     <?php 
 		echo highlight_string(skelForm::getForm($_POST['_id'])); //  
 	 ?> 
       <div class="buttonZone">

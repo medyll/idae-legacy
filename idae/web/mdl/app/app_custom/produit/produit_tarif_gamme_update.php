@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 
 	$APP_PROD = new App('produit');
@@ -45,7 +45,7 @@
 				</div>
 			</div>
 			<div class="flex_main" style="overflow: auto;width:100%;">
-				<? while ($arr_pt = $rsPT->getNext()):
+				<?php while ($arr_pt = $rsPT->getNext()):
 					$idproduit_tarif = (int)$arr_pt['idproduit_tarif'];
 					?>
 					<div class="titre_entete borderb  bold"><i class="fa fa-calendar"></i> <?= date_fr($arr_pt['dateDebutProduit_tarif']) ?></div>
@@ -54,7 +54,7 @@
 							<a class="bold active">
 								<i class="fa fa-euro"></i> <?= idioma('Ajouter un prix') ?>
 							</a>
-							<? while ($arrT = $rsT->getNext()) {
+							<?php while ($arrT = $rsT->getNext()) {
 								$nomGamme          = !empty($arrP['idtransport']) ? $arrT["nomTransport_gamme"] : $arrT["nomGamme"];
 								$idgamme           = $arrT["idgamme"];
 								$idtransport_gamme = $arrT["idtransport_gamme"];
@@ -64,7 +64,7 @@
 								   vars="table=produit_tarif_gamme&vars[idgamme]=<?= $idgamme ?>&vars[idtransport_gamme]=<?= $idtransport_gamme ?>&vars[idproduit]=<?= $idproduit ?>&vars[idproduit_tarif]=<?= $idproduit_tarif ?>"
 								   options="{scope:'produit_tarif_gamme'}"><?= $nomGamme ?></a>
 
-							<?
+							<?php
 							}
 								$rsT->reset(); ?>
 						</div>
@@ -75,7 +75,7 @@
 					<script>
 				 load_table_in_zone('table=produit_tarif_gamme&vars[idproduit_tarif]=<?=$idproduit_tarif?>', 'produit_tarif<?=$idproduit_tarif?>');
 					</script>
-				<? endwhile;?>
+				<?php endwhile;?>
 			</div>
 		</div>
 	</div>

@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 
 	$_POST['defer'] = '';
@@ -80,7 +80,7 @@
 			<table border="0" id="tablePlanningQuoti" class="tablePlanning" width="100%"
 			       style="width:100%;table-layout:fixed;" cellspacing="0" cellpadding="0">
 				<tbody class="tdcalday">
-				<?
+				<?php
 					for ($hr = 7; $hr < 25; $hr++) {
 						$idPile   = $witDate . $hr . '0000';
 						$idQuart  = $witDate . $hr . '1500';
@@ -151,12 +151,12 @@
 							<td valign="middle" class="hQuart<?= $clf ?>" heuredebut="<?= $hr . ':45:00' ?>"
 							    style="width: 40px;">45&nbsp;</td>
 						</tr>
-					<? } ?>
+					<?php } ?>
 				</tbody>
 
 			</table>
 			<div>
-				<?// = skelMdl::cf_module('app/app_planning/app_planning_tache_reload', array('defer' => 'true', 'maxJours' => 4, 'tableparent' => 'innerPlanningQuotidien' . $rand, 'sd' => $sd)); ?>
+				<?php// = skelMdl::cf_module('app/app_planning/app_planning_tache_reload', array('defer' => 'true', 'maxJours' => 4, 'tableparent' => 'innerPlanningQuotidien' . $rand, 'sd' => $sd)); ?>
 			</div>
 		</div>
 	</div>

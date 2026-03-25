@@ -1,4 +1,4 @@
-<?
+<?php
 include_once($_SERVER['CONF_INC']);
 $uniqid =  uniqid(); 
 echo $mdl = $_POST['mdl_stat'].'/'.$_POST['mdl_stat'];

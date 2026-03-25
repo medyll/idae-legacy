@@ -31,7 +31,7 @@
 ?>
 <div class="padding relative toggler applink">
 	<div class="flex_h flex_wrap flex_margin padding" style="width:100%;">
-		<? if (!empty($table)): ?>
+		<?php if (!empty($table)): ?>
 			<div style="min-width:90px;" class="aligncenter blanc">
 				<a onclick="<?= fonctionsJs::app_create($table) ?>" class="ellipsis">
 					<i class="fa fa-<?= $APP->iconAppscheme ?> fa-2x"></i>
@@ -39,9 +39,9 @@
 					<br>
 					<i class="fa fa-copy textbleu"></i><?= idioma('Nouveau') ?>
 				</a>
-			</div>        <? endif; ?>
+			</div>        <?php endif; ?>
 		<div>
-			<? if (!empty($APP_TABLE['hasTypeScheme']) || sizeof($GRILLE_FK) != 0): ?>
+			<?php if (!empty($APP_TABLE['hasTypeScheme']) || sizeof($GRILLE_FK) != 0): ?>
 				<a data-menu="data-menu" class="aligncenter ellipsis">
 					<i class="fa fa-database" style="color: #BEAC8B"></i>
 
@@ -49,18 +49,18 @@
 					Grouper par <?= $groupBy ?>
 				</a>
 				<div class="toggler boxshadow   contextmenu applinkblock hide_on_click" style="display:none;z-index:1000;">
-					<? if (!empty($APP_TABLE['hasTypeScheme'])): ?>
+					<?php if (!empty($APP_TABLE['hasTypeScheme'])): ?>
 						<a class="autoToggle" app_button="app_button" vars="<?= $HTTP_BASE_VARS ?>&groupBy=<?= $table . '_type' ?>&<?= $HTTP_VARS ?>">
-							<i class="fa fa-list"></i> <?= $table . '_type' ?></a>                    <? endif; ?>
-					<? if (sizeof($GRILLE_FK) != 0): ?>
-						<? foreach ($GRILLE_FK as $fk):
+							<i class="fa fa-list"></i> <?= $table . '_type' ?></a>                    <?php endif; ?>
+					<?php if (sizeof($GRILLE_FK) != 0): ?>
+						<?php foreach ($GRILLE_FK as $fk):
 							?>
 							<a class="autoToggle" app_button="app_button" vars="<?= $HTTP_BASE_VARS ?>&groupBy=<?= $fk['table_fk'] ?>&<?= $HTTP_VARS ?>">
-								<?= $fk['table_fk'] ?> </a>                        <? endforeach; ?><? endif; ?>
+								<?= $fk['table_fk'] ?> </a>                        <?php endforeach; ?><?php endif; ?>
 					<a class="autoToggle" app_button="app_button" vars="<?= $HTTP_BASE_VARS ?>&groupBy=&<?= $HTTP_VARS ?>">
 						ne plus grouper
 					</a>
-				</div>            <? endif; ?>
+				</div>            <?php endif; ?>
 		</div>
 		<div class="autoToggle flex_h">
 			<a class=" aligncenter ellipsis" data-menu="data-menu">
@@ -70,30 +70,30 @@
 				Trier par <?= $arr_sort[$sortBy] ?>
 			</a>
 			<div class="absolute   contextmenu applinkblock hide_on_click" style="display:none;z-index:1000;">
-				<? foreach ($ARR_GROUP_FIELD as $key => $val) {
+				<?php foreach ($ARR_GROUP_FIELD as $key => $val) {
 					$arrg = $val['group'];
 					$arrf = $val['field'];
 					?>
 					<div class="borderb">
-						<? foreach ($arrf as $keyf => $valf) {
+						<?php foreach ($arrf as $keyf => $valf) {
 							?>
 							<a class="autoToggle" app_button="app_button" vars="<?= $HTTP_BASE_VARS ?>&sortBy=<?= $valf['codeAppscheme_field'] . $Table ?>&<?= $HTTP_VARS ?>">
 								<?= ucfirst($valf['nomAppscheme_field']) ?>  </a>
-						<? } ?>
+						<?php } ?>
 					</div>
-				<? } ?>
+				<?php } ?>
 
 
-				<? if (sizeof($GRILLE_FK) != 0): ?>
-					<? foreach ($GRILLE_FK as $fk):
+				<?php if (sizeof($GRILLE_FK) != 0): ?>
+					<?php foreach ($GRILLE_FK as $fk):
 						?>
 						<a class="autoToggle" app_button="app_button" vars="<?= $HTTP_BASE_VARS ?>&sortBy=<?= 'nom' . ucfirst($fk['table_fk']) ?>&<?= $HTTP_VARS ?>">
-							<?= $fk['table_fk'] ?> </a>                    <? endforeach; ?>
-					<hr>                <? endif; ?>
-				<? foreach ($arr_sort as $key => $value):
+							<?= $fk['table_fk'] ?> </a>                    <?php endforeach; ?>
+					<hr>                <?php endif; ?>
+				<?php foreach ($arr_sort as $key => $value):
 					?>
 					<a class="autoToggle" app_button="app_button" vars="<?= $HTTP_BASE_VARS ?>&sortBy=<?= $key ?>&<?= $HTTP_VARS ?>">
-						<?= $value ?></a>                <? endforeach; ?>
+						<?= $value ?></a>                <?php endforeach; ?>
 			</div>
 			<div class="toggler">
 				<a class="autoToggle borderb" app_button="app_button" vars="<?= $HTTP_BASE_VARS ?>&sortDir=<?= (($sortDir == 1) ? '1' : '-1'); ?>&<?= $HTTP_VARS ?>">
@@ -105,7 +105,7 @@
 			</div>
 		</div>
 		<div class="border4 flex_h">
-			<? foreach ($arrFieldsBool as $bool => $arr_ico):
+			<?php foreach ($arrFieldsBool as $bool => $arr_ico):
 				$var = $bool . ucfirst($table);
 				(empty($_POST['vars'][$var]));
 				?>
@@ -117,7 +117,7 @@
 						<a onclick="return false;" class="autoToggle" app_button="app_button" vars="<?= $HTTP_BASE_VARS ?>&vars[<?= $var ?>]=1&<?= $HTTP_VARS ?>"><i class="fa fa-<?= $arr_ico[0] ?>"></i> <?= $bool ?></a>
 						<a onclick="return false;" class="autoToggle" app_button="app_button" vars="<?= $HTTP_BASE_VARS ?>&vars[<?= $var ?>]=0&<?= $HTTP_VARS ?>"><i class="fa fa-<?= $arr_ico[1] ?>"></i> <?= $bool ?></a>
 					</div>
-				</div>            <? endforeach; ?>
+				</div>            <?php endforeach; ?>
 		</div>
 		<div class="disinput border4 blanc" style="overflow:hidden;">
 			<a expl_multi_button="expl_multi_button">

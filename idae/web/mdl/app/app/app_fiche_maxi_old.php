@@ -79,8 +79,8 @@
 						class="fa fa-list-ul"></i>
 				</a>
 				<div style="width:50px"></div>
-				<? if (sizeof($R_FK) != 0): ?>
-					<? foreach ($R_FK as $arr_fk):
+				<?php if (sizeof($R_FK) != 0): ?>
+					<?php foreach ($R_FK as $arr_fk):
 						$value_rfk               = $arr_fk['table_value'];
 						$table_rfk               = $arr_fk['table'];
 						$vars_rfk['vars']        = ['id' . $table => $table_value];
@@ -91,11 +91,11 @@
 						if (empty($count)) continue;
 						?>
 						<a act_target="onglet_<?= $zou ?>" mdl="app/app_liste/app_liste" vars="table=<?= $table_rfk ?>&vars[<?= 'id' . $table ?>]=<?= $table_value ?>" class="autoToggle <?= $css_active ?>"><?= $arr_fk['nomAppscheme'] ?></a>
-					<? endforeach; ?>
-				<? endif; ?>
-				<? if (!empty($APP_TABLE['hasImageScheme'])) { ?>
+					<?php endforeach; ?>
+				<?php endif; ?>
+				<?php if (!empty($APP_TABLE['hasImageScheme'])) { ?>
 					<a act_target="onglet_<?= $zou ?>" mdl="app/app_img/image_app_liste_img" vars="table=<?= $table ?>&table_value=<?= $table_value ?>" class="autoToggle">Images</a>
-				<? } ?>
+				<?php } ?>
 			</div>
 		</div>
 		<div id="<?= $zouzou ?>" class="flex_main flex_h" style="width: 100%;overflow-y:hidden;overflow-x: auto;">
@@ -103,27 +103,27 @@
 				hh
 			</div>
 			<div style="position:sticky;left:0;z-index:1;max-width:200px;" class="ededed borderr avoid">
-				<? foreach ($GRILLE_FK as $field):
+				<?php foreach ($GRILLE_FK as $field):
 					$id       = 'id' . $field;
 					// query for name
 					$arr      = $APP->plug($field['base_fk'], $field['table_fk'])->findOne([$field['idtable_fk'] => $ARR[$field['idtable_fk']]]);
 					$dsp_name = $arr['nom' . ucfirst($field['table_fk'])];
 
 					if (!empty($ARR[$field['idtable_fk']])): ?>
-						<div class="margin padding " act_defer mdl="app/app/app_fiche_thumb" vars="table=<?= $field['table_fk'] ?>&table_value=<?= $ARR[$field['idtable_fk']] ?>"> &nbsp;</div>                <? endif;
+						<div class="margin padding " act_defer mdl="app/app/app_fiche_thumb" vars="table=<?= $field['table_fk'] ?>&table_value=<?= $ARR[$field['idtable_fk']] ?>"> &nbsp;</div>                <?php endif;
 				endforeach; ?>
 			</div>
 			<div id="onglet_<?= $zou ?>" data-act_target_toggle="true" vars="<?= $http_post ?>" act_defer mdl="<?= $mdl_load ?>" style="width:100%;">
 			</div>
 			<div id="onglet_more_<?= $zou ?>" data-act_target_toggle="true" class="flex_h" style="display:none;">
-				<? foreach ($GRILLE_FK as $field):
+				<?php foreach ($GRILLE_FK as $field):
 					// continue;
 					$id       = 'id' . $field;
 					// query for name
 					$arr      = $APP->plug($field['base_fk'], $field['table_fk'])->findOne([$field['idtable_fk'] => $ARR[$field['idtable_fk']]]);
 					$dsp_name = $arr['nom' . ucfirst($field['table_fk'])];
-					?><? if (!empty($ARR[$field['idtable_fk']])): ?>
-					<div style="height:100%;" act_defer mdl="app/app/app_fiche_forward" vars="table=<?= $field['table_fk'] ?>&table_value=<?= $ARR[$field['idtable_fk']] ?>"></div>        <? endif; ?><? endforeach; ?>
+					?><?php if (!empty($ARR[$field['idtable_fk']])): ?>
+					<div style="height:100%;" act_defer mdl="app/app/app_fiche_forward" vars="table=<?= $field['table_fk'] ?>&table_value=<?= $ARR[$field['idtable_fk']] ?>"></div>        <?php endif; ?><?php endforeach; ?>
 			</div>
 		</div>
 	</div>

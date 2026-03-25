@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 	ini_set('display_errors', 0);
 	if (empty($_POST['table'])) return;
@@ -20,7 +20,7 @@
 	$fin   = 'fin' . $uniqid;
 	$APP_SYNC        = new App('sync_log');
 ?>
-<!--<input type="hidden" name="table" value="<? /*= $table */ ?>">-->
+<!--<input type="hidden" name="table" value="<?php /*= $table */ ?>">-->
 <div id="form<?= $uniqid ?>" class="parent_form flex_h flex_align_middle   boxshadow border4" main_auto_tree>
 	<div class="flex_v  flex_main padding">
 		<div class="flex_h  flex_align_middle borderb">
@@ -29,13 +29,13 @@
 				<a data-menu="data-menu" data-clone="true" class="ellipsis"><i class="fa fa-angle-right"></i><span id="type_date_<?= $uniqid ?>">Type de date</span></a>
 				<div class="contextmenu" style="display:none;">
 					<div class="applink applinkblock">
-						<? foreach ($APP_DATE_FIELD as $valdate => $valf) {
+						<?php foreach ($APP_DATE_FIELD as $valdate => $valf) {
 							$nomdate  = $valf['nomAppscheme_field'];
 							$codedate = $valf['codeAppscheme_field'] . $Table;
 							?>
 							<a class="autoToggle ellipsis"
 							   onclick="$('type_date_<?= $uniqid ?>').update('<?= $nomdate . ' ' . $table ?>');$($('form<?= $uniqid ?>').querySelector('#<?= $deb ?>')).setAttribute('name','vars_date[<?= $codedate ?>]'+'[$gte]');$($('form<?= $uniqid ?>').querySelector('#<?= $fin ?>')).setAttribute('name','vars_date[<?= $codedate ?>]'+'[$lte]')">
-								<i class="fa fa-<?= $valf['iconAppscheme_field'] ?>"></i> <?= ucfirst(idioma($nomdate)) . ' ' . $table; ?></a>                                <? } ?>
+								<i class="fa fa-<?= $valf['iconAppscheme_field'] ?>"></i> <?= ucfirst(idioma($nomdate)) . ' ' . $table; ?></a>                                <?php } ?>
 					</div>
 				</div>
 				<div data-menu="data-menu" data-clone="true" class="applink  applinkblock   ">

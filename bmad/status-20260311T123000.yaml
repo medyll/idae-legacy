@@ -1,0 +1,140 @@
+project: "Idae Legacy — Code Modernization"
+updated: "2026-03-11T12:30:00Z"
+recommendation: "bmad-master test integration S4-02 --auto (queued)"
+
+# Snapshot: queued integration run triggered by `bmad-master next` command
+# Created: 2026-03-11T12:30:00Z
+
+phases:
+  - id: 1
+    name: "Infrastructure & Bootstrap"
+    status: done
+    progress: 100
+    notes: >
+      PHP 8.2 in Docker — operational.
+      Login flow functional (actions.php, ClassSession, ClassApp basic path).
+      MongoCompat helper created. Node.js server refactored to ESM (app_node/src/).
+      docker-compose up --build works. Apache serves the app on port 8080.
+
+  - id: 2
+    name: "SCSS Migration + ClassApp Foundation"
+    status: done
+    progress: 100
+    artifacts:
+      - "S2-01 — Convert 26 LESS → SCSS ✅"
+      - "S2-02 — Wire entry points with @use/@forward ✅"
+      - "S2-03 — Convert LESS mixins to @mixin/@include ✅"
+      - "S2-04 — Remove lessc.inc.php ✅"
+      - "S2-05 — ClassApp.__construct modernized ✅"
+      - "npm run build:css compiles successfully ✅"
+    notes: "All 5 stories complete. SCSS pipeline fully operational. Ready for Phase 3 (ClassApp CRUD methods)."
+    ref: "bmad/artifacts/sprints/sprint-02.md"
+
+  - id: 3
+    name: "ClassApp CRUD + Testing"
+    status: done
+    progress: 100
+    artifacts:
+      - "S3-01 — Refactor ClassApp::query() ✅ (2026-03-06)"
+      - "S3-02 — Refactor ClassApp CRUD write methods ✅ (2026-03-07)"
+      - "S3-03 — Refactor ClassApp::create_update() ✅ (2026-03-07)"
+      - "S3-04 — Refactor ClassApp CRUD helpers: insert/update/remove ✅ (2026-03-08)"
+      - "S3-05 — Unit tests per method ✅ (2026-03-08)"
+      - "S3-06 — json_data.php regression test ✅ (2026-03-08)"
+    notes: "All 6 stories complete. ClassApp fully modernized for read/write paths. Legacy skeleton files (ClassMongoDb, skelMongo, ClassSession_old) updated to MongoClient as interim step. Full MongoDB\\Client migration deferred to Phase 4."
+    ref: "idae/web/PHASE2_STRATEGY.md"
+
+  - id: 3.5
+    name: "Sprint 4 — ClassAppAgg + Integration Tests + JSON Services"
+    status: in_progress
+    progress: 20
+    artifacts:
+      - "S4-01 — Extract ClassAppAgg.php ✅ (2026-03-11)"
+      - "S4-02 — Integration/JsonDataTest.php 🟡 IN_PROGRESS (started via bmad-master next --auto 2026-03-11T12:00:00Z)"
+      - "S4-03 — Modernize json_scheme.php + json_data_search.php ⏳"
+      - "S4-04 — Modernize json_data_table.php + json_data_table_row.php ⏳"
+      - "S4-05 — BUG-01 Node.js socket investigation ⏳"
+    notes: "S4-01 done: ClassAppAgg extracted (distinct/distinct_rs/distinct_all). Tests written; pending Docker run."
+    ref: "bmad/artifacts/sprints/sprint-04.md"
+
+  - id: 4
+    name: "Modules & Templates"
+    status: upcoming
+    progress: 0
+    artifacts:
+      - "mdl/* audit (legacy MongoId/MongoRegex/MongoDate usage)"
+      - "cursorToArray rollout in modules"
+      - "Smarty/Latte template review"
+
+  - id: 5
+    name: "Security & PHP Hardening"
+    status: upcoming
+    progress: 0
+    artifacts:
+      - "declare(strict_types=1) rollout on modified files"
+      - "Input validation / CSRF on actions.php, postAction.php"
+      - "Remove @ error suppression"
+      - "Composer dependency audit & updates"
+
+  - id: 6
+    name: "QA & Regression"
+    status: upcoming
+    progress: 0
+    artifacts:
+      - "Full test suite pass"
+      - "Browser smoke test (login → grid load → CRUD)"
+      - "app_cache_reset() validation after schema changes"
+
+sprints:
+  - id: 1
+    theme: "Foundation: Test Infrastructure & SCSS Pipeline"
+    dates: "2026-03-02 → 2026-03-13"
+    points: 12
+    status: done
+    file: "artifacts/sprints/sprint-01.md"
+  - id: 2
+    theme: "SCSS Migration Complete + ClassApp Connection"
+    dates: "2026-03-16 → 2026-03-27"
+    points: 13
+    status: done
+    progress: 100
+    file: "artifacts/sprints/sprint-02.md"
+  - id: 3
+    theme: "ClassApp CRUD + ClassAppFk + Unit Tests"
+    dates: "2026-03-30 → 2026-04-10"
+    points: 14
+    status: done
+    file: "artifacts/sprints/sprint-03.md"
+  - id: 4
+    theme: "ClassAppAgg + Integration Tests + JSON Services"
+    dates: "2026-04-13 → 2026-04-24"
+    points: 14
+    status: in_progress
+    file: "artifacts/sprints/sprint-04.md"
+  - id: 5
+    theme: "Modules, Security, Hardening & Regression"
+    dates: "2026-04-27 → 2026-05-08"
+    points: 15
+    status: upcoming
+    file: "artifacts/sprints/sprint-05.md"
+
+backlog:
+  total_points: 68
+  completed_points: 28
+  progress: "41%"
+
+qa:
+  test_plan: pending
+  coverage: "~0%"
+  last_run: "2026-03-11T12:30:00Z"
+  last_run_status: queued
+  last_run_note: "Queued via bmad-master next; run Docker (docker-compose up) then execute integration tests: vendor/bin/phpunit --testsuite=Integration --filter=JsonDataTest or run full Integration suite."
+  bugs:
+    - id: BUG-01
+      title: "Node.js socket server refuses connections (port 3005)"
+      severity: medium
+      status: open
+    - id: BUG-02
+      title: "CleanStr signature mismatch (array_walk_recursive)"
+      severity: low
+      status: patched_needs_broader_testing

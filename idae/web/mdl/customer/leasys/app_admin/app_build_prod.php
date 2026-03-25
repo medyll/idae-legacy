@@ -1,4 +1,4 @@
-<?
+<?php
 
 	include_once($_SERVER['CONF_INC']);
 
@@ -13,7 +13,7 @@
 	$collection_tarif_gamme = $db->produit_tarif_gamme;
 
 ?>
-<?
+<?php
 	if(empty($_POST['run'])):
 		$ct_old = $collection_tarif->find(['dateDebutProduit_tarif'=>['$lte'=>date('Y-m-d')]]);
 		$ct_tar =  $ct_old->count();
@@ -39,7 +39,7 @@
 		</div>
 		<div style="display:none;width:100%;max-height:350px;border:none;overflow:auto;" id="frame_xmlte" scrolling="auto"></div>
 	</div>
-<?
+<?php
 	return;
 endif;
 	set_time_limit(0);
