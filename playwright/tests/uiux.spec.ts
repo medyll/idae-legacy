@@ -16,11 +16,26 @@ test('uiux: basic layout and responsive checks', async ({ page, request }) => {
     if (m) phpsess = m[1];
   }
 
-  // Load homepage in desktop
+  // Load homepage in desktop; try to detect main UI and otherwise perform an in-browser login
   await page.setViewportSize({ width: 1280, height: 800 });
-  if (phpsess) await page.context().addCookies([{ name: 'PHPSESSID', value: phpsess, domain: 'localhost', path: '/', httpOnly: true }]);
   await page.goto(base + '/');
-  await page.waitForLoadState('networkidle');
+  try {
+    await page.waitForSelector('#main, .app-gui, #grid, .grid, .app-list', { timeout: 10000 });
+  } catch (e) {
+    // Perform in-browser login flow if SPA displayed login widget
+    const loginSelector = 'input[name=loginAgent], input[name=login], input[placeholder*=Identification], input[placeholder*=Ident]';
+    await page.waitForSelector(loginSelector, { timeout: 15000 });
+    await page.fill('input[name=loginAgent], input[name=login]', user);
+    await page.fill('input[name=passwordAgent]', pass);
+    await page.click('input[type=submit], button:has-text("Valider")');
+    await page.waitForLoadState('networkidle').catch(() => {});
+    // Fetch session info and set localStorage so SPA bootstraps reliably
+    const sess = await page.evaluate(async () => { try { const r = await fetch('/services/json_ssid.php'); return await r.json(); } catch(e) { return null; } });
+    if (sess && sess.PHPSESSID) {
+      await page.evaluate((s) => { try { localStorage.setItem('PHPSESSID', s.PHPSESSID); localStorage.setItem('SESSID', s.SESSID || s.idagent || ''); localStorage.setItem('APPID', s.PHPSESSID); } catch(e){} }, sess);
+    }
+    await page.waitForSelector('#main, .app-gui, #grid, .grid, .app-list', { timeout: 30000 });
+  }
 
   // Basic checks
   const title = await page.title();
