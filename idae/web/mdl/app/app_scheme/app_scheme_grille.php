@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 	require_once(__DIR__ . '/../../../appclasses/appcommon/MongoCompat.php');
 	use AppCommon\MongoCompat;
@@ -36,7 +36,7 @@
 					</tr>
 				</thead>
 				<tbody id="oio" sort_zone_drag="true">
-					<?
+					<?php
 						foreach ($arr_fk as $key => $arrInput):
 							?>
 							<tr uid="<?= $arrInput['uid'] ?>" draggable="true" data-sort_element="true" sort_zone="sort_zone">
@@ -65,7 +65,7 @@
 									</a>
 								</td>
 							</tr>
-							<?
+							<?php
 						endforeach;
 					?></tbody>
 			</table>

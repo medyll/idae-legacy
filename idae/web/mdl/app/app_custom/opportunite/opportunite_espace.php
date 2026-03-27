@@ -28,7 +28,7 @@
 			</div>
 		</div>
 		<div class = "flex_main applink applinkblock toggler" style = "overflow:auto;" id = "oppor_oi">
-			<? while ($ARR_A = $RSA->getNext()):
+			<?php while ($ARR_A = $RSA->getNext()):
 				$idagent = (int)$ARR_A['idagent'];
 				$rs_OPOR = $APP_OPOR->find([ 'idagent' => (int)$ARR_A['idagent'] ]);
 				?>
@@ -41,7 +41,7 @@
 				<script>
 					load_table_in_zone('table=opportunite&vars[idagent]=<?=$idagent?>', 'zone_opor<?=$idagent?>');
 				</script>
-			<? endwhile; ?>
+			<?php endwhile; ?>
 		</div>
 	</div>
 </div>

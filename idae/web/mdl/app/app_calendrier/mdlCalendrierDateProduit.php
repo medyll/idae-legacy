@@ -1,4 +1,4 @@
-<?
+<?php
 if(file_exists('../conf.inc.php')) include_once('../conf.inc.php');
 if(file_exists('../../conf.inc.php')) include_once('../../conf.inc.php'); 
 // generalement , le nom du container
@@ -64,12 +64,12 @@ $moisSuiv = mktime(12,0,0,$moisEnCours+1,$jourEnCours,$anneeEnCours);
   <div class="blanc" style="width:100%;display:block;" id="outTblCalTache<?=$time?>">
  <span class="titre3"> <?=idioma('Dates disponibles')?></span>
  <div class="flowDown" style="overflow:auto;">
- <?
+ <?php
  while($arr = $rsDateProduit->fetchRow()){
  ?>
  <br />
  <a onclick="fillInput(<?=$inputString?>,'<?=date_fr($arr['dateDebutDate_produit'])?>');"><?=date_fr($arr['dateDebutDate_produit'])?></a>
- <?
+ <?php
  }?></div>
   </div>
 </div>
@@ -78,11 +78,11 @@ $moisSuiv = mktime(12,0,0,$moisEnCours+1,$jourEnCours,$anneeEnCours);
 
  
 fillInput = function(input,vars){
-	<? if(!empty($_POST['function'])){ ?> 
+	<?php if(!empty($_POST['function'])){ ?> 
 		<?=$_POST['function']?>(vars) 
-	<? }else{ ?>
+	<?php }else{ ?>
 	$(input).value = vars;
-	<? }?> 
+	<?php }?> 
 	return false;
 }
 </script>

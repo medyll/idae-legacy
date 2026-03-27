@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 
 	$APP = new App();
@@ -29,21 +29,21 @@
 				<div class="applink applinkblock" id="app_group_field" style="display:none;">
 					<div class="titre_entete"><?= idioma('Groupes') ?></div>
 					<div class="applinkbig">
-					<? while ($arrg = $rsG->getNext()) {
+					<?php while ($arrg = $rsG->getNext()) {
 						?>
 							<a class="autoToggle" onclick="$('appscheme_field_zone').loadModule('app/app_liste/app_liste','table=appscheme_field&vars[idappscheme_field_group]=<?=$arrg['idappscheme_field_group']?>')"><?= ucfirst($arrg['nomAppscheme_field_group']) ?></a>
 
-					<? }
+					<?php }
 						$rsG->reset();?></div>
 				</div>
 				<div class="applink applinkblock" id="app_type_field" style="display:none;">
 					<div class="titre_entete"><?= idioma('Type') ?></div>
-					<? while ($arrg = $rsT->getNext()) {
+					<?php while ($arrg = $rsT->getNext()) {
 						?>
 						<div style="position:relative;">
 							<a class="autoToggle"><?= ucfirst($arrg['nomAppscheme_field_type']) ?></a>
 						</div>
-					<? } ?>
+					<?php } ?>
 				</div>
 			</div>
 		</div>

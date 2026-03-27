@@ -1,4 +1,4 @@
-<? 
+<?php 
 if(file_exists('../../conf.inc.php')) include_once('../../conf.inc.php'); 
 
 array_walk_recursive($_POST, 'CleanStr',$_POST); 

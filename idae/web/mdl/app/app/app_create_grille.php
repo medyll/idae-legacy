@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 	ini_set('display_errors' , 55);
 	// POST
@@ -51,16 +51,16 @@
 
 		<div class = "flex_h" >
 			<div class = "padding flex_v" style = "max-width:170px" >
-				<? if ( ! empty($APP_TABLE['hasImageScheme']) ): ?>
+				<?php if ( ! empty($APP_TABLE['hasImageScheme']) ): ?>
 					<div class = "aligncenter" >
 						<div class = " ededed inline aligncenter" style = "width:150px;height:150px;" >
 							<img style="max-width:100%;" src="<?=Act::imgApp($table,$table_value,'square')?>">
 						</div >
 					</div >
-				<? endif ?>
-				<? if ( ! empty($APP_TABLE['hasBoolScheme']) ): ?>
+				<?php endif ?>
+				<?php if ( ! empty($APP_TABLE['hasBoolScheme']) ): ?>
 				<div class = "aligncenter  padding" >
-					<? foreach ($arrFieldsBool as $field => $arr_ico):
+					<?php foreach ($arrFieldsBool as $field => $arr_ico):
 						$fa         = empty($ARR[$field . ucfirst($table)]) ? 'circle-thin' : 'check-circle';
 						$css        = empty($ARR[$field . ucfirst($table)]) ? 'textgris' : 'textvert';
 						$input_name = "vars[" . $field . ucfirst($table) . "]";
@@ -69,8 +69,8 @@
 							<?= ucfirst(idioma($field)) ?>
 							&nbsp;<input name = "<?= $input_name ?>" type = "range" min = "0" max = "1" value = "<?= $ARR[$field . ucfirst($table)] ?>" style = "width:40px;height:15px;vertical-align: middle;" />
 						</div >
-					<? endforeach; ?></div >
-				<? endif ?>
+					<?php endforeach; ?></div >
+				<?php endif ?>
 			</div >
 			<div class = "flex_main" >
 				<table class = "table_info" >
@@ -83,10 +83,10 @@
 				   
 			</div >
 			
-			<? if(sizeof($R_FK)!=0): ?>
+			<?php if(sizeof($R_FK)!=0): ?>
 					<div class="bordert">
 				<table class="table_info">
-					<? foreach ($R_FK as $arr_fk):
+					<?php foreach ($R_FK as $arr_fk):
 						$value_rfk               = $arr_fk['table_value'];
 						$table_rfk               = $arr_fk['table'];
 						$vars_rfk['vars']        = ['id' . $table => $table_value];
@@ -101,14 +101,14 @@
 									<i class="fa fa-<?= $APP -> iconAppscheme ?>"></i> <?=$count . ' ' . $table_rfk . '' . (($count == 0) ? '' : 's')?></a></td>
 						</tr>
 	
-					<? endforeach; ?>
+					<?php endforeach; ?>
 				</table>     </div>
-				<? endif; ?>
+				<?php endif; ?>
 				
 
 		</div >
 		<div class = "padding margin border4 ededed" >
-					<? foreach ($GRILLE  as $field):
+					<?php foreach ($GRILLE  as $field):
 						$id       = 'id' . $field['table_grille'];
 						$nom      = 'nom' . ucfirst($field['table_grille']);
 						$arr      = $APP->plug($field['base_grille'] , $field['table_grille'])->findOne([ $field['idtable_grille'] => $ARR[$field['idtable_grille']] ]);
@@ -120,7 +120,7 @@
 						<div class = "padding" >
 							
 						</div >
-					<? endforeach; ?></div >
+					<?php endforeach; ?></div >
 		<div class = "buttonZone" >
 			<button type = "button" class = "trash_button left" onclick="<?= fonctionsJs::app_delete($table,$table_value)?>" >
 				<?= idioma('Supprimer') ?>

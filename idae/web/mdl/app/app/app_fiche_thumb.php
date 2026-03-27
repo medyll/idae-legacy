@@ -47,7 +47,7 @@
 
 				</div>
 			</div>
-			<? if (!empty($APPOBJ->APP_TABLE['hasImageScheme'])):
+			<?php if (!empty($APPOBJ->APP_TABLE['hasImageScheme'])):
 				$size = empty($APPOBJ->APP_TABLE['hasImagesquareScheme']) ? empty($APPOBJ->APP_TABLE['hasImagetinyScheme']) ? 'small' : 'tiny' : 'square';
 				?>
 				<div class="aligncenter">
@@ -55,11 +55,11 @@
 					     vars="table=<?= $table ?>&table_value=<?= $table_value ?>&codeTailleImage=square&show=thumb" scope="app_img"
 					     value="<?= $table ?>-square-<?= $table_value ?>"></div>
 				</div>
-			<? else: ?>
+			<?php else: ?>
 				<div class="aligncenter">
 					<i style="color:<?= $APP->colorAppscheme ?>" class="padding fa fa-<?= $icon ?> fa-2x"></i>
 				</div>
-			<? endif; ?>
+			<?php endif; ?>
 			<div style="color:<?= $ARR['color' . $Table . '_statut'] ?>">
 				<?= $APP->draw_field(['field_name_raw' => 'icon', 'field_name' => 'icon' . $Table . '_statut', 'table' => $table, 'field_value' => $ARR['icon' . $Table . '_statut']]) ?>
 			</div>
@@ -70,13 +70,13 @@
 			</div>
 			<div class="bordert "  >
 				<div class="flex_v ">
-					<? foreach ($ARR_GROUP_FIELD as $key => $val) {
+					<?php foreach ($ARR_GROUP_FIELD as $key => $val) {
 						$arrg = $val['group'];
 						$arrf = $val['field'];
 						?>
 						<div style="order:<?= $arrg['ordreAppscheme_field_group'] ?>">
 							<div class="flex_h flex_wrap flex_align_middle">
-								<?
+								<?php
 									$totitre = '';
 									foreach ($arrf as $keyf => $valf) {
 
@@ -86,7 +86,7 @@
 											$totitre = true;
 											?>
 											<div class="borderb none flex_main padding" style="min-width:100%;">- <?= $arrg['nomAppscheme_field_group'] ?></div>
-											<?
+											<?php
 										}
 										?>
 										<div title=" <?= ucfirst($valf['nomAppscheme_field']) ?>" class="flex_h flex_align_middle">
@@ -96,13 +96,13 @@
 											<div class="flex_main padding"><span
 													class="bold"><?= $valf['nomAppscheme_field'] ?> : </span> <?= $APP->draw_field(['field_name_raw' => $valf['codeAppscheme_field'], 'table' => $table, 'field_value' => $value]) ?></div>
 										</div>
-									<? } ?>
+									<?php } ?>
 							</div>
 						</div>
-					<? } ?>
+					<?php } ?>
 				</div>
 				<div class="padding bordert ededed none">
-					<?
+					<?php
 
 						foreach ($GRILLE_FK as $field):
 							$id_fk    = $field['idtable_fk'];
@@ -120,7 +120,7 @@
 										<?= $field['nomAppscheme'] . ' : ' ?></div>
 									<div class="flex_main alignright"><span class="bold ellipsis"><?= strtolower($dsp_name) ?></span></div>
 								</div>
-							<? }
+							<?php }
 						endforeach;
 					?>
 				</div>

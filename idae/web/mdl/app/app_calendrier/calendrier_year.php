@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 	$sd         = $_POST['sd'];
 	$calendarId = $_POST['calendarId'];
@@ -11,7 +11,7 @@
 ?>
 <div style="text-align:left;padding:0px;height: 100%;width:100%;overflow:hidden;" id="dynlistYear">
 	<div style="height:100%;width:100%; " class="applink toggler applinkblock flex_h flex_wrap flex_align_stretch">
-		<?
+		<?php
 			for ($m = $annee - 1; $m <= $annee + 7; $m++) {
 				$lien = gmmktime(12, 0, 0, $mois, $jour, $m);
 				// $class =($annee == date("Y", $sd)) ? 'active' :  '';
@@ -24,6 +24,6 @@
 						</a>
 					</div>
 				</div>
-			<? } ?>
+			<?php } ?>
 	</div>
 </div>

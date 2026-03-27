@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 
 
@@ -29,13 +29,13 @@
 		//if (sizeof($final_rfk) == 0) return;
 		?>
 		<div class="flex_h flex_wrap flex_align_stretch">
-			<?
+			<?php
 				foreach ($final_rfk as $key => $arr_final):
 					// vardump($arr_final);
 					?>
 					<div class=" ">
 						<div class="applink applinkblock         padding">
-							<?
+							<?php
 								foreach ($arr_final as $arr_fk):
 									if (empty($arr_fk['count'])) {
 										continue;
@@ -52,12 +52,12 @@
 										<span data-count="data-count" data-table="<?= $arr_fk['table'] ?>" data-vars="<?= http_build_query($vars_rfk); ?>"><?= $count ?></span>
 										<?= $arr_fk['nomAppscheme'] . '' . (($count < 2) ? '' : 's') ?>
 									</a>
-								<? endforeach; ?>
+								<?php endforeach; ?>
 						</div>
 					</div>
-				<? endforeach; ?>
+				<?php endforeach; ?>
 		</div>
-		<?
+		<?php
 	endif; ?>
 
 

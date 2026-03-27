@@ -7,6 +7,7 @@
 	 * return array of raw data queried
 	 * 
 	 * MIGRATION NOTE: MongoId/MongoRegex converted to MongoCompat (2026-02-02)
+	 * Modified: 2026-03-15 — replace exit with return so file is require-safe for PHPUnit
 	 */
 
 	include_once($_SERVER['CONF_INC']);
@@ -64,7 +65,7 @@
 		endforeach;
 		$APP_TABLE['grilleBoolIcon'] = $arrFieldsBool;
 		echo trim(json_encode($APP_TABLE));
-		exit;
+		return;
 	}
 	//
 	$where = array();
@@ -121,7 +122,7 @@
 ////
 	if ($PIECE == 'header') {
 		echo $json_head;
-		exit;
+		return;
 	}
 
 	$rs = $APP->query($vars + $where, (int)$page, (int)$nbRows);
@@ -210,12 +211,12 @@
 	endwhile;
 	if ($PIECE == 'data') {
 		echo trim(json_encode($JSON_STR));
-		exit;
+		return;
 	}
 	if ($PIECE == 'query') {
 		$q['count']=$rs->count();
 		$q['maxcount']=$max_count;
 		$q['rs']= $JSON_STR;
 		echo  trim(json_encode($q));
-		exit;
+		return;
 	}

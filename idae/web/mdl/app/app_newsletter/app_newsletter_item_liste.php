@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 	$APP      = new App('newsletter');
 	$APP_ITEM = new App('newsletter_item');
@@ -36,7 +36,7 @@
 			<?= idioma('Ordonner') ; ?>
 		</div>
 		<div class="  padding margin" style="position:relative;" id="<?= $formSearch ?>" sort_zone_drag="true">
-			<? if (!empty($idnewsletter)) {
+			<?php if (!empty($idnewsletter)) {
 
 				$rs_item = $APP_ITEM->query(array('idnewsletter' => $idnewsletter))->sort(['ordreNewsletter_item'=>1]);
 				while ($arr_item = $rs_item->getNext()):
@@ -61,7 +61,7 @@
 							</div>
 						</div>
 					</div>
-					<?
+					<?php
 				endwhile;
 
 			} ?>

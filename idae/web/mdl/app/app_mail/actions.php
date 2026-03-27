@@ -1,4 +1,4 @@
-<?    
+<?php    
 include_once($_SERVER['CONF_INC']); 
 $_POST+=$_GET;
 array_walk_recursive($_POST, 'CleanStr',$_POST);  

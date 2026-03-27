@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 	require_once(__DIR__ . '/../../../../appclasses/appcommon/MongoCompat.php');
 	use AppCommon\MongoCompat;
@@ -43,7 +43,7 @@
 	$rs2   = $APP->plug('sitebase_email', 'email_contact')->find($add2, ['limit' => 10]);
 
 ?>
-<?
+<?php
 	if (empty($_POST['email'])) {
 		while ($arr = $rsOri->getNext()) {
 			$value = strtolower($arr["email"]);
@@ -52,17 +52,17 @@
 			$meta .= '&meta[email]=' . $value;
 			?>
 			<?= display_contact($email, $arr["nom"], $meta) ?>
-		<? }
+		<?php }
 	} ?>
-<? while ($arr = $rs2->getNext()) {
+<?php while ($arr = $rs2->getNext()) {
 	$value = strtolower($arr["email"]);
 	$name  = empty($arr["nom"]) ? $value : $arr["nom"] . ' ' . $value;
 	$meta  = 'meta[nom]=' . $name;
 	$meta .= '&meta[email]=' . $value;
 	?>
 	<?= display_contact($value, $arr["nom"], $meta) ?>
-<? } ?>
-<? while ($rs->hasNext()) {
+<?php } ?>
+<?php while ($rs->hasNext()) {
 	$arr      = $rs->getNext();
 	$idclient = (int)$arr["idclient"];
 	$rsD      = $baseDevis->find(['idclient' => $idclient]);
@@ -72,8 +72,8 @@
 	$meta .= '&meta[email]=' . $value;
 	?>
 	<?= display_contact($value, $nom, $meta) ?>
-<? } ?>
-<? if (filter_var($DAMAIL, FILTER_VALIDATE_EMAIL)) {
+<?php } ?>
+<?php if (filter_var($DAMAIL, FILTER_VALIDATE_EMAIL)) {
 	$meta = 'meta[email]=' . $DAMAIL; ?>
 	<div class="fond_noir color_fond_noir padding_more flex_h flex_margin flex_align_middle" onclick="$(this).fire('dom:act_click',{value:'<?= $DAMAIL ?>',meta:'<?= $meta ?>'})">
 		<div class="padding borderr"><i class="fa fa-link"></i></div>
@@ -84,8 +84,8 @@
 			</a>
 		</div>
 	</div>
-<? } ?>
-<?
+<?php } ?>
+<?php
 	function display_contact($email, $nom, $meta = '') {
 
 		$onclick = "onclick=\"$(this).fire('dom:act_click',{value:'$email',meta:'$meta'})\"";

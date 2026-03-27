@@ -1,4 +1,4 @@
-<?
+<?php
 include_once ($_SERVER['CONF_INC']);
 require_once(__DIR__ . '/../../../appclasses/appcommon/MongoCompat.php');
 use AppCommon\MongoCompat;
@@ -53,7 +53,7 @@ $types = $APP->app_default_fields;
 						<td  >
 							<?=chkSch('hasLigneScheme', $arr['hasLigneScheme']); ?></td >
 					</tr >
-					<? foreach ($types as $key => $value) {
+					<?php foreach ($types as $key => $value) {
 						$Key = ucfirst($key);
 						$Name = empty($value)? $key : $value ;
 						?>
@@ -61,7 +61,7 @@ $types = $APP->app_default_fields;
 						<td ><?=$Name?></td >
 						<td ><?= chkSch('has' . $Key . 'Scheme', $arr['has' . $Key . 'Scheme']); ?></td >
 					</tr >
-						<?
+						<?php
 
 						}
 					?>

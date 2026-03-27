@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 	//
 	if (empty($_POST['table'])) return;
@@ -23,7 +23,7 @@
 	$add_vars = "reloadModule[app/app_gui/app_gui_tile_click]=$table_value";
 ?>
 <div class="inline">
-	<?
+	<?php
 		if (empty($arrT)):
 			?>
 			<a class="textgris"
@@ -31,10 +31,10 @@
 			   title="<?= idioma('Mettre en icone sur le bureau') ?>">
 				<i class="fa fa-star"></i>
 			</a>
-		<? else: ?>
+		<?php else: ?>
 			<a class="" onclick="ajaxValidation('app_delete','mdl/app/','<?= $add_vars ?>&table=agent_tuile&table_value=<?= $arrT['idagent_tuile'] ?>')" title="<?= idioma('Enlever icone bureau') ?>">
 				<i class="fa fa-star textvert"></i>
 			</a>
-			<?
+			<?php
 		endif;
 	?></div>

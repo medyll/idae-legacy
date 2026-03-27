@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 	require_once(__DIR__ . '/../../appclasses/appcommon/MongoCompat.php');
 	use AppCommon\MongoCompat;
@@ -48,28 +48,28 @@
 	endif;
 
 ?>
-<? while ($arr = $rs->getNext()) { ?>
+<?php while ($arr = $rs->getNext()) { ?>
 	<a class="autoToggle app_select"
 	   onclick="$(this).fire('dom:act_click',{value:'<?= niceUrlSpace($arr[$nom]) ?>',code:'<?= $arr[$code] ?>',id:'<?= $arr[$id] ?>',table:'<?= $table ?>'})">
 		<div class="    flex_h flex_align_middle">
 			<div class="textgris" style="width:40px;"><?= $arr[$id] ?></div>
-			<? if (array_key_exists('icon' . $Table, $ARR_FIELDS) && $arr['icon' . $Table]) { ?>
+			<?php if (array_key_exists('icon' . $Table, $ARR_FIELDS) && $arr['icon' . $Table]) { ?>
 				<div style="width:20px;"><i class="fa fa-<?= $arr['icon' . $Table] ?>"></i></div>
-			<? } ?>
+			<?php } ?>
 			<div class="flex_main"><span class="ellipsis"><?= $arr[$nom] ?> <?= htmlspecialchars(empty($arr[$prenom]) ? '' : ' ' . $arr[$prenom]); ?></span></div>
 
-			<? if (array_key_exists('codePostal' . $Table, $ARR_FIELDS) && $arr['codePostal' . $Table]) { ?>
+			<?php if (array_key_exists('codePostal' . $Table, $ARR_FIELDS) && $arr['codePostal' . $Table]) { ?>
 				<div style=" text-align:right;"><span   >&nbsp;<?= $arr['codePostal' . $Table] ?></span></div>
-			<? } ?>
+			<?php } ?>
 
-			<? if (array_key_exists('color' . $Table, $ARR_FIELDS) && $arr['color' . $Table]) { ?>
+			<?php if (array_key_exists('color' . $Table, $ARR_FIELDS) && $arr['color' . $Table]) { ?>
 				<div style="width:15px;text-align:center;"><span class="border4" style="background-color: <?= $arr['color' . $Table] ?>">&nbsp;</span></div>
-			<? } ?>
+			<?php } ?>
 
 		</div>
 	</a>
-<? } ?>
-<? if (droit_table($_SESSION['idagent'], 'C', $table)) { ?>
+<?php } ?>
+<?php if (droit_table($_SESSION['idagent'], 'C', $table)) { ?>
 	<div class="padding_more bordert">
 		<a class="border4 ededed bold padding_more" act_chrome_gui="app/app/app_create"
 		   vars="table=<?= $table ?>&<?= $HTTP_VARS ?>&vars[nom<?= $Table ?>]=<?= $search ?>&reloadScope[app_select]=<?= $Table ?>"
@@ -77,5 +77,5 @@
 			  <i class="fa fa-plus-circle textvert"></i><?= idioma('Créer') . ' ' . $APP->nomAppscheme ?>
 		</a>
 	</div>
-<? } ?>
+<?php } ?>
 <div class="none" data-need_more="<?= ($rs->count()) - ($rs->count(true)) ?>"></div>

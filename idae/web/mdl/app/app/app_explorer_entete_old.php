@@ -35,7 +35,7 @@
 ?>
 <div style="overflow: hidden;" class="flex_v">
 	<div id="<?= $zone ?>" style="width:100%;overflow: hidden;" class="flex_v flex_wrap flex_main  ">
-		<?
+		<?php
 			$arr_has = ['statut', 'type'];
 			foreach ($arr_has as $key => $value):
 				$Value  = ucfirst($value);
@@ -58,7 +58,7 @@
 							<div class>ici</div>
 							<div class="flex_main">
 								<table class="table tablemiddle   ">
-									<? while ($arr_tmp = $rs_tmp->getNext()):
+									<?php while ($arr_tmp = $rs_tmp->getNext()):
 										$rs_tmp_ct = $APP->find($vars + [$_id => $arr_tmp[$_id]])->sort(['ordre' . $_Table => 1]);
 										if ($rs_tmp_ct->count() == 0) continue;
 										?>
@@ -73,12 +73,12 @@
 											<td class="textgrisfonce"><?= idioma('Total') ?></td>
 											<td style="width: 30px;" class="textgrisfonce   alignright  "><?= $rs_tmp_ct->count(); ?></td>
 										</tr>
-									<? endwhile; ?>
+									<?php endwhile; ?>
 								</table>
 							</div>
 						</div>
 					</div>
-				<? endif; ?>
-			<? endforeach; ?>
+				<?php endif; ?>
+			<?php endforeach; ?>
 	</div>
 </div>

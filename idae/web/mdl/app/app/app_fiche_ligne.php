@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 
 	$table = $this->HTTP_VARS['table'];
@@ -25,28 +25,28 @@
 	<table class=" " style="width: 100%;">
 		<thead class="bordert borderb">
 			<tr>
-				<? foreach ($fields as $key => $field) { ?>
+				<?php foreach ($fields as $key => $field) { ?>
 					<td class="padding_more">
 						<i class="fa fa-<?= $field['iconAppscheme_field'] ?> "></i>
 						<?= $field['nomAppscheme_field'] ?>
 					</td>
-				<? } ?>
+				<?php } ?>
 			</tr>
 		</thead>
 		<tbody>
-			<? foreach ($liste as $key_liste => $row) {
+			<?php foreach ($liste as $key_liste => $row) {
 				$id = 'id' . $table ?>
 				<tr data-table="<?= $table ?>" data-table_value="<?= $row[$id] ?>" class="cursor">
-					<? foreach ($fields as $key => $field) {
+					<?php foreach ($fields as $key => $field) {
 						?>
 						<td class="padding_more">
 							<?= $this->draw_field(['field_name_raw' => $field['codeAppscheme_has_field'],
 							                       'table'          => $table,
 							                       'field_value'    => $row[$field['codeAppscheme_has_field']]]); ?>
 						</td>
-					<? } ?>
+					<?php } ?>
 				</tr>
-			<? } ?>
+			<?php } ?>
 		</tbody>
 	</table>
 </div>

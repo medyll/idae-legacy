@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 	ini_set('display_errors', 55);
 	// POST
@@ -33,7 +33,7 @@
 		<div>
 			<div class="titre1 padding"><?= $APP->draw_field(['field_name_raw' => 'nom', 'table' => $table, 'field_value' => $ARR['nom' . $Table]]) ?></div>
 			<div class="flex_h flex_wrap flex_align_middle padding bordert borderb">
-			<?
+			<?php
 
 				foreach ($GRILLE_FK as $field):
 					$id_fk = $field['idtable_fk'];
@@ -49,16 +49,16 @@
 						<div class='flex_main demi'>
 							<div class="ellipsis"><i class='textgris   fa fa-<?= $field['iconAppscheme'] ?>'></i><?= strtolower($dsp_name) ?></div>
 						</div>
-					<? }
+					<?php }
 				endforeach;
 			?></div>
 			<div class="     ">
-				<? foreach ($ARR_GROUP_FIELD as $key => $val) {
+				<?php foreach ($ARR_GROUP_FIELD as $key => $val) {
 					$arrg = $val['group'];
 					$arrf = $val['field'];
 					?>
 					<div class="flex_h flex_wrap flex_align_middle">
-						<? foreach ($arrf as $keyf => $valf) {
+						<?php foreach ($arrf as $keyf => $valf) {
 							if($arrg['codeAppscheme_field_group']=='identification' || $arrg['codeAppscheme_field_group']=='codification'|| $arrg['codeAppscheme_field_group']=='valeur')continue;
 							$value = strip_tags($ARR[$valf['codeAppscheme_field'] . $Table]);
 							if (empty($value)) continue;
@@ -68,9 +68,9 @@
 									<?= $APP->draw_field(['field_name_raw' => $valf['codeAppscheme_field'], 'table' => $table, 'field_value' => $value]) ?>
 								</div>
 							</div>
-						<? } ?>
+						<?php } ?>
 					</div>
-				<? } ?>
+				<?php } ?>
 			</div>
 		</div>
 	</div>

@@ -1,4 +1,4 @@
-<?
+<?php
 	ob_start();
 	include_once($_SERVER['CONF_INC']);
 	ob_end_clean();
@@ -47,28 +47,28 @@
 				$ctype = 'image/gif';
 				?>
 				<img style="width:100%;" src="data:image/gif;base64,<?= base64_encode($ct->getBytes()) ?>">
-				<?
+				<?php
 				exit;
 				break;
 			case 'png':
 				$ctype = 'image/png';
 				?>
 				<img style="width:100%;" src="data:image/png;base64,<?= base64_encode($ct->getBytes()) ?>">
-				<?
+				<?php
 				exit;
 				break;
 			case 'jpeg':
 				$ctype = 'image/jpeg';
 				?>
 				<img style="width:100%;" src="data:image/jpeg;base64,<?= base64_encode($ct->getBytes()) ?>">
-				<?
+				<?php
 				exit;
 				break;
 			case 'jpg':
 				$ctype = 'image/jpg';
 				?>
 				<img style="width:100%;" src="data:image/jpg;base64,<?= base64_encode($ct->getBytes()) ?>">
-				<?
+				<?php
 				exit;
 				break;
 			case 'mp3':
@@ -100,7 +100,7 @@
 				$ctype = 'image/jpeg';
 				?>
 				<img src="data:image/jpeg;base64,<?= base64_encode($ct->getBytes()) ?>">
-				<?
+				<?php
 				exit;
 				break;
 		}
@@ -122,6 +122,6 @@
 			        frameborder="0">
 			</iframe>
 		</div>
-		<?
+		<?php
 	}
 ?>

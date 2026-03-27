@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 	$uniqid = uniqid();
 	$_POST = fonctionsProduction::cleanPostMongo($_POST);
@@ -23,7 +23,7 @@
 	<div class = "">
 		<div class = "">
 			<div class = "applink applinkbig applinkblock toggler">
-				<? while ($arrDev = $rsDev->getNext()) { ?>
+				<?php while ($arrDev = $rsDev->getNext()) { ?>
 					<label class = "autoToggle"
 					       value = "zebre block"
 					       onclick = "amore('vars[iddevis]=<?= $arrDev['iddevis'] ?>')">
@@ -31,8 +31,8 @@
 						       name = "vars[iddevis]"
 						       value = "<?= $arrDev['iddevis'] ?>">
 						Devis <?= $arrDev['iddevis'] . ' ' . $arrDev['nomClient'] ?></label>
-				<? } ?>
-				<? while ($arrCli = $rsCli->getNext()) {
+				<?php } ?>
+				<?php while ($arrCli = $rsCli->getNext()) {
 					?>
 					<label class = "autoToggle"
 					       value = "zebre block"
@@ -41,7 +41,7 @@
 						       name = "vars[idclient]"
 						       value = "<?= $arrCli['idclient'] ?>">
 						<?= '<strong>' . strtoupper($arrCli['nomClient']) . '</strong> ' . strtolower($arrCli['prenomClient']) . ' ' . $arrCli['idclient'] ?></label>
-				<? } ?>
+				<?php } ?>
 				<div class = "bordert"
 				     id = "moredst"></div>
 			</div>

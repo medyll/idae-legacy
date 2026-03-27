@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 	$uniqid = uniqid();
 	$_POST = fonctionsProduction::cleanPostMongo($_POST, 1);
@@ -16,8 +16,8 @@
 	<div class = "padding aligncenter">
 		<li class = "fa fa-caret-down"></li>
 	</div>
-<? if (empty($vars['iddevis'])): ?>
-	<? while ($arr_devis = $rs_devis->getNext()) { ?>
+<?php if (empty($vars['iddevis'])): ?>
+	<?php while ($arr_devis = $rs_devis->getNext()) { ?>
 		<label class = "autoToggle block"
 		       style = "display: block;">
 			<input type = "radio"
@@ -26,10 +26,10 @@
 			<?= ' devis ' . $arr_devis['iddevis'] ?>
 		</label>
 		</label>
-	<? } ?>
-<? endif; ?>
-<? if (empty($vars['idclient'])): ?>
-	<? while ($arr_client = $rs_client->getNext()) { ?>
+	<?php } ?>
+<?php endif; ?>
+<?php if (empty($vars['idclient'])): ?>
+	<?php while ($arr_client = $rs_client->getNext()) { ?>
 		<label class = "autoToggle block"
 		       style = "display: block;">
 			<input type = "radio"
@@ -37,12 +37,12 @@
 			       value = "<?= $arr_client['idclient'] ?>">
 			<?= ' Client ' . $arr_client['idclient'].' '.$arr_client['nomClient'] ?>
 		</label>
-	<? } ?>
-<? endif; ?>
+	<?php } ?>
+<?php endif; ?>
 	<div class = "padding aligncenter bordert">
 		<li class = "fa fa-caret-down"></li>
 	</div>
-<? while ($arrPrest = $rsPrestataire->getNext()) { ?>
+<?php while ($arrPrest = $rsPrestataire->getNext()) { ?>
 	<label class = "autoToggle block"
 	       style = "display: block;">
 		<input type = "radio"
@@ -50,4 +50,4 @@
 		       value = "<?= $arrPrest['idprestataire'] ?>">
 		<?= 'prestataire <strong>' . strtoupper($arrPrest['nomPrestataire']) . '</strong> Dossier ' . strtolower($arrPrest['numeroDossierDevis']) . ' devis ' . $arrPrest['iddevis'] ?>
 	</label>
-<? } ?>
+<?php } ?>

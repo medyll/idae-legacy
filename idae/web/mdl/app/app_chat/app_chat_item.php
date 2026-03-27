@@ -48,7 +48,7 @@
 					<div class="app_chat_ask_contact_ok applink applinkblock" style="display:none;"><a><i
 								class="fa fa-comments-o"></i> contact ok</a></div>
 				</div>
-				<? //= skelMdl::cf_module('app/app/app_fiche_mini', ['table' => 'agent', 'table_value' => $arr_online['idagent']]) ?>
+				<?php //= skelMdl::cf_module('app/app/app_fiche_mini', ['table' => 'agent', 'table_value' => $arr_online['idagent']]) ?>
 			</div>
 		</div>
 	</div>

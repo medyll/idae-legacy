@@ -100,6 +100,19 @@ class MongodbCursorWrapper implements \Iterator, \Countable {
     }
     
     /**
+     * Legacy MongoCursor compatibility: check if there are more documents
+     * @return bool
+     */
+    public function hasNext() {
+        if ($this->isArray) {
+            return isset($this->documents[$this->position]);
+        }
+        // Convert to array to allow position-based checking
+        $this->toArray();
+        return isset($this->documents[$this->position]);
+    }
+
+    /**
      * Get all documents as array
      * WARNING: This loads all documents into memory
      * @return array

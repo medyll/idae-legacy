@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 	ini_set('display_errors', 55);
 	$APP = new App('appscheme');
@@ -32,7 +32,7 @@
 
 ?>
 <div class="flex_v" style="width:100%;height:100%;overflow:hidden;">
-	<? if (droit_table($_SESSION['idagent'], 'CONF', $table) && !empty($APP_TABLE) && $APP_TABLE->has_agent()): ?>
+	<?php if (droit_table($_SESSION['idagent'], 'CONF', $table) && !empty($APP_TABLE) && $APP_TABLE->has_agent()): ?>
 		<!--LIEN AGENT / ALL-->
 		<div class="  toggler   blanc barre_entete" style="width:100%;">
 			<div class=" applink flex_h " style="width:100%;overflow:hidden;">
@@ -44,7 +44,7 @@
 				</a>
 			</div>
 		</div>
-	<? endif; ?>
+	<?php endif; ?>
 
 	<div   style="position:relative;padding:0.5em; overflow-y:auto;overflow-x:hidden;">
 		<?= skelMdl::cf_module('app/app_prod/app_prod_nav_fk', ['table' => $table, 'vars' => $vars], $mdl_value) ?>

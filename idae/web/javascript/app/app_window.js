@@ -460,7 +460,7 @@ windowGui.prototype = {
 		}
 		//this.container.className= 'containerdisp';
 		new Effect.Fade($(this.container), {duration: 0.3})
-		JSGUI.addButton({vars: this.vars, container: $(this.container), element_id: $(this.container).identify(), taskBar: 'taskBar', onglet_id: 'ongl' + this.container.id, title: this.title});
+		window.JSGUI.addButton({vars: this.vars, container: $(this.container), element_id: $(this.container).identify(), taskBar: 'taskBar', onglet_id: 'ongl' + this.container.id, title: this.title});
 	}
 
 

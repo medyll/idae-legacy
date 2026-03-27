@@ -1,9 +1,9 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 
 ?>
 <div class = "blanc">
-	<?
+	<?php
 		$table = str_replace('id' , '' , $_POST['table']);
 		$APP = new App($table);
 		$TABLE_ONE = $APP->app_table_one;
@@ -21,50 +21,50 @@
 </div>
 <div class = "barre_entete applink applinkblock toggler borderb ededed">
 	<?= skelMdl::cf_module('app/app_custom/contextuel/' . $table , array( $id => $table_value )) ?>
-	<? if ( $act_from != 'fiche' ): ?>
+	<?php if ( $act_from != 'fiche' ): ?>
 		<a act_chrome_gui = "app/app_fiche" vars = "table=<?= $table ?>&table_value=<?= $table_value ?>" options = "{ident:'fiche_<?= $table . $table_value ?>'}">
 			<i class = "fa fa-file-text-o"></i>
 			&nbsp;
 			<?= idioma('Fiche') . ' ' . coupeChaine($arr[$nom] , 15) ?>
 		</a>
-	<? endif; ?>
-	<? if ( $act_from != 'preview' ): ?>
+	<?php endif; ?>
+	<?php if ( $act_from != 'preview' ): ?>
 		<a act_chrome_gui = "app/app_liste_preview_gui" vars = "table=<?= $table ?>&table_value=<?= $table_value ?>" options = "{ident:'prev_<?= $table . $table_value ?>'}">
 			<i class = "fa fa-eye"></i>
 			&nbsp;
 			<?= idioma('Détails') . ' ' . coupeChaine($arr[$nom] , 15) ?>
 		</a>
-	<? endif; ?>
-	<? if ( $act_from != 'update' ): ?>
+	<?php endif; ?>
+	<?php if ( $act_from != 'update' ): ?>
 		<a act_chrome_gui = "app/app/app_update" vars = "table=<?= $table ?>&table_value=<?= $table_value ?>" options = "{ident:'update_<?= $table . $table_value ?>'}">
 			<i class = "fa fa-pencil"></i>
 			&nbsp;
 			<?= idioma('Modifier') ?>
 		</a>
-	<? endif; ?>
-	<? if($TABLE_ONE['hasImageScheme']): ?>
+	<?php endif; ?>
+	<?php if($TABLE_ONE['hasImageScheme']): ?>
 	<a act_chrome_gui = "app/app_img/image_app_liste_img" vars = "table=<?= $table ?>&table_value=<?= $table_value ?>" options = "{ident:'img_<?= $table . $table_value ?>'}">
 		<i class = "fa fa-file-image-o"></i>
 		&nbsp;
 		<?= idioma('Images') ?>
 	</a>
-	<? endif; ?>
+	<?php endif; ?>
 	<!--
-	<a act_chrome_gui = "app/app_meta_update" vars = "table=<?/*= $table */?>&table_value=<?/*= $table_value */?>" options = "{ident:'meta_update_<?/*= $table . $table_value */?>'}">
+	<a act_chrome_gui = "app/app_meta_update" vars = "table=<?php/*= $table */?>&table_value=<?php/*= $table_value */?>" options = "{ident:'meta_update_<?php/*= $table . $table_value */?>'}">
 		<i class = "fa fa-code"></i>
 		&nbsp;
-		<?/*= idioma('web méta') */?>
-	</a><a act_chrome_gui = "production/produitliste/produit_liste_gui" vars = "vars[<?/*= $id */?>]=<?/*= $table_value */?>" options = "{ident:'prod_<?/*= $table . $table_value */?>'}">
+		<?php/*= idioma('web méta') */?>
+	</a><a act_chrome_gui = "production/produitliste/produit_liste_gui" vars = "vars[<?php/*= $id */?>]=<?php/*= $table_value */?>" options = "{ident:'prod_<?php/*= $table . $table_value */?>'}">
 		<i class = "fa fa-cube"></i>
 		&nbsp;
-		<?/*= idioma('Textes référencement') */?>
+		<?php/*= idioma('Textes référencement') */?>
 	</a>
-	<a act_chrome_gui = "production/produitliste/produit_liste_gui" vars = "vars[<?/*= $id */?>]=<?/*= $table_value */?>" options = "{ident:'prod_<?/*= $table . $table_value */?>'}">
+	<a act_chrome_gui = "production/produitliste/produit_liste_gui" vars = "vars[<?php/*= $id */?>]=<?php/*= $table_value */?>" options = "{ident:'prod_<?php/*= $table . $table_value */?>'}">
 		<i class = "fa fa-cubes"></i>
 		&nbsp;
-		<?/*= idioma('Production') */?>
+		<?php/*= idioma('Production') */?>
 	</a>-->
-	<? foreach ($R_FK as $arr_fk):
+	<?php foreach ($R_FK as $arr_fk):
 		$nAPP                    = new APP($arr_fk['table']);
 		$value_rfk               = $arr_fk['table_value'];
 		$table_rfk               = $arr_fk['table'];
@@ -77,7 +77,7 @@
 			<a act_chrome_gui = "app/app_liste_gui" vars = "<?= http_build_query($vars_rfk); ?>">
 				<i class = "fa fa-<?= $APP->iconAppscheme ?>"></i> <?=
 					$count . ' ' . $table_rfk . '' . (($count == 0) ? '' : 's') . ' ' . idioma('pour') . ' ' . $arr[$nom]?></a>
-		<? endif; endforeach; ?>
+		<?php endif; endforeach; ?>
 	<hr>
 	<a onclick = "<?= fonctionsJs::tache_create(array( $id => $table_value )) ?>">
 		<i class = "fa fa-calendar-o"></i>

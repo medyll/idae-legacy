@@ -40,5 +40,5 @@
 		<div class="border4 blanc" style="min-width:960px;width:960px;max-width:960px;height:100%;overflow:auto;"><?= $liste ?>
 		</div>
 	</div>
-<?
+<?php
 

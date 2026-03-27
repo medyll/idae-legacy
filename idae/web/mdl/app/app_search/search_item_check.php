@@ -69,7 +69,7 @@
 						<a onclick="this.up().up().up().hide()"><i class="fa fa-times textrouge"></i></a>
 					</div>
 					<div style="overflow-y:auto;overflow-x:hidden;max-height:250px;">
-						<?
+						<?php
 							while ($arr = $rs->getNext()):
 
 								?>
@@ -79,7 +79,7 @@
 										<?= $arr['nom' . $Table] ?>
 									</label>
 								</div>
-								<?
+								<?php
 							endwhile;
 						?>
 					</div>

@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);	require_once(__DIR__ . '/../../../appclasses/appcommon/MongoCompat.php');
 	use AppCommon\MongoCompat;
 	$APP_SCH           = new APP('appscheme');

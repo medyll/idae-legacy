@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 
 
@@ -35,7 +35,7 @@
 			</tr>
 			</thead>
 			<tbody  class="toggler">
-			<?
+			<?php
 				while ($arr = $rs->getNext()) {
 				 	 	?>
 					<tr class="autoToggle">
@@ -48,7 +48,7 @@
 						</td>
 						<td><?= $arr['nomAppscheme_field_group'] ?></td>
 					</tr>
-				<? } ?>
+				<?php } ?>
 			</tbody>
 		</table>
 	</div>

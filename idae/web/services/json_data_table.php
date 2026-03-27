@@ -1,29 +1,15 @@
-<?php
-declare(strict_types=1);
+<?
 
-/**
- * json_data_table.php — Return data for a specific table with FK resolution
- *
- * Returns a single record with all foreign key relations resolved.
- * Used by forms and detail views.
- *
- * @package Idae\Services
- * Date: 2007-XX-XX (Legacy)
- * Modified: 2026-03-27 — Added strict_types, code formatting
- */
-
-// ob_end_clean();
-include_once($_SERVER['CONF_INC']);
-require_once(__DIR__ . '/../appclasses/appcommon/MongoCompat.php');
-
-use AppCommon\MongoCompat;
-
-//ini_set('display_errors', 0);
-if (empty($_SESSION['idagent'])) {
-    // skelMdl::send_cmd('act_notify', ['msg' => 'Agent not logged in', 'options' => $_GET + ['mdl' => 'app/app_login/app_login', 'sticky' => 1, 'id' => 'json_debug']], session_id());
-    exit;
-}
-$DEBUG = false;
+	// ob_end_clean();
+	include_once($_SERVER['CONF_INC']);
+	require_once(__DIR__ . '/../appclasses/appcommon/MongoCompat.php');
+	use AppCommon\MongoCompat;
+	//ini_set('display_errors', 0);
+	if (empty($_SESSION['idagent'])) {
+		// skelMdl::send_cmd('act_notify', ['msg' => 'Agent non connecté', 'options' => $_GET + ['mdl' => 'app/app_login/app_login', 'sticky' => 1, 'id' => 'json_debug']], session_id());
+		return;
+	}
+	$DEBUG = false;
 
 	$_POST = array_merge($_GET, $_POST);
 	//
@@ -98,7 +84,7 @@ $DEBUG = false;
 	
 	// Handle missing schema with silent fail and error logging
 	if (empty($APP_TABLE) || is_null($APP_TABLE)) {
-		error_log("[json_data_table] Missing schema for table '$table' - silent fail");
+		// Missing schema — return empty result silently
 		
 		// Return empty result to avoid breaking the frontend
 		$empty_response = [
@@ -118,7 +104,7 @@ $DEBUG = false;
 		} else {
 			echo json_encode($empty_response);
 		}
-		exit;
+		return;
 	}
 	
 	$GRILLE_FK       = $APP->get_fk_tables();
@@ -139,7 +125,7 @@ $DEBUG = false;
 	$MDL              = empty($_POST['mdl']) ? '' : $_POST['mdl'];
 	$strem_chunk_size = empty($MDL) ? 20 : 15;
 
-	// $in => tableau
+	// Convert array values to MongoDB $in operators
 	foreach ($vars as $key_vars => $value_vars):
 		if ($key_vars == 'ne') continue;
 		if (is_array($value_vars) && $key_vars != 'gte' && $key_vars != 'lte' && $key_vars != 'ne' && sizeof(array_values($value_vars)) != 0) $vars[$key_vars] = ['$in' => array_values($value_vars)];
@@ -189,8 +175,7 @@ $DEBUG = false;
 	//
 	$where = [];
 
-	# champ = 'null'
-
+	// Field value sent as literal string 'null' — treat as missing/unset in MongoDB
 	foreach ($vars as $key_vars => $value_vars):
 		if (is_string($value_vars) && strtolower($value_vars) == 'null') {
 			unset($vars[$key_vars]);
@@ -204,10 +189,6 @@ $DEBUG = false;
 		$regexp = MongoCompat::toRegex($search_escaped, 'i');
 
 		if (is_int($_POST['search'])) $where['$or'][] = [$id => (int)$_POST['search']];
-		/*$out[] = new MongoRegex("/" . (string)$_POST['search'] . "/i");
-		if (sizeof($out) == 1) {
-			$where = array('$or' => array(array($nom => array('$all' => $out)), array('code' . $Table => array('$in' => $out))));
-		}*/
 
 		if ($APP->has_field('nom')) $where['$or'][] = ['nom' . $Table => $regexp];
 		if ($APP->has_field('prenom')) $where['$or'][] = ['prenom' . $Table => $regexp];
@@ -219,7 +200,7 @@ $DEBUG = false;
 			$where['$or'][] = ['telephone' . $Table => MongoCompat::toRegex($tel_escaped, 'i')];
 		}
 
-		// tourne ds fk
+		// Extend OR filter to FK display-name fields
 		if (sizeof($GRILLE_FK) != 0) {
 			foreach ($GRILLE_FK as $field):
 				$code_fk = 'nom' . ucfirst($field['codeAppscheme']);
@@ -230,7 +211,6 @@ $DEBUG = false;
 			endforeach;
 		}
 
-		// vardump($where);exit;
 	}
 
 	if (!empty($_POST['search_start'])) {
@@ -274,7 +254,7 @@ $DEBUG = false;
 			}
 
 			$where_fk = [];
-			// => on devrait tourner dans tout les champs de la table vars_search
+			// Iterate all fields of the FK table to build a regex OR filter
 			$APPKEY           = new App($table_key);
 			$APP_TABLE_SCHEME = $APPKEY->get_field_list();
 
@@ -302,7 +282,7 @@ $DEBUG = false;
 			$where_rfk = [];
 			$testid    = substr(trim($table_key), 0, 2);;
 			if ($testid == 'id') $table_key = substr($table_key, -strlen($table_key) + 2);
-			// => on devrait tourner dans tout les champs de la table vars_search
+			// Iterate all fields of the FK table to build a regex OR filter
 			$APPKEY           = new App($table_key);
 			$APP_TABLE_SCHEME = $APPKEY->get_display_fields($table_key);
 
@@ -507,7 +487,7 @@ $DEBUG = false;
 				if (!empty($_POST['stream_to'])):
 					$arr_allow_stream = $APP_SOCKET->findOne(['nomStream_to' => $_POST['stream_to']]);
 					if (!empty($arr_allow_stream['stop'])):
-						exit;
+						return;
 					endif;
 				endif;
 				$i++;
@@ -534,7 +514,7 @@ $DEBUG = false;
 			unset($vars['id' . $groupBy]);
 			unset($vars[$groupBy]);
 		endforeach;
-		// pas dans distinc : sans groupBy
+		// Records with no groupBy field value — rendered as an ungrouped tail section
 		$data_main    = $strm = [];
 		$vars_rfk     = [];
 		$rs_noGroupBy = $APP->find($vars + $where + ['id' . $groupBy => ['$exists' => false]], ['sort' => [$sortBy => $sortDir], 'skip' => $page, 'limit' => $nbRows]);
@@ -561,7 +541,7 @@ $DEBUG = false;
 	endif;
 	// NORMAL
 	if ($rs->count() == 0) {
-		$z = " Pas de résultats";
+		$z = " No results";
 
 		$strm_vars = ['stream_to' => $_POST['stream_to'],
 		              'data_size' => is_array($strm) ? sizeof($strm) : 0,
@@ -689,7 +669,7 @@ $DEBUG = false;
 		global $APP, $APP_TABLE, $arrFields_all, $GRILLE_FK, $BASE_APP, $GRILLE_COUNT, $sortBy, $key_date, $MDL;
 		$out = [];
 		$id  = 'id' . $table;
-		// variables pour le mdl_tr => vars
+		// Template row variables passed to mdl_tr
 		$trvars['id' . $table] = $arr[$id];
 		$trvars['_id']         = (string)$arr['_id'];
 		$trvars['table']       = $table;
@@ -705,7 +685,7 @@ $DEBUG = false;
 			$field_name_raw           = $value_f['field_name_raw'];
 			$codeAppscheme_field_type = $value_f['codeAppscheme_field_type'];
 			// if (is_array($arr[$field_name])) unset($arr[$field_name]);
-			// Integralité des champs // cast
+			// Cast all fields to their declared schema types
 			$arr_cast                = ['field_name' => $field_name, 'field_name_raw' => $field_name_raw, 'field_value' => $field_value, 'codeAppscheme_field_type' => $codeAppscheme_field_type];
 			$arr_cast['table']       = $table;
 			$arr_cast['table_value'] = $arr[$id];

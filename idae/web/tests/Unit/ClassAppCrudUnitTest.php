@@ -86,3 +86,4 @@ final class ClassAppCrudUnitTest extends TestCase
         $this->assertEquals(2,$count);
     }
 }
+

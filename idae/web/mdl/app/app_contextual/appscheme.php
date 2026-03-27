@@ -1,11 +1,11 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 	$time        = time();
 	$idappscheme = (int)$_POST['idappscheme'];
 	$APP         = new App('appscheme');
 	$arr         = $APP->query_one(array('idappscheme' => (int)$idappscheme));
 ?>
-<? if (droit('ADMIN')): ?>
+<?php if (droit('ADMIN')): ?>
 	<div>
 		<a onclick="act_chrome_gui('app/app_scheme/app_scheme_has_field_update_model','idappscheme=<?= $idappscheme ?>')">
 			<i class="fa fa-user-secret"></i> <?= idioma('Modele') ?>
@@ -18,4 +18,4 @@
 		</a>
 		<hr>
 	</div>
-<? endif; ?>
+<?php endif; ?>

@@ -31,12 +31,12 @@
 <div class="padding relative toggler applink applink_block">
 	<a class="" data-menu="data-menu"><i class="fa fa-sort-numeric-asc"></i></a>
 	<div class="contextmenu" style="display:none;">
-		<? if (!empty($table)): ?>
-			<? foreach ($arr_page as $key => $value): ?>
+		<?php if (!empty($table)): ?>
+			<?php foreach ($arr_page as $key => $value): ?>
 				<a class="autoToggle" app_button="app_button" onclick="save_settings('list_data_button_nbRows_<?= $table ?>','<?= $table ?>');" vars="<?= $HTTP_BASE_VARS ?>&nbRows=<?= $value ?>&<?= $HTTP_VARS ?>">
 					<?= $value ?>
 				</a>
-			<? endforeach; ?>
-		<? endif; ?>
+			<?php endforeach; ?>
+		<?php endif; ?>
 	</div>
 </div>

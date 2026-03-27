@@ -15,15 +15,15 @@ if($ct->count()==0 ){}else{
   <table width="100%" class="tabletop">
     <tr>
       <td style="width:110px"><label>Fichier(s) joint(s)</label></td>
-      <td class="applink"><? 
+      <td class="applink"><?php 
 		while($arr = $ct->getNext()){   
 		?>
         <a class="left margin inline padding blanc ellipsis alignright" style="max-width:30%" onclick="openDoc('<?=$uniqid?>','<?=addslashes($arr->file['filename'])?>')">
         <?=$arr->file['filename']?>
         </a>
-        <? } ?>
+        <?php } ?>
         <div class="spacer"></div></td>
     </tr>
   </table>
 </div>
-<? }?>
+<?php }?>

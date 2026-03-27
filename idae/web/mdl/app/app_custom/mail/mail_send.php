@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 	$APP_AG  = new App('agent');
 	$APP_CL  = new App('client');
@@ -122,10 +122,10 @@
 						<td colspan="2"><textarea ext_mce_textarea class="required" style="width:100%;height:400px" name="texteMail"><?= $insert ?><?= $after ?>
 								<br><br>
 								<br><br>
-								<? if(!empty($_POST['confirm'])){
+								<?php if(!empty($_POST['confirm'])){
 									?>
 									<a href="<?=HTTPEXTERNALCUSTOMERSITE?>secure/paiement/<?=$test['md5Devis']?>" target="_blank">procéder au paiement
-									<?
+									<?php
 								}?>
 								<br><br>
 								<table border="0">

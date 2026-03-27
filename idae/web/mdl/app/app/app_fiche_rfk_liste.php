@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 	ini_set('display_errors', 55);
 
@@ -18,10 +18,10 @@
 		// if (sizeof($final_rfk) == 0) return;
 		?>
 		<div class="nth2 flex_v" auto_tree_main>
-			<?
+			<?php
 				foreach ($final_rfk as $key => $arr_final):
 					?>
-					<?
+					<?php
 					foreach ($arr_final as $arr_fk):
 						if (empty($arr_fk['count'])) {
 							continue;
@@ -46,10 +46,10 @@
 								<?= skelMdl::cf_module('app/app_liste/app_liste_mini', $vars_rfk) ?>
 							</div>
 						</div>
-					<? endforeach; ?>
-				<? endforeach; ?>
+					<?php endforeach; ?>
+				<?php endforeach; ?>
 		</div>
-		<?
+		<?php
 	endif; ?>
 
 

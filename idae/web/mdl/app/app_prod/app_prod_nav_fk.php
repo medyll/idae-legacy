@@ -40,7 +40,7 @@
 		<div class="padding">Repartitions</div>
 	</div>
 	<div class="retrait" data-app_fragment="remenber_search">
-		<?
+		<?php
 
 			$sort_fk = empty($_POST['sort_fk']) ? 'count' : $_POST['sort_fk'];
 			foreach ($GRILLE_FK as $key => $value) {
@@ -84,7 +84,7 @@
 							<div class="bordert aligncenter  none  " title="<?= idioma("Elements sans $_nom ") ?>">
 								<a onclick="<?= $orphan_link ?>" class=""><i class="fa fa-chain-broken textrouge"></i><?= $rs_orphans->count(); ?></a>
 							</div>
-						<? } ?>
+						<?php } ?>
 					</div>
 					<div class="flex_main">
 						<div auto_tree>
@@ -98,7 +98,7 @@
 							</div>
 						</div>
 						<div class="none applink applinkblock  ">
-							<?
+							<?php
 								foreach ($G2 as $value_idfk => $arr_groupBy) {
 									// echo $_id;
 									$afk_tmp = $arr_rfk;
@@ -117,11 +117,11 @@
 											</span>
 										</a>
 									</div>
-									<?
+									<?php
 								}
 							?>
 						</div>
 					</div>
 				</div>
-			<? } ?></div>
+			<?php } ?></div>
 </div>

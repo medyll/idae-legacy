@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 	ini_set('display_errors', 55);
 	$APP = new App('appscheme');
@@ -25,7 +25,7 @@
 	$mdl = "app/app_prod/app_prod_nav";
 ?>
 <div main_auto_tree class="applink applinkblock toggler relative flex_main" style="position:relative;padding:0.5em; overflow-y:auto;overflow-x:hidden;">
-	<?
+	<?php
 		foreach ($RS_APP as $ARR_APP):
 			//
 			$table           = $ARR_APP['codeAppscheme'];
@@ -41,7 +41,7 @@
 				<a class="autoToggle" app_button="<?= $table ?>" vars="table=<?= $table ?>&<?= $tr_vars ?>"><i class="fa fa-<?= $APP_TMP->iconAppscheme ?>"></i> <?= $table ?></a>
 			</div>
 			<div style="position:relative;">
-				<?
+				<?php
 					$arr_has = ['categorie', 'statut', 'type'];
 					foreach ($arr_has as $key => $value):
 						$Value        = ucfirst($value);
@@ -60,7 +60,7 @@
 								<a class="autoToggle">Par <?= ucfirst(idioma($Value)) ?></a>
 							</div>
 							<div class="autoBlock toggler" style="display:none;overflow:hidden;">
-								<?
+								<?php
 									foreach ($rsType as $row_type):
 										$add_vars             = 'vars[' . $id_type . ']=' . $row_type[$id_type];
 										$auto_tree_count_type = $APP_TMP->find($vars + [$id_type => (int)$row_type[$id_type]])->count();
@@ -73,19 +73,19 @@
 										     vars="table=<?= $table ?>&<?= $tr_vars ?>&<?= $add_vars ?>"
 										     class="autoBlock toggler"
 										     style="display: none;"></div>
-										<?
+										<?php
 									endforeach; ?>
 							</div>
 						</div>
-					<? endforeach; ?>
-				<? if (sizeof($ARR_APP['grilleFK']) != 0) : ?>
+					<?php endforeach; ?>
+				<?php if (sizeof($ARR_APP['grilleFK']) != 0) : ?>
 					<div class="autoBlock">
 						<div auto_tree>
 							<a class="autoToggle">Grouper</a>
 						</div>
 						<div class="autoBlock toggler"><?= skelMdl::cf_module('app/app_prod/app_prod_nav_group', ['table' => $table, 'vars' => $vars]) ?></div>
 					</div>
-				<? endif; ?>
+				<?php endif; ?>
 			</div>
-		<? endforeach; ?>
+		<?php endforeach; ?>
 </div>

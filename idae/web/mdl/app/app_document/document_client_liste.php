@@ -1,4 +1,4 @@
-<?
+<?php
 include_once($_SERVER['CONF_INC']);  
 $uniqid = uniqid();
 $idclient = (int)$_POST['idclient']; 
@@ -23,7 +23,7 @@ $rs 	= $fs->find(array('metadata.idclient'=>$idclient))->sort(array('uploadDate'
       </tr>
     </thead>
     <tbody class="toggler" id="tclient_doc">
-      <?
+      <?php
 while($file=$rs->getNext()){   
 	$arr = $file->file;
 ?>
@@ -36,7 +36,7 @@ while($file=$rs->getNext()){
           <li class="fa fa-times"></li>
           </a></td>
       </tr>
-      <? }?>
+      <?php }?>
     </tbody>
   </table>
 </div>

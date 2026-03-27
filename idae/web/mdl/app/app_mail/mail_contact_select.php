@@ -1,4 +1,4 @@
-<?
+<?php
 include_once($_SERVER['CONF_INC']);
 	require_once(__DIR__ . '/../../../appclasses/appcommon/MongoCompat.php');
 	use AppCommon\MongoCompat;
@@ -39,7 +39,7 @@ $rs 		= 	$APP_CONTACT->find($add)->limit(10);
  
 
 ?>
-<?
+<?php
 if(empty($_POST['email'])){
 while($arr =  $rsOri->getNext()){
 	$value = strtolower($arr["email"]);
@@ -48,7 +48,7 @@ while($arr =  $rsOri->getNext()){
 	$meta .= '&meta[email]='.$value;
 	?>
 	<a class="autoToggle" onclick="$(this).fire('dom:act_click',{value:'<?=$value?>',meta:'<?=$meta?>'})" ><?=$name?></a>
-	<?  }
+	<?php  }
 while($arr =  $rs->getNext()){
 	$value = strtolower($arr["email"]);
 	$name  = empty($arr["nom"])? $value : $arr["nom"].' '.$value;
@@ -56,5 +56,5 @@ while($arr =  $rs->getNext()){
 	$meta .= '&meta[email]='.$value;
 	?>
 	<a class="autoToggle" onclick="$(this).fire('dom:act_click',{value:'<?=$value?>',meta:'<?=$meta?>'})" ><?=$name?></a>
-	<?  }
+	<?php  }
 }?>

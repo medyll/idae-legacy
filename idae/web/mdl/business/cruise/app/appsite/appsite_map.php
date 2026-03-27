@@ -25,13 +25,13 @@
 
 ?>
 	<div>
-		<? if (droit('DEV')) { ?>
-		<a onclick="<?= fonctionsJs::app_mdl('app/appsite/appsite_map') ?>"><i class="fa fa-trash"></i> voir map</a><? } ?>
-		<? if (droit('DEV')) { ?>
-		<a onclick="<?= fonctionsJs::app_mdl('app/appsite/appsite') ?>"><i class="fa fa-trash"></i> Construire site</a><? } ?>
+		<?php if (droit('DEV')) { ?>
+		<a onclick="<?= fonctionsJs::app_mdl('app/appsite/appsite_map') ?>"><i class="fa fa-trash"></i> voir map</a><?php } ?>
+		<?php if (droit('DEV')) { ?>
+		<a onclick="<?= fonctionsJs::app_mdl('app/appsite/appsite') ?>"><i class="fa fa-trash"></i> Construire site</a><?php } ?>
 	</div>
 	<div class="blanc padding flex_h flex_wrap" style="height: 100%;overflow:auto;">
-		<?
+		<?php
 
 			while ($ARR_SCH = $RS_SCH->getNext()) {
 
@@ -45,19 +45,19 @@
 					<div class="titre_entete"><?= $table ?></div>
 					<div>
 						Liens vers fiche fk
-						<? vardump(array_keys($GRILLE_FK)); ?>
+						<?php vardump(array_keys($GRILLE_FK)); ?>
 					</div>
 					<hr>
 					<div>
 						Lister : rfk
-						<? vardump(array_keys($GRILLE_RFK)); ?>
+						<?php vardump(array_keys($GRILLE_RFK)); ?>
 					</div>
 				</div>
-				<?
+				<?php
 
 			} ?>
 	</div>
-<?
+<?php
 
 	$dakeys = ['idproduit'              => 'iprod',
 	           'idproduit_type'         => 'prt',
