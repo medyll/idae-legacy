@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 	ini_set('display_errors',55);
 
@@ -19,7 +19,7 @@ if(empty($_POST['BIG_SCREEN'])){
 		 $('dev<?=$uniqid?>').fire('dom:close')
 		 ajaxInMdl('<?=$path_to_devis?>devis_create','nouveau_devis','BIG_SCREEN=1&<?=http_build_query($_POST)?>',{onglet:'Nouveau devis'});
 	</script>
-	<?
+	<?php
 	return;
 }
 ?>
@@ -68,11 +68,11 @@ if(empty($_POST['BIG_SCREEN'])){
 	</div>
 </div>
 <script>
-	<?
+	<?php
 	if(!empty($_POST['idclient']) || !empty($_POST['idproduit']) ){?>
 	$('div_produit_liste_devis').unToggleContent();
 	$('div_devis_create_make').loadModule('<?=$path_to_devis?>devis_create_make', '<?=http_build_query($_POST)?>');
-	<? }?>
+	<?php }?>
 
 	$('devis_create_zone').observe('dom:act_change', function (event) {
 		idproduit = event.memo.id

@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 	ini_set('display_errors' , 55);
 	// POST
@@ -29,7 +29,7 @@
 			<span><i class="fa fa-battery-<?=$ARR['rangOpportunite']?> fa-rotate-270" ></i></span>
 		</div>
 		<div class = "retrait applink applinkblock">
-			<? while ($ARR_LGN = $RS_OPOR_LGN->getNext()) {
+			<?php while ($ARR_LGN = $RS_OPOR_LGN->getNext()) {
 				$q = (int)$ARR_LGN['quantiteOpportunite_ligne'];
 				$p = $ARR_LGN['nomProduit'];
 				?>
@@ -38,7 +38,7 @@
 					<span style="width:15px;" class="aligncenter">*</span>
 					<span class="flex_main"><?= $APP->draw_field([ 'field_name' => 'nomProduit' , 'field_name_raw' => 'nom' , 'field_value' => $p ]) ?></span>
 				</a>
-			<? } ?>
+			<?php } ?>
 		</div>
 		<div class = "bold padding titre aligncenter ededed bordert">
 			<?= $APP->draw_field([ 'field_name' => 'montantOpportunite' , 'field_name_raw' => 'montant' , 'field_value' => $ARR['montantOpportunite'] ]) ?>

@@ -36,8 +36,8 @@ if (empty($_POST['search'])) {
 	$uniqid = uniqid();
 	//
 	$APP = new App('appscheme');
-	//
-	$RSSCHEME = $APP->find([]); // 'codeAppscheme_base'=>'sitebase_base'
+	// Load all scheme definitions for cross-table iteration
+	$RSSCHEME = $APP->find([]);
 	//
 	$vars    = empty($_POST['vars']) ? [] : fonctionsProduction::cleanPostMongo(array_filter($_POST['vars']), 1);
 	$groupBy = empty($_POST['groupBy']) ? '' : $_POST['groupBy'];
@@ -59,8 +59,7 @@ if (empty($_POST['search'])) {
 	$FIELDS = array_merge(array_keys($APP_DATE_FIELDS), array_values($APP_FIELD_BOOL));
 	//
 
-	// MAIN_DATA
-
+	// Accumulated result rows for the response payload
 	$data_main = [];
 	$strm      = [];
 
@@ -69,15 +68,15 @@ if (empty($_POST['search'])) {
 
 	$SEARCH = trim($_POST['search']);
 
+	// Escape user input before building regex — prevents ReDoS via MongoCompat::escapeRegex
 	$search_escaped  = MongoCompat::escapeRegex($SEARCH);
 	$RSSCHEME_SEARCH = $APP->find(['codeAppscheme' => MongoCompat::toRegex($search_escaped, 'i')]);
 	$maxcount        = $RSSCHEME_SEARCH->count();
 	$count           = $RSSCHEME_SEARCH->count(true);
 
-	//
+	// Prepend a group header when matching scheme names were found
 	if ($RSSCHEME_SEARCH->count() != 0) {
 		$data_main[] = ['groupBy' => 'appscheme', 'html' => '<i class="fa fa-link"></i> Espaces'];
-
 	}
 	while ($ARR_SCh = $RSSCHEME_SEARCH->getNext()) {
 		$table = $ARR_SCh['codeAppscheme'];
@@ -130,6 +129,7 @@ if (empty($_POST['search'])) {
 		$where     = [];
 
 		if (!empty($_POST['search'])) {
+			// Build OR filter across all indexed text fields using an already-escaped regex
 			if (!is_int($_POST['search'])):
 				$regexp = MongoCompat::toRegex($search_escaped, 'i');
 
@@ -213,7 +213,7 @@ if (empty($_POST['search'])) {
 			$data_main[] = ['html' => $data_out, 'value' => $arr[$id], 'name_id' => $id, 'table' => $table];
 			$strm[]      = ['html' => $data_out, 'value' => $arr[$id], 'name_id' => $id, 'table' => $table];
 
-			// stream
+			// Flush partial results to the client every 50 rows to enable streaming
 			if ($i == 1 || ($i % 50) == 0 || !$rssc->hasNext()) {
 				if (!empty($_POST['stream_to'])):
 					$out_model = ['data_main' => $strm, 'maxcount' => $maxcount];

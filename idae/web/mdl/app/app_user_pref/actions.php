@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 
 array_walk_recursive($_POST, 'CleanStr');
@@ -34,7 +34,7 @@ switch ($F_action){
 		localStorage.setItem('wallpaper',url_w);
 		$('body').setStyle({backgroundImage:url_w}) ;
 		</script>
-		<? 
+		<?php 
 	break;
 	case "setColor":
 		$color = $_POST['color'];//PATH."/images/background/"; 

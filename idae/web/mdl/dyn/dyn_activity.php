@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 
 	$time = time();
@@ -9,7 +9,7 @@
 			<script>
 				alert ('Merci de relancer l\'application dès que possible (ctrl + F5)');
 			</script>
-			<?
+			<?php
 			exit;
 		endif;
 		if ($_POST['notify'] == 'exit_application'):
@@ -17,7 +17,7 @@
 			<script>
 				ajaxValidation ('quitter');
 			</script>
-			<?
+			<?php
 			exit;
 		endif;
 		if ($_POST['notify'] == 'act_close_mdl'):
@@ -32,7 +32,7 @@
 				$$('[scope=<?=$id?>][value=<?=$table_value?>]').invoke('remove');
 				}
 			</script>
-			<?
+			<?php
 			exit;
 		endif;
 		if ($_POST['notify'] == 'act_upd_mdl'):
@@ -46,7 +46,7 @@
 				    alert('udp');
 				}
 			</script>
-			<?
+			<?php
 			exit;
 		endif;
 		if ($_POST['notify'] == 'popModule'):
@@ -66,7 +66,7 @@
 				popModule.focus ();
 				if (loadPop == true) popModule = window.open ('proxyIndex.php?mdl=<?=$_POST['loadModule']?>&<?=http_build_query($_POST['vars'])?>', handle, 'menubar=no, status=no, scrollbars=no, menubar=no, width=<?=$width?>, height=<?=$height?>,resizable = no');
 			</script>
-			<?
+			<?php
 			exit;
 		endif;
 		if ($_POST['notify'] == 'loadModule'):
@@ -75,7 +75,7 @@
 			<script>
 				ajaxMdl ('<?=$_POST['loadModule']?>', 'appLive <?=$value?>', '<?=http_build_query($_POST['vars'])?>', {value: '<?=$_POST['vars']['value']?>', ident: '<?=$value?>', className: 'widget'})
 			</script>
-			<?
+			<?php
 			exit;
 		endif;
 		if ($_POST['notify'] == 'loadModuleOnce'):
@@ -86,7 +86,7 @@
 					ajaxMdl ('<?=$_POST['loadModule']?>', ' <?=$value?>', '<?=http_build_query($_POST['vars'])?>', {value: '<?=$_POST['vars']['value']?>'})
 				}
 			</script>
-			<?
+			<?php
 			exit;
 		endif;
 		?>
@@ -94,6 +94,6 @@
 			g = new myddeNotifier ()
 			g.growl ('<?=str_replace('+',' ',$_POST['notify'])?>');
 		</script>
-	<?
+	<?php
 	endif;
 ?>

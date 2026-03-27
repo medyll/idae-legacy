@@ -34,7 +34,7 @@
 		       class="inputMedium"/>
 	</div>
 	<progress id="progress_fa" style="display:none;"></progress>
-	<?
+	<?php
 } ?>
 <script>
 	$('fa_icon_choose').observe('dom:act_change', function (event, node) {

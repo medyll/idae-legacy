@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 	// table_has => pour affichage table // appscheme_has_table_field
 	ini_set('display_errors', 55);
@@ -32,7 +32,7 @@
 				<div class="flex_h">
 					<div class="flex_main  borderr ededed padding">
 						<table class="table_form">
-							<? while ($arrf = $rs_field->getNext()) {
+							<?php while ($arrf = $rs_field->getNext()) {
 								$ARR_FIELD = $APP_SCH_FIELD->findOne(['idappscheme_field' => (int)$arrf['idappscheme_field']]);
 								$Key       = ucfirst($arrf['field_raw']);
 								// dans appscheme_has_table_field ?
@@ -56,13 +56,13 @@
 									<td><?= ucfirst(empty($arrf['nomAppscheme_has_field']) ? $arrf['codeAppscheme_has_field'] : $arrf['nomAppscheme_has_field']) ?></td>
 									<td><?= chkSch($act_vars, $arr_test_has['idappscheme'], 'vars_has_table_field'); ?></td>
 								</tr>
-							<? } ?>
+							<?php } ?>
 						</table>
 					</div>
-					<? if (sizeof($GRILLE_FK) != 0): ?>
+					<?php if (sizeof($GRILLE_FK) != 0): ?>
 						<div class="flex_main padding">
 							<div auto_tree_main>
-								<? foreach ($GRILLE_FK as $fk):
+								<?php foreach ($GRILLE_FK as $fk):
 									$fkTable = ucfirst($fk['table']);
 									$ARR_SCH = $APP_SCH->findOne(['codeAppscheme' => $fk['table']]);
 									?>
@@ -71,7 +71,7 @@
 											<div class="flex_main"><?= $fk['table'] ?></div>
 										</div>
 									</div>
-									<?
+									<?php
 									// =>
 									$arr_field   = $APP->plug('sitebase_app', 'appscheme_has_field')->distinct('idappscheme_field', ['idappscheme' => (int)$ARR_SCH['idappscheme']]);
 									$arr_field_2 = $APP->plug('sitebase_app', 'appscheme_field')->distinct('idappscheme_field_group', ['idappscheme_field' => ['$in' => $arr_field]]);
@@ -82,7 +82,7 @@
 										?>
 										<div class="autoBlock">
 											<table class="table_form">
-												<? while ($arrf = $rsF->getNext()) {
+												<?php while ($arrf = $rsF->getNext()) {
 													$field_name   = $arrf['field_raw'] . '_' . $fkTable . '_' . $arrf['field_raw'];
 													$Key          = ucfirst($arrf['field_raw']);
 													$act_vars     = $idappscheme . '_' . $ARR_SCH['idappscheme'] . '_' . $arrf['idappscheme_field'];
@@ -95,16 +95,16 @@
 																<?= chkSch($act_vars, $arr_test_has['idappscheme'], 'vars_has_table_field'); ?></div>
 														</td>
 													</tr>
-												<? } ?>
+												<?php } ?>
 											</table>
 										</div>
-									<? } ?>
-									<?
+									<?php } ?>
+									<?php
 								endforeach; ?>
 							</div>
 						</div>
-					<? endif; ?>
-					<?
+					<?php endif; ?>
+					<?php
 						if (sizeof($R_FK) != 0): foreach ($R_FK as $arr_fk):
 							$final_rfk[$arr_fk['scope']][] = $arr_fk;
 						endforeach;
@@ -117,12 +117,12 @@
 									</div>
 								</div>
 								<div class="autoBlock">
-								<?
+								<?php
 									foreach ($final_rfk as $key => $arr_final):
 										// vardump($arr_final);
 										?>
 										<div class="applink applinkblock">
-											<?
+											<?php
 												foreach ($arr_final as $arr_fk):
 													if (empty($arr_fk['count'])) {
 														continue;
@@ -140,15 +140,15 @@
 														<i class="fa fa-<?= $arr_fk['icon'] ?>   padding"></i> <?=$arr_fk['nomAppscheme'] ?>
 													</div>
 													</label>
-												<? endforeach; ?>
+												<?php endforeach; ?>
 										</div>
-									<? endforeach; ?></div>
+									<?php endforeach; ?></div>
 							</div>
-							<?
+							<?php
 						endif; ?>
 					<div class="flex_main padding borderr">
 						<div auto_tree_main>
-							<?
+							<?php
 								$ARR_HAS = ['type', 'statut'];
 								foreach ($ARR_HAS as $TYPE_NAME):
 
@@ -161,7 +161,7 @@
 										<div auto_tree>
 											<div class="trait"><?= $Table_name ?></div>
 										</div>
-										<?
+										<?php
 										// =>
 										$arr_field   = $APP->plug('sitebase_app', 'appscheme_has_field')->distinct('idappscheme_field', ['idappscheme' => (int)$ARR_SCH['idappscheme']]);
 										$arr_field_2 = $APP->plug('sitebase_app', 'appscheme_field')->distinct('idappscheme_field_group', ['idappscheme_field' => ['$in' => $arr_field]]);
@@ -172,7 +172,7 @@
 											?>
 											<div class="autoBlock">
 												<table class="table_form">
-													<? while ($arrf = $rsF->getNext()) {
+													<?php while ($arrf = $rsF->getNext()) {
 														$field_name   = $arrf['field_raw'] . '_' . $Table_name . '_' . $arrf['field_raw'];
 														$Key          = ucfirst($arrf['field_raw']);
 														$act_vars     = $idappscheme . '_' . $ARR_SCH['idappscheme'] . '_' . $arrf['idappscheme_field'];
@@ -185,12 +185,12 @@
 																	<?= chkSch($act_vars, $arr_test_has['idappscheme'], 'vars_has_table_field'); ?></div>
 															</td>
 														</tr>
-													<? } ?>
+													<?php } ?>
 												</table>
 											</div>
-										<? } ?>
-									<? } ?>
-								<? endforeach; ?>
+										<?php } ?>
+									<?php } ?>
+								<?php endforeach; ?>
 						</div>
 					</div>
 				</div>

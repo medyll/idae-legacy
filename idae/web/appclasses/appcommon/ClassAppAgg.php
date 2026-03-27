@@ -2,309 +2,224 @@
 declare(strict_types=1);
 
 /**
- * ClassAppAgg.php — MongoDB Aggregation Helpers for ClassApp
+ * ClassAppAgg.php — Aggregation helper extraction for ClassApp
  *
- * Extends ClassApp with aggregation pipeline methods for analytics,
- * grouping, counting, and summing operations.
+ * Provides distinct() and groupBy aggregation helpers as static methods
+ * so they can be tested and maintained independently of ClassApp.
  *
- * @package AppCommon
- * Date: 2026-03-27
+ * Date: 2026-03-11
  */
 
 namespace AppCommon;
 
-require_once __DIR__ . '/ClassApp.php';
-require_once __DIR__ . '/MongoCompat.php';
+use AppCommon\MongoCompat;
 
-use MongoDB\BSON\Regex;
-
-// App class is not namespaced
-class ClassAppAgg extends \App
+class ClassAppAgg
 {
     /**
-     * Execute an aggregation pipeline on the current collection.
+     * Return distinct values for a field, optionally resolved to full records.
      *
-     * @param array<int, array<string, mixed>> $pipeline Aggregation pipeline stages
-     * @param array<string, mixed> $options Additional options (typeMap, maxTimeMS, etc.)
-     * @return iterable<int, array<string, mixed>> Aggregation results
-     * @throws \MongoDB\Driver\Exception\RuntimeException on connection error
+     * Executes a MongoDB distinct() on the current table's collection, then
+     * optionally fetches complete records from the groupBy table sorted by
+     * $sort_field.
+     *
+     * @param \App                 $app        App instance (caller)
+     * @param string               $groupBy    Table name used to resolve full records
+     * @param array<string, mixed> $vars       Optional filter applied to the distinct query
+     * @param int                  $limit      Maximum number of records returned (mode=full)
+     * @param string               $mode       'full' returns resolved records; any other value returns raw IDs
+     * @param string               $field      Override field name (defaults to 'id'.$groupBy)
+     * @param array<int|string>    $sort_field Two-element array [field, direction] e.g. ['nom', 1]
+     * @return \AppCommon\MongodbCursorWrapper|array<mixed>
      */
-    public function aggregate(array $pipeline, array $options = []): iterable
-    {
-        if (empty($this->table)) {
-            error_log('[ClassAppAgg::aggregate] No table specified');
-            return [];
+    public static function distinct(
+        \App $app,
+        string $groupBy,
+        array $vars = [],
+        int $limit = 200,
+        string $mode = 'full',
+        string $field = '',
+        array $sort_field = ['nom', 1]
+    ) {
+        if (empty($field)) {
+            $field = 'id' . $groupBy;
         }
 
-        $collection = $this->plug(
-            $this->app_table_one['codeAppscheme_base'] ?? 'sitebase_app',
-            $this->table
-        )->getCollection();
+        $dist = $app->plug(
+            $app->app_table_one['codeAppscheme_base'],
+            $app->app_table_one['codeAppscheme']
+        );
 
-        $defaultOptions = [
-            'typeMap' => ['root' => 'array', 'document' => 'array', 'array' => 'array'],
-        ];
+        $vars = MongoCompat::convertFilter($vars);
 
-        try {
-            $cursor = $collection->aggregate($pipeline, array_merge($defaultOptions, $options));
-            return $cursor;
-        } catch (\Throwable $e) {
-            error_log('[ClassAppAgg::aggregate] Aggregation failed: ' . $e->getMessage());
-            return [];
+        if (!empty($vars)) {
+            $first_arr_dist = $dist->distinct($field, $vars);
+        } else {
+            $first_arr_dist = $dist->distinct($field);
         }
+
+        if (empty($first_arr_dist)) {
+            $first_arr_dist = [];
+        }
+
+        $base = $app->get_base_from_table($groupBy);
+        if (empty($base)) {
+            $base = 'sitebase_base';
+        }
+
+        if ($mode === 'full') {
+            $sortKey = $sort_field[0] . ucfirst($groupBy);
+            $rs = $app->plug($base, $groupBy)->find(
+                ['id' . $groupBy => ['$in' => $first_arr_dist]],
+                ['sort' => [$sortKey => (int)$sort_field[1]], 'limit' => $limit]
+            );
+
+            return $rs;
+        }
+
+        return $first_arr_dist;
     }
 
     /**
-     * Count documents grouped by a specific field.
+     * Group documents by a foreign-key field and return enriched rows with counts.
      *
-     * Example result: [
-     *   ['_id' => 'active', 'count' => 15],
-     *   ['_id' => 'inactive', 'count' => 5]
-     * ]
+     * Reads the main collection, groups rows by $vars_dist['groupBy_table'],
+     * enriches each group with the resolved FK document, and returns an array
+     * sorted either by a named field or by count.
      *
-     * @param string $groupByField Field to group by
-     * @param array<string, mixed> $matchFilter Optional filter to apply before grouping
-     * @return array<int, array<string, mixed>> Grouped counts
+     * @param \App                 $app       App instance (caller)
+     * @param array<string, mixed> $vars_dist Configuration array with keys:
+     *   - 'groupBy_table' (string) required
+     *   - 'vars'          (array)  optional filter
+     *   - 'limit'         (int)    optional, default 250
+     *   - 'field'         (string) optional field to distinct on
+     *   - 'sort_field'    (array)  optional [field, dir], default ['nom', 1]
+     * @return array<int, array<string, mixed>>
      */
-    public function countBy(string $groupByField, array $matchFilter = []): array
+    public static function distinct_rs(\App $app, array $vars_dist): array
     {
-        $pipeline = [];
+        $groupBy_table = (string)($vars_dist['groupBy_table'] ?? '');
+        $vars          = (array)($vars_dist['vars'] ?? []);
+        $limit         = (int)($vars_dist['limit'] ?? 250);
+        $field         = (string)($vars_dist['field'] ?? '');
+        $sort_field    = (array)($vars_dist['sort_field'] ?? ['nom', 1]);
 
-        // Add match stage if filter provided
-        if (!empty($matchFilter)) {
-            $pipeline[] = ['$match' => MongoCompat::convertFilter($matchFilter)];
+        if (empty($field)) {
+            $field = 'id' . $groupBy_table;
         }
 
-        // Group and count
-        $pipeline[] = [
-            '$group' => [
-                '_id' => '$' . $groupByField,
-                'count' => ['$sum' => 1],
-            ],
-        ];
+        $vars = MongoCompat::convertFilter($vars);
 
-        // Sort by count descending
-        $pipeline[] = ['$sort' => ['count' => -1]];
+        $idgroupBy_table   = 'id' . $groupBy_table;
+        $arr_collect_rs    = [];
+        $arr_collect       = [];
+        $arr_collect_field = [];
 
-        $results = iterator_to_array($this->aggregate($pipeline));
+        // Determine sort field on the main table
+        if ($app->has_field($sort_field[0] . ucfirst($app->table))) {
+            $sort_on = $sort_field[0] . ucfirst($app->table);
+        } else {
+            $sort_on = (string)$sort_field[0];
+        }
 
-        return array_map(function ($row) use ($groupByField) {
-            return [
-                $groupByField => $row['_id'],
-                'count' => $row['count'],
+        $base_rs  = $app->plug(
+            $app->app_table_one['codeAppscheme_base'],
+            $app->app_table_one['codeAppscheme']
+        );
+        $basedist = new \App($groupBy_table);
+
+        $findOpts = array_merge(['_id' => 0], ['limit' => 3000]);
+        if ($sort_field[0] !== 'count') {
+            $findOpts['sort'] = [$sort_on => (int)$sort_field[1]];
+        } else {
+            $findOpts['sort'] = ['nom' . ucfirst($app->table) => 1];
+        }
+
+        $rs_basedist = new \AppCommon\MongodbCursorWrapper($base_rs->find($vars, $findOpts));
+
+        while ($arr_basedist = $rs_basedist->getNext()) {
+            $arr_collect_field[$arr_basedist[$field]][] = $arr_basedist[$app->app_field_name_id];
+
+            if (empty($arr_basedist[$idgroupBy_table])) {
+                continue;
+            }
+            if (array_key_exists($arr_basedist[$field], $arr_collect)) {
+                continue;
+            }
+
+            $arr_dist = $basedist->findOne(
+                [$idgroupBy_table => (int)$arr_basedist[$idgroupBy_table]],
+                ['_id' => 0]
+            );
+
+            $arr_collect[$arr_basedist[$field]] = $arr_basedist[$field];
+
+            $count_cursor = new \AppCommon\MongodbCursorWrapper(
+                $base_rs->find($vars + [$idgroupBy_table => (int)$arr_basedist[$idgroupBy_table]], ['_id' => 0])
+            );
+            $row_count = $count_cursor->count();
+
+            $arr_collect_rs[$arr_basedist[$field]] = ($arr_dist ?? []) + $arr_basedist + [
+                'nomAppscheme'      => $groupBy_table,
+                'count'             => $row_count,
+                'groupBy'           => $groupBy_table,
+                $field              => $arr_basedist[$field],
+                $app->app_field_name_id => (int)$arr_basedist[$app->app_field_name_id],
+                $sort_field[0]      => $arr_basedist[$sort_field[0] . ucfirst($app->table)] ?? null,
             ];
-        }, $results);
-    }
 
-    /**
-     * Sum a numeric field grouped by another field.
-     *
-     * Example result: [
-     *   ['_id' => 'category_a', 'total' => 1500.50],
-     *   ['_id' => 'category_b', 'total' => 2300.75]
-     * ]
-     *
-     * @param string $sumField Field to sum (must be numeric)
-     * @param string $groupByField Field to group by
-     * @param array<string, mixed> $matchFilter Optional filter to apply before grouping
-     * @return array<int, array<string, mixed>> Grouped sums
-     */
-    public function sumBy(string $sumField, string $groupByField, array $matchFilter = []): array
-    {
-        $pipeline = [];
-
-        // Add match stage if filter provided
-        if (!empty($matchFilter)) {
-            $pipeline[] = ['$match' => MongoCompat::convertFilter($matchFilter)];
+            if ($sort_field[0] !== 'count' && count($arr_collect_rs) === $limit) {
+                break;
+            }
         }
 
-        // Group and sum
-        $pipeline[] = [
-            '$group' => [
-                '_id' => '$' . $groupByField,
-                'total' => ['$sum' => '$' . $sumField],
-            ],
-        ];
-
-        // Sort by total descending
-        $pipeline[] = ['$sort' => ['total' => -1]];
-
-        $results = iterator_to_array($this->aggregate($pipeline));
-
-        return array_map(function ($row) use ($groupByField) {
-            return [
-                $groupByField => $row['_id'],
-                'total' => (float)($row['total'] ?? 0),
-            ];
-        }, $results);
-    }
-
-    /**
-     * Get distinct values for a field with optional filtering.
-     *
-     * @param string $field Field to get distinct values for
-     * @param array<string, mixed> $filter Optional filter
-     * @return array<int, mixed> Distinct values
-     */
-    public function distinctValues(string $field, array $filter = []): array
-    {
-        $pipeline = [];
-
-        // Add match stage if filter provided
-        if (!empty($filter)) {
-            $pipeline[] = ['$match' => MongoCompat::convertFilter($filter)];
+        if ($sort_field[0] === 'count') {
+            usort($arr_collect_rs, static function (array $a, array $b): int {
+                return (int)$b['count'] - (int)$a['count'];
+            });
+            $arr_collect_rs = array_slice($arr_collect_rs, 0, $limit - 1);
+        } else {
+            $sort_on_copy = $sort_on;
+            usort($arr_collect_rs, static function (array $a, array $b) use ($sort_on_copy): int {
+                return (int)($a[$sort_on_copy] ?? 0) <=> (int)($b[$sort_on_copy] ?? 0);
+            });
+            $arr_collect_rs = array_slice($arr_collect_rs, 0, $limit - 1);
         }
 
-        // Group by field
-        $pipeline[] = [
-            '$group' => [
-                '_id' => '$' . $field,
-            ],
-        ];
-
-        // Sort
-        $pipeline[] = ['$sort' => ['_id' => 1]];
-
-        $results = iterator_to_array($this->aggregate($pipeline));
-
-        return array_map(fn($row) => $row['_id'], $results);
+        return array_values($arr_collect_rs);
     }
 
     /**
-     * Get top N items by a field, grouped by another field.
+     * Return raw distinct values for a field without record resolution.
      *
-     * Example: Get top 5 products by price in each category
+     * Simpler variant of distinct() that always returns the raw array of
+     * distinct field values with no join to related collections.
      *
-     * @param string $groupByField Field to group by (e.g., 'categorie')
-     * @param string $sortField Field to sort by (e.g., 'prix')
-     * @param int $limit Number of top items per group
-     * @param array<string, mixed> $filter Optional filter
-     * @return array<int, array<string, mixed>> Top N items per group
+     * @param \App                 $app     App instance (caller)
+     * @param string               $groupBy Field or conceptual grouping name
+     * @param array<string, mixed> $vars    Optional filter
+     * @param int                  $limit   Unused (reserved for future use)
+     * @param string               $mode    Unused (reserved for future use)
+     * @return array<mixed>
      */
-    public function topNByGroup(
-        string $groupByField,
-        string $sortField,
-        int $limit = 5,
-        array $filter = []
+    public static function distinct_all(
+        \App $app,
+        string $groupBy,
+        array $vars = [],
+        int $limit = 200,
+        string $mode = 'full'
     ): array {
-        $pipeline = [];
+        $dist = $app->plug(
+            $app->app_table_one['codeAppscheme_base'],
+            $app->app_table_one['codeAppscheme']
+        );
 
-        // Add match stage if filter provided
-        if (!empty($filter)) {
-            $pipeline[] = ['$match' => MongoCompat::convertFilter($filter)];
+        $vars = MongoCompat::convertFilter($vars);
+
+        if (!empty($vars)) {
+            return $dist->distinct($groupBy, $vars) ?? [];
         }
 
-        // Sort by the specified field
-        $pipeline[] = ['$sort' => [$sortField => -1]];
-
-        // Group and push top N
-        $pipeline[] = [
-            '$group' => [
-                '_id' => '$' . $groupByField,
-                'items' => [
-                    '$push' => [
-                        'id' => '$id' . ($this->table ?? 'item'),
-                        $sortField => '$' . $sortField,
-                        'nom' => '$nom' . ($this->table ?? 'item'),
-                    ],
-                ],
-            ],
-        ];
-
-        // Limit items per group
-        $pipeline[] = [
-            '$project' => [
-                '_id' => 0,
-                $groupByField => '$_id',
-                'topItems' => ['$slice' => ['$items', $limit]],
-            ],
-        ];
-
-        $results = iterator_to_array($this->aggregate($pipeline));
-
-        return array_values($results);
-    }
-
-    /**
-     * Calculate statistics (min, max, avg, sum, count) for a numeric field.
-     *
-     * @param string $field Numeric field to analyze
-     * @param array<string, mixed> $filter Optional filter
-     * @return array<string, float|int> Statistics
-     */
-    public function statsForField(string $field, array $filter = []): array
-    {
-        $pipeline = [];
-
-        // Add match stage if filter provided
-        if (!empty($filter)) {
-            $pipeline[] = ['$match' => MongoCompat::convertFilter($filter)];
-        }
-
-        // Calculate statistics
-        $pipeline[] = [
-            '$group' => [
-                '_id' => null,
-                'min' => ['$min' => '$' . $field],
-                'max' => ['$max' => '$' . $field],
-                'avg' => ['$avg' => '$' . $field],
-                'sum' => ['$sum' => '$' . $field],
-                'count' => ['$sum' => 1],
-            ],
-        ];
-
-        $results = iterator_to_array($this->aggregate($pipeline));
-
-        if (empty($results)) {
-            return [
-                'min' => 0,
-                'max' => 0,
-                'avg' => 0,
-                'sum' => 0,
-                'count' => 0,
-            ];
-        }
-
-        $stats = $results[0];
-        return [
-            'min' => (float)($stats['min'] ?? 0),
-            'max' => (float)($stats['max'] ?? 0),
-            'avg' => (float)($stats['avg'] ?? 0),
-            'sum' => (float)($stats['sum'] ?? 0),
-            'count' => (int)($stats['count'] ?? 0),
-        ];
-    }
-
-    /**
-     * Search with regex across multiple fields.
-     *
-     * @param string $searchTerm Search term
-     * @param array<string> $fields Fields to search in
-     * @param array<string, mixed> $additionalFilter Additional filters
-     * @param int $limit Max results
-     * @return iterable<int, array<string, mixed>> Search results
-     */
-    public function search(
-        string $searchTerm,
-        array $fields,
-        array $additionalFilter = [],
-        int $limit = 100
-    ): iterable {
-        $orConditions = [];
-
-        foreach ($fields as $field) {
-            $orConditions[] = [
-                $field => MongoCompat::toRegex(MongoCompat::escapeRegex($searchTerm), 'i'),
-            ];
-        }
-
-        $matchFilter = array_merge($additionalFilter, ['$or' => $orConditions]);
-
-        $pipeline = [
-            ['$match' => MongoCompat::convertFilter($matchFilter)],
-            ['$limit' => $limit],
-        ];
-
-        return $this->aggregate($pipeline);
+        return $dist->distinct($groupBy) ?? [];
     }
 }

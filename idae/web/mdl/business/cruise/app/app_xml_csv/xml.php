@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 
 	$PATH = 'business/' . BUSINESS . '/app/app_xml_csv/';
@@ -13,7 +13,7 @@
 				<div class="autoNext">MSC</div>
 				<div class="toggler">
 					<a class="autoToggle" onClick="$('xml_csv_pad').loadModule('<?=$PATH?>gui/msc','fourn=msc')">Lancer</a>
-					<!--<a class="autoToggle" onClick="ajaxMdl('<?/*=$PATH*/?>xml_launch','','fourn=msc')">Lancer</a>-->
+					<!--<a class="autoToggle" onClick="ajaxMdl('<?php/*=$PATH*/?>xml_launch','','fourn=msc')">Lancer</a>-->
 
 				</div>
 				<div class="autoNext">Costa</div>

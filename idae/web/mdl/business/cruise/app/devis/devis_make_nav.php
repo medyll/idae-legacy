@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 
 	if (!droit('DEV')) return;
@@ -31,7 +31,7 @@
 	$tot_dev = $arr['prixDevis'];
 ?>
 <div class="padding">
-	<? if ($tot_ac != $tot_dev) { ?>
+	<?php if ($tot_ac != $tot_dev) { ?>
 		<div class="padding flex_h ededed border4 margin">
 			<div><i class="fa fa-warning"></i></div>
 			<div>Vérifier total devis / total acompte
@@ -39,29 +39,29 @@
 			     Echéancier, manque <?= maskNbre($tot_dev - $tot_ac, 2) . ' €' ?>
 			</div>
 		</div>
-	<? } else { ?>
-		<? 	} ?>
+	<?php } else { ?>
+		<?php 	} ?>
 	<div class="padding margin border4">
 		<div class="padding borderb bold uppercase aligncenter"><?= $arr['nomDevis_statut'] ?></div>
 		<div>
-			<? if ( $arr['codeDevis_statut'] == 'WAIT') { ?>
+			<?php if ( $arr['codeDevis_statut'] == 'WAIT') { ?>
 				<a onclick="act_chrome_gui('app/app_update_field','mode=fk&table=devis&table_value=<?= $iddevis ?>&field_name_raw=devis_statut')" class="cursor">
 					<img src="<?= ICONPATH ?>signature16.png"/>
 					&nbsp;Mettre en cours de traitement
 				</a>
-			<? } ?>
-			<? if ($arr['codeDevis_statut'] != 'END' && $arr['codeDevis_statut'] != 'WAITCONFIRM' && $arr['codeDevis_statut'] != 'WAIT') { ?>
+			<?php } ?>
+			<?php if ($arr['codeDevis_statut'] != 'END' && $arr['codeDevis_statut'] != 'WAITCONFIRM' && $arr['codeDevis_statut'] != 'WAIT') { ?>
 				<a onclick="act_chrome_gui('app/app_update_field','mode=fk&table=devis&table_value=<?= $iddevis ?>&field_name_raw=devis_statut')" class="cursor">
 					<img src="<?= ICONPATH ?>signature16.png"/>
 					&nbsp;Mettre en attente signature
 				</a>
-			<? } ?>
-			<? if ( $arr['codeDevis_statut'] == 'WAITCONFIRM' && $arr['codeDevis_statut'] != 'WAIT') { ?>
+			<?php } ?>
+			<?php if ( $arr['codeDevis_statut'] == 'WAITCONFIRM' && $arr['codeDevis_statut'] != 'WAIT') { ?>
 				<a onclick="act_chrome_gui('app/app_update_field','mode=fk&table=devis&table_value=<?= $iddevis ?>&field_name_raw=devis_statut')" class="cursor">
 					<img src="<?= ICONPATH ?>signature16.png"/>
 					&nbsp;Marquer comme signé
 				</a>
-			<? } ?>
+			<?php } ?>
 		</div>
 
 	</div>
@@ -77,10 +77,10 @@
 		<img src="<?= ICONPATH ?>cash16.png"/>
 		&nbsp;Relevé des profits
 	</a>
-	<? if (!empty($arr['attente_signature']) || !empty($arr['est_signe'])) { ?>
-		<a onclick="<? //= fonctionsJs::facture_create(array( 'iddevis' => $arr['iddevis'] , 'idclient' => $arr['idclient'] )) ?>">
+	<?php if (!empty($arr['attente_signature']) || !empty($arr['est_signe'])) { ?>
+		<a onclick="<?php //= fonctionsJs::facture_create(array( 'iddevis' => $arr['iddevis'] , 'idclient' => $arr['idclient'] )) ?>">
 			<img src="<?= ICONPATH ?>euro16.png"/>
 			&nbsp;Faire une facture
 		</a>
-	<? } ?>
+	<?php } ?>
 </div>

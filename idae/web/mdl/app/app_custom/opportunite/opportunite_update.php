@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 
 	$APP = new App('opportunite');
@@ -144,7 +144,7 @@
 		</div >
 </div >
 
-<? if (!empty($ARR['idclient'])) {
+<?php if (!empty($ARR['idclient'])) {
 	$add_table = 'client';
 	$add_value = $ARR['idclient'];
 } elseif (!empty($ARR['idprospect'])) {
@@ -155,11 +155,11 @@
 	$add_value = $ARR['idcontact'];
 } ?>
 <div class="enteteFor" >
-	<? if (!empty($add_table)) { ?>
+	<?php if (!empty($add_table)) { ?>
 		<div class=" " ><?= skelMdl::cf_module('app/app/app_menu', ['table' => $add_table, 'table_value' => $add_value]) ?>
 
 		</div >
-	<? } ?>
+	<?php } ?>
 </div >
 <div class="titreFor">
 	<?=$ARR['nomOpportunite']?> <?=$ARR['nomClient']?>

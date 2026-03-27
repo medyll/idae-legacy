@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 
 	if (empty($_POST['base']) || empty($_POST['collection']))
@@ -30,11 +30,11 @@
 		<input type = "hidden"
 		       name = "collection"
 		       value = "<?= $collection ?>"/>
-		<? foreach ($_id as $value) { ?>
+		<?php foreach ($_id as $value) { ?>
 			<input name = "_id[]"
 			       type = "hidden"
 			       value = "<?= $value ?>">
-		<? } ?>
+		<?php } ?>
 		<table class = "tabletop">
 			<tr>
 				<td style = "width:90px;text-align:center"><br>
@@ -45,7 +45,7 @@
 						<?= sizeof($_id) ?>
 						document(s)</strong> ?
 					<hr>
-					<? switch ($_POST['F_action']):
+					<?php switch ($_POST['F_action']):
 					case "desc":
 						?>
 						<label>
@@ -55,7 +55,7 @@
 					       name = "vars[descriptionProduit]"
 					       value = ""
 					       class = "inputLarge">
-					<?
+					<?php
 						break;
 						case "suppr":
 					?>
@@ -66,7 +66,7 @@
 							&nbsp;
 							<?= idioma('SUPPRIMER DEFINITIVEMENT') ?>
 						</label>
-					<?
+					<?php
 						break;
 						case "setmetadata":
 					?>
@@ -91,7 +91,7 @@
 							//   new myddeDatalist($('id
 							<?=$uniqid?>'));
 						</script>
-						<?
+						<?php
 						break;
 					endswitch; ?></td>
 			</tr>

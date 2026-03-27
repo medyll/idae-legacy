@@ -319,25 +319,6 @@ socket.on ('receive_cmd', function (data) {
 	}
 }.bind (this));
 
-// Handles socketModule response to update DOM
-socket.on ('socketModule', function (data) {
-    if (data.out && data.out.element) {
-        var el = $(data.out.element);
-        if (el) {
-            el.update(data.body);
-            if (el.undoLoading) el.undoLoading();
-            if (window.afterAjaxCall) afterAjaxCall(el);
-            el.fire('content:loaded');
-            
-            // Handle caching if needed (mirroring app_test.js idea but simpler)
-             if (window.app_cache && data.out.options && data.out.options.cache) {
-                 // Cache update logic could go here
-            }
-        } else {
-            console.warn('socketModule: Element not found', data.out.element);
-        }
-    }
-});
 
 //
 socket.on ('reloadModule', function (data) {
@@ -398,7 +379,7 @@ socket.on ('socketModule', function (data) {
 	}
 	var key_name = build_cache_key (this.out.file, (this.out.vars || ''));
 
-	var cache_body = window.localStorage.get (key_name) || '';
+	var cache_body = window.localStorage.getItem (key_name) || '';
 
 	var data_body_compare  = data_body.replace (/(\r\n|\n|\r)/gm, "");
 	var cache_body_compare = cache_body.replace (/(\r\n|\n|\r)/gm, "");
@@ -417,30 +398,17 @@ socket.on ('socketModule', function (data) {
 		return;
 	}
 
-	if ( localStorage.getItem ('cache_mode') == 'on' && $ (this.out.element).readAttribute ('data-cache') && $ (this.out.element).readAttribute ('data-need_cache')!="true"  ) { //  && $(this.out.element).readAttribute('data-from_cache')
-
-		$ (this.out.element).removeAttribute ('data-from_cache');
-
+	$ (this.out.element).removeAttribute ('data-need_cache')
+	if ( options.append ) {
+		$ (this.out.element).insert (data_body);
+	} else if ( options.insertion ) {
+		$ (this.out.element).insert ({ top : data_body });
 	} else {
-
-		$ (this.out.element).removeAttribute ('data-need_cache')
-		if ( options.append ) {
-			$ (this.out.element).insert (data_body);
-		} else if ( options.insertion ) {
-			$ (this.out.element).insert ({ top : data_body });
-		} else {
-			$ (this.out.element).update (data_body);
-		}
-
-		afterAjaxCall ($ (this.out.element));
-		$ (this.out.element).fire ('content:loaded');
+		$ (this.out.element).update (data_body);
 	}
 
-	if ( localStorage.getItem ('cache_mode') == 'on' && $ (this.out.element).readAttribute ('data-cache') ) {
-		window.app_cache.setItem (key_name, objDta, function (err, result) {
-
-		});
-	}
+	afterAjaxCall ($ (this.out.element));
+	$ (this.out.element).fire ('content:loaded');
 
 	}.bind (this));
 //

@@ -1,4 +1,4 @@
-<?
+<?php
 include_once($_SERVER['CONF_INC']);  
 $uniqid 	= uniqid();
 $_POST 		= fonctionsProduction::cleanPostMongo($_POST,1);
@@ -29,7 +29,7 @@ while($arr=$rs->getNext()){
 		<script>
 			$$('[base=<?=$base?>][collection=<?=$collection?>][tag=<?=$TAG?>] [count]').invoke('update',' <?=$total?>')
 		</script>
-		<? 
+		<?php 
 	endforeach;
 }
 

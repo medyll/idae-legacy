@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 	ini_set('display_errors', 55);
 	// POST
@@ -32,7 +32,7 @@
 	<div class="relative"><?= skelMdl::cf_module('app/app/app_menu', ['table' => $table, 'table_value' => $table_value, 'act_from' => 'preview']) ?></div>
 	<div class="barre_entete alignright ">
 		<div  style="display: inline-table;">
-			<? foreach ($arrFieldsBool as $bool => $arr_ico):
+			<?php foreach ($arrFieldsBool as $bool => $arr_ico):
 				$set_value = empty($arr[$bool . ucfirst($table)]);
 				$css       = empty($arr[$bool . ucfirst($table)]) ? 'textgris' : '';
 				$name      = $bool . ucfirst($table);
@@ -42,18 +42,18 @@
 						<div class="padding"><li class="fa fa-<?= $arr_ico[(int)$set_value] ?>"></li> </div>
 
 				</div>
-			<? endforeach; ?></div></div>
+			<?php endforeach; ?></div></div>
 	<div main_auto_tree class="flex_main" style="overflow:auto;">
 		<div auto_tree ><div class="trait"> <?= idioma('Fiche') ?></div></div>
 		<div class="retrait">
 			<?=skelMdl::cf_module('app/app/app_fiche_mini', array('table' => $table, 'table_value' => $table_value)) ?>
 		</div> 
-		<? if (sizeof($GRILLE_FK) != 0): ?>
+		<?php if (sizeof($GRILLE_FK) != 0): ?>
 			<br>
 			<div auto_tree onclick="save_setting_autoNext(this,'<?= $table ?>_preview_grillefk')"><div class="trait"> <?= idioma('Propriétés') ?></div></div>
 			<div class="retrait" style="display:<?= $APP -> get_settings($_SESSION['idagent'], $table . '_preview_grillefk') ?>;">
 				<table class="table_info">
-					<? foreach ($GRILLE_FK as $field):
+					<?php foreach ($GRILLE_FK as $field):
 						// query for name
 						$arr      = $APP->plug($field['base_fk'], $field['table_fk'])->findOne([$field['idtable_fk'] => $ARR[$field['idtable_fk']]]);
 						$dsp_name = $arr['nom' . ucfirst($field['table_fk'])];
@@ -65,16 +65,16 @@
 							                               options="{ident:'<?= $field['table_fk'] ?>',scope:'<?= $field['table_fk'] ?>'}"><?= empty($dsp_name) ? 'Aucun ' : $dsp_name; ?></a>
 							</td>
 						</tr>
-					<? endforeach; ?>
+					<?php endforeach; ?>
 				</table>
 			</div>
-		<? endif; ?>
-		<? if(sizeof($R_FK)!=0): ?>
+		<?php endif; ?>
+		<?php if(sizeof($R_FK)!=0): ?>
 			<br>	<br>
 		<div auto_tree ><div class="trait ededed"> <?= idioma('Liens') ?></div></div>
 		<div class="retrait" >
 			<table class="table_info">
-				<?
+				<?php
 					foreach ($R_FK as $arr_fk):
 					$value_rfk               = $arr_fk['table_value'];
 					$table_rfk               = $arr_fk['table'];
@@ -91,18 +91,18 @@
 									$count . ' ' . $table_rfk . '' . (($count == 0) ? '' : 's') ?></a>
 						</td>
 					</tr>
-				<? endforeach; ?>
+				<?php endforeach; ?>
 			</table>
 		</div>
-		<? endif; ?>
+		<?php endif; ?>
 
-		<? if(!empty($APP_TABLE['hasLigneScheme'])): ?>	<br>	<br>
+		<?php if(!empty($APP_TABLE['hasLigneScheme'])): ?>	<br>	<br>
 			<div auto_tree ><div class="trait"> <?= idioma('Lignes') ?></div></div>
 			<div class="retrait" id="has_ligne<?=$table_value?>" data-dsp="table_line"></div>
 			<script >
 				load_table_in_zone('table=<?=$table?>_ligne&vars[<?=$id?>]=<?=$table_value?>', 'has_ligne<?=$table_value?>');
 			</script >
-		<? endif; ?>
+		<?php endif; ?>
 
 		 
 	</div>

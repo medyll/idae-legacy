@@ -1,4 +1,4 @@
-<?
+<?php
 include_once($_SERVER['CONF_INC']); 
    $APP = new App('promo_zone');
 $_POST 		= 	fonctionsProduction::cleanPostMongo($_POST,1);
@@ -49,7 +49,7 @@ $width = $arrSize[sizeof($to_alter)];
  	  <input type="hidden" name="scope" value="uid_grille_mdl" />
  	  <input type="hidden" name="scopse[]" value="idpromo_zone" />
   <div class="padding margin">
-    <? 
+    <?php 
 	switch($key_mdl):
 		case  'mdl_idproduit':
 		?>
@@ -67,25 +67,25 @@ $width = $arrSize[sizeof($to_alter)];
 
    <label>
 		<input type="checkbox" name="insertMore" value="1"> Entrer infos contextuelles ( url, prix , description ... )</label>
-    <?
+    <?php
 		
 		break;
 		case  'mdl_description':
 		?>
     <textarea ext_mce_textarea id="denfer" name="<?=$key_mdl?>" style="width:<?=$width?>px;max-width:<?=$width?>px;height:250px;" ><?=empty($text)? 'Descriptif':$text?>
 </textarea>
-    <?
+    <?php
 		
 		break;
 		case  'mdl_prix':
 		?>
     <input type="text" name="<?=$key_mdl?>" style="width:100%;" value="<?=nl2br(empty($text)? 'prix':$text )?>" >
-    <?
+    <?php
 		break;
 		default:
 		?>
     <input type="text" name="<?=$key_mdl?>" style="width:100%;" value="<?=empty($text)? 'texte' : $text ?>" >
-    <?
+    <?php
 		break;
 	endswitch; ?>
   </div>

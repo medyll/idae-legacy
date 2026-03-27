@@ -3,8 +3,6 @@
 // Modified: 2026-03-02
 // Changes: LESS recursive loop mixins → SCSS @for; no LESS variable imports needed
 
-@use "sass:math";
-
 .flex,
 .flex_h,
 .flex_v {
@@ -13,7 +11,7 @@
   &>* {
     box-sizing: border-box;
   }
-  &>*:not('.flex_main') {
+  &>*:not(.flex_main) {
     flex: 0 0 auto;
   }
   &.flex_inline {
@@ -115,15 +113,15 @@
 @for $i from 1 through 12 {
   .flex_h.flex_col_#{$i} {
     >* {
-      width: math.div(100%, $i);
+      width: (100% / $i);
     }
     &.flex_wrap >* {
-      max-width: math.div(100%, $i);
+      max-width: (100% / $i);
     }
   }
   .flex_v.flex_col_#{$i} {
     >* {
-      height: math.div(100%, $i);
+      height: (100% / $i);
     }
   }
 }

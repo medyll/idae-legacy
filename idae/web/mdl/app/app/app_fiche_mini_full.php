@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 
 	ini_set('display_errors', 55);
@@ -30,7 +30,7 @@
 			<div class=""><i class="fa fa-<?= $APP->iconAppscheme ?> fa-fw" style="color:<?= $APP->colorAppscheme ?>"></i></div>
 			<div class="flex_main"> <?= $APP->nomAppscheme ?></div>
 			<div class="flex_h flex_align_middle" >
-				<?
+				<?php
 					$arr_has = ['statut', 'type', 'categorie', 'group'];
 					foreach ($arr_has as $key => $value):
 						$APPTMP = new App($value);
@@ -46,8 +46,8 @@
 								</span>
 								<?= $APPTMP->draw_field(['field_name_raw' => 'nom','field_name' => $_nom, 'table' => $table, 'field_value' => $ARR['nom' . $_Table]]) ?>
 							</div>
-						<? endif; ?>
-					<? endforeach; ?>
+						<?php endif; ?>
+					<?php endforeach; ?>
 			</div>
 		</div>
 		<div class=" padding_more">
@@ -55,12 +55,12 @@
 		</div>
 	</div>
 	<div class="">
-		<? foreach ($ARR_GROUP_FIELD as $key => $val) {
+		<?php foreach ($ARR_GROUP_FIELD as $key => $val) {
 			$arrg = $val['group'];
 			$arrf = $val['field'];
 			?>
 			<div class="retrait flex_h flex_wrap flex_align_stretch">
-				<? foreach ($arrf as $keyf => $valf) {
+				<?php foreach ($arrf as $keyf => $valf) {
 					if ($valf['codeAppscheme_field'] == 'nom') continue;
 					if ($valf['codeAppscheme_field'] == 'login') continue;
 					if ($valf['codeAppscheme_field'] == 'password') continue;
@@ -80,9 +80,9 @@
 							</tr>
 						</table>
 					</div>
-				<? } ?>
+				<?php } ?>
 			</div>
-		<? } ?>
+		<?php } ?>
 	</div>
 	<div class="  retrait">
 		<?= skelMdl::cf_module('app/app/app_fiche_fk', ['act_chrome_gui' => 'app/app_liste/app_liste_gui', 'mode' => 'fiche', 'table' => $table, 'table_value' => $table_value], $table_value) ?>

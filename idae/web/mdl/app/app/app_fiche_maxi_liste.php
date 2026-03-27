@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 
 	$table       = $_POST['table'];
@@ -26,7 +26,7 @@
 			</div>
 		</div>
 		<div id="where_all_<?= $zouzou ?>" class="flex_main flex_v" style="overflow-x:hidden;overflow-y: auto;">
-			<? if (sizeof($R_FK_FIRST) != 0):
+			<?php if (sizeof($R_FK_FIRST) != 0):
 				foreach ($R_FK_FIRST as $arr_fk):
 					$vars_rfk              = [];
 					$value_rfk               = $arr_fk['table_value'];
@@ -88,8 +88,8 @@
 							</div>
 						</div>
 					</div>
-				<? endforeach; ?>
-			<? endif; ?>
+				<?php endforeach; ?>
+			<?php endif; ?>
 		</div>
 	</div>
 </div>

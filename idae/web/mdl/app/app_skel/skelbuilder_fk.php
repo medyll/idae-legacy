@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 	require_once(__DIR__ . '/../../../appclasses/appcommon/MongoCompat.php');
 	use AppCommon\MongoCompat;
@@ -38,7 +38,7 @@
 				</tr>
 				</thead>
 				<tbody id = "oio">
-				<?
+				<?php
 					foreach ($arr_fk as $key => $arrInput):
 						?>
 						<tr uid = "<?= $arrInput['uid'] ?>">
@@ -57,7 +57,7 @@
 									onclick = "ajaxMdl('app/app_skel/skelbuilder_input_update','Mise à jour champ','_id=<?= $_POST['_id'] ?>&nomInput=<?= $arrInput['nomInput'] ?>');"><img
 										src = "<?= ICONPATH ?>delete16.png"/></a></td>
 						</tr>
-					<?
+					<?php
 					endforeach;
 				?></tbody>
 			</table>

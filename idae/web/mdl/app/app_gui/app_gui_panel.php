@@ -33,7 +33,7 @@
 		<div onclick="save_setting_autoNext(this,'<?= $table ?>_panel')"><i class="textorange fa fa-<?= $APP_TMP->iconAppscheme ?>"></i> <?= strtoupper($table) ?></div>
 	</div>
 	<div class="retrait applink applinkblock" style="display:<?= $APP->get_settings($_SESSION['idagent'], $table . '_panel') ?>;">
-		<?
+		<?php
 			while ($arr = $RS->getNext()):
 				// if (empty($arr['nomAgent_history'])) continue;
 				$arr_table = $APP_TMP->findOne([$name_id => (int)$arr['valeurAgent_history']]);
@@ -49,7 +49,7 @@
 							<?= $APP_TMP->draw_field($tr_vars) ?></a>
 					</div>
 				</div>
-				<?
+				<?php
 			endwhile;
 		?>
 	</div>

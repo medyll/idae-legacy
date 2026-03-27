@@ -1,4 +1,4 @@
-<?
+<?php
 if(file_exists('../conf.inc.php')) include_once('../conf.inc.php');
 if(file_exists('../../conf.inc.php')) include_once('../../conf.inc.php');
 if(file_exists('../../../conf.inc.php')) include_once('../../../conf.inc.php');
@@ -40,7 +40,7 @@ $label = '90 derniers jours';
 $out[] = array('startTime'=>$startTime,'endTime'=>$endTime,'label'=>$label) ;
 ?>
 <div class="applink applinkblock toggler">
-<? foreach($out as $inlink): ?>
+<?php foreach($out as $inlink): ?>
 <a class="autoToggle" onClick="$(this).fire('dom:datechoosen',{dateDebut:'<?=$inlink['startTime']?>',dateFin:'<?=$inlink['endTime']?>',value:'<?=$inlink['label']?>'})"><?=$inlink['label']?></a>
-<? endforeach; ?> 
+<?php endforeach; ?> 
 </div>

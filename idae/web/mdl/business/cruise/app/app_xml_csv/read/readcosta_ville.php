@@ -27,7 +27,7 @@
 	if ( empty($_POST['run']) ) {
 		?>
 		<div class = "padding"><?= sizeof($xml->Ports->Port) ?> Ports</div>
-		<?
+		<?php
 
 	} else {
 		foreach ($xml_p as $key => $Port) {

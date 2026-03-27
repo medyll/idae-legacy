@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 	$time = 'app_conge_time';
 	$_POST['idagent'] = $_SESSION['idagent'];
@@ -53,16 +53,16 @@
 		</div >
 		<div class="relative padding_more ededed flex_h" >
 			<div class="margin padding bold ucfirst" ><?=idioma('types')?></div >
-			<? while ($arr_ty = $rs_ty->getNext()) {
+			<?php while ($arr_ty = $rs_ty->getNext()) {
 				?>
 				<div class="margin padding border4 blanc" ><i style="color:<?= $arr_ty['colorConge_type'] ?>;" class="fa fa-fw fa-square"></i> <?= $arr_ty['nomConge_type'] ?></div >
-				<? 	} ?>
+				<?php 	} ?>
 			<div class="margin padding bold ucfirst" ><?=idioma('statuts')?></div >
 
-			<? while ($arr_st = $rs_st->getNext()) {
+			<?php while ($arr_st = $rs_st->getNext()) {
 				?>
 				<div class="margin padding border4 blanc" ><i style="color:<?= $arr_st['colorConge_statut'] ?>;" class="fa fa-fw fa-<?= $arr_st['iconConge_statut'] ?>"></i> <?= $arr_st['nomConge_statut'] ?></div >
-				<? 	} ?>
+				<?php 	} ?>
 		</div >
 	</div >
 </div >

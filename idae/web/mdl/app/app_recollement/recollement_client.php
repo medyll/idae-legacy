@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once('conf.inc.php');
 	$APP = new App();
 	$BASE_SYNC = $APP->plug_base('sitebase_sync');

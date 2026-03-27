@@ -1,4 +1,4 @@
-<?
+<?php
 if(file_exists('../conf.inc.php')) include_once('../conf.inc.php');
 if(file_exists('../../conf.inc.php')) include_once('../../conf.inc.php'); 
 $sd = $_POST['sd'];
@@ -16,7 +16,7 @@ $lienS = gmmktime(12,0,0,$mois,$jour,$annee+6);
 	<a onClick="ajaxInMdl('app/app_calendrier/mdlCalendrierListYear','<?=$_POST['yearCal']?>','<?=sendPost("sd=$lienS")?>');" >>></a>
 </div><div style="text-align:left;padding:0px;min-height: 120px;width:100%;overflow:hidden;"  id="dynlistYear">
 <table style="width:100%;height:100%" class="applink">
-<?
+<?php
 for($m=$annee; $m<=$annee+8;$m++){ 
 $lien = gmmktime(12,0,0,$mois,$jour,$m); 
 ($lien==$sd)? $class = 'goodChoice' : $class = '';
@@ -26,7 +26,7 @@ $i++;
 <td class="listMois <?=$class?>">
 <a onclick="reloadModule('app/app_calendrier/mdlCalendrier','<?=$calendarId?>','<?=sendPost("sd=$lien",$_POST)?>');" ><?=$m?></a>
 </td>
-<? } ?></table>
+<?php } ?></table>
 </div>
 <style> 
 .listYear:hover {

@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 	ini_set('display_errors', 55);
 $time=time();
@@ -77,7 +77,7 @@ $time=time();
 				       value="<?= $nbRows ?>"
 				       onchange="reloadScope('scope_prod_liste','<?= $uniqid ?>','nbRows='+$(this).value)"> /page
 			</div>
-			<? if ($nbPage > 1) { ?>
+			<?php if ($nbPage > 1) { ?>
 				<div class="cell applink">
 
 					<div class="titre_entete toggler">
@@ -92,7 +92,7 @@ $time=time();
 						</a>
 					</div>
 				</div>
-			<? } ?>
+			<?php } ?>
 			<div class="cell">
 
 			</div>

@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 
 	$vars     = empty($_POST['vars']) ? [] : fonctionsProduction::cleanPostMongo($_POST['vars'], 1);
@@ -23,15 +23,15 @@
 			<i class="fa fa-<?= $fk['iconAppscheme'] ?>"></i> par <?= $fk['nomAppscheme'] ?> <i class="fa fa-caret-right"></i></a>
 	</div>
 	<div style="display:none;width:100%;overflow:hidden;position:relative">
-		<? if ($rs_dist->count() != $rs_dist->count(true)) { ?>
+		<?php if ($rs_dist->count() != $rs_dist->count(true)) { ?>
 			<div class="retrait flex_h flex_align_middle">
 				<div><i class="fa fa-search"></i></div>
 				<div class="relative">
 					<input type="text" style="max-width:100%;" onkeyup="reloadModule('app/app_prod/app_prod_nav_group_inner','<?=$scope?>','search='+this.value+'&table=<?= $table ?>&table_fk=<?= $table_fk ?>&<?= $tr_vars ?>')">
 				</div>
 			</div>
-		<? } ?>
+		<?php } ?>
 		<div style="overflow:hidden;" class="retrait" act_defer mdl="app/app_prod/app_prod_nav_group_inner" vars="table=<?= $table ?>&table_fk=<?= $table_fk ?>&<?= $tr_vars ?>" value="<?=$scope?>">
 		</div>
 	</div>
-<? endforeach; ?>
+<?php endforeach; ?>

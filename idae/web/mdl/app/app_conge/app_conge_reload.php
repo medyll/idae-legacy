@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 	 
 	$APP 	= new App('conge');
@@ -49,7 +49,7 @@
 		$witDate = date("Y-m-d", mktime(12, 0, 0, $moisEnCours, $premierJourSemaine + $i, $anneeEnCours));
 		// de 07 à 20h
 		?>
-		<?
+		<?php
 		$_POST['heureDebutConge'] = empty($_POST['heureDebutConge']) ? '' : $_POST['heureDebutConge'];
 		//
 		$rs = $APP->find(array('dateDebutConge' => $witDate));
@@ -81,6 +81,6 @@
 				</div>
 			</div>
 
-		<? } ?>
-	<? } ?>
+		<?php } ?>
+	<?php } ?>
  

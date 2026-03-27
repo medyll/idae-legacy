@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 	require_once(__DIR__ . '/../../appclasses/appcommon/MongoCompat.php');
 	use AppCommon\MongoCompat;
@@ -220,9 +220,9 @@
 
 			if (empty($_POST['tag'])):
 				?>
-				<!--<script > ajaxMdl('document/document_tag', 'TAG ', '<?/*=http_build_query($_POST)*/
+				<!--<script > ajaxMdl('document/document_tag', 'TAG ', '<?php/*=http_build_query($_POST)*/
 				?>', {runonce: true});</script >-->
-				<?
+				<?php
 			else:
 
 			endif;

@@ -33,8 +33,8 @@
 <div class="titreFor">
 	<?= idioma('Liste')  ?>   <?= $APP->get_titre_vars($vars); ?>
 </div>
-<? if (droit('DEV')) { ?>
+<?php if (droit('DEV')) { ?>
 	<div class="footerFor">
-		<div class="padding bordert ededed">     <?= $_POST['module'] ?>  <? printr($_POST) ?></div>
+		<div class="padding bordert ededed">     <?= $_POST['module'] ?>  <?php printr($_POST) ?></div>
 	</div>
-<? } ?>
+<?php } ?>

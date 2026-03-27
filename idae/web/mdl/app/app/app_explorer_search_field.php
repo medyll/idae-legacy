@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 	// POST
 	$table = $_POST['table'];
@@ -28,16 +28,16 @@
 <div class="relative ededed">
 	<form action="<?= ACTIONMDL ?>app/actions.php" onsubmit="return false;">
 		<input type="hidden" name="table" value="<?= $table ?>"/>
-		<? foreach ($vars as $key => $input): ?>
+		<?php foreach ($vars as $key => $input): ?>
 			<input type="hidden" name="vars[<?= $key ?>]" value="<?= $input ?>">
-		<? endforeach; ?>
+		<?php endforeach; ?>
 		<div class="  relative">
-			<? foreach ($ARR_GROUP_FIELD as $key => $val) {
+			<?php foreach ($ARR_GROUP_FIELD as $key => $val) {
 				$arrg = $val['group'];
 				$arrf = $val['field'];
 				?><br>
 				<div class="relative blanc  boxshadow">
-					<? foreach ($arrf as $keyf => $valf) {
+					<?php foreach ($arrf as $keyf => $valf) {
 						if ($valf['nomAppscheme_field'] == 'description') continue;
 						?>
 						<div class="borderb  padding">
@@ -49,9 +49,9 @@
 								</div>
 							</div>
 						</div>
-					<? } ?>
+					<?php } ?>
 				</div>
-			<? } ?>
+			<?php } ?>
 		</div>
 		<div class="buttonZone">
 			<button type="submit" value="Ok"><i class="fa fa-search"></i></button>

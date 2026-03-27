@@ -24,7 +24,7 @@
 	</div>
 	<div class="flex_main">
 		<div class="    aligncenter" style=" overflow:hidden;">
-			<? if (!empty($APPOBJ->APP_TABLE['hasImageScheme'])):
+			<?php if (!empty($APPOBJ->APP_TABLE['hasImageScheme'])):
 				$size = empty($APPOBJ->APP_TABLE['hasImagesquareScheme']) ? empty($APPOBJ->APP_TABLE['hasImagetinyScheme']) ? 'small' : 'tiny' : 'square';
 				?>
 				<div class="aligncenter  ">
@@ -32,27 +32,27 @@
 					     vars="table=<?= $table ?>&table_value=<?= $table_value ?>&codeTailleImage=small&show=small" scope="app_img"
 					     value="<?= $table ?>-small-<?= $table_value ?>"></div>
 				</div>
-			<? endif; ?>
+			<?php endif; ?>
 		</div>
 	</div>
 	<div>
-		<? if ($table_value) {
+		<?php if ($table_value) {
 			$R_FK = $APP->get_reverse_grille_fk($table, $table_value);
 			?>
-			<? foreach ($R_FK as $arr_fk):
+			<?php foreach ($R_FK as $arr_fk):
 				$final_rfk[$arr_fk['scope']][] = $arr_fk;
 			endforeach; ?>
-		<? } ?>
-		<? if (!$table_value) { ?>
+		<?php } ?>
+		<?php if (!$table_value) { ?>
 			<div class=" "><?= skelMdl::cf_module('app/app_gui/app_gui_tile_table_click', ['table' => $table], $table); ?></div>
-		<? } ?>
+		<?php } ?>
 		<div class="applink applinkblock  aignright" style="">
-			<? foreach ($final_rfk as $key => $arr_final):
+			<?php foreach ($final_rfk as $key => $arr_final):
 				?>
 				<div class="padding alignright">
 					<br>
 				</div>
-				<?
+				<?php
 				foreach ($arr_final as $arr_fk):
 					$tmp_table = $arr_fk['codeAppscheme'];
 					$APP_TMP          = new App($tmp_table);
@@ -63,8 +63,8 @@
 					<a style="vertical-align: middle" title="<?= $arr_fk['nomAppscheme'] ?>" onclick="<?= fonctionsJs::app_create($arr_fk['table'], ['vars' => ['id' . $table => $table_value, 'idagent' => $_SESSION['idagent']]]) ?>">
 						&nbsp;<i style="vertical-align: middle" class="fa fa-<?=$APP_TMP->iconAppscheme ?>    "></i> créer <?= $arr_fk['nomAppscheme'] ?>
 					</a>
-				<? endforeach; ?>
-			<? endforeach; ?>
+				<?php endforeach; ?>
+			<?php endforeach; ?>
 			<br>
 		</div>
 		<div class="alignright" style=""><?= skelMdl::cf_module('app/app_scheme/app_scheme_menu_icon', ['table' => $table]) ?></div>

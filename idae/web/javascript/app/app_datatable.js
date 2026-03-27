@@ -276,6 +276,7 @@ BuildTbl.prototype = {
             var res_tmp = event.memo;
             var data = window.register_stream[res_tmp]['data'];
             var data_main = data['data_main'];
+            if (!data_main) return;
             this.options.table_data = data_main;
 
             if (data_main[0]) {

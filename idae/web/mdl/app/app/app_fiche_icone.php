@@ -1,4 +1,4 @@
-<?
+<?php
 
 	include_once($_SERVER['CONF_INC']);
 	$table = $_POST['table'];
@@ -62,12 +62,12 @@
 			</div>
 		</div>
 		<div class="tile_bottom" style="overflow:hidden;">
-			<? if (!empty($ARR['color' . $Table . '_type']) || !empty($ARR['color' . $Table . '_statut'])) { ?>
+			<?php if (!empty($ARR['color' . $Table . '_type']) || !empty($ARR['color' . $Table . '_statut'])) { ?>
 				<div class="tile_text aligncenter ellipsis">
 					<i class="fa fa-<?= $ARR['icon' . $Table . '_type'] ?>" style="color:<?= $ARR['color' . $Table . '_type'] ?>"></i>
 					<i class="fa fa-<?= $ARR['icon' . $Table . '_statut'] ?>" style="color:<?= $ARR['color' . $Table . '_statut'] ?>"></i>
 				</div>
-			<? } ?>
+			<?php } ?>
 			<div class="tile_text aligncenter ellipsis ucfirst"><?= strtolower($ARR['nom' . ucfirst($table)]) ?></div>
 			<div class="tile_text aligncenter ellipsis"><span class="bordert textgrisfonce">  <?= $ARR['code' . ucfirst($table)] ?></span></div>
 		</div>
