@@ -1,10 +1,16 @@
-<?
-
-	// ob_end_clean();
+<?php
+declare(strict_types=1);
+/**
+ * json_data_table.php — Streaming table-list endpoint used by the main SPA grid.
+ * Supports groupBy, search, FK resolution, count sub-queries, and CSV export.
+ * Results are pushed via skelMdl::send_cmd('act_stream_to') in configurable chunks.
+ *
+ * Date: 07/07/14
+ * Modified: 2026-03-15 — <?php open tag, strict_types, exit→return, English comments, remove debug artifacts
+ */
 	include_once($_SERVER['CONF_INC']);
 	require_once(__DIR__ . '/../appclasses/appcommon/MongoCompat.php');
 	use AppCommon\MongoCompat;
-	//ini_set('display_errors', 0);
 	if (empty($_SESSION['idagent'])) {
 		// skelMdl::send_cmd('act_notify', ['msg' => 'Agent non connecté', 'options' => $_GET + ['mdl' => 'app/app_login/app_login', 'sticky' => 1, 'id' => 'json_debug']], session_id());
 		return;

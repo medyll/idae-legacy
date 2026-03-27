@@ -1,6 +1,5 @@
 <?php
 declare(strict_types=1);
-<<<<<<< HEAD
 
 /**
  * json_data_search.php — Global search across all schemes
@@ -12,21 +11,6 @@ declare(strict_types=1);
  * Date: 2007-XX-XX (Legacy)
  * Modified: 2026-03-27 — Added strict_types, MongoCompat::toRegex usage verified
  */
-=======
-/**
- * json_data_search.php — Cross-table full-text search endpoint.
- * Iterates all appscheme tables the current agent has access to, runs regex queries
- * via MongoCompat::toRegex, and streams results back via skelMdl::send_cmd.
- *
- * Date: 07/07/14
- * Modified: 2026-03-15 — <?php open tag, strict_types, remove display_errors, English comments
- */
-	include_once($_SERVER['CONF_INC']);
-	require_once(__DIR__ . '/../appclasses/appcommon/MongoCompat.php');
-	use AppCommon\MongoCompat;
-
-	$_POST = array_merge($_GET, $_POST);
->>>>>>> origin/main
 
 include_once($_SERVER['CONF_INC']);
 require_once(__DIR__ . '/../appclasses/appcommon/MongoCompat.php');

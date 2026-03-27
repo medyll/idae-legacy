@@ -1,4 +1,12 @@
 <?php
+declare(strict_types=1);
+/**
+ * json_scheme.php — Build and return appscheme JSON models consumed by the frontend SPA.
+ * Assembles fieldModel, columnModel, miniModel, defaultModel, hasModel for window.APP.APPSCHEMES.
+ *
+ * Date: 07/07/14
+ * Modified: 2026-03-15 — strict_types, exit→return, English comments
+ */
 
 include_once($_SERVER['CONF_INC']);
 
