@@ -1,14 +1,30 @@
-<?
-	include_once($_SERVER['CONF_INC']);
-	require_once(__DIR__ . '/../appclasses/appcommon/MongoCompat.php');
-	use AppCommon\MongoCompat;
+<?php
+declare(strict_types=1);
 
-	ini_set('display_errors', 55);
-	$_POST = array_merge($_GET, $_POST);
+/**
+ * json_data_search.php — Global search across all schemes
+ *
+ * Searches for a term across all accessible schemes (appscheme collection)
+ * and returns results grouped by scheme.
+ *
+ * @package Idae\Services
+ * Date: 2007-XX-XX (Legacy)
+ * Modified: 2026-03-27 — Added strict_types, MongoCompat::toRegex usage verified
+ */
 
-	if (empty($_POST['search'])) {
-		return;
-	}
+include_once($_SERVER['CONF_INC']);
+require_once(__DIR__ . '/../appclasses/appcommon/MongoCompat.php');
+
+use AppCommon\MongoCompat;
+
+ini_set('display_errors', 55);
+$_POST = array_merge($_GET, $_POST);
+
+// Validate search term
+if (empty($_POST['search'])) {
+    echo json_encode(['success' => false, 'error' => 'Missing search parameter']);
+    exit;
+}
 	if (!empty($_POST['stream_to'])) {
 		if (!empty($_POST['url_data'])) {
 			$_POST['url_data'] .= '&stream_to=' . $_POST['stream_to'];
