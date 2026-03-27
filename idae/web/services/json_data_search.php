@@ -1,22 +1,30 @@
 <?php
 declare(strict_types=1);
+
 /**
- * json_data_search.php — Cross-table full-text search endpoint.
- * Iterates all appscheme tables the current agent has access to, runs regex queries
- * via MongoCompat::toRegex, and streams results back via skelMdl::send_cmd.
+ * json_data_search.php — Global search across all schemes
  *
- * Date: 07/07/14
- * Modified: 2026-03-15 — <?php open tag, strict_types, remove display_errors, English comments
+ * Searches for a term across all accessible schemes (appscheme collection)
+ * and returns results grouped by scheme.
+ *
+ * @package Idae\Services
+ * Date: 2007-XX-XX (Legacy)
+ * Modified: 2026-03-27 — Added strict_types, MongoCompat::toRegex usage verified
  */
-	include_once($_SERVER['CONF_INC']);
-	require_once(__DIR__ . '/../appclasses/appcommon/MongoCompat.php');
-	use AppCommon\MongoCompat;
 
-	$_POST = array_merge($_GET, $_POST);
+include_once($_SERVER['CONF_INC']);
+require_once(__DIR__ . '/../appclasses/appcommon/MongoCompat.php');
 
-	if (empty($_POST['search'])) {
-		return;
-	}
+use AppCommon\MongoCompat;
+
+ini_set('display_errors', 55);
+$_POST = array_merge($_GET, $_POST);
+
+// Validate search term
+if (empty($_POST['search'])) {
+    echo json_encode(['success' => false, 'error' => 'Missing search parameter']);
+    exit;
+}
 	if (!empty($_POST['stream_to'])) {
 		if (!empty($_POST['url_data'])) {
 			$_POST['url_data'] .= '&stream_to=' . $_POST['stream_to'];

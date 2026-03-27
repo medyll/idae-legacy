@@ -8,9 +8,9 @@ declare(strict_types=1);
  * Modified: 2026-03-15 — strict_types, exit→return, English comments
  */
 
-	include_once($_SERVER['CONF_INC']);
+include_once($_SERVER['CONF_INC']);
 
-	$_POST = array_merge($_GET, $_POST);
+$_POST = array_merge($_GET, $_POST);
 
 	$APP                 = new App();
 	$APP_SCH             = new App('appscheme');

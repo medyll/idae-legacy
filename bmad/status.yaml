@@ -27,6 +27,7 @@ phases:
       Login flow functional (actions.php, ClassSession, ClassApp basic path).
       MongoCompat helper created. Node.js server refactored to ESM (app_node/src/).
       docker-compose up --build works. Apache serves the app on port 8080.
+      QWEN.md documentation created (2026-03-27).
 
   - id: 2
     name: "SCSS Migration + ClassApp Foundation"
