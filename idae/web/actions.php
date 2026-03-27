@@ -7,8 +7,7 @@
 		exit;
 	}
 
-
-	array_walk_recursive($_POST , 'CleanStr' , $_POST);
+	array_walk_recursive($_POST, 'CleanStr');
 
 	$APP = new App();
 

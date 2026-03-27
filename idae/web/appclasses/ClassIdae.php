@@ -164,7 +164,7 @@
 
 			$parameters['table'] = $table;
 
-			array_walk_recursive($vars, 'CleanStr', $vars);
+			array_walk_recursive($vars, 'CleanStr');
 			$vars = empty($vars) ? [] : function_prod::cleanPostMongo($vars, 1);
 
 			$rs  = $this->find($vars);

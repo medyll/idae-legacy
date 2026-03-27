@@ -6,7 +6,7 @@
 
 	exit;
 	$_POST += $_GET;
-	array_walk_recursive($_POST, 'CleanStr', $_POST);
+	array_walk_recursive($_POST, 'CleanStr');
 
 	ini_set('display_errors', 55);
 

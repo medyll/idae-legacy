@@ -6,7 +6,7 @@
 	ini_set('max_execution_time', 10);
 	ini_set('max_input_time', 10);
 
-//if(isset($_POST['F_action'])){ $F_action =$_POST['F_action'];} else{exit;} 
+//if(isset($_POST['F_action'])){ $F_action =$_POST['F_action'];} else{exit;}
 	array_walk_recursive($_POST, 'CleanStr');
 	$msg = '';
 	$APP = new App();

@@ -1,7 +1,7 @@
-<? 
-if(file_exists('../../conf.inc.php')) include_once('../../conf.inc.php'); 
+<?
+if(file_exists('../../conf.inc.php')) include_once('../../conf.inc.php');
 
-array_walk_recursive($_POST, 'CleanStr',$_POST); 
+array_walk_recursive($_POST, 'CleanStr');
 if(isset($_POST['F_action'])){ $F_action =$_POST['F_action'];} else{exit;}
 switch ($F_action)
 {	 

@@ -1,7 +1,7 @@
 <?
 	include_once($_SERVER['CONF_INC']);
 
-	array_walk_recursive($_POST, 'CleanStr', $_POST);
+	array_walk_recursive($_POST, 'CleanStr');
 	ini_set('display_errors', 55);
 
 	$APP      = new App('newsletter');
