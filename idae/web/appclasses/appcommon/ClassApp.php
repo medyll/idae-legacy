@@ -1498,25 +1498,34 @@ require_once __DIR__ . '/ClassAppFk.php';
 			return new MongodbCursorWrapper($rs);
 		}
 
-		// Modified: 2026-03-06
 		/**
 		 * Insert a new document into the collection.
 		 *
 		 * @param array<string, mixed> $vars Document fields
-		 * @return int Inserted document logical ID (app field)
+		 * @return int|false Inserted document logical ID (app field) or false on error
 		 */
 		function insert(array $vars = []): int|false {
+			// Ensure table metadata is loaded
+			if (empty($this->app_table_one) || empty($this->app_table_one['codeAppscheme'])) {
+				error_log('[ClassApp::insert] app_table_one not loaded for table: ' . ($this->table ?? 'unknown'));
+				return false;
+			}
+
 			$vars = MongoCompat::convertFilter($vars);
 			if (empty($vars[$this->app_field_name_id])) {
 				$vars[$this->app_field_name_id] = (int)$this->getNext($this->app_field_name_id);
 			}
-			$col = $this->plug($this->app_table_one['codeAppscheme_base'], $this->app_table_one['codeAppscheme'])->getCollection();
+
+			$base = $this->app_table_one['codeAppscheme_base'] ?? 'sitebase_app';
+			$table = $this->app_table_one['codeAppscheme'];
+			$col = $this->plug($base, $table)->getCollection();
+
 			try {
-    $col->insertOne($vars);
-} catch (\Throwable $e) {
-    error_log('[ClassApp::insert] insertOne failed: ' . $e->getMessage());
-    return false;
-}
+				$col->insertOne($vars);
+			} catch (\Throwable $e) {
+				error_log('[ClassApp::insert] insertOne failed: ' . $e->getMessage());
+				return false;
+			}
 
 			$this->consolidate_scheme($vars[$this->app_field_name_id]);
 
@@ -1784,79 +1793,111 @@ require_once __DIR__ . '/ClassAppFk.php';
 			$this->plug($this->app_table_one['codeAppscheme_base'], $this->app_table_one['codeAppscheme'])->updateOne($vars, ['$set' => $fields], ['upsert' => $upsert]);
 		}
 
-		// Modified: 2026-03-03
-		function update($vars, $fields = [], $upsert = true) {
-			$table       = $this->app_table_one['codeAppscheme'];
-			$vars        = MongoCompat::convertFilter($vars);
+		/**
+		 * Update a document with change detection and real-time notification.
+		 *
+		 * Compares new fields with existing values, updates only if changes exist,
+		 * and broadcasts changes via Socket.IO for real-time UI refresh.
+		 * Also updates reverse FK relations if the name field changes.
+		 *
+		 * @param array<string, mixed> $vars Query filter (must contain id{table})
+		 * @param array<string, mixed> $fields Fields to update
+		 * @param bool $upsert Whether to insert if not found (default: true)
+		 * @return array<string, mixed>|null Array of casted updated fields, or null if no update performed
+		 * @throws \MongoDB\Driver\Exception\RuntimeException on connection error
+		 */
+		function update(array $vars, array $fields = [], bool $upsert = true): ?array {
+			$table = $this->app_table_one['codeAppscheme'];
+			$vars = MongoCompat::convertFilter($vars);
 			$table_value = (int)$vars[$this->app_field_name_id];
-			// anciennes valeurs
-			if (empty($table_value)) {
-				//vardump_async("$table sans value en update");
 
+			// Validate that ID exists in filter
+			if (empty($table_value)) {
+				error_log('[ClassApp::update] Missing ID in filter for table: ' . $table);
 				return null;
 			}
+
+			// Fetch current values for change detection
 			$arr_one_before = $this->findOne([$this->app_field_name_id => $table_value]);
-			// differences avec anciennes valeurs
+
+			// Compute difference: only update fields that actually changed
 			$arr_inter = array_diff_assoc($fields, (array)$arr_one_before);
 			if (empty($arr_inter)) {
-				// skelMdl::send_cmd('act_notify', ['msg' => 'Mise Ã  jour inutile'], session_id());
-
-				return;
+				error_log('[ClassApp::update] No changes detected for ' . $table . ' ID ' . $table_value);
+				return null;
 			}
-			// on garde la diffÃ©rence
+
+			// Use only the changed fields
 			$fields = $arr_inter;
-			// UPDATE !!!
-			//vardump_async($fields,true);
 			$fields = MongoCompat::convertFilter($fields);
-			if (isset($fields['_id'])) unset($fields['_id']);
+
+			// Never update _id field
+			if (isset($fields['_id'])) {
+				unset($fields['_id']);
+			}
+
+			// Execute update
 			$col = $this->plug($this->app_table_one['codeAppscheme_base'], $this->app_table_one['codeAppscheme'])->getCollection();
 			try {
-    $col->updateOne([$this->app_field_name_id => $table_value], ['$set' => $fields], ['upsert' => $upsert]);
-} catch (\Throwable $e) {
-    error_log('[ClassApp::update] updateOne failed: ' . $e->getMessage());
-    return null;
-}
-			$this->consolidate_scheme($table_value);
-			//
-			$arr_one_after = $this->findOne([$this->app_field_name_id => $table_value]);
-
-			$updated_fields_real = array_diff_assoc((array)$arr_one_after, (array)$arr_one_before);
-
-			// AppSocket::send_cmd('act_notify',['msg'=>json_encode($updated_fields_real,JSON_PRETTY_PRINT),'options'=>['sticky'=>true]],session_id());
-
-			$update_diff_cast = [];
-			foreach ($updated_fields_real as $k => $v):
-				$exp['field_name']  = $k;
-				$exp['field_value'] = $v;
-				//if($v==$vars[$k] || empty($vars[$k])) continue;
-				$update_diff_cast[$k] = App::cast_field_all($exp, true); // new_vars deviendra vars
-			endforeach;
-
-			if (class_exists('skelMdl')) {
-				skelMdl::send_cmd('act_upd_data', ['table' => $table, 'table_value' => $table_value, 'new_vars' => $update_diff_cast]);
+				$col->updateOne(
+					[$this->app_field_name_id => $table_value],
+					['$set' => $fields],
+					['upsert' => $upsert]
+				);
+			} catch (\Throwable $e) {
+				error_log('[ClassApp::update] updateOne failed: ' . $e->getMessage());
+				return null;
 			}
 
-			// log
-			$R_FK = $this->get_reverse_grille_fk($this->app_table_one['codeAppscheme'], (int)$vars[$this->app_field_name_id]);
-			//
-			if (!empty($fields['nom' . ucfirst($table)])):
-				foreach ($R_FK as $arr_fk):
-					$value_rfk               = $arr_fk['table_value'];
-					$table_rfk               = $arr_fk['table'];
-					$vars_rfk['vars']        = ['id' . $table => $table_value];
-					$vars_rfk['table']       = $table_rfk;
-					$vars_rfk['table_value'] = $value_rfk;
-					$count                   = $arr_fk['count'];
+			// Consolidate scheme (update FK references, types, etc.)
+			$this->consolidate_scheme($table_value);
 
-					if (!empty($count)):
-						$APPCONV   = new App($table_rfk);
-						$sd_vars   = ['id' . $table => $table_value];
+			// Fetch updated document to compute actual changes
+			$arr_one_after = $this->findOne([$this->app_field_name_id => $table_value]);
+			$updated_fields_real = array_diff_assoc((array)$arr_one_after, (array)$arr_one_before);
+
+			// Cast field values according to their types (for notification payload)
+			$update_diff_cast = [];
+			foreach ($updated_fields_real as $k => $v) {
+				$exp = [
+					'field_name' => $k,
+					'field_value' => $v,
+				];
+				$update_diff_cast[$k] = App::cast_field_all($exp, true);
+			}
+
+			// Broadcast update via Socket.IO for real-time UI refresh
+			if (class_exists('skelMdl')) {
+				skelMdl::send_cmd(
+					'act_upd_data',
+					[
+						'table' => $table,
+						'table_value' => $table_value,
+						'new_vars' => $update_diff_cast,
+					]
+				);
+			}
+
+			// Update reverse FK relations if name field changed
+			$R_FK = $this->get_reverse_grille_fk(
+				$this->app_table_one['codeAppscheme'],
+				(int)$vars[$this->app_field_name_id]
+			);
+
+			if (!empty($fields['nom' . ucfirst($table)])) {
+				foreach ($R_FK as $arr_fk) {
+					$value_rfk = $arr_fk['table_value'];
+					$table_rfk = $arr_fk['table'];
+					$count = $arr_fk['count'];
+
+					if (!empty($count)) {
+						$APPCONV = new App($table_rfk);
+						$sd_vars = ['id' . $table => $table_value];
 						$fields_fk = ['nom' . ucfirst($table) => $fields['nom' . ucfirst($table)]];
 						$APPCONV->update($sd_vars, ['$set' => $fields_fk]);
-
-					endif;
-				endforeach;
-			endif;
+					}
+				}
+			}
 
 			return $update_diff_cast;
 		}
