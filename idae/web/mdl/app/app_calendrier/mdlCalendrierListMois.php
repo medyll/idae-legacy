@@ -1,4 +1,4 @@
-<?
+<?php
 if(file_exists('../conf.inc.php')) include_once('../conf.inc.php');
 if(file_exists('../../conf.inc.php')) include_once('../../conf.inc.php'); 
 $sd = $_POST['sd'];
@@ -18,7 +18,7 @@ $lienS = gmmktime(12,0,0,$mois,$jour,$annee+1);
 </div>
 <div class="relative" style="text-align:left;padding:0px;height: 100%;width:100%;overflow:hidden;"  id="dynlistMois">
 <table style="width:100%;"  class="applink toggler">
-<?
+<?php
 $i=0;
 for($m=1; $m<=12;$m++){ 
 $lien = gmmktime(12,0,0,$m,$jour,$annee); 
@@ -29,6 +29,6 @@ $lien = gmmktime(12,0,0,$m,$jour,$annee);
 <td class="listMois  aligncenter " onclick="reloadModule('app/app_calendrier/mdlCalendrier','<?=$calendarId?>','<?=sendPost("sd=$lien",$_POST)?>');">
 <a class="<?=$class?> ellipsis autoToggle" > <?=$tabMois2[$m]?> </a>
 </td>
-<? } ?>
+<?php } ?>
 </table>
 </div>  

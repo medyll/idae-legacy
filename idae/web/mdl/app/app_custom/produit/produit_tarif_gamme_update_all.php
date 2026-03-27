@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 
 	$APP_PROD = new App('produit');
@@ -54,7 +54,7 @@
 					<td style = "width:25px;" class = "aligncenter"></td>
 					<td style = "width:80px" class = "borderr ededed aligncenter bold"><?= idioma("date") ?></td>
 					<td style = "width:25px;" class = "aligncenter" title = "<?= idioma("Supprimer") ?>"></td>
-					<? while ($arrT = $rsT->getNext()) {
+					<?php while ($arrT = $rsT->getNext()) {
 						$nomGamme = ! empty($arrP['idtransport']) ? $arrT["nomTransport_gamme"] : $arrT["nomGamme"];
 						$nomGamme = (empty($arrP['idtransport']) && ! empty($idhotel)) ? $arrT["nomHotel_gamme"] : $nomGamme;
 						?>
@@ -63,19 +63,19 @@
 						<td style = "width:40px;"><?= idioma("3°") ?></td>
 						<td style = "width:40px;"><?= idioma("singl") ?></td>
 						<td style = "width:40px;"><?= idioma("enf") ?></td>
-					<? }
+					<?php }
 						$rsT->reset(); ?>
 					<td></td>
 				</tr>
 			</thead>
 			<tbody id = "<?= $body ?>">
-				<? foreach ($rsPT as $key => $arr) {
+				<?php foreach ($rsPT as $key => $arr) {
 					$idproduit_tairf = $arr["idproduit_tarif"];
 					$idproduit       = $arr["idproduit"];
 					$mois            = date('m' , strtotime($arr["dateDebutProduit_tarif"]));
 					$annee           = date('Y' , strtotime($arr["dateDebutProduit_tarif"]));
 					?>
-					<?
+					<?php
 					if ( $mois != $oldmois ): ?>
 						<tr class = "">
 							<td colspan = "3" class = "uppercase bold ">
@@ -83,13 +83,13 @@
 									<?= mois_fr($arr["dateDebutProduit_tarif"]); ?>
 									<?= $mois . ' ' . $annee ?></div>
 							</td>
-							<? while ($arrT = $rsT->getNext()) { ?>
+							<?php while ($arrT = $rsT->getNext()) { ?>
 								<td class = "cursor" colspan = "5">&nbsp;</td>
-							<? }
+							<?php }
 								$rsT->reset(); ?>
 							<td></td>
 						</tr>
-						<?
+						<?php
 						$oldmois = $mois;
 					endif;
 
@@ -104,7 +104,7 @@
 						<td class = "cursor">
 							<a onclick = "ajaxMdl('production/produittarifgamme/produit_tarif_gamme_duplique','Dupliquer des tarifs','idproduit=<?= $arr["idproduit"] ?>&idproduit_tarif=<?= $arr["idproduit_tarif"] ?>')"><img onclick = "" src = "<?= ICONPATH ?>copy16.png" class = "cursor"/></a>
 						</td>
-						<? while ($arrT = $rsT->getNext()) {
+						<?php while ($arrT = $rsT->getNext()) {
 							$daGrp   = 'dagrp_' . uniqid();
 
 							$arrMore["idproduit_tarif"] = (int)$arr["idproduit_tarif"];
@@ -137,11 +137,11 @@
 							<td class = "ededed">
 								<input grp = "<?= $daGrp ?>" type = "text" class = "<?= $daGrp ?> inputFree alignright" name = "chProduit_tarif_gamme" value = "<?= $ARRPT["chProduit_tarif_gamme"] ?>"/>
 							</td>
-						<? }
+						<?php }
 							$rsT->reset(); ?>
 						<td></td>
 					</tr>
-				<? } ?>
+				<?php } ?>
 			</tbody>
 		</table>
 	</div>

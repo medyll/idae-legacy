@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 
 	ini_set('display_errors', 55);
@@ -33,7 +33,7 @@
 	<div class="flex_h flex_align_top flex_main" style="overflow:auto;">
 		<br>
 		<div class="retrait">
-			<?
+			<?php
 				while ($arrApp = $rsApp->getNext()):
 					$CODE_FOURNISSEUR = $arrApp['codeFeed_header'];
 					$idfournisseur    = (int)$arrApp['idfournisseur'];
@@ -54,12 +54,12 @@
 
 								<br><?= $CRUISELINE ?>
 								<br><?= idioma('Lancer') ?></a>
-							<? //=Act::imgApp('fournisseur',$idfournisseur,'tiny')
+							<?php //=Act::imgApp('fournisseur',$idfournisseur,'tiny')
 							?>
 						</div>
 						<div class="flex_main">
 							<div class="flex_h flex_wrap">
-								<?
+								<?php
 									// pour chaque destination de fournisseur GeoCode
 									$i = 0;
 									while ($arr_XD = $rs_XD->getNext()):
@@ -93,15 +93,15 @@
 												<progress style="display: none;color:red" id="auto_<?= $PROGRESS_NAME ?>"></progress>
 											</div>
 										</div>
-									<? endwhile; ?>
+									<?php endwhile; ?>
 							</div>
 						</div>
 					</div>
-				<? endwhile; ?>
+				<?php endwhile; ?>
 		</div>
 		<div style="overflow:hidden;position:sticky;">
 			<div class="borderl ededed" style="position:sticky;height:100%;overflow:auto;width:350px;">
-				<?
+				<?php
 					$rsApp->reset();
 					while ($arrApp = $rsApp->getNext()):
 						$CODE_FOURNISSEUR = $arrApp['codeFeed_header'];
@@ -115,7 +115,7 @@
 							<div class="padding borderb bold" style="position: sticky;top:0em;z-index:100">
 								<?= $CRUISELINE ?> <?= $APP->draw_field(['field_name_raw' => 'dateRun', 'table' => 'feed_header', 'field_value' => date_fr($arrApp['dateRunFeed_header'])]) ?>
 							</div>
-							<?
+							<?php
 								// pour chaque destination de fournisseur GeoCode
 								$i = 0;
 								while ($arr_XD = $rs_XD->getNext()):
@@ -130,12 +130,12 @@
 											<progress style="display: none;color:red" id="auto_<?= $PROGRESS_NAME ?>_panel"></progress>
 										</div>
 									</div>
-									<?
+									<?php
 
 								endwhile;
 							?>
 						</div>
-						<?
+						<?php
 					endwhile; ?></div>
 		</div>
 	</div>

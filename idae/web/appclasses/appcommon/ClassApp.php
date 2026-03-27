@@ -451,6 +451,10 @@ require_once __DIR__ . '/ClassAppFk.php';
 		}
 
 		function query_one($vars, $fields = []) {
+			if (empty($this->app_table_one['codeAppscheme_base']) || empty($this->app_table_one['codeAppscheme'])) {
+				error_log("[ClassApp::query_one] app_table_one not properly initialized for table: " . ($this->app_table ?? 'unknown'));
+				return [];
+			}
 			$arr = $this->plug($this->app_table_one['codeAppscheme_base'], $this->app_table_one['codeAppscheme'])->findOne($vars, $fields);
 
 			return $arr;
@@ -527,9 +531,9 @@ require_once __DIR__ . '/ClassAppFk.php';
 
 		function set_log($idagent, $table, $table_value, $log_type) {
 			$round_numerator      = 60 * 5;
-			$rounded_time         = (round(time() / $round_numerator) * $round_numerator);
+			$rounded_time         = (int)(round(time() / $round_numerator) * $round_numerator);
 			$upd                  = [];
-			$upd['codeActivite']  = strtoupper($table) . '_' . strtoupper($log_type);
+			$upd['codeActivite']  = strtoupper($table ?? '') . '_' . strtoupper($log_type ?? '');
 			$upd['timeActivite']  = (int)$rounded_time;
 			$upd['dateActivite']  = date('Y-m-d', $rounded_time);
 			$upd['heureActivite'] = date('H:i:s', $rounded_time);
@@ -545,7 +549,7 @@ require_once __DIR__ . '/ClassAppFk.php';
 			//
 			$APP_TMP                     = new App($table);
 			$ARR_TMP                     = $APP_TMP->query_one(['id' . $table => (int)$table_value]);
-			$h_upd['nomAgent_history']   = strtolower($ARR_TMP['nom' . ucfirst($table)]);
+			$h_upd['nomAgent_history']   = strtolower((string)($ARR_TMP['nom' . ucfirst($table ?? '')] ?? ''));
 			$h_upd['timeAgent_history']  = (int)time();
 			$h_upd['dateAgent_history']  = date('Y-m-d');
 			$h_upd['heureAgent_history'] = date('H:i:s');
@@ -649,7 +653,7 @@ require_once __DIR__ . '/ClassAppFk.php';
 			}
 
 			//if (!empty($value)):
-			switch (strtolower($arrF['codeAppscheme_field_type'])):
+			switch (strtolower($arrF['codeAppscheme_field_type'] ?? '')):
 				case 'valeur':
 					$value = (is_int($value)) ? maskNbre($value, 0) : $value;
 					break;
@@ -718,8 +722,8 @@ require_once __DIR__ . '/ClassAppFk.php';
 
 			$field_name_raw = $vars['field_name_raw'];
 			$table          = $vars['table'];
-			$value          = nl2br($vars['field_value']);
-			$value          = $vars['field_value'];//nl2br($vars['field_value']);
+			$value          = nl2br((string)($vars['field_value'] ?? ''));
+			$value          = $vars['field_value'] ?? '';//nl2br($vars['field_value']);
 			$Table          = ucfirst($table);
 			$field_name     = empty($vars['field_name']) ? $field_name_raw . $Table : $vars['field_name'];
 			$a1             = $this->appscheme_has_field->findOne(['codeAppscheme_has_field' => $field_name]);
@@ -741,7 +745,7 @@ require_once __DIR__ . '/ClassAppFk.php';
 
 			}
 
-			switch (strtolower($a2['codeAppscheme_field_type'])):
+			switch (strtolower($a2['codeAppscheme_field_type'] ?? '')):
 				case "icon":
 					$attr  = 'act_defer mdl="app/app_select_icon_fa" vars="' . http_build_query($vars) . '"';
 					$class = "fauxInput";
@@ -933,19 +937,28 @@ require_once __DIR__ . '/ClassAppFk.php';
 			return $db->getGridFS();
 		}
 
-		function update_inc($vars, $field = '') {
-			$table = $this->app_table_one['codeAppscheme'];
+		/**
+ * Increment a numeric field on documents matching the filter.
+ *
+ * @param array<string,mixed> $vars Filter for documents to update
+ * @param string $field Field to increment (defaults to nombreVue{Table})
+ * @return bool True on success, false on failure
+ */
+function update_inc($vars, $field = '') {
+$table = $this->app_table_one['codeAppscheme'];
 
-			if (empty($field)) $field = 'nombreVue' . ucfirst($table);
-			//
-			try {
-    $this->plug($this->app_table_one['codeAppscheme_base'], $this->app_table_one['codeAppscheme'])->updateOne($vars, ['$set' => $fields], ['upsert' => $upsert]);
+if (empty($field)) $field = 'nombreVue' . ucfirst($table);
+$vars = MongoCompat::convertFilter($vars);
+$col = $this->plug($this->app_table_one['codeAppscheme_base'], $this->app_table_one['codeAppscheme'])->getCollection();
+try {
+$col->updateOne($vars, ['$inc' => [$field => 1]]);
 } catch (\Throwable $e) {
-    error_log('[ClassApp::update_native] updateOne failed: ' . $e->getMessage());
-    return false;
+error_log('[ClassApp::update_inc] updateOne failed: ' . $e->getMessage());
+return false;
 }
 
-		}
+return true;
+}
 
 		function readNext($id) {
 			$arr = $this->plug('sitebase_increment', 'auto_increment')->findOne(['_id' => $id]);
@@ -1536,8 +1549,12 @@ require_once __DIR__ . '/ClassAppFk.php';
 			// table sur laquelle on bosse
 			$name_id    = $this->app_field_name_id;
 			$name_table = $this->app_table_one['codeAppscheme'];
-			$Name_table = ucfirst($name_table);
+			$Name_table = ucfirst($name_table ?? '');
 			$GRILLE_FK  = $this->get_grille_fk();//$name_table
+			if (empty($this->app_table_one['codeAppscheme_base']) || empty($this->app_table_one['codeAppscheme'])) {
+				error_log("[ClassApp::consolidate_scheme] app_table_one not initialized for table: " . ($this->app_table ?? 'unknown'));
+				return [];
+			}
 			$col        = $this->plug($this->app_table_one['codeAppscheme_base'], $this->app_table_one['codeAppscheme']);
 			$arr_vars   = (empty($table_value)) ? [] : [$name_id => $table_value];
 			$rs         = new MongodbCursorWrapper($col->find($arr_vars));
@@ -2313,5 +2330,6 @@ require_once __DIR__ . '/ClassAppFk.php';
 			return $out;
 		}
 	}
+
 
 

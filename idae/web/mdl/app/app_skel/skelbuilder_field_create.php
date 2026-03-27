@@ -38,17 +38,17 @@
 				<div class="ms-TextField is-required">
 					<label class="ms-Label">field_group</label>
 					<select required name="vars[idappscheme_field_group]" class="ms-TextField-field" >
-					<? while($arr_g = $rs_g->getNext()): ?>
+					<?php while($arr_g = $rs_g->getNext()): ?>
 					<option value="<?=$arr_g['idappscheme_field_group']?>"><?=$arr_g['nomAppscheme_field_group']?></option>
-					<?
+					<?php
 						endwhile;?></select>
 				</div>
 				<div class="ms-TextField is-required">
 					<label class="ms-Label">field_type</label>
 					<select required name="vars[field_type]" class="ms-TextField-field" >
-					<? while($arr_t = $rs_t->getNext()): ?>
+					<?php while($arr_t = $rs_t->getNext()): ?>
 					<option value="<?=$arr_t['type_name']?>"><?=$arr_t['type_name']?></option>
-					<?
+					<?php
 						endwhile;?></select>
 				</div>
 				<div class="buttonZone">

@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 	require_once(__DIR__ . '/../../../appclasses/appcommon/MongoCompat.php');
 	use AppCommon\MongoCompat;
@@ -49,19 +49,19 @@
 	<div id = "param_se"
 	     class = "applink applinkblock border4 margin absolute blanc avoid"
 	     style = "width: 100%;z-index: 100;display: none;">
-		<? foreach ($RSSCHEME as $sch):
+		<?php foreach ($RSSCHEME as $sch):
 			$table = $sch['collection'];?>
 			<label><input type = "checkbox" onclick="save_setting_mdl_search(this,'<?= $table ?>_search_field');"
 			              value = "1" <?=checked( $APP->get_settings($_SESSION['idagent'], $table . '_search_field'));?>>&nbsp;<?= $sch['base'] .'-'. $sch['collection'] ?></label>
 
-		<? endforeach; ?>
+		<?php endforeach; ?>
 	</div>
 </div>
 <div id="dyn_se"></div>
 
 <div app_gui_flowdown
      style = "overflow: auto;width:550px;">
-	<? foreach ($RSSCHEME as $sch):
+	<?php foreach ($RSSCHEME as $sch):
 		$table  = $sch['collection'];
 		$id     = 'id' . $table;
 		$nom    = 'nom' . ucfirst($table);
@@ -107,7 +107,7 @@
 					<?= $sch['collection'] ?></span>
 				</div>
 				<div class = "autoBlock applink applinkblock">
-					<? while ($arr_rssc = $rssc->getNext()) : ?>
+					<?php while ($arr_rssc = $rssc->getNext()) : ?>
 						<table style = "width: 100%;" class="tabletop"  data-contextual="table=<?= $table ?>&table_value=<?= $arr_rssc[$id] ?>">
 							<tr class = "mastershow">
 								<td style = "width: 50px;"><a><?= $arr_rssc[$id] ?></a></td>
@@ -115,7 +115,7 @@
 									<div <?=(sizeof($GRILLE_FK)==0)? '' : 'auto_tree'; ?>><a act_chrome_gui = "app/app/app_fiche"
 									                  vars = "table=<?= $table ?>&table_value=<?= $arr_rssc[$id] ?>"><?= $arr_rssc[$nom] ?> <?= strtolower($arr_rssc[$prenom]) ?></a></div>
 									<div class="autoBlock" style="display:none;">
-										<? foreach ($GRILLE_FK as $field):
+										<?php foreach ($GRILLE_FK as $field):
 											$id_fk = $field['idtable_fk'];
 											//
 											if(!empty($arr_rssc[$id_fk])):
@@ -125,19 +125,19 @@
 												$APPFK     = new App($field['table_fk']);
 											?>
 											<div class = "ellipsis inline demi" style="width:40%;"><a><i class = "fa fa-<?= $APPFK->app_table_one['icon'] ?>"></i><?= $dsp_name?></a></div>
-										<? endif; ?>
-										<? endforeach; ?>
+										<?php endif; ?>
+										<?php endforeach; ?>
 									</div>
 								</td>
 
 
 							</tr>
 						</table>
-					<? endwhile; ?>
+					<?php endwhile; ?>
 				</div>
 			</div>
-		<? endif; ?>
-	<? endforeach; ?>
+		<?php endif; ?>
+	<?php endforeach; ?>
 </div>
 <script>
 	save_setting_mdl_search = function (node, key) {

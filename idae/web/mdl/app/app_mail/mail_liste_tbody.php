@@ -10,7 +10,7 @@ $rs=skelMongo::connect('email','sitebase_email')->find(array('idagent'=>(int)$id
 $time = time(); 
 ?>
 <tr   id="autoLoad-recordcount" style="display:none" class="autoLoad-recordcount" recordcount="<?=$rs->count()?>"></tr>
-<?
+<?php
 $i=0;
 $out = '';
 while($msg=$rs->getNext()){

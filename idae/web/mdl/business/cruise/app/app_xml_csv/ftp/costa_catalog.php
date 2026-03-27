@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 	const JOBS = 8;
 	ini_set("soap.wsdl_cache_enabled", 0);

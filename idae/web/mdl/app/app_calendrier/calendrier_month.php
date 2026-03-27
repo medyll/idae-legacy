@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 	$sd         = $_POST['sd'];
 	$calendarId = $_POST['calendarId'];
@@ -12,7 +12,7 @@
 ?>
 <div class="padding_more ededed bordert" style="text-align:left;height: 100%;overflow:hidden;" id="dynlistMois">
 	<div class="    blanc  relative applink applinkblock toggler flex_h flex_wrap  flex_align_stretch " style="text-align:left;padding:0px;height: 100%;overflow:hidden;" >
-		<?
+		<?php
 			for ($m = 1; $m <= 12; $m++) {
 				$lien = gmmktime(12, 0, 0, $m, $jour, $annee);
 				($mois == $m) ? $class = 'active' : $class = '';
@@ -22,6 +22,6 @@
 						<a class="ellipsis <?= $class ?> autoToggle"> <?= $tabMois2[$m] ?> </a>
 					</div>
 				</div>
-			<? } ?>
+			<?php } ?>
 	</div>
 </div>

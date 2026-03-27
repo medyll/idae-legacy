@@ -38,13 +38,13 @@
 	<div class="padding_more boxshadowb blanc">
 		Voir aussi
 	</div>
-	<?
+	<?php
 		foreach ($GRILLE_RFK_BIS as $grp_fk => $arr_type) {
 
 			?>
 			<div class="padding_more borderb bold"><i class="fa fa-<?= $arr_type['iconAppscheme_type'] ?>"></i><?= $arr_type['nomAppscheme_type'] ?></div>
 			<div class="flex_v retrait">
-				<?
+				<?php
 					foreach ($arr_type['appscheme'] as $table_fk => $arr_rfk) {
 
 						?>
@@ -56,9 +56,9 @@
 								<span>(<?= $arr_rfk['count'] ?>)</span>
 							</a>
 						</div>
-					<? } ?>
+					<?php } ?>
 			</div>
-			<?
+			<?php
 		}
 
 	?>

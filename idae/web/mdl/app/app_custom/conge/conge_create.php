@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 	$APP    = new App('conge');
 	$APP_T  = new App('conge_type');
@@ -26,22 +26,22 @@
 		<input type="hidden" name="proprietaireAgent" value="<?= $_SESSION['idagent']; ?>"/>
 		<input type="hidden" name="vars[idagent_writer]" value="<?= $_SESSION['idagent']; ?>"/>
 		<input type="hidden" name="vars[estActifConge]" value="0"/>
-		<? if (!empty($_POST['vars']['idagent'])) { ?>
+		<?php if (!empty($_POST['vars']['idagent'])) { ?>
 			<input type="hidden" name="vars[idagent]" value="<?= $_POST['vars']['idagent']; ?>"/>
-		<? } ?>
+		<?php } ?>
 		<input type="hidden" name="reloadModule[app/app_conge/app_conge_reload]" value="*"/>
 		<input type="hidden" name="afterAction[app/app/app_create]" value="close"/>
 		<input type="hidden" name="table" value="conge"/>
 		<div class=" ededed ">
 			<div class="padding margin border4  blanc">
-				<? if (empty($_POST['vars']['idagent'])) { ?>
+				<?php if (empty($_POST['vars']['idagent'])) { ?>
 					<table class="tablemiddle tablepadding" style="width:100%;table-layout:auto">
 						<tr>
 							<td style="width:80px;"><?= idioma("Agent") ?></td>
 							<td><?= $selectA ?></td>
 						</tr>
 					</table>
-				<? } ?>
+				<?php } ?>
 				<table class="tablemiddle tablepadding" style="width:100%;table-layout:auto">
 					<tr>
 						<td style="width:80px;"><?= idioma("Type") ?></td>

@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 	global $buildArr;
 	global $IMG_SIZE_ARR;
@@ -66,12 +66,12 @@
 					<td>Image</td>
 					<td><?= chkSch('hasImageScheme', $arr['hasImageScheme']); ?></td>
 				</tr>
-				<? foreach ($IMG_SIZE_ARR as $key => $value) { ?>
+				<?php foreach ($IMG_SIZE_ARR as $key => $value) { ?>
 					<tr>
 						<td><?=$key?> <?=$value[0].' '.$value[1]?></td>
 						<td><?= chkSch('hasImage'.$key.'Scheme', $arr['hasImage'.$key.'Scheme']); ?></td>
 					</tr>
-				<?  } ?>
+				<?php  } ?>
 			</table>
 		</div>
 	</div>

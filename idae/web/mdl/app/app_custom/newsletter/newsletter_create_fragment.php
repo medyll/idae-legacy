@@ -8,4 +8,4 @@
 ?>
 	<input type="hidden" name="editAfter" value="newsletter"/>
 
-<?
+<?php

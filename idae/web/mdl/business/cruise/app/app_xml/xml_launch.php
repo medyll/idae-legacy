@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 	$APP   = new App('feed_header');
 	$col_F = new App('fournisseur');
@@ -19,7 +19,7 @@
 		<br>
 	</div>
 	<div class="retrait flex_main toggler" style="overflow: auto;">
-		<?
+		<?php
 			//
 			$PROG_MSG = '';
 			$zi       = 0;
@@ -42,7 +42,7 @@
 						<progress style="display: none;" id="auto_xml_job_<?= $CRUISELINE ?>"></progress>
 					</div>
 				</div>
-				<?
+				<?php
 			endwhile;
 		?>
 	</div>

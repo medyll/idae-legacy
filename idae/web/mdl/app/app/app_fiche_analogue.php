@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 
 	$table = $_POST['table'];
@@ -24,7 +24,7 @@
 	$nom = 'nom' . ucfirst($table);
 
 ?>
-<?
+<?php
 	$arr_same = [];
 	foreach ($APPOBJ->GRILLE_FK as $field):
 		//	print_r($field);
@@ -47,9 +47,9 @@
 					<a onclick="<?= fonctionsJs::app_liste($table, '5', $list_vars . '&sortBy=dateCreation' . $Table . '&sortDir=-1') ?>"><?= idioma('Voir tout') . ' (' . $RS_SAME->count() . ')' ?></a>
 					<div class="textbold"> <?= $APP->vars_to_titre($arr_same) ?></div>
 				</div>
-			<? } ?>
+			<?php } ?>
 			<div class="  padding_more flex_h flex_wrap" style="overflow:hidden; ">
-				<?
+				<?php
 					while ($ARR_SAME = $RS_SAME->getNext()):
 
 						?>
@@ -58,9 +58,9 @@
 								<a onclick="<?= fonctionsJs::app_fiche($table, $ARR_SAME[$name_id]) ?>">- <?= strtolower($ARR_SAME['nom' . $Table]); ?></a>
 							</div>
 						</div>
-						<?
+						<?php
 					endwhile;
 				?>
 			</div>
-		<? } ?>
-	<? } ?>
+		<?php } ?>
+	<?php } ?>

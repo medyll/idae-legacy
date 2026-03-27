@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 	$APP           = new App('newsletter');
 	$APP_ITEM      = new App('newsletter_item');
@@ -29,23 +29,23 @@
 			</a>
 		</div>
 		<div class="padding border4 " style="display:none">
-			<? while ($arrT = $rsType->getNext()) {
+			<?php while ($arrT = $rsType->getNext()) {
 				$idnewsletter_item_type = $arrT['idnewsletter_item_type'];
 				$valeur = $arrT['quantiteNewsletter_item_type'];
 				?>
 				<div class="margin flex_h flex_align_middle ededed  ">
 					<div class="flex_main flex_h flex_align_middle">
-						<? for ($i = 0; $i < $valeur; $i++) { ?>
+						<?php for ($i = 0; $i < $valeur; $i++) { ?>
 							<div class="flex_main   aligncenter margin border4" style="line-height:3em;">
 								<i class="fa fa-image"></i>
 							</div>
-						<? } ?>
+						<?php } ?>
 					</div>
 					<div class="">
 						<a onclick="ajaxValidation('app_multi_create','mdl/app/','occurence=<?=$valeur?>&table=newsletter_item&vars[idnewsletter_item_type]=<?=$idnewsletter_item_type?>&vars[idnewsletter]=<?=$idnewsletter?>')"><i class="fa fa-plus"></i> </a>
 					</div>
 				</div>
-			<? } ?>
+			<?php } ?>
 		</div>
 	</div>
 	<div class="relative" style="min-height:200px;overflow: auto">
@@ -53,7 +53,7 @@
 			<a><i class="fa fa-sort"></i> <?= idioma('Ordonner'); ?></a>
 		</div>
 		<div  data-table="newsletter_block"  class="  padding margin" style="position:relative;" id="<?= $formSearch ?>" sort_zone_drag="true">
-			<? if (!empty($idnewsletter)) {
+			<?php if (!empty($idnewsletter)) {
 
 				$rs_block = $APP_BLOCK->query(array('idnewsletter' => $idnewsletter))->sort(['ordreNewsletter_block' => 1]);
 				while ($arr_block = $rs_block->getNext()):
@@ -64,11 +64,11 @@
 					<div draggable="true" data-sort_element="true" data-table="newsletter_block" data-table_value="<?= $idnewsletter_block ?>" data-contextual="table=newsletter_block&table_value=<?= $idnewsletter_block ?>" class="flex_h flex_align_middle borderb margin" style="width:100%;position:relative;">
 						<div>
 							<div class="relative flex_h" style="width: 160px;">
-								<? for ($i = 0; $i < $rs_item->count(); $i++) { ?>
+								<?php for ($i = 0; $i < $rs_item->count(); $i++) { ?>
 									<div class="flex_main fond_noir aligncenter margin boxshadow" style="line-height:3em;">
 										 ss
 									</div>
-								<? } ?>
+								<?php } ?>
 							</div>
 						</div>
 						<div class="alignright" style="width:40px;vertical-align:top;">
@@ -78,7 +78,7 @@
 							</div>
 						</div>
 					</div>
-					<?
+					<?php
 				endwhile;
 
 			} ?>

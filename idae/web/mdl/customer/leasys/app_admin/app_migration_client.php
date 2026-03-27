@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 
 	$APP       = new App();
@@ -49,7 +49,7 @@
 			</div>
 			<div style="width:100%;max-height:350px;border:none;overflow:auto;" id="frame_xmlte_fst"></div>
 		</div>
-		<?
+		<?php
 		return;
 	endif;
 

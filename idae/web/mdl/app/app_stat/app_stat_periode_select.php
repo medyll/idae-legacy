@@ -1,4 +1,4 @@
-<?
+<?php
 include_once($_SERVER['CONF_INC']);
 $uniqid = uniqid();
 
@@ -39,7 +39,7 @@ $label = '90 derniers jours';
 $out[] = array('startTime'=>$startTime,'endTime'=>$endTime,'label'=>$label) ;
 ?>
 <div class="applink applinkblock toggler">
-<? foreach($out as $inlink): ?>
+<?php foreach($out as $inlink): ?>
 <a class="autoToggle" onClick="$(this).fire('dom:act_click',{dateDebut:'<?=$inlink['startTime']?>',dateFin:'<?=$inlink['endTime']?>',value:'<?=$inlink['label']?>'})"><?=$inlink['label']?></a>
-<? endforeach; ?> 
+<?php endforeach; ?> 
 </div>

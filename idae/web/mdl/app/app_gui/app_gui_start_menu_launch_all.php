@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 
 	$idappscheme_type = (int)$_POST['idappscheme_type'];
@@ -15,11 +15,11 @@
 	<div class="flex_main" style="overflow:auto;">
 		<div style="width:100%;">
 			<div class="">
-				<? foreach ($RSSCHEME as $sch):
+				<?php foreach ($RSSCHEME as $sch):
 					$table   = $sch['codeAppscheme'];
 					$APP_TMP = new App($table);
 					?>
-					<? if (droit_table($_SESSION['idagent'], 'L', $table)) : ?>
+					<?php if (droit_table($_SESSION['idagent'], 'L', $table)) : ?>
 					<div class="margin_more   bordert    flex_align_middle">
 						<div class="ellipsis">
 							<a class="autoToggle hide_gui_pane" onclick="ajaxInMdl('app/app/app_explorer','app_explorer_<?= $table ?>','table=<?= $table ?>',{onglet:'<?= idioma('Espace ' . $table) ?>'});"><i
@@ -28,28 +28,28 @@
 							</a>
 						</div>
 						<div class=" applink retrait alignright">
-							<? if (droit_table($_SESSION['idagent'], 'C', $table)) : ?>
+							<?php if (droit_table($_SESSION['idagent'], 'C', $table)) : ?>
 								<a class="autoToggle hide_gui_pane" onclick="<?= fonctionsJs::app_create($table, ['idagent' => $_SESSION['idagent']]); ?>"><i class="fa fa-save"></i></a>
-							<? endif; ?>
-							<? if (droit_table($_SESSION['idagent'], 'L', $table)) : ?>
+							<?php endif; ?>
+							<?php if (droit_table($_SESSION['idagent'], 'L', $table)) : ?>
 								<a class="autoToggle hide_gui_pane" onclick="ajaxInMdl('app/app/app_explorer','app_explorer_<?= $table ?>','table=<?= $table ?>',{onglet:'<?= idioma('Espace ' . $table) ?>'});"><i
 										class="fa fa-home "></i>
 								</a>
 								<a class="autoToggle hide_gui_pane" onclick="ajaxInMdl('app/app_prod/app_prod','tmp_exp_prod','table=<?= $table ?>',{onglet:'Production <?= $table ?>'});"><i class="fa fa-folder-open"></i>
 								</a>
-							<? endif; ?>
-							<? if (droit_table($_SESSION['idagent'], 'R', $table)) : ?>
+							<?php endif; ?>
+							<?php if (droit_table($_SESSION['idagent'], 'R', $table)) : ?>
 								<a class="autoToggle hide_gui_pane" onclick="ajaxInMdl('app/app_prod/app_prod_search','tmp_exp_prod_search','table=<?= $table ?>&vars[collection]=<?= $table ?>',{onglet:'Recherche rapide <?= $table ?>'});"><i
 										class="fa fa-search textgris"></i>
 								</a>
-							<? endif; ?>
-							<? if ($APP_TMP->has_field('dateDebut') && !empty($APP_TMP->app_table_one['hasStatutScheme'])) { ?>
+							<?php endif; ?>
+							<?php if ($APP_TMP->has_field('dateDebut') && !empty($APP_TMP->app_table_one['hasStatutScheme'])) { ?>
 								<a class="autoToggle hide_gui_pane" onclick="<?= fonctionsJs::app_console($table) ?>"><i class="fa fa-dashboard"></i></a>
-							<? } ?>
+							<?php } ?>
 						</div>
 					</div>
-				<? endif; ?><br>
-				<? endforeach; ?>
+				<?php endif; ?><br>
+				<?php endforeach; ?>
 			</div>
 		</div>
 	</div>

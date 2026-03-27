@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 
 	$table = $_POST['table'];
@@ -57,12 +57,12 @@
 					<div class="flex_v" >
 						<div class="margin flex_v" style="min-width:350px;max-width:650px; ">
 							<div class="borderb">
-								<? foreach ($APPOBJ->ARR_GROUP_FIELD as $key => $val) {
+								<?php foreach ($APPOBJ->ARR_GROUP_FIELD as $key => $val) {
 									$arrg = $val['group'];
 									$arrf = $val['field'];
 									?>
 									<div class="margin   flex_h flex_wrap flex_align_stretch">
-										<? foreach ($arrf as $keyf => $valf) {
+										<?php foreach ($arrf as $keyf => $valf) {
 											if (empty($ARR[$valf['codeAppscheme_field'] . $Table])) continue;
 											?>
 											<table class="table_info flex_grow_1">
@@ -76,14 +76,14 @@
 													</td>
 												</tr>
 											</table>
-										<? } ?>
+										<?php } ?>
 									</div>
-								<? } ?>
+								<?php } ?>
 							</div>
 							<div class="padding">
 								<div><?= skelMdl::cf_module('app/app/app_fiche_fk', ['mode' => 'fiche', 'table' => $table, 'table_value' => $table_value], $table_value) ?></div>
 							</div>
-							<? if (!empty($APPOBJ->APP_TABLE['hasLigneScheme'])): ?>
+							<?php if (!empty($APPOBJ->APP_TABLE['hasLigneScheme'])): ?>
 								<br>
 								<div class="border4" style="max-height:300px;overflow:auto;" id="zone_ligne<?= $table_value ?>" data-classname="table_vertical" data-data_model="defaultModel">
 									<script>
@@ -91,13 +91,13 @@
 									</script>
 								</div>
 								<br>
-							<? endif; ?>
+							<?php endif; ?>
 							<div class="flex_main"></div>
-							<? if (sizeof($R_FK) != 0) : ?>
+							<?php if (sizeof($R_FK) != 0) : ?>
 								<div class="padding_more ededed bordert">
 									<?= skelMdl::cf_module('app/app/app_fiche_rfk', ['act_chrome_gui' => 'app/app_liste/app_liste_gui', 'table' => $table, 'table_value' => $table_value], $table_value) ?>
 								</div>
-							<? endif; ?>
+							<?php endif; ?>
 						</div>
 						<div class="flex_main dark_3" >main</div>
 					</div>
@@ -105,7 +105,7 @@
 				<div class="" style="max-width:210px;">
 					<div class="">
 						<div class="padding_more relative">
-							<?
+							<?php
 								$arr_has = ['statut', 'type', 'categorie', 'group'];
 								foreach ($arr_has as $key => $value):
 									$APPTMP = new App($value);
@@ -119,13 +119,13 @@
 											<div class="textgris"><?= ucfirst(idioma($Value)) ?> <i class="fa fa-<?= $APPTMP->iconAppscheme ?>"></i></div>
 											<div><?= $ARR[$_nom] ?></div
 										</div>
-									<? endif; ?>
-								<? endforeach; ?>
+									<?php endif; ?>
+								<?php endforeach; ?>
 						</div>
 						<div>
 							<div><?= skelMdl::cf_module('app/app/app_fiche_history', ['mode' => 'fiche', 'table' => $table, 'table_value' => $table_value], $table_value) ?></div>
 						</div>
-						<? if ($APPOBJ->R_FK['document']): ?>
+						<?php if ($APPOBJ->R_FK['document']): ?>
 							<div>
 								<div class=" inline padding border4 margin ededed">
 									<div style="position:relative;width:100px;" id="drag_perso">
@@ -158,7 +158,7 @@
 									new myddeAttach ($ ('fiche_table_<?=$table?>_<?=$table_value?>'), { form : 'form_upload_<?= $table ?>', autoSubmit : true });
 								</script>
 							</div>
-						<? endif; ?>
+						<?php endif; ?>
 					</div>
 				</div>
 			</div>
@@ -168,11 +168,11 @@
 <div class="buttonZone ">
 	<input type="button" class="cancelClose" value="<?= idioma('Fermer') ?>">
 </div>
-<? if (droit('DEV')) { ?>
+<?php if (droit('DEV')) { ?>
 	<div class="footerFor">
-		<div class="padding bordert  ededed">     <?= $_POST['module'] ?><? printr($_POST) ?></div>
+		<div class="padding bordert  ededed">     <?= $_POST['module'] ?><?php printr($_POST) ?></div>
 	</div>
-<? } ?>
+<?php } ?>
 <div class="titreFor">
 	<i class="fa fa-<?= $APPOBJ->ICON ?>" boxshadow style="color:<?= $ICON_COLOR ?>"></i> <?= ucfirst($APPOBJ->NAME_APP) ?> <?= $APPOBJ->ARR[$nom] ?>
 </div>

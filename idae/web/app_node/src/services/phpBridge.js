@@ -3,6 +3,7 @@
  */
 import axios from 'axios';
 import qs from 'qs';
+import logger from '../config/logger.js';
 
 /**
  * Wrapper for PHP Legacy calls
@@ -13,10 +14,15 @@ export const phpBridge = {
      */
     buildHeaders(data) {
         const PHPSESSID = data.PHPSESSID || "";
-        return {
+        const headers = {
             "Cookie": "PHPSESSID=" + PHPSESSID + "; path=/",
             "content-type": "application/x-www-form-urlencoded"
         };
+        // Forward the original client domain as Host header so PHP host detection works
+        if (data.DOCUMENTDOMAIN) {
+            headers["Host"] = data.DOCUMENTDOMAIN;
+        }
+        return headers;
     },
 
     /**
@@ -28,7 +34,7 @@ export const phpBridge = {
             const headers = this.buildHeaders(data);
             
             // Console log for debug
-            // console.log(`[PHP-BRIDGE] POST ${url}`, { headers, bodyLength: body.length });
+            // logger.info(`[PHP-BRIDGE] POST ${url}`, { headers, bodyLength: body.length });
 
             const response = await axios.post(url, body, {
                 headers: headers,
@@ -42,10 +48,10 @@ export const phpBridge = {
         } catch (error) {
             // Handle Redirects (3xx) manually if needed, or just return empty/error
              if (error.response && error.response.status >= 300 && error.response.status < 400) {
-                 console.log(`[PHP-BRIDGE] Redirect detected from ${url} -> ${error.response.headers.location}`);
+                 logger.info(`[PHP-BRIDGE] Redirect detected from ${url} -> ${error.response.headers.location}`);
                  return { data: "", status: error.response.status, location: error.response.headers.location };
              }
-            console.error(`[PHP-BRIDGE] Error posting to ${url}:`, error.message);
+            logger.error(`[PHP-BRIDGE] Error posting to ${url}:`, error.message);
             throw error;
         }
     },
@@ -65,12 +71,12 @@ export const phpBridge = {
             return response.data;
         } catch (error) {
             if (error.response && error.response.status >= 300 && error.response.status < 400) {
-                 console.log(`[PHP-BRIDGE] Redirect detected from ${url} -> ${error.response.headers.location}`);
+                 logger.info(`[PHP-BRIDGE] Redirect detected from ${url} -> ${error.response.headers.location}`);
                  // Return empty JSON or indication of redirect? 
                  // For get_data('json_ssid'), return default structure?
                  return { error: 'redirect', location: error.response.headers.location };
              }
-            console.error(`[PHP-BRIDGE] Error getting ${url}:`, error.message);
+            logger.error(`[PHP-BRIDGE] Error getting ${url}:`, error.message);
             throw error;
         }       
     }

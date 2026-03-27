@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 	$APP = new App('promo_zone');
 
@@ -20,7 +20,7 @@
 		</div>
 	</div>
 	<div class="none">
-		<? //=skelMdl::cf_module('document/document_nav',array('scope'=>'document','document'=>$_SESSION['idagent']),$_SESSION['idagent'])?>
+		<?php //=skelMdl::cf_module('document/document_nav',array('scope'=>'document','document'=>$_SESSION['idagent']),$_SESSION['idagent'])?>
 	</div>
 	<div id="fullzone<?= $uniqid ?>" class="flex_main flex_h relative">
 		<div id="<?= $dropzone ?>" class="frmCol11 ededed">

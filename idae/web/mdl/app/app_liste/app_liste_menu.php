@@ -41,18 +41,18 @@
 ?>
 <div class="boxshadow padding relative toggler applink">
 	<div class="flex_h   flex_margin padding flex_align_middle">
-		<? if (!empty($table) && droit_table($_SESSION['idagent'], 'C', $table)): ?>
+		<?php if (!empty($table) && droit_table($_SESSION['idagent'], 'C', $table)): ?>
 			<div class="aligncenter blanc borderr">
 				<a onclick="<?= fonctionsJs::app_create($table, $_POST) ?>" class="ellipsis appbutton bold">
 					<i class="fa fa-copy textbleu"></i> <?= idioma('Créer') . ' ' . $APP->nomAppscheme ?>
 				</a>
 			</div>
-		<? endif; ?>
+		<?php endif; ?>
 		<div class="">
 			<a class="autoToggle none" app_button="app_button" onclick="save_settings('list_data_button_nbRows_<?= $table ?>','<?= $_table ?>');" vars="<?= $HTTP_BASE_VARS ?>&nbRows=5000&<?= $HTTP_VARS ?>">
 				5000
 			</a>
-			<? if (!empty($APP_TABLE['hasTypeScheme']) || sizeof($GRILLE_FK) != 0):
+			<?php if (!empty($APP_TABLE['hasTypeScheme']) || sizeof($GRILLE_FK) != 0):
 				$css = (!empty($settings_button_group)) ? 'active' : '';
 				?>
 				<a data-menu="data-menu" class="<?= $css ?> aligncenter ellipsis">
@@ -60,13 +60,13 @@
 					Grouper <?= $settings_button_group ?>
 				</a>
 				<div class="toggler boxshadow   contextmenu applinkblock hide_on_click" style="display:none;z-index:1000;">
-					<? foreach ($arr_sort as $key => $value):
+					<?php foreach ($arr_sort as $key => $value):
 						$url_vars  = http_build_query(array_merge($ARR_BASE_VARS,$ARR_VARS,['groupBy'=> $value['codeAppscheme_field']]));
 						?>
 						<a data-button_group="<?=$key ?>" onclick="save_settings('list_data_button_group_<?= $table ?>','<?= $value['codeAppscheme_field'] ?>');" class="autoToggle" app_button="app_button" vars="<?= $url_vars ?>">
-							<?= $value['nomAppscheme_field'] ?></a>                <? endforeach; ?>
+							<?= $value['nomAppscheme_field'] ?></a>                <?php endforeach; ?>
 					<hr>
-					<?
+					<?php
 						$arr_has = ['statut', 'type', 'categorie', 'groupe', 'group'];
 						foreach ($arr_has as $key => $value):
 							$Value  = ucfirst($value);
@@ -79,9 +79,9 @@
 								   vars="<?=$url_vars?>">
 									<?= $value ?>
 								</a>
-							<? endif; ?>
-						<? endforeach; ?>
-					<? if (sizeof($GRILLE_FK) != 0):
+							<?php endif; ?>
+						<?php endforeach; ?>
+					<?php if (sizeof($GRILLE_FK) != 0):
 						foreach ($GRILLE_FK as $fk):
 							$css = ($settings_button_group == $fk['table_fk']) ? 'active' : '';
 							$url_vars  = http_build_query(array_merge($ARR_BASE_VARS,$ARR_VARS,['groupBy'=>$fk['table_fk']]));
@@ -89,14 +89,14 @@
 							<a data-button_group="<?=$fk['table_fk']?>" onclick="save_settings('list_data_button_group_<?= $table ?>','<?= $fk['table_fk'] ?>');" class="autoToggle <?= $css ?>" app_button="app_button"
 							   vars="<?= $url_vars ?>">
 								<?= $fk['table_fk'] ?> </a>
-						<? endforeach;
+						<?php endforeach;
 					endif;
 						$url_vars  = http_build_query(array_merge($ARR_BASE_VARS,$ARR_VARS,['groupBy'=>null]));
 					?>
 					<a data-button_group="" onclick="save_settings('list_data_button_group_<?= $table ?>','');" class="autoToggle" app_button="app_button" vars="<?=$url_vars?>">
 						ne plus grouper
 					</a>
-				</div>            <? endif; ?>
+				</div>            <?php endif; ?>
 		</div>
 		<div class="borderl flex_h flex_align_middle">
 			<a class=" aligncenter ellipsis" data-menu="data-menu">
@@ -104,28 +104,28 @@
 				Trier par <?= $arr_sort[$sortBy]['nomAppscheme_field'] ?>
 			</a>
 			<div class="absolute   contextmenu applinkblock hide_on_click" style="display:none;z-index:1000;">
-				<? foreach ($ARR_GROUP_FIELD as $key => $val) {
+				<?php foreach ($ARR_GROUP_FIELD as $key => $val) {
 					$arrg = $val['group'];
 					$arrf = $val['field'];
 					?>
 					<div class="borderb">
-						<? foreach ($arrf as $keyf => $valf) {
+						<?php foreach ($arrf as $keyf => $valf) {
 							?>
 							<a data-button_sort="<?= $valf['codeAppscheme_field'] . $Table ?>" class="autoToggle" onclick="save_settings('list_data_button_sort_<?= $table ?>','<?= $valf['codeAppscheme_field'] . $Table ?>');" app_button="app_button"
 							   vars="<?= $HTTP_BASE_VARS ?>&sortBy=<?= $valf['codeAppscheme_field'] . $Table ?>&<?= $HTTP_VARS ?>">
-								<?= ucfirst($valf['nomAppscheme_field']) ?>  </a>                        <? } ?>
-					</div>                <? } ?>
+								<?= ucfirst($valf['nomAppscheme_field']) ?>  </a>                        <?php } ?>
+					</div>                <?php } ?>
 
-				<? if (sizeof($GRILLE_FK) != 0): ?><? foreach ($GRILLE_FK as $fk):
+				<?php if (sizeof($GRILLE_FK) != 0): ?><?php foreach ($GRILLE_FK as $fk):
 					?>
 					<a data-button_sort="<?=$fk['table_fk'] ?>" onclick="save_settings('list_data_button_sort_<?= $table ?>','<?= 'nom' . ucfirst($fk['table_fk']) ?>');" class="autoToggle" app_button="app_button"
 					   vars="<?= $HTTP_BASE_VARS ?>&sortBy=<?= 'nom' . ucfirst($fk['table_fk']) ?>&<?= $HTTP_VARS ?>">
-						<?= $fk['table_fk'] ?> </a>                    <? endforeach; ?>
-					<hr>                <? endif; ?>
-				<? foreach ($arr_sort as $key => $value):
+						<?= $fk['table_fk'] ?> </a>                    <?php endforeach; ?>
+					<hr>                <?php endif; ?>
+				<?php foreach ($arr_sort as $key => $value):
 					?>
 					<a data-button_sort="<?=$key ?>" onclick="save_settings('list_data_button_sort_<?= $table ?>','<?= $key ?>');" class="autoToggle" app_button="app_button" vars="<?= $HTTP_BASE_VARS ?>&sortBy=<?= $key ?>&<?= $HTTP_VARS ?>">
-						<?= $value['nomAppscheme_field'] ?></a>                <? endforeach; ?>
+						<?= $value['nomAppscheme_field'] ?></a>                <?php endforeach; ?>
 			</div>
 			<div class="flex_h toggler">
 				<a data-button_sort_order="1" class="autoToggle bordert" app_button="app_button" vars="<?= $HTTP_BASE_VARS ?>&sortDir=<?= (($sortDir == 1) ? '1' : '-1'); ?>&<?= $HTTP_VARS ?>">
@@ -207,25 +207,25 @@
 				<a onclick="save_settings('list_data_button_dsp_<?= $table ?>','fields');" class="autoToggle" data-button-dsp="fields">
 					<i class="fa fa-align-left "></i> <?= idioma('fields') ?>
 				</a>
-				<? if ($APP->hasImageScheme) { ?>
+				<?php if ($APP->hasImageScheme) { ?>
 					<hr>
 					<a onclick="save_settings('list_data_button_dsp_<?= $table ?>','image');" class="autoToggle" data-button-dsp="image">
 						<i class="fa fa-align-left "></i> <?= idioma('Images') ?>
 					</a>
-				<? } ?>
+				<?php } ?>
 			</div>
 		</div>
-		<? if (droit('DEV')) { ?>
+		<?php if (droit('DEV')) { ?>
 			<div>
 				<?= skelMdl::cf_module('app/app_prod/app_prod_liste_menu_export', $_POST) ?>
 			</div>
-		<? } ?>
-		<? if (!empty($TEST_AGENT)): ?>
+		<?php } ?>
+		<?php if (!empty($TEST_AGENT)): ?>
 			<div class="toggler toggler_visible ededed border4 flex_h">
 				<a class="autoToggle textvert" app_button="app_button" vars="<?= $HTTP_BASE_VARS ?>&<?= $HTTP_VARS ?>&vars[idagent]=<?= $_SESSION['idagent'] ?>"><i class="fa fa-user"></i></a>
 				<a class="autoToggle textorange" app_button="app_button" vars="<?= $HTTP_BASE_VARS ?>&<?= $HTTP_VARS_NOAGENT ?>"><i class="fa fa-globe"></i></a>
 			</div>
-		<? endif; ?>
+		<?php endif; ?>
 		<div class="flex_main"></div>
 		<div class="flex_h flex_align_middle borderl borderr">
 			<div class="border4 margin flex_h flex_align_middle ededed"><i class="fa fa-search textbold"></i>

@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 
 	ini_set('display_errors' , 55);
@@ -20,13 +20,13 @@
 
 ?>
 <div class = "applink applinkblock ededed">
-	<?
+	<?php
 		 while($arr= $rs->getNext()):
 
 
 			 ?>
 		 <a  app_button="app_button" vars="<?=http_build_query($arr['vars'])?>"><?=$arr['nomActivity_expl']?> <?=http_build_query($arr['vars'])?></a>
-		 <?
+		 <?php
 		endwhile;
 	?>
 </div>

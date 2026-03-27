@@ -1,4 +1,4 @@
-<?
+<?php
 
 	include_once($_SERVER['CONF_INC']);
 
@@ -22,7 +22,7 @@
 		$ct_tar = $ct_old->count();
 		// dateDebutProduit_tarif
 		?> BUILD <?=$ct_tar?>
-		<?
+		<?php
 		return;
 	endif;
 	set_time_limit(0);

@@ -37,7 +37,7 @@
 				<label class="ms-Label"><?= idioma('Choix des colonnes'); ?></label>
 					</div>
 				<div class="margin ms-TextField margin padding ededed border4" style="max-height:250px;overflow:auto;" >
-					<?
+					<?php
 						foreach ($TITLES as $key_title => $line_title) {
 							if (substr($key_title, 0, 2) == 'id') continue;
 							if (substr($key_title, 0, 2) == '_i') continue;
@@ -46,7 +46,7 @@
 									<input type="checkbox" name="row[<?= $key_title ?>]" checked="checked" > <?= $key_title ?>
 								</label >
 							</div >
-							<?
+							<?php
 						}
 					?>
 				</div >
@@ -56,7 +56,7 @@
 			</form >
 		</div >
 		<iframe name="frm_csv" style="display:none;" ></iframe >
-		<?
+		<?php
 	else:
 		// clean ids ...
 		ini_set('display_errors', 55);

@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 	ini_set('display_errors', 55);
 	$table = $_POST['table'];
@@ -32,7 +32,7 @@
 		au <?= fonctionsProduction::jourMoisDate_fr($dateFin) ?>
 	</div>
 	<div class="margin_more ededed  flex_h flex_wrap">
-		<?
+		<?php
 
 			// tous les field type
 			$RS_SCH_FIELD_TY = $APP_SCH_FIELD_TY->find(['codeAppscheme_field_type' => ['$in' => $arr_type]]);
@@ -44,8 +44,8 @@
 				$RS_FIELD       = $APP_SCH_FIELD->find(['idappscheme_field' => ['$in' => $ARR_HAS]])->sort(['ordreAppscheme_field' => 1]);
 				if ($RS_FIELD->count() == 0) continue;
 				?>
-				<?// =$ARR_SCH_FIELD_TY['codeAppscheme_field_type']?>
-				<? while ($ARR_FIELD = $RS_FIELD->getNext()) {
+				<?php// =$ARR_SCH_FIELD_TY['codeAppscheme_field_type']?>
+				<?php while ($ARR_FIELD = $RS_FIELD->getNext()) {
 					$css                 = (empty($i)) ? '' : '';
 					$i                   = true;
 					$stop                = false;
@@ -133,8 +133,8 @@
 							</div>
 						</div>
 					</div>
-				<? } ?>
-				<?
+				<?php } ?>
+				<?php
 			}
 
 		?>

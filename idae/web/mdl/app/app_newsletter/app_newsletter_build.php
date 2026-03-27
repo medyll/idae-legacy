@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 	$APP = new App('newsletter');
 	$APP->init_scheme('sitebase_newsletter', 'newsletter_item');
@@ -50,7 +50,7 @@
 						<div id="ffds56fds"  data-act_target_toggle="true" data-table="newsletter" data-table_value="<?= $idnewsletter ?>">
 							<br><br>
 							<div class="applinkblock applink" main_auto_tree>
-								<? $arr_edit = ['nom'=>'Titre','dateDebut'=>'Date d\'envoi','color'=>'Couleur','bgcolor'=>'Couleur de fond'];
+								<?php $arr_edit = ['nom'=>'Titre','dateDebut'=>'Date d\'envoi','color'=>'Couleur','bgcolor'=>'Couleur de fond'];
 								foreach($arr_edit  as $key=>$value) {
 
 									?>
@@ -60,7 +60,7 @@
 											<?= $APP->draw_field(['field_name_raw' => $key, 'table' => $table, 'field_value' => $arr[$key . $Table]]) ?>&nbsp;</a>
 										<div class="" style="position: absolute;display:none;top:0;min-width:100%;min-height:100%;z-index:300" id="news_field_edit_<?= $key ?>"></div>
 									</div>
-									<?
+									<?php
 								}
 								?>
 								<div auto_tree class="padding bold"><div><?= idioma('Image') ?></div></div>

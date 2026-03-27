@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 
 	$vars = empty($_POST['vars']) ? array() : fonctionsProduction::cleanPostMongo($_POST['vars'] , 1);
@@ -16,9 +16,9 @@
 		<form class="Form" action = "<?= ACTIONMDL ?>app/actions.php"  onsubmit = "ajaxFormValidation(this);return false;" auto_reset="auto_reset">
 			<input type = "hidden" name = "F_action" id = "F_action" value = "app_create"/>
 			<input type = "hidden" name = "table" value = "opportunite_ligne"/>
-			<? foreach ($vars as $key => $input): ?>
+			<?php foreach ($vars as $key => $input): ?>
 				<input type = "hidden" name = "vars[<?= $key ?>]" value = "<?= $input ?>">
-			<? endforeach; ?>
+			<?php endforeach; ?>
 			<input type = "hidden" name = "idagent_writer" value = "<?= $_SESSION['idagent']; ?>"/>
 			<div class="paddin retrait">
 				<table>

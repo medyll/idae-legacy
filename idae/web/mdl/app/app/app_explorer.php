@@ -49,7 +49,7 @@
 					</a>
 				</div>
 				<div class="flex_main aligncenter borderr">
-					<!--<a class="flex_main autoToggle" onclick=" $('menu_expl_<? /*=$table*/ ?>').show();load_table_in_zone('table=<? /*= $table */ ?>&nbRows=350', 'contenu_explorer_<? /*= $table */ ?>');"><i class="fa fa-list-ul"></i>-->
+					<!--<a class="flex_main autoToggle" onclick=" $('menu_expl_<?php /*=$table*/ ?>').show();load_table_in_zone('table=<?php /*= $table */ ?>&nbRows=350', 'contenu_explorer_<?php /*= $table */ ?>');"><i class="fa fa-list-ul"></i>-->
 					<a class="flex_main autoToggle" onclick="$('contenu_explorer_<?= $table ?>').loadModule('app/app_liste/app_liste','table=<?= $table ?>&nbRows=750');"><i class="fa fa-list-ul"></i>
 
 						<br>

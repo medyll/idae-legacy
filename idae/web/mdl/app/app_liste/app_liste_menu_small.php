@@ -60,23 +60,23 @@
 				</div>
 			</div>
 		</div>
-		<? if (!empty($TEST_AGENT)): ?>
+		<?php if (!empty($TEST_AGENT)): ?>
 			<div class="toggler toggler_visible ededed">
 				<a class="autoToggle textvert" app_button="app_button" vars="<?= $HTTP_BASE_VARS ?>&<?= $HTTP_VARS ?>&vars[idagent]=<?= $_SESSION['idagent'] ?>"><i class="fa fa-user"></i></a>
 				<a class="autoToggle textorange" app_button="app_button" vars="<?= $HTTP_BASE_VARS ?>&<?= $HTTP_VARS_NOAGENT ?>"><i class="fa fa-user-secret"></i></a>
 			</div>
-		<? endif; ?>
+		<?php endif; ?>
 		<div class="flex_main"></div>
 		<div class="toggler borderr">
 			<a class="autoToggle none" data-button_chk="showchk">chk</a>
 		</div>
-		<? if (!empty($table)): ?>
+		<?php if (!empty($table)): ?>
 			<div class="aligncenter blanc borderr">
 				<a onclick="<?= fonctionsJs::app_create($table, $_POST) ?>" class="ellipsis">
 					<i class="fa fa-copy textbleu bold"></i> <?= idioma('Créer') . ' ' . $APP->nomAppscheme ?>
 				</a>
 			</div>
-		<? endif; ?>
+		<?php endif; ?>
 		<div class="flex_h flex_align_middle   borderr">
 			<div class="border4 margin flex_h flex_align_middle ededed"><i class="fa fa-search textbold"></i>
 				<input class="noborder" placeholder="Rechercher" expl_search_button="expl_search_button" style="width:120px;" type="text">

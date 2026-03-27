@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 	if (empty($_POST['table'])) return;
 	//
@@ -20,16 +20,16 @@
 
 	<div class="menu_nav" >
 		<div class="applink applinkblock toggler border4 padding margin ededed flex_h flex_wrap"  >
-			<? foreach ($alph as $v) {
+			<?php foreach ($alph as $v) {
 				//	$more = (!droits('VOIR_TOUS_CLIENTS'))? '&agent_idagent='.$_SESSION['idagent']: '';
 				?>
 				<a style="width:9%;" class="autoToggle" onClick="reloadModule('client/mdlClientListe','<?= $valueModule ?>','lettre=<?= $v ?><?= $more ?>')" >
 					<?= $v ?>
 				</a >
-				<? ;
+				<?php ;
 			} ?></div >
 
-		<? foreach($arr_has as $key=>$value):
+		<?php foreach($arr_has as $key=>$value):
 			$Value = ucfirst($value);
 			$_id = 'id'.$value;
 			$_nom = 'nom'.ucfirst($value);
@@ -46,12 +46,12 @@
 				       vars="table=<?= $value . '_type' ?>"
 				       value="" />
 			</div >
-		<? endif; ?>
+		<?php endif; ?>
 
 
-		<? endforeach; ?>
+		<?php endforeach; ?>
 		FK
-		<? foreach ($GRILLE_FK as $fk):
+		<?php foreach ($GRILLE_FK as $fk):
 			$table_fk = $fk['table_fk'];
 			$id_fk = 'id' . $fk['table_fk'];
 			$rs_dist = $APP->distinct($table_fk, $vars);
@@ -63,11 +63,11 @@
 				<?= skelMdl::cf_module('app/app_search/search_item', ['item' => $table_fk], '', 'item="' . $table_fk . '"') ?>
 			</div >
 
-		<? endforeach; ?>
-		<? if (sizeof($R_FK) != 0): ?>
+		<?php endforeach; ?>
+		<?php if (sizeof($R_FK) != 0): ?>
 <hr>
 			RFK
-			<? foreach ($R_FK as $arr_fk):
+			<?php foreach ($R_FK as $arr_fk):
 				$value_rfk = $arr_fk['table_value'];
 				$table_rfk = $arr_fk['table'];
 				$vars_rfk['vars'] = ['id' . $table => $table_value];
@@ -87,9 +87,9 @@
 					       style ="width: 190px;"  />
 
 				</div >
-			<? endforeach; ?>
+			<?php endforeach; ?>
 
-		<? endif; ?>
+		<?php endif; ?>
 		<div >
 			<button type="submit" value="Ok" >Ok</button >
 		</div >

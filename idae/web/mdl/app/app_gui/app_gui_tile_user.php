@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 	require_once(__DIR__ . '/../../../appclasses/appcommon/MongoCompat.php');
 	use AppCommon\MongoCompat;
@@ -15,9 +15,9 @@
 <div class="inline">
 	<div class="flex_h flex_align_middle">
 		<a class="<?= $css ?>" act_chrome_gui="app/app_user_pref/app_user_pref" data-vars='mdl=<?= $mdl ?>&code=<?= $code ?>'>
-			<? if ($test->count() == 0): ?>
+			<?php if ($test->count() == 0): ?>
 				<span class="textorange   inline   "><i class="fa fa-exclamation"></i></span>
-			<? endif ?>
+			<?php endif ?>
 			<i class="fa fa-cog"></i>
 			<?= $text ?>
 		</a>

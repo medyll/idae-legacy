@@ -35,7 +35,7 @@
 			</div>
 			<div style=" width:100%;max-height:350px;border:none;overflow:auto;" id="frame_xmlte_fst" scrolling="auto"></div>
 		</div>
-		<?
+		<?php
 		return;
 	endif;
 	clearstatcache();

@@ -1,16 +1,4 @@
 <?php
-declare(strict_types=1);
-
-/**
- * json_scheme.php — Return scheme metadata for UI generation
- *
- * Returns field definitions, column models, and form models for a given scheme.
- * Used by the frontend to dynamically build grids and forms.
- *
- * @package Idae\Services
- * Date: 2007-XX-XX (Legacy)
- * Modified: 2026-03-27 — Code formatting, English comments
- */
 
 include_once($_SERVER['CONF_INC']);
 
@@ -32,8 +20,11 @@ $_POST = array_merge($_GET, $_POST);
 		$table       = $ARR_APP['codeAppscheme'];
 		$Table       = ucfirst($ARR_APP['codeAppscheme']);
 
+		// All fields bound to this entity
 		$RS_HAS_FIELD       = $APP_HAS_FIELD->find(['idappscheme' => (int)$idappscheme]);
+		// Fields shown in the table grid, ordered by display position
 		$RS_HAS_TABLE_FIELD = $APP_HAS_TABLE_FIELD->find(['idappscheme' => (int)$idappscheme])->sort(['ordreAppscheme_has_table_field' => 1]);
+		// Fields shown in the mini-fiche panel
 		$RS_HAS_MINI_FIELD  = $APP_HAS_FIELD->find(['idappscheme' => (int)$idappscheme, 'in_mini_fiche' => 1])->sort(['ordreAppscheme_has_table_field' => 1]);
 
 		$APP          = new App($table);
@@ -44,7 +35,7 @@ $_POST = array_merge($_GET, $_POST);
 		$arrFields = $APP->get_basic_fields_nude($table);
 
 		$fieldModel = [];
-		foreach ($RS_HAS_FIELD as $ARR_HAS_FIELD): // tout les champs declarés dans skel.
+		foreach ($RS_HAS_FIELD as $ARR_HAS_FIELD): // all fields declared in the schema
 			$ARR_FIELD    = $APP_FIELD->findOne(['idappscheme_field' => (int)$ARR_HAS_FIELD['idappscheme_field']]);
 			$fieldModel[] = ['field_name'       => $ARR_FIELD['codeAppscheme_field'] . $Table,
 			                 'field_name_raw'   => $ARR_FIELD['codeAppscheme_field'],
@@ -54,7 +45,7 @@ $_POST = array_merge($_GET, $_POST);
 			                 'title'            => $ARR_FIELD['nomAppscheme_field']];
 		endforeach;
 		$miniModel = [];
-		foreach ($RS_HAS_MINI_FIELD as $ARR_HAS_MINI_FIELD): // tout les champs declarés dans skel.
+		foreach ($RS_HAS_MINI_FIELD as $ARR_HAS_MINI_FIELD): // all fields declared in the mini-fiche schema
 			$ARR_FIELD = $APP_FIELD->findOne(['idappscheme_field' => (int)$ARR_HAS_MINI_FIELD['idappscheme_field']]);
 			//
 			switch ($ARR_FIELD['codeAppscheme_field_type']):
@@ -91,11 +82,8 @@ $_POST = array_merge($_GET, $_POST);
 		$hasModel      = [];
 		$updateModel   = [];
 
-		// $columnModel[] = array( 'field_name' => 'chk' , 'field_name_raw' => 'chk' , 'title' => '<input type = "checkbox"  >' , 'width' => '' , 'className' => 'avoid' );
-		// $columnModel[] = array( 'field_name' => 'id' . $table , 'field_name_raw' => 'id' . $table , 'title' => 'id' , 'width' => '' , 'className' => 'alignright' );
-
-		// default_model AUTO pour has table : affichage table personnalisable
-		foreach ($RS_HAS_TABLE_FIELD as $ARR_HAS_TABLE_FIELD): // tout les champs declarés dans has_table_field.
+		// default_model: user-customisable table view built from appscheme_has_table_field
+		foreach ($RS_HAS_TABLE_FIELD as $ARR_HAS_TABLE_FIELD): // all fields declared in has_table_field
 			$ARR_SCH_FIELD = $APP_SCH->findOne(['idappscheme' => (int)$ARR_HAS_TABLE_FIELD['idappscheme_link']]);
 			$ARR_FIELD     = $APP_FIELD->findOne(['idappscheme_field' => (int)$ARR_HAS_TABLE_FIELD['idappscheme_field']]);
 			$ARR_HAS_FIELD = $APP_HAS_FIELD->findOne(['idappscheme_field' => (int)$ARR_HAS_TABLE_FIELD['idappscheme_field']]);
@@ -145,7 +133,7 @@ $_POST = array_merge($_GET, $_POST);
 			$columnModel[] = ['field_name' => 'nom' . $Table_type, 'field_name_raw' => 'nom' . $Table_type, 'title' => $Table_type, 'width' => ''];
 
 		endif;
-		// start here for all : columnModel => pour table par defaut, sans description, sueleument code et identification + fk
+		// columnModel: default table columns — code/identification fields + FK columns only
 		foreach ($RS_HAS_FIELD as $ARR_HAS_FIELD):
 			$ARR_FIELD = $APP_FIELD->findOne(['idappscheme_field' => (int)$ARR_HAS_FIELD['idappscheme_field']]);
 			if ($ARR_FIELD['codeAppscheme_field_group'] == 'codification' || $ARR_FIELD['codeAppscheme_field_group'] == 'identification') {
@@ -181,11 +169,11 @@ $_POST = array_merge($_GET, $_POST);
 			$updateModel[] = ['field_name' => 'range' . $Table, 'field_name_raw' => 'range', 'title' => idioma('rang')];
 		endif;
 
-		$APP_TABLE['columnModel']  = $columnModel; // par defaut (nom || code  || reference) + grille fk
-		$APP_TABLE['defaultModel'] = $default_model; // utilisateur
-		$APP_TABLE['hasModel']     = $hasModel; // sans fk
-		$APP_TABLE['fieldModel']   = $fieldModel; // tout les champs
-		$APP_TABLE['miniModel']    = $miniModel; // mini
+		$APP_TABLE['columnModel']  = $columnModel;   // default grid: nom/code/reference + FK columns
+		$APP_TABLE['defaultModel'] = $default_model; // user-customisable view
+		$APP_TABLE['hasModel']     = $hasModel;      // identification fields only, no FK
+		$APP_TABLE['fieldModel']   = $fieldModel;    // all declared fields
+		$APP_TABLE['miniModel']    = $miniModel;     // mini-fiche fields
 
 		//
 		$COLLECT[] = $APP_TABLE;
@@ -193,17 +181,17 @@ $_POST = array_merge($_GET, $_POST);
 
 	if ($PIECE == 'scheme'):
 		echo trim(json_encode($COLLECT));
-		exit;
+		return;
 	endif;
 	if ($PIECE == 'fields'):
 		echo trim(json_encode($arrFields));
-		exit;
+		return;
 	endif;
 	if ($PIECE == 'bool_fields'):
 		echo trim(json_encode(array_keys($APP->get_bool_fields())));
-		exit;
+		return;
 	endif;
 	if ($PIECE == 'bool_fields_icon'):
 		echo trim(json_encode($APP->get_array_field_bool()));
-		exit;
+		return;
 	endif;

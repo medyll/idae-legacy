@@ -1,4 +1,4 @@
-<?
+<?php
 include_once($_SERVER['CONF_INC']);   
 $uniqid 	= uniqid();
 $_POST['vars'] = empty($_POST['vars'])? array() : $_POST['vars'];
@@ -12,7 +12,7 @@ $typeListe  = empty($_POST['typeListe'])? 'small' : $_POST['typeListe'];
 ?>
 
 <table id="drag<?=$uniqid?>" class="tableverticale" width="100%" cellpadding="0" cellspacing="0">
-  <? if($typeListe=='big'): ?>
+  <?php if($typeListe=='big'): ?>
   <thead>
     <tr class="entete">
       <td style="width:40px"></td>
@@ -21,16 +21,16 @@ $typeListe  = empty($_POST['typeListe'])? 'small' : $_POST['typeListe'];
       <td style="width:40px"></td>
     </tr>
   </thead>
-  <? endif; ?>
+  <?php endif; ?>
   <tbody class="toggler" id="tfile<?=$uniqid?>">
-    <?
+    <?php
 while($file=$rs->getNext()){   
 	$arr = $file->file;
 ?>
     <tr class="autoToggle applink" mdl='trfilename' value="<?=$arr['_id']?>">
-      <? if($typeListe=='big'): ?>
+      <?php if($typeListe=='big'): ?>
       <td class="aligncenter"><input type="checkbox" value="<?=$arr['_id']?>" name="_id[]" /></td>
-      <? endif; ?>
+      <?php endif; ?>
       <td class="" title="<?=$arr['filename']?>"ondblclick="openDoc('<?=$arr['_id']?>','ged_client','sitebase_ged')"><a >
         <?=$arr['filename']?>
         </a></td>
@@ -38,13 +38,13 @@ while($file=$rs->getNext()){
         <?=strtolower(implode(' ',$arr['metatag']));?>
         </a></td>
       <td class="textgris" style="width:100px"><?=date_fr($arr['metadata']['date']).' '.maskHeure($arr['metadata']['heure'])?></td>
-      <? if($typeListe=='big'): ?>
+      <?php if($typeListe=='big'): ?>
       <td class="aligncenter"><a deleteFile="<?=$arr['_id']?>">
         <li class="fa fa-times"></li>
         </a></td>
-      <? endif; ?>
+      <?php endif; ?>
     </tr>
-    <? }?>
+    <?php }?>
   </tbody>
 </table>
 <script>

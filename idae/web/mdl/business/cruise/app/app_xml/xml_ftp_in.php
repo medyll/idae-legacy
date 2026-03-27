@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 
 	if (empty($_POST['vars']['GeoCode']) || empty($_POST['vars']['CruiseLine'])) {
