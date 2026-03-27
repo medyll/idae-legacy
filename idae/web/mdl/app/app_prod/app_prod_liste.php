@@ -3,7 +3,7 @@
 	ini_set('display_errors', 55);
 $time=time();
 	$uniqid = uniqid();
-	array_walk_recursive($_POST, 'CleanStr', $_POST);
+	array_walk_recursive($_POST, 'CleanStr');
 	//
 	if (empty($_POST['table']) && empty($_POST['search'])):
 		// echo skelMdl::cf_module('app/app_liste/app_liste_home', $_POST);

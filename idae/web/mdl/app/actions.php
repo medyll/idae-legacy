@@ -3,7 +3,7 @@
 	require_once(__DIR__ . '/../../appclasses/appcommon/MongoCompat.php');
 	use AppCommon\MongoCompat;
 
-	array_walk_recursive($_POST, 'CleanStr', $_POST);
+	array_walk_recursive($_POST, 'CleanStr');
 
 	if (isset($_POST['F_action'])) {
 		$F_action = $_POST['F_action'];

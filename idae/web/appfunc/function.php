@@ -966,10 +966,16 @@
 		$value = "'" . $value . "'";
 	}
 
-	function cleanStr(&$value, $key = '', $userdata = null) {
+	/**
+	 * Clean/sanitize string values in arrays.
+	 * Callback for array_walk_recursive - trims strings and converts date formats.
+	 *
+	 * @param mixed &$value Current element value (passed by reference)
+	 * @param string|int $key Current element key
+	 */
+	function cleanStr(&$value, $key = '') {
 		if (is_array($value) || is_object($value)) {
-			array_walk_recursive($value, 'CleanStr', $value);
-
+			array_walk_recursive($value, 'cleanStr');
 			return;
 		}
 		$value = trim($value);

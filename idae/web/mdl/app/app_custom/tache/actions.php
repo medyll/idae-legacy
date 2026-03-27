@@ -1,6 +1,6 @@
 <?
 	include_once($_SERVER['CONF_INC']);
-	array_walk_recursive($_POST, 'CleanStr', $_POST);
+	array_walk_recursive($_POST, 'CleanStr');
 	ini_set('display_errors', 55);
 	if (isset($_POST['F_action'])) {
 		$F_action = $_POST['F_action'];

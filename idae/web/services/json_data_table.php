@@ -147,7 +147,7 @@ $DEBUG = false;
 
 	//  vars_date
 	if (!empty($_POST['vars_date'])):
-		array_walk_recursive($_POST, 'CleanStr', $_POST['vars_date']);
+		array_walk_recursive($_POST['vars_date'], 'CleanStr');
 		foreach ($_POST['vars_date'] as $dt => $dv):
 			$vars[$dt] = $dv;
 		endforeach;
