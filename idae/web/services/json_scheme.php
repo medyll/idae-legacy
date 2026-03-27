@@ -1,8 +1,20 @@
 <?php
+declare(strict_types=1);
 
-	include_once($_SERVER['CONF_INC']);
+/**
+ * json_scheme.php — Return scheme metadata for UI generation
+ *
+ * Returns field definitions, column models, and form models for a given scheme.
+ * Used by the frontend to dynamically build grids and forms.
+ *
+ * @package Idae\Services
+ * Date: 2007-XX-XX (Legacy)
+ * Modified: 2026-03-27 — Code formatting, English comments
+ */
 
-	$_POST = array_merge($_GET, $_POST);
+include_once($_SERVER['CONF_INC']);
+
+$_POST = array_merge($_GET, $_POST);
 
 	$APP                 = new App();
 	$APP_SCH             = new App('appscheme');

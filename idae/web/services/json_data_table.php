@@ -1,15 +1,29 @@
-<?
+<?php
+declare(strict_types=1);
 
-	// ob_end_clean();
-	include_once($_SERVER['CONF_INC']);
-	require_once(__DIR__ . '/../appclasses/appcommon/MongoCompat.php');
-	use AppCommon\MongoCompat;
-	//ini_set('display_errors', 0);
-	if (empty($_SESSION['idagent'])) {
-		// skelMdl::send_cmd('act_notify', ['msg' => 'Agent non connecté', 'options' => $_GET + ['mdl' => 'app/app_login/app_login', 'sticky' => 1, 'id' => 'json_debug']], session_id());
-		return;
-	}
-	$DEBUG = false;
+/**
+ * json_data_table.php — Return data for a specific table with FK resolution
+ *
+ * Returns a single record with all foreign key relations resolved.
+ * Used by forms and detail views.
+ *
+ * @package Idae\Services
+ * Date: 2007-XX-XX (Legacy)
+ * Modified: 2026-03-27 — Added strict_types, code formatting
+ */
+
+// ob_end_clean();
+include_once($_SERVER['CONF_INC']);
+require_once(__DIR__ . '/../appclasses/appcommon/MongoCompat.php');
+
+use AppCommon\MongoCompat;
+
+//ini_set('display_errors', 0);
+if (empty($_SESSION['idagent'])) {
+    // skelMdl::send_cmd('act_notify', ['msg' => 'Agent not logged in', 'options' => $_GET + ['mdl' => 'app/app_login/app_login', 'sticky' => 1, 'id' => 'json_debug']], session_id());
+    exit;
+}
+$DEBUG = false;
 
 	$_POST = array_merge($_GET, $_POST);
 	//
