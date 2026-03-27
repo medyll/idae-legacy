@@ -2,7 +2,7 @@
 	include_once($_SERVER['CONF_INC']);
 	$_POST += $_GET;
 	$APP = new App();
-	array_walk_recursive($_POST , 'CleanStr' , $_POST);
+	array_walk_recursive($_POST , 'CleanStr');
 
 	$time = time();
 	ini_set('display_errors' , 55);
