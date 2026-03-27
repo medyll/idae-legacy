@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 	$APP          = new App('promo_zone');
 	$uniqid       = uniqid();
@@ -14,7 +14,7 @@
 	vardump($grilleBlock);
 ?>
 <div class="relative padding" style="max-width: 900px;">
-	<?
+	<?php
 		foreach ($grilleBlock as $key => $value):
 			$uid_grille_block   = $value['uid_grille_block'];
 			$nomPromo_zone_item = $value['nomPromo_zone_item'];
@@ -32,7 +32,7 @@
 					</div>
 					<table style="width:100%;table-layout:fixed;">
 						<tr>
-							<?
+							<?php
 								foreach ($value['vignette'] as $key2 => $value2) :
 									$uid_grille_mdl = $value2['uid_grille_mdl'];
 									$size           = sizeof($value['vignette']);
@@ -43,7 +43,7 @@
 					</table>
 				</div>
 			</div>
-			<?
+			<?php
 		endforeach;
 	?>
 </div>

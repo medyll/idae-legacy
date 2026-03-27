@@ -468,7 +468,7 @@ switch ($host) {
         DEFINE('HTTPAPP', 'http://localhost/');
         //
         DEFINE('FLATTENIMGDIR', CUSTOMERPATH . 'images_base/');
-        DEFINE('FLATTENIMGHTTP', HTTPCCUSTOMERSITE . '/images_base/');
+        DEFINE('FLATTENIMGHTTP', HTTPCUSTOMERSITE . '/images_base/');
         //
         DEFINE('SOCKETIO_PORT', 3005);
         //
@@ -503,7 +503,7 @@ switch ($host) {
         DEFINE('HTTPAPP', 'http://idaertys.mydde.fr/');
         //
         DEFINE('FLATTENIMGDIR', CUSTOMERPATH . 'images_base/');
-        DEFINE('FLATTENIMGHTTP', HTTPCCUSTOMERSITE . '/images_base/');
+        DEFINE('FLATTENIMGHTTP', HTTPCUSTOMERSITE . '/images_base/');
         //
         DEFINE('SOCKETIO_PORT', 3005);
         //

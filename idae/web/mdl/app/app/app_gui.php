@@ -17,7 +17,7 @@
 <div style="width:850px;" class="flex_v" >
 	<div class="flex_main" style="min-height:150px;overflow: auto;position:relative;" >
 		Gui !!!
-		<?//= skelMdl::cf_module('app/app/app_fiche_preview', $_POST + ['scope' => 'id' . $table], $table_value) ?>
+		<?php //= skelMdl::cf_module('app/app/app_fiche_preview', $_POST + ['scope' => 'id' . $table], $table_value) ?>
 	</div >
 	<div class="buttonZone" >
 		<button type="button" class="buttonClose" ><?= idioma('Fermer') ?></button >

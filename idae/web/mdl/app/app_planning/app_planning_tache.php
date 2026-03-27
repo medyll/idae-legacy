@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 	$APP         = new App('tache');
 
@@ -38,7 +38,7 @@
      title="<?= $arrtache['objetTache'] ?>">
 	<div class=""><?=$APP->draw_field(['field_name_raw'=>'icon','table'=>'tache_type','field_value'=>$arrtache['iconTache_type']])?></div>
 	<div class="flex_main ellipsis" title="<?= $arrtache['nomTache'] ?>">
-		<? if(empty($arrtache['nomClient'].$arrtache['nomProspect'])){
+		<?php if(empty($arrtache['nomClient'].$arrtache['nomProspect'])){
 			echo $APP->draw_field(['field_name_raw'=>'nom','table'=>'tache','field_value'=>$arrtache['nomTache']]);
 		} else{
 			echo $APP->draw_field(['field_name_raw'=>'nom','table'=>'client','field_value'=>$arrtache['nomClient']]);

@@ -2,13 +2,16 @@
   "config":{
     "disable-tls": true,
     "secure-http": false,
-    "platform-check": false
+    "platform-check": false,
+    "audit": {
+      "ignore": ["PKSA-5rsx-p2fk-h2gr"]
+    }
   },
   "require": {
     "wisembly/elephant.io": "3.1.0",
     "rase/socket.io-emitter": "0.7.0",
     "ddeboer/imap": "0.5.2",
-    "smarty/smarty": "^4.5.3",
+    "smarty/smarty": "^3.1.48",
     "latte/latte": "^2.10.6",
     "altorouter/altorouter": "v1.2.0",
     "mongodb/mongodb": "^2.0"

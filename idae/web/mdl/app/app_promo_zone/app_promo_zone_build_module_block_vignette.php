@@ -1,4 +1,4 @@
-<?
+<?php
 include_once($_SERVER['CONF_INC']);
 ini_set('display_errors', 55);
 $APP = new App('promo_zone');
@@ -54,24 +54,24 @@ $varimg['collection'] = 'fs';
 ?>
 <div style="min-width:<?= $width ?>px;" class="borderl margin padding">
 	<table class="table_info">
-		<?
+		<?php
 		foreach ($arrTag as $key_tag => $key_mdl):
 			$val = $arr[$key_mdl];
 
 			?>
 			<tr>
 			<td class="applink"> <a onclick="ajaxMdl('app/app_promo_zone/app_promo_zone_build_module_update','Mise à jour vignette <?=$uid_grille_mdl?>','idpromo_zone=<?=$idpromo_zone?>&uid_grille_mdl=<?=$uid_grille_mdl?>&uid_grille_block=<?=$uid_grille_block?>&key_tag=<?=$key_tag?>&key_mdl=<?=$key_mdl?>');">
-				 <? if(!empty($value2[$key_mdl])){ ?><i class="fa fa-check"></i><? } ?>
+				 <?php if(!empty($value2[$key_mdl])){ ?><i class="fa fa-check"></i><?php } ?>
 
 					<?= $key_tag ?></a></td>
 			<td><?= $arr[$key_mdl] ?></td>
 
-			</tr><?
+			</tr><?php
 		endforeach;
 		?>
 		<tr>
 			<td class="label"><?= idioma('image') ?></td>
-			<td><?//= skelMdl::cf_module('app/app_img/image_dyn', $varimg, $img_name); ?></td>
+			<td><?php//= skelMdl::cf_module('app/app_img/image_dyn', $varimg, $img_name); ?></td>
 
 		</tr>
 	</table>

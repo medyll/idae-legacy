@@ -27,7 +27,7 @@
 				<input data-quickFind data-quickFind-where="" type="text">
 			</div>
 			<div class="applink applinkblock toggler">
-				<?
+				<?php
 					while ($ARR = $rs->getNext()) {
 
 						?>
@@ -36,7 +36,7 @@
 								<i class="fa fa-<?= empty($ARR['estTop' . $Table]) ? '' : 'star'; ?> fa-fw"></i>
 								<?= $ARR['nom' . $Table] ?></a>
 						</div>
-					<? } ?>
+					<?php } ?>
 			</div>
 		</div>
 	</div>

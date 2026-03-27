@@ -141,7 +141,7 @@
 
 			// load mongo server connection
 			try {
-				$this->_connection = new Mongo($this->_config['connectionString'], $opts);
+				$this->_connection = new MongoClient($this->_config['connectionString'], $opts);
 			} catch (Exception $e) {
 				throw new Exception('Can\'t connect to the MongoDB server.');
 			}

@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 	require_once(__DIR__ . '/../../../appclasses/appcommon/MongoCompat.php');
 	use AppCommon\MongoCompat;
@@ -27,7 +27,7 @@
 
 ?>
 <div class="flex_h">
-	<?
+	<?php
 		foreach ($arrFieldsBool as $field => $arr_ico):
 			$field_name_bool = $field . ucfirst($table);
 		$rs1 = $APP->query([$field_name_bool => 1])->count();
@@ -38,6 +38,6 @@
 			<i class = "fa fa-<?= $arr_ico[0] ?>"></i><?= $rs1 ?> |
 			<i class = "fa fa-<?= $arr_ico[1] ?>"></i><?= $rs2 ?></div>
 		</div>
-	<?
+	<?php
 	endforeach; ?>
 </div>

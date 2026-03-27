@@ -43,11 +43,11 @@
 		       value = "app_save_liste_multi"/><input type = "hidden"
 		                                          name = "table"
 		                                          value = "<?= $table ?>"/>
-		<? foreach ($arr_id as $value) { ?>
+		<?php foreach ($arr_id as $value) { ?>
 			<input name = "arr_id[]"
 			       type = "hidden"
 			       value = "<?= $value ?>">
-		<? } ?>
+		<?php } ?>
 		<div class = "table" style="width:100%;">
 			<div class = "cell">
 				<div class = "margin padding  ">

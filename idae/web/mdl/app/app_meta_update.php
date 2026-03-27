@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 	ini_set('display_errors', 55);
 	// POST
@@ -53,31 +53,31 @@
 		     style = "width: 100%;">
 			<div class = "cell padding">
 				<table class = "table_form">
-					<? foreach ($arrFieldsMeta as $field):
+					<?php foreach ($arrFieldsMeta as $field):
 						$input_name = "vars[$field" . ucfirst($table) . "]";
 						?>
 						<tr>
 							<td><?= ucfirst(idioma($field)) ?></td>
 							<td class = "justify">
-								<?
+								<?php
 									switch ($field):
 										case  'description':
 											?>
 											<textarea name = "<?= $input_name ?>"
 											          style = "width:100%; height:100px;"><?= nl2br($ARR[$field . ucfirst($table)]) ?>
 											</textarea>
-											<?
+											<?php
 											break;
 										default:
 											?>
 												<textarea name = "<?= $input_name ?>" class="border4"
 														  style = "width:550px; height:39px;overflow:hidden;"><?= nl2br($ARR[$field . ucfirst($table)]) ?></textarea>
-											<?
+											<?php
 											break;
 									endswitch; ?>
 							</td>
 						</tr>
-					<? endforeach; ?>
+					<?php endforeach; ?>
 				</table>
 
 			</div>

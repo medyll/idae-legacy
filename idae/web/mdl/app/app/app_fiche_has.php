@@ -23,7 +23,7 @@
 	$ARR = $APP->findOne($vars);
 ?>
 <div  class="flex_h">
-	<?
+	<?php
 		$arr_has = ['statut', 'type', 'categorie', 'group'];
 		foreach ($arr_has as $key => $value):
 			$APPTMP = new App($value);
@@ -38,6 +38,6 @@
 					<div><?= $ARR[$_nom] ?></div>
 					<div><i class="fa fa-<?= $APPTMP->iconAppscheme ?>"></i></div>
 				</div>
-			<? endif; ?>
-		<? endforeach; ?>
+			<?php endif; ?>
+		<?php endforeach; ?>
 </div>

@@ -1,5 +1,15 @@
-<?
+<?php
+declare(strict_types=1);
+/**
+ * json_data_table_row.php — Per-table row list endpoint (legacy grid view).
+ * Returns {data_main, maxcount} with one HTML-rendered row per document.
+ *
+ * Date: 07/07/14
+ * Modified: 2026-03-15 — <?php open tag, strict_types, array() → [], MongoCompat require, English comments
+ */
 	include_once($_SERVER['CONF_INC']);
+	require_once(__DIR__ . '/../appclasses/appcommon/MongoCompat.php');
+	use AppCommon\MongoCompat;
 	$_POST = array_merge($_GET, $_POST);
 	if (empty($_POST['table'])) {
 		return;
@@ -21,7 +31,7 @@
 	$actif    = 'estActif' . ucfirst($table);
 	$visible  = 'estVisible' . ucfirst($table);
 	//
-	$vars    = empty($_POST['vars']) ? array() : fonctionsProduction::cleanPostMongo($_POST['vars'], 1);
+	$vars    = empty($_POST['vars']) ? [] : fonctionsProduction::cleanPostMongo($_POST['vars'], 1);
 	$groupBy = empty($_POST['groupBy']) ? '' : $_POST['groupBy'];
 	$sortBy  = empty($_POST['sortBy']) ? empty($settings_sortBy) ? $nom : $settings_sortBy : $_POST['sortBy'];
 	$sortDir = empty($_POST['sortDir']) ? empty($settings_sortDir) ? 1 : (int)$settings_sortDir : (int)$_POST['sortDir'];
@@ -35,8 +45,8 @@
 		$key_date        = $_POST['vars_date'] ['name_key'];
 		$vars[$key_date] = $_POST['vars_date'][$key_date];
 	endif;
-	// SETTINGS       ne pas faire ici mais par javascript ....
-	// $APP->set_settings($_SESSION['idagent'], ['sortBy_' . $table => $sortBy, 'sortDir_' . $table => $sortDir, 'groupBy_' . $table => $groupBy, 'nbRows_' . $table => $nbRows]);
+	// Settings intentionally not persisted here — handled client-side via JavaScript
+	// $APP->set_settings($_SESSION['idagent'], ['sortBy_' . $table => $sortBy, ...]);
 	//
 	$APP_TABLE       = $APP->app_table_one;
 	$GRILLE_FK       = $APP->get_grille_fk();
@@ -50,18 +60,18 @@
 	//
 	$FIELDS = array_merge(array_keys($APP_DATE_FIELDS), array_values($APP_FIELD_BOOL));
 	//
-	$where = array();
+	$where = [];
 	if (!empty($_POST['search'])) {
 		$search_escaped = MongoCompat::escapeRegex($_POST['search']);
 		$regexp         = MongoCompat::toRegex(".*" . $search_escaped . "*.", 'i');
-		$where['$or'][] = array($nom => $regexp);
-		$where['$or'][] = array($id => (int)$_POST['search']);
-		// tourne ds fk
+		$where['$or'][] = [$nom => $regexp];
+		$where['$or'][] = [$id => (int)$_POST['search']];
+		// Extend OR filter to FK display-name fields
 		if (sizeof($GRILLE_FK) != 0) {
 			foreach ($GRILLE_FK as $field):
 				$nom_fk         = 'nom' . ucfirst($field['table_fk']);
 				$regexp         = MongoCompat::toRegex("." . $nom_fk . "*.", 'i');
-				$where['$or'][] = array($nom_fk => $regexp);
+				$where['$or'][] = [$nom_fk => $regexp];
 			endforeach;
 		}
 	}
@@ -73,47 +83,46 @@
 
 	//
 	//$rs->limit($nbRows)->skip($page * $nbRows);
-	// deprecated
-	$columnModel   = array();
-	$columnModel[] = array('field_name' => '', 'title' => '<input type = "checkbox" onclick = "doClickto(this);" >', 'width' => '', 'className' => '');
-	$columnModel[] = array('field_name' => 'id'.$table,'field_name_raw' => 'id'.$table, 'title' => 'id', 'width' => '', 'className' => 'alignright');
+	// columnModel built for legacy grid rendering
+	$columnModel   = [];
+	$columnModel[] = ['field_name' => '', 'title' => '<input type = "checkbox" onclick = "doClickto(this);" >', 'width' => '', 'className' => ''];
+	$columnModel[] = ['field_name' => 'id'.$table, 'field_name_raw' => 'id'.$table, 'title' => 'id', 'width' => '', 'className' => 'alignright'];
 
 	foreach ($arrFieldsBool as $bool => $arr_ico):
-		$columnModel[] = array('field_name' => $bool.$Table,'field_name_raw' => $bool, 'title' => '<i class="fa fa-' . $arr_ico[0] . '"></i>', 'width' => '', 'className' => 'fk');
+		$columnModel[] = ['field_name' => $bool.$Table, 'field_name_raw' => $bool, 'title' => '<i class="fa fa-' . $arr_ico[0] . '"></i>', 'width' => '', 'className' => 'fk'];
 	endforeach;
-	$columnModel[] = array('field_name' => '','field_name_raw' => '', 'title' => '<i class = "fa fa-cubes" ></i >', 'width' => '', 'className' => 'aligncenter');
+	$columnModel[] = ['field_name' => '', 'field_name_raw' => '', 'title' => '<i class = "fa fa-cubes" ></i >', 'width' => '', 'className' => 'aligncenter'];
 	if (!empty($key_date)):
-		$columnModel[] = array('field_name' => $key_date.$Table,'field_name_raw' => $key_date, 'title' => $key_date, 'width' => '', 'className' => '');
+		$columnModel[] = ['field_name' => $key_date.$Table, 'field_name_raw' => $key_date, 'title' => $key_date, 'width' => '', 'className' => ''];
 	endif;
 	if (!empty($APP_TABLE['hasCodeScheme'])):
-		$columnModel[] = array('field_name' => 'code'.$Table,'field_name_raw' => 'code', 'title' => idioma('code'));
+		$columnModel[] = ['field_name' => 'code'.$Table, 'field_name_raw' => 'code', 'title' => idioma('code')];
 	endif;
-	$columnModel[] = array('field_name' => 'nom'.$Table,'field_name_raw' => 'nom', 'title' => $table, 'width' => '', 'className' => '');
+	$columnModel[] = ['field_name' => 'nom'.$Table, 'field_name_raw' => 'nom', 'title' => $table, 'width' => '', 'className' => ''];
 	foreach ($GRILLE_FK as $fk):
-		$columnModel[] = array('field_name' => $fk['table_fk'],'field_name_raw' => $fk['table_fk'], 'title' => $fk['table_fk'], 'width' => '', 'className' => '');
+		$columnModel[] = ['field_name' => $fk['table_fk'], 'field_name_raw' => $fk['table_fk'], 'title' => $fk['table_fk'], 'width' => '', 'className' => ''];
 	endforeach;
 	if (!empty($APP_TABLE['hasOrdreScheme'])):
-		$columnModel[] = array('field_name' => 'ordre'.$Table,'field_name_raw' => 'ordre', 'title' => idioma('ordre'));
+		$columnModel[] = ['field_name' => 'ordre'.$Table, 'field_name_raw' => 'ordre', 'title' => idioma('ordre')];
 	endif;
 	if (!empty($APP_TABLE['hasPrixScheme'])):
-		$columnModel[] = array('field_name' => 'prix'.$Table,'field_name_raw' => 'prix', 'title' => idioma('Prix'));
+		$columnModel[] = ['field_name' => 'prix'.$Table, 'field_name_raw' => 'prix', 'title' => idioma('Prix')];
 	endif;
 	if (!empty($APP_TABLE['hasDateScheme'])):
-		$columnModel[] = array('field_name' => 'dateDebut'.$Table,'field_name_raw' => 'date', 'title' => idioma('date'));
+		$columnModel[] = ['field_name' => 'dateDebut'.$Table, 'field_name_raw' => 'date', 'title' => idioma('date')];
 	endif;
 	if (!empty($APP_TABLE['hasHeureScheme'])):
 		$data_out['heureDebut' . ucfirst($table)] = maskHeure($arr['heureDebut' . ucfirst($table)]);
-		$data_out['heureFin' . ucfirst($table)] = maskHeure($arr['heureFin' . ucfirst($table)]);
+		$data_out['heureFin' . ucfirst($table)]   = maskHeure($arr['heureFin' . ucfirst($table)]);
 	endif;
 	// MAIN_DATA
 
 
-		$data_main = array();
-
+		$data_main = [];
 
 		while ($arr = $rs->getNext()) {
 			$data_out = $arr;
-			// variables pour le mdl_tr
+			// template row variables passed to mdl_tr
 			$trvars['id' . $table] = $arr[$id];
 			$trvars['_id']         = (string)$arr['_id'];
 			$trvars['table']       = $table;
@@ -163,10 +172,9 @@
 			endif;
 
 
-			$data_main[] = array('html' => $data_out, 'vars' => $trvars,'value'=>$arr[$id]);
+			$data_main[] = ['html' => $data_out, 'vars' => $trvars, 'value' => $arr[$id]];
 		}
 
-
-	$out_model = array( 'data_main' => $data_main,'maxcount'=>$maxcount); // 'columnModel' => $columnModel,
+	$out_model = ['data_main' => $data_main, 'maxcount' => $maxcount];
 	//
 	echo trim(json_encode($out_model));

@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 	if (empty($_POST['table'])) return;
 	// if ($_SESSION['idagent'] != 1) return;
@@ -20,12 +20,12 @@
 			</div>
 			<div style="overflow-x:hidden;height:100%;">
 				<div><input type="hidden" name="table" value="<?= $table ?>"></div>			
-				<? if (!empty($APP_TABLE['hasTypeScheme'])): ?>
+				<?php if (!empty($APP_TABLE['hasTypeScheme'])): ?>
 					<div class="cellsearch">
 						<?= skelMdl::cf_module('app/app_search/search_item_check', array('table_main'=>$table,'table' => $table . '_type'), '', 'item="' . $table . '_type"') ?>
 					</div>
-				<? endif; ?>
-				<? foreach ($GRILLE_FK as $fk):
+				<?php endif; ?>
+				<?php foreach ($GRILLE_FK as $fk):
 					$table_fk = $fk['table_fk'];
 					$id_fk    = 'id' . $fk['table_fk'];
 					$rs_dist  = $APP->distinct($table_fk, $vars);
@@ -36,7 +36,7 @@
 					<div class="cellsearch">
 						<?= skelMdl::cf_module('app/app_search/search_item_check', array('table_main'=>$table,'item' => $table_fk), '', 'item="' . $table_fk . '"') ?>
 					</div>
-				<? endforeach; ?>
+				<?php endforeach; ?>
 			</div>
 			
 			<div class="buttonZone">

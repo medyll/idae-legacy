@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 
 	$uniqid = uniqid();
@@ -33,7 +33,7 @@
 					<span class="padding inline">Choix du type de date &nbsp;</span>
 				</div>
 				<div class="  applink toggler">
-					<? while ($ARR_FIELD = $RS_FIELD->getNext()) {
+					<?php while ($ARR_FIELD = $RS_FIELD->getNext()) {
 						$css                 = (empty($i)) ? 'active' : '';
 						$i                   = true;
 						$idappscheme_field   = $ARR_FIELD['idappscheme_field'];
@@ -42,7 +42,7 @@
 						$nomAppscheme_field  = $ARR_FIELD['nomAppscheme_field'];
 						?>
 						<a class="autoToggle <?= $css ?>" app_button data-vars="type_date=<?=$codeAppscheme_field?>" ><i class="fa fa-<?= $iconAppscheme_field ?>"></i> <?= $nomAppscheme_field ?></a>
-					<? } ?>
+					<?php } ?>
 				</div>
 				<div class="flex_main"></div>
 				<div class="in_menu" style="width:25%;">
@@ -50,12 +50,12 @@
 				</div>
 				<div class="in_menu" style="width:25%;">
 					<div class="flex_h toggler">
-						<? foreach ($ARR_PERIODE as $key => $value) {
+						<?php foreach ($ARR_PERIODE as $key => $value) {
 							?>
 							<div class="flex_main aligncenter ">
 								<a class="autoToggle   link" app_button data-vars="type_periodicite=<?=$key?>" ><?= ucfirst($value) ?></a>
 							</div>
-							<? } ?>
+							<?php } ?>
 					</div>
 				</div>
 			</div>

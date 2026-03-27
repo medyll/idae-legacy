@@ -1,4 +1,4 @@
-<?
+<?php
 if(file_exists('../conf.inc.php')) include_once('../conf.inc.php');
 if(file_exists('../../conf.inc.php')) include_once('../../conf.inc.php'); 
 $ONLINE_KEY = $_POST['ONLINE_KEY'];
@@ -39,7 +39,7 @@ $arrA = $baseAgent->findOne(array('idagent'=>(int)$_POST['idagent']));
 </div>
 <div id="onlive_slider_<?=$ONLINE_KEY?>"   style="width:350px;overflow:hidden">
   <div   style="height:350px;overflow:auto;background-color:#fff;" id='onlive_holder_<?=$ONLINE_KEY?>'>
-    <?
+    <?php
 while($arr=$rs->getNext()): 
 $arr['onlive_thread'] = array_reverse($arr['onlive_thread']);
 foreach($arr['onlive_thread'] as $key=>$value):
@@ -60,7 +60,7 @@ $css = ($value['idagent'] != $_SESSION['idagent'] )? 'ededed border4' : 'blanc' 
       </div>
       <?=stripslashes(nl2br($value['texte']))?>
     </div>
-    <?
+    <?php
 endforeach;
 endwhile;
 

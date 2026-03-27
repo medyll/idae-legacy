@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 	$APP = new App();
 	$time = time();
@@ -38,15 +38,15 @@
 		<input type="hidden" name="reloadModule[app/app_planning/app_planning_tache_reload]" value="*"/>
 		<input type="hidden" name="afterAction[app/app_custom/tache/tache_create]" value="close"/>
 		<input type="hidden"    name = "vars[m_mode]"   value ="1"/>
-		<? if(!empty($_POST['add_table'])): ?>
+		<?php if(!empty($_POST['add_table'])): ?>
 			<input type="hidden" name="add_table" value="<?= $_POST['add_table']; ?>"/>
 			<input type="hidden" name="add_table_value" value="<?= $_POST['add_table_value']; ?>"/>
 			<input type="hidden" name="vars[id<?= $_POST['add_table']; ?>]" value="<?= $_POST['add_table_value']; ?>"/>
-		<? endif; ?>
+		<?php endif; ?>
 
-		<? foreach ($vars as $key => $input): ?>
+		<?php foreach ($vars as $key => $input): ?>
 			<input type = "hidden" name = "vars[<?= $key ?>]" value = "<?= $input ?>" >
-		<? endforeach; ?>
+		<?php endforeach; ?>
 		<div class="none">
 			<table class="tablemiddle" style="width:100%;table-layout:auto">
 				<tr>
@@ -75,47 +75,47 @@
 				<?= skelMdl::cf_module('app/app_custom/tache/tache_periode', $_POST); ?>
 			</div>
 		</div>
-		<? if(!empty($_POST['add_table'])):
+		<?php if(!empty($_POST['add_table'])):
 			$APP_TMP = new App($_POST['add_table']);
 			$ARR_TMP = $APP_TMP->findOne(['id'.$_POST['add_table']=>(int)$_POST['add_table_value']]);
 		?>
 				<div class="padding borderb ededed none">
 					<?=$ARR_TMP['nom'.ucfirst($_POST['add_table'])]?>
 				</div>
-			<?
+			<?php
 			endif;
 			?>
 		<div class=" ">
-			<? if (!empty($_POST['vars']['heureDebutTache'])) { ?>
+			<?php if (!empty($_POST['vars']['heureDebutTache'])) { ?>
 				<input type="hidden" name="vars[heureDebutTache]" value="<?= $_POST['vars']['heureDebutTache'] ?>"/>
-			<? } ?>
-			<? if (!empty($_POST['vars']['dateDebutTache'])) { ?>
+			<?php } ?>
+			<?php if (!empty($_POST['vars']['dateDebutTache'])) { ?>
 				<input type="hidden" name="vars[dateDebutTache]" value="<?= date_mysql($_POST['vars']['dateDebutTache']) ?>"/>
-			<? } ?>
+			<?php } ?>
 			<div class=" maingui">
 				<table class="table_form tablemiddle" style="width:100%;table-layout:auto">
 
-					<? if (empty($_POST['add_table']) && empty($_POST['vars']['idclient'])) { ?>
+					<?php if (empty($_POST['add_table']) && empty($_POST['vars']['idclient'])) { ?>
 						<tr id="tache_maker_first">
 							<td class="ededed borderb paddingb" colspan="8" style="padding:0!important;">
 								<?=skelMdl::cf_module('app/app_field_add',array('module_value'=>123,'field'=>['prospect','client']),123)?>
 							</td>
 						</tr>
-					<? } ?>
-					<? if ( empty($_POST['vars']['idclient'])) { ?>
+					<?php } ?>
+					<?php if ( empty($_POST['vars']['idclient'])) { ?>
 						<tr>
 							<td class="ededed borderb paddingb" colspan="8" style="padding:0!important;">
 								<?=skelMdl::cf_module('app/app_field_add',array('module_value'=>456,'field'=>['contact']),456)?>
 							</td>
 						</tr>
-					<? } else{ ?>
+					<?php } else{ ?>
 						<tr>
 							<td class="ededed borderb paddingb" colspan="8" style="padding:0!important;">
 								<?=skelMdl::cf_module('app/app_field_add',array('vars'=>['idclient'=>$_POST['vars']['idclient']],'module_value'=>456,'field'=>['contact']),456)?>
 							</td>
 						</tr>
 
-					<? } ?>
+					<?php } ?>
 					<tr>
 						<td style="width:80px;"><label>
 								<?= idioma("Objet") ?>
@@ -127,24 +127,24 @@
 						<td style="width:80px;"><label>
 								<?= idioma("Début") ?>
 							</label></td>
-						<td><? if (empty($_POST['vars']['dateDebutTache'])) { ?>
+						<td><?php if (empty($_POST['vars']['dateDebutTache'])) { ?>
 								<input  class="validate-date-au" type="text" id="dateDebutTache<?= $rand ?>"
 								       name="vars[dateDebutTache]" value="<?= date('d/m/Y', time() + 86400); ?>">
-							<?
+							<?php
 							}
 							else {
 								?>
 								<?= date_fr($_POST['vars']['dateDebutTache']); ?>
-							<? } ?></td>
-						<td><i class="fa fa-clock-o"></i>&nbsp;<? if (empty($_POST['vars']['heureDebutTache'])) { ?>
+							<?php } ?></td>
+						<td><i class="fa fa-clock-o"></i>&nbsp;<?php if (empty($_POST['vars']['heureDebutTache'])) { ?>
 								<input type="text" class="heure inputSmall" id="heureDebutTache<?= $rand ?>"
 								       name="vars[heureDebutTache]" value="09:00:00">
-							<?
+							<?php
 							}
 							else {
 								?>
 								<?= maskHeure($_POST['vars']['heureDebutTache']); ?>
-							<? } ?></td>
+							<?php } ?></td>
 						<td style="width:70px;" class="alignright"><label>
 								<?= idioma("Type") ?>
 							</label></td>
@@ -158,16 +158,16 @@
 						<td><label>
 								<?= idioma("Fin") ?>
 							</label></td>
-						<td><? if (empty($_POST['vars']['dateDebutTache'])) { ?>
+						<td><?php if (empty($_POST['vars']['dateDebutTache'])) { ?>
 								<input  class="validate-date-au" type="text" id="dateFinTache<?= $rand ?>"
 								       name="vars[dateFinTache]" value="">
-							<?
+							<?php
 							}
 							else {
 								?>
 								<input  class="validate-date-au" type="text" id="dateFinTache<?= $rand ?>"
 								       name="vars[dateFinTache]" value="<?= date_fr($_POST['vars']['dateDebutTache']); ?>">
-							<? } ?></td>
+							<?php } ?></td>
 						<td><i class="fa fa-clock-o"></i>&nbsp;<input class="inputSmall heure" type="text" name="vars[heureFinTache]" value=""></td>
 						<td class="alignright"><label>
 								<?= idioma("Statut") ?>

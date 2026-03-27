@@ -1,4 +1,4 @@
-<?
+<?php
 if(file_exists('../conf.inc.php')) include_once('../conf.inc.php');
 if(file_exists('../../conf.inc.php')) include_once('../../conf.inc.php'); 
 $ONLINE_KEY = $_POST['ONLINE_KEY']; 
@@ -24,7 +24,7 @@ foreach($arr['onlive_thread'] as $key=>$value):
     <br />
   </div>
 </div>
-<?
+<?php
 $final = ob_get_contents();
 ob_end_clean();   
 $pattern = '/(?:(?<=\>)|(?<=\/\>))(\s+)(?=\<\/?)/';
@@ -38,7 +38,7 @@ if(!$('p_<?=$value['time']?>')){
 	$('onlive_slider_<?=$ONLINE_KEY?>').scrollTop = 10000
 	}
 </script>
-<?
+<?php
 endforeach; 
 ?>
 </div>

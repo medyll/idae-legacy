@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 	ini_set('display_errors', 55);
 	$APP               = new App('appscheme');
@@ -19,7 +19,7 @@
 		</div>
 	</div>
 	<div class="padding" id="only_name_field" expl_left_zone main_auto_tree>
-		<? while ($arrg = $rsG->getNext()) {
+		<?php while ($arrg = $rsG->getNext()) {
 			$rsF = $APP->plug('sitebase_app', 'appscheme_field')->find(['idappscheme_field_group' => $arrg['idappscheme_field_group']])->sort(['ordreAppscheme_field_group' => 1]);
 			?>
 			<div auto_tree style="position:relative;" class="borderb">
@@ -27,7 +27,7 @@
 			</div>
 			<div class="retrait">
 				<div class="" >
-					<? while ($arrf = $rsF->getNext()) {
+					<?php while ($arrf = $rsF->getNext()) {
 
 						$arrSF = $APPHASF->findOne(['idappscheme' => $idappscheme, 'idappscheme_field' => (int)$arrf['idappscheme_field']]);
 						$has   = !empty($arrSF['idappscheme_has_field']);
@@ -37,11 +37,11 @@
 							<input type="hidden" name="vars_has_field[<?= $arrf['idappscheme_field'] ?>]" value="1">
 							<div class="padding" style="width:150px;"><?= $arrf['nomAppscheme_field'] ?></div>
 						</div>
-					<? } ?>
+					<?php } ?>
 				</div>
 				<br>
 			</div>
-		<? } ?>
+		<?php } ?>
 	</div>
 </div>
 

@@ -25,7 +25,7 @@ $connMailboxMime->ensureIndex(array('idmail'=>1));
 <div class="padding borderb">
 <a class="iconedesk" onclick="ajaxInMdl('app/app_mail/app_mail','tmp_mail','',{onglet:'Boite de reception'})"><img src="<?=ICONPATH?>mail16.png" > <span id="count_mail"></span></a>
 </div> 
-<?
+<?php
 foreach($list as $num=>$msg): 
 	if(!empty($msg['message_id'])):
 	$out = array();

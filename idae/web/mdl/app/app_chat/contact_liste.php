@@ -1,4 +1,4 @@
-<?
+<?php
 if(file_exists('../conf.inc.php')) include_once('../conf.inc.php');
 if(file_exists('../../conf.inc.php')) include_once('../../conf.inc.php'); 
 ini_set('display_errors',0);
@@ -15,7 +15,7 @@ $id_onlive = 'discuss'.$time;
   <div class="titreGadget">onLive</div>
   <div class="in_gadget">
     <div class="gdt_1">
-      <?
+      <?php
 while($arr=$rsA->getNext()):
 	$arrLive  = $baseLive->findOne(array('idagent'=>(int)$arr['idagent']));
 	$arrCheck = $baseCheck->findOne(array('idagent'=>(int)$arr['idagent']));
@@ -34,17 +34,17 @@ while($arr=$rsA->getNext()):
         </a>
       </div>
       <div class="retrait none" >
-        <? if(!empty($arrLive['firstConnect'])): ?>
+        <?php if(!empty($arrLive['firstConnect'])): ?>
         depuis
         <?=maskTime($first)?>
         <br>
-        <? endif; ?>
-        <? if(!empty($arrCheck['lastConnect'])): ?>
+        <?php endif; ?>
+        <?php if(!empty($arrCheck['lastConnect'])): ?>
         idle
         <?=maskTime($idle)?>
-        <? endif; ?>
+        <?php endif; ?>
       </div>
-      <?
+      <?php
 ///	endif;
 endwhile;
 ?>

@@ -1,4 +1,4 @@
-<? 
+<?php 
 if(file_exists('../../conf.inc.php')) include_once('../../conf.inc.php'); 
 
 array_walk_recursive($_POST, 'CleanStr',$_POST);
@@ -38,7 +38,7 @@ switch ($F_action){
 		<script> 
 		// $('writer_text_<?=$ONLINE_KEY?>').value='';
 		</script>
-		<?
+		<?php
 		//exit;
 	break;
 	case "setIdle":

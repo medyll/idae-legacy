@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 	$APP      = new App('appscheme');
 	$arr_tbl  = ['client', 'prospect', 'contact', 'tache', 'affaire', 'financement', 'contrat', 'opportunite', 'intervention', 'materiel'];
@@ -10,7 +10,7 @@
 	<div class="padding alignright bold"><span class="inline border4 ededed padding"><i class="fa fa-caret-down textgrisfonce"></i> <?= idioma('Accéder à mes listes') ?></span></div>
 	<div class="  flex_v " style="height:100%;width: 100%;">
 		<div class=" toggler   flex_h flex_wrap ">
-			<?
+			<?php
 				foreach ($RSSCHEME as $arr_dist):
 					//
 					$table  = $arr_dist['codeAppscheme'];
@@ -30,7 +30,7 @@
 							</div>
 						</div>
 					</div>
-					<?
+					<?php
 				endforeach; ?>
 		</div>
 	</div>

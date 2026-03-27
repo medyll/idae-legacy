@@ -45,7 +45,3 @@ npm run dev
 npm start
 # Runs 'node src/main.js'
 ```
-
-## Legacy Notes
-The old `idae_server.js` has been renamed to `idae_server.legacy.js` for reference.
-Legacy scripts like `start_socket.js` or `appmodules/` are deprecated in favor of this structure.

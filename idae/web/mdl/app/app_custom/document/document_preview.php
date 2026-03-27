@@ -1,4 +1,4 @@
-<?
+<?php
 	ob_start();
 	include_once($_SERVER['CONF_INC']);
 	ob_end_clean();
@@ -30,7 +30,7 @@
 		?>
 		<div class="flex_v" style="overflow:hidden;height:100%;width:100%;min-width:750px;">
 			<div class="titre_entete"><?= $ARR['nomDocument'] ?></div>
-			<? if (empty($NEDD)) { ?>
+			<?php if (empty($NEDD)) { ?>
 				<div class="padding">
 					<form action="<?=ACTIONMDL?>app/actions.php" onsubmit="ajaxFormValidation(this);return false;">
 						<input type="hidden" name="F_action" value="app_update">
@@ -43,17 +43,17 @@
 						</div>
 					</form>
 				</div>
-			<? } else { ?>
+			<?php } else { ?>
 
 
-			<? }?>
+			<?php }?>
 			<div class="relative flex_main padding" style="overflow:hidden;">
 				<iframe src="/mdl/<?= $_POST['MODULE'] ?>.php?frameLoaded=frameLoaded&<?= http_build_query($_POST); ?>" style="display:block;height:100%;overflow:auto;width:100%;margin:0 auto;" marginheight="0" marginwidth="0"
 				        frameborder="0">
 				</iframe>
 			</div>
 		</div>
-		<?
+		<?php
 
 	} else {
 		$collection = 'ged_bin';
@@ -102,28 +102,28 @@
 				$ctype = 'image/gif';
 				?>
 				<img style="width:100%;" src="data:image/gif;base64,<?= base64_encode($ct->getBytes()) ?>">
-				<?
+				<?php
 				exit;
 				break;
 			case 'png':
 				$ctype = 'image/png';
 				?>
 				<img style="width:100%;" src="data:image/png;base64,<?= base64_encode($ct->getBytes()) ?>">
-				<?
+				<?php
 				exit;
 				break;
 			case 'jpeg':
 				$ctype = 'image/jpeg';
 				?>
 				<img style="width:100%;" src="data:image/jpeg;base64,<?= base64_encode($ct->getBytes()) ?>">
-				<?
+				<?php
 				exit;
 				break;
 			case 'jpg':
 				$ctype = 'image/jpg';
 				?>
 				<img style="width:100%;" src="data:image/jpg;base64,<?= base64_encode($ct->getBytes()) ?>">
-				<?
+				<?php
 				exit;
 				break;
 			case 'mp3':
@@ -166,7 +166,7 @@
 				$ctype = 'image/jpeg';
 				?>
 				<img src="data:image/jpeg;base64,<?= base64_encode($ct->getBytes()) ?>">
-				<?
+				<?php
 				exit;
 				break;
 		}

@@ -1,10 +1,19 @@
-<?
+<?php
+/**
+ * actions.php — Main AJAX action entry point.
+ * Dispatches F_action to internal handlers then includes postAction.php.
+ *
+ * Date: 07/07/14
+ * Modified: 2026-03-15 — <?php tag, CSRF validation, exit→return, English comments
+ */
 	include_once($_SERVER['CONF_INC']);
+	require_once(__DIR__ . '/appclasses/appcommon/CsrfGuard.php');
+	use AppCommon\CsrfGuard;
 
 	if ( isset($_POST['F_action']) ) {
 		$F_action = $_POST['F_action'];
 	} else {
-		exit;
+		return;
 	}
 
 	array_walk_recursive($_POST, 'CleanStr');
@@ -35,7 +44,7 @@
 
 			$APP_SOCKET->update(array( 'nomStream_to' => $_POST['stream_to'] ),array('$set'=>array('stop'=>1)),array('upsert'=>true,'safe'=>1));
 
-			exit;
+			return;
 			break;
 	}
 //

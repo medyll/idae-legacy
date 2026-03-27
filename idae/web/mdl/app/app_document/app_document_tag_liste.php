@@ -1,4 +1,4 @@
-<?    
+<?php    
 include_once($_SERVER['CONF_INC']);
 ini_set('display_errors',55);
     $APP = new App();
@@ -22,7 +22,7 @@ $arrTagUser		= array('DOC'=>'documents','CNIUSER'=>'pièce');
 $arrTagImg      = array('GENE'=>'Général','Istock'=>'Istock');
 ?>
 <div class="padding applink applinkblock toggler" id="loader<?=$uniqid?>">13
-<?
+<?php
 $rs 	 	= $APP->plug('sitebase_ged','ged_tag')->find()->sort(array('titre'=>1)); // skelMongo::connect('ged_tag','sitebase_ged')->find()->sort(array('titre'=>1));
 while($arr=$rs->getNext()){
    $collection 	=	$arr['collection'];
@@ -39,7 +39,7 @@ while($arr=$rs->getNext()){
       Sans tag
       <span count class="bold"> <?=$total?></span>
       </a>
-   <?
+   <?php
    foreach($arr['grilleTag'] as $TAG=>$value_text): 
       $ct	= 	skelMongo::connectBase($base)->getGridFs($collection)->find(array('metatag'=>array('$in'=>array($TAG))))->count();
       $target 	=  	'target[tag]='.$TAG.'&target[collection]='.$collection.'&target[base]='.$base; 
@@ -51,7 +51,7 @@ while($arr=$rs->getNext()){
       <?=$value_text?>
       <span count class="bold"> <?=$total?></span>
       </a>
-      <?
+      <?php
        
    endforeach;
    ?>
@@ -59,10 +59,10 @@ while($arr=$rs->getNext()){
       <i class="fa fa-trash-o"></i>
       corbeille<span count></span></a>  
    </div>
-   <?
+   <?php
 }
 ?>
-<?
+<?php
 $arrGed = array();
 foreach($arrGed as $KEY=>$TYPE): 
 $namevar = 'arrTag'.$KEY;
@@ -75,7 +75,7 @@ skelMongo::connect('ged_tag','sitebase_ged')->update(array('ged'=>$KEY),array('$
       <a dropzone="move" tag="notag" base="<?=$TYPE['base']?>" collection="<?=$TYPE['collection']?>" class="autoToggle" target="<?=$trashNotag?>">
       <i class="fa fa-star-o"></i>
       Sans tags<span count></span></a>  
-    <? foreach($$namevar as $key=>$tag):
+    <?php foreach($$namevar as $key=>$tag):
       $target =  'target[tag]='.$key.'&target[collection]='.$TYPE['collection'].'&target[base]='.$TYPE['base']; 
     ?>
     <a dropzone="move" tag="<?=$key?>" base="<?=$TYPE['base']?>" collection="<?=$TYPE['collection']?>" class="autoToggle" target="<?=$target?>">
@@ -84,12 +84,12 @@ skelMongo::connect('ged_tag','sitebase_ged')->update(array('ged'=>$KEY),array('$
     <?=$tag?>
     <span count class="bold"></span>
     </a>
-    <? endforeach; ?>
+    <?php endforeach; ?>
      <a  dropzone="move" tag="TRASH" base="<?=$TYPE['base']?>" collection="<?=$TYPE['collection']?>" class="autoToggle" target="<?=$trashTarget?>">
       <i class="fa fa-trash-o"></i>
       corbeille<span count></span></a>  
   </div> 
-<? endforeach; ?>
+<?php endforeach; ?>
 </div>
 <style>
 [draggable=true], [dropzone]{

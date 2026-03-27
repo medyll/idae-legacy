@@ -30,11 +30,11 @@
 			   value="app_multi_delete"/><input type="hidden"
 												name="table"
 												value="<?= $table ?>"/>
-		<? foreach ($arr_id as $value) { ?>
+		<?php foreach ($arr_id as $value) { ?>
 			<input name="arr_id[]"
 				   type="hidden"
 				   value="<?= $value ?>">
-		<? } ?>
+		<?php } ?>
 		<table>
 			<tr>
 				<td style = "width:90px;text-align:center"><br>

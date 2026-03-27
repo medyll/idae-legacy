@@ -48,7 +48,7 @@
 	$RS = $APP->find($vars);
 ?>
 <div id="<?= $zone ?>" style="width:100%; " class=" ">.. **
-	<?
+	<?php
 		while ($ARR = $RS->getNext()) {
 			$main_id = (int)$ARR[$APPOBJ->NAME_ID];
 			foreach ($GRILLE_RFK as $key => $arr_fk) {

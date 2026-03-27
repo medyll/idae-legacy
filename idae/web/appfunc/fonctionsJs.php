@@ -66,7 +66,7 @@ class fonctionsJs
 		$query = is_array($vars) ? http_build_query($vars) : $vars;
 		return "act_chrome_gui('app/app_liste/app_liste_gui','table=$table&table_value=$table_value&$query',{ident: '$ident' });";
 	}
-	function client_big_fiche($idclient){
+	static function client_big_fiche($idclient){
 		$APP = new App('client');
 		$arr = $APP->findOne(array('idclient'=>(int)$idclient));
 		$name = addslashes($arr['nomClient']);

@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 	require_once(__DIR__ . '/../../../appclasses/appcommon/MongoCompat.php');
 	use AppCommon\MongoCompat;
@@ -69,7 +69,7 @@
 <div class="applink flex_h fond_noir color_fond_noir" style="height: 100%;width:100%;">
 	<div class="toggler flex_v " style="height:100%;width: 100%;">
 		<div class="applinkblock applink panel_entete flex_main flex_v  " style="overflow:auto;">
-			<? while ($ARR_TY = $RS_TY->getNext()) {
+			<?php while ($ARR_TY = $RS_TY->getNext()) {
 				$idappscheme_type = (int)$ARR_TY['idappscheme_type'];
 				$RS_SCH           = $APP_SCH->find(['idappscheme_type' => $idappscheme_type, 'idappscheme' => ['$in' => $arr_sch]])->sort(['nomAppscheme' => 1]);
 				?>
@@ -78,7 +78,7 @@
 						<a vars="idappscheme_type=<?= $ARR_TY['idappscheme_type'] ?>" act_target="loader_gui_pane" mdl="app/app_gui/app_gui_start_menu_launch_all"><i class="fa fa-<?= $ARR_TY['iconAppscheme_type'] ?>"></i></a>
 					</div>
 					<div class="flex_main">
-						<?
+						<?php
 							while ($ARR_SCH = $RS_SCH->getNext()) {
 								$table       = $ARR_SCH['codeAppscheme'];
 								$nom_table   = $ARR_SCH['nomAppscheme'];
@@ -91,14 +91,14 @@
 									<span class="flex_main"><?= ucfirst(idioma($nom_table)) ?></span>
 									<span style="width:30px;" class="aligncenter"><i class="fa fa-caret-right"></i></span>
 								</a>
-								<?
+								<?php
 							} ?>
 					</div>
 				</div>
-			<? } ?>
+			<?php } ?>
 			<div class="flex_h">
 				<div class="flex_main" style="order:1">
-					<? $has = 0;
+					<?php $has = 0;
 						foreach ($RSNOSCHEME as $sch):
 							$table   = $sch['codeAppscheme'];
 							$table_name = $sch['nomAppscheme'];
@@ -113,13 +113,13 @@
 								<span class="flex_main"><?= ucfirst(idioma($table_name)) ?></span>
 								<span style="width:30px;" class="aligncenter"><i class="fa fa-caret-right"></i></span>
 							</a>
-						<? endforeach; ?>
+						<?php endforeach; ?>
 				</div>
-				<? if (!empty($has)) { ?>
+				<?php if (!empty($has)) { ?>
 					<div class="transpnoir" style="order:0;">
-						<a><i class="fa fa-random"></i> <? //= $arr['nomAppscheme_type'] ?></a>
+						<a><i class="fa fa-random"></i> <?php //= $arr['nomAppscheme_type'] ?></a>
 					</div>
-				<? } ?>
+				<?php } ?>
 			</div>
 			<div class="flex_h flex flex_main ">
 				<div class="transpnoir">
@@ -128,27 +128,27 @@
 				<div class="flex_main">
 				</div>
 			</div>
-			<? if (BUSINESS == 'cruise') { ?>
+			<?php if (BUSINESS == 'cruise') { ?>
 				<div class="hide_gui_pane  ">
 					<a onclick="ajaxMdl('app/app_custom/mail/mail_send','Nouveau Mail')"> Nouveau mail</a>
 				</div>
-				<? if (droit('DEV')) { ?>
+				<?php if (droit('DEV')) { ?>
 					<div class="hide_gui_pane  ">
 						<a  onclick="<?=fonctionsJs::app_mdl('app/app_mail/app_mail')?>">app_mail</a>
 					</div>
 
-				<? } ?>
-			<? } ?>
+				<?php } ?>
+			<?php } ?>
 		</div>
 		<div class="flex_h flex_align_middle">
 			<a class="autoToggle flex_main" mdl="app/app_gui/app_gui_production" act_target="loader_gui_pane">
 				<i class="fa fa-cube"></i> &nbsp;<?= idioma('Production') ?> </a>
-			<? if (droit('ADMIN')) { ?>
+			<?php if (droit('ADMIN')) { ?>
 				<a class="autoToggle flex_main" act_target="loader_gui_pane" mdl="app/app_admin/app_admin">
 					<i class="fa fa-cogs"></i>
 					&nbsp;Administration&nbsp;
 				</a>
-			<? } ?>
+			<?php } ?>
 			<div class="alignright">
 				<?= skelMdl::cf_module('app/app_gui/app_gui_tile_user', ['moduleTag' => 'span', 'code' => 'app_menu_start']) ?>
 			</div>

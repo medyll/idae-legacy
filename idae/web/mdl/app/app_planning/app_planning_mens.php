@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 
 	$tabmonth = $tabMois = array(1 => "Janvier", "F&eacute;vrier", "Mars", "Avril", "Mai", "Juin", "Juillet", "Ao&ucirc;t", "Septembre", "Octobre", "Novembre", "D&eacute;cembre");
@@ -35,7 +35,7 @@
 
 <div class="flex_v" style="width:100%;overflow:hidden;position:relative;height:100%;"  data-dsp="planning"  id="innerPlanningMens<?= $rand ?>" >
 	<div class="titre_entete toggler applink relative"  >
-		<? for ($i = 1; $i < 13; $i++) {
+		<?php for ($i = 1; $i < 13; $i++) {
 			$sd = mktime(12, 0, 0, $i, $jourEnCours, $anneeEnCours);
 			($i == $moisEnCours) ? $className = 'active bold' : $className = 'lienMoisOff';
 			if ($i == ($moisEnCours - 1) || $i == ($moisEnCours + 1)) {
@@ -47,23 +47,23 @@
 				&nbsp;
 				<?= $tabMois[intval($i)] ?>
 				&nbsp;</a>
-		<? } ?>
+		<?php } ?>
 	</div>
 	<div style="box-shadow:0 0 2px #666;position:relative;z-index:1">
 	<table style="width:100%;">
 		<tr>
 			<td class="borderr ededed aligncenter" style="width: 40px;"><i class="fa fa-calendar-o"></i></td>
-			<? for ($i = 0; $i < 7; $i++) { ?>
+			<?php for ($i = 0; $i < 7; $i++) { ?>
 				<td class="aligncenter" valign="middle" style="height:25px;">
 					<div class="titre_entete">
 						<span class="bold borderb"><?= $tabday[$i] ?></span> </div>
 				</td>
-			<? } ?>
+			<?php } ?>
 			<td style="width: 17px;"></td>
 		</tr>
 	</table></div>
 	<div style="position:relative;overflow:auto;height:100%;" class="flex_main">
-		<?
+		<?php
 			$num_day = date("w", mktime(0, 0, 0, $moisEnCours, 01, $anneeEnCours));
 			if ($num_day == 0) {
 				$num_day = 7;
@@ -77,7 +77,7 @@
 		       cellspacing="0" cellpadding="0">
 			<tbody class="tdcalday">
 
-			<?
+			<?php
 				while ($cpt_day <= $max_day + $num_day) {
 					// calcul le numero de semaine
 					$nb_day = date("z", gmmktime(0, 0, 0, $moisEnCours, $cpt_day - $num_day + 3, $anneeEnCours));
@@ -87,7 +87,7 @@
 					?>
 					<tr>
 						<td class="" style="width:40px;"></td>
-						<?
+						<?php
 							for ($i = 0; $i < 7; $i++) {
 								$class     = " ";
 								$jourferie = true;
@@ -110,11 +110,11 @@
 							              </div>
 									</div>
 								</td>
-							<? } ?>
+							<?php } ?>
 					</tr>
 					<tr>
 						<td class="blanc" style="width:40px;"></td>
-						<?
+						<?php
 							$class = "";
 							for ($i = 0; $i < 7; $i++) {
 								$theday = date("D", gmmktime(0, 0, 0, $moisEnCours, $cpt_day - $num_day, $anneeEnCours));
@@ -146,14 +146,14 @@
 									     class="   caseMois" dropvalue="<?= date_fr($witDate) ?>"
 									     datedebut="<?= date_fr($witDate) ?>" date="<?= date_fr($witDate) ?>"></div>
 								</td>
-							<? } ?>
+							<?php } ?>
 					</tr>
-				<? } ?>
+				<?php } ?>
 			</tbody>
 		</table>
 	</div>
 	<div class="padding bordert">
-		<?//= skelMdl::cf_module('app/app_planning/app_planning_tache_reload', array( 'maxJours' => 30, 'tableparent' => 'innerPlanningMens' . $rand, 'sd' => $_POST['sd']) + $_POST); ?>
+		<?php//= skelMdl::cf_module('app/app_planning/app_planning_tache_reload', array( 'maxJours' => 30, 'tableparent' => 'innerPlanningMens' . $rand, 'sd' => $_POST['sd']) + $_POST); ?>
 	</div>
 </div>
 <script>

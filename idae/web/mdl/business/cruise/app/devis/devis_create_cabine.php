@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 	ini_set('display_errors', 55);
 	$APP    = new App('produit_tarif');
@@ -12,7 +12,7 @@
 			<br>
 			Date de départ non choisie
 		</div>
-		<?
+		<?php
 
 	} else {
 		$idproduit_tarif = (int)$_POST['idproduit_tarif'];
@@ -21,14 +21,14 @@
 
 		?>
 		<div class="toggler applink flex_h">
-			<?
+			<?php
 				$arrG  = $APP_TG->distinct_all('idgamme', array('idproduit_tarif' => (int)$idproduit_tarif, 'idproduit' => $idproduit));
 				$RS_GM = $APP_GM->find(['idgamme' => ['$in' => $arrG]])->sort(['ordreGamme' => 1]);
 				while ($arrGM = $RS_GM->getNext()) {
 					$idgamme = (int)$arrGM['idgamme'];
 					?>
 					<div class="flex_main">
-					<div class="padding margin borderb"><?= $arrGM["nomGamme"] ?></div><?
+					<div class="padding margin borderb"><?= $arrGM["nomGamme"] ?></div><?php
 					$rsT = $APP_TG->query(array('idgamme' => $idgamme, 'idproduit_tarif' => (int)$idproduit_tarif, 'idproduit' => $idproduit))->sort(['prixProduit_tarif_gamme' => 1]);
 					foreach ($rsT as $key => $arr) {
 						// var_dump($arr);
@@ -49,11 +49,11 @@
 								€
 							</div>
 						</label>
-					<? }
-					?></div><?
+					<?php }
+					?></div><?php
 				}
 			?>
 		</div>
-	<? } ?>
+	<?php } ?>
 
 

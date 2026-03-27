@@ -26,7 +26,9 @@ export const config = {
             return `mongodb://${this.user}:${this.pass}@${this.host}:27017/${this.dbName}?authSource=admin`;
         }
     },
-    env: process.env.NODE_ENV || 'development'
+    env: process.env.NODE_ENV || 'development',
+    // Map client-facing domains to internal Docker service names for PHP bridge calls
+    phpBridgeHost: process.env.PHP_BRIDGE_HOST || ''
 };
 
 // Log config at startup

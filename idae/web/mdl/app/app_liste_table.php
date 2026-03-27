@@ -1,4 +1,4 @@
-<?
+<?php
 include_once($_SERVER['CONF_INC']);
 	require_once(__DIR__ . '/../../appclasses/appcommon/MongoCompat.php');
 	use AppCommon\MongoCompat;
@@ -84,34 +84,34 @@ $rs = $APP->query($vars + $where, (int)$page, (int)$nbRows);
     <tr>
         <td class="avoid aligncenter"><input type="checkbox" onclick="doClickto(this);"></td>
         <td class="alignright">id</td>
-        <? foreach ($arrFieldsBool as $bool => $arr_ico): ?>
+        <?php foreach ($arrFieldsBool as $bool => $arr_ico): ?>
             <td class="aligncenter" style="width:40px">
                 <li class="fa fa-<?= $arr_ico[0] ?>"></li>
             </td>
-        <? endforeach; ?>
+        <?php endforeach; ?>
         <td class="aligncenter">
             <li class="fa fa-cubes"></li>
         </td>
-        <? if (!empty($key_date)): ?>
+        <?php if (!empty($key_date)): ?>
             <td><?= $key_date ?></td>
-        <? endif; ?>
+        <?php endif; ?>
         <td><?= $table ?></td>
-        <? foreach ($GRILLE_FK as $fk):
+        <?php foreach ($GRILLE_FK as $fk):
             ?>
             <td>
                 <?= $fk['table_fk'] ?>
             </td>
-        <? endforeach; ?>
-        <? if (!empty($APP_TABLE['hasPrixScheme'])): ?>
+        <?php endforeach; ?>
+        <?php if (!empty($APP_TABLE['hasPrixScheme'])): ?>
             <td class="alignright"><?= idioma('Prix') ?></td>
-        <? endif; ?>
+        <?php endif; ?>
 
     </tr>
     </thead>
-    <?
+    <?php
     if (!empty($groupBy)):
         ?>
-        <? foreach ($rs_dist as $arr_dist):
+        <?php foreach ($rs_dist as $arr_dist):
         $vars['id' . $groupBy] = (int)$arr_dist['id' . $groupBy];
         $rs = $APP->query($vars + $where)->sort(array($sortBy => $sortDir));
         //
@@ -138,7 +138,7 @@ $rs = $APP->query($vars + $where, (int)$page, (int)$nbRows);
 
             </td>
         </tr>
-        <?
+        <?php
         while ($arr = $rs->getNext()) {
             // variables pour le mdl_tr
             $trvars['id' . $table] = $arr[$id];
@@ -150,13 +150,13 @@ $rs = $APP->query($vars + $where, (int)$page, (int)$nbRows);
                 'data-contextual="table=' . $table . '&table_value=' . $arr[$id] . '" act_preview_mdl = "app/app_liste/app_liste_preview" draggable="draggable"');
             ?>
 
-        <? } ?>
+        <?php } ?>
 
         </tbody>
-    <? endforeach; ?>
-    <? else: ?>
+    <?php endforeach; ?>
+    <?php else: ?>
         <tbody class="toggler" id="tb_<?=$uniqid?>">
-        <?
+        <?php
         while ($arr = $rs->getNext()) {
             // variables pour le mdl_tr
             $trvars['id' . $table] = $arr[$id];
@@ -169,6 +169,6 @@ $rs = $APP->query($vars + $where, (int)$page, (int)$nbRows);
         }
             ?>
         </tbody>
-    <? endif; ?>
+    <?php endif; ?>
 
 </table>

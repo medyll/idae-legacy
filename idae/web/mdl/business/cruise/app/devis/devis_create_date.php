@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once($_SERVER['CONF_INC']);
 
 	$path_to_devis = 'business/'.BUSINESS.'/app/devis/' ;
@@ -14,7 +14,7 @@
 ?>
 
 <div class = " toggler" >
-	<?
+	<?php
 		$year = $month = $day;
 		foreach ($arr_TF as $key => $arrDate) {
 			$date    = date_create($arrDate['dateDebutProduit_tarif']);
@@ -23,7 +23,7 @@
 			$mois    = date_format($date , 'm');
 			$jour    = date_format($date , 'd');
 			?>
-			<? if ( $year != $annee ) {
+			<?php if ( $year != $annee ) {
 				$year  = $annee;
 				$month = '';
 				?><br />
@@ -32,8 +32,8 @@
 						<?= $annee ?>
 					</strong >
 				</div >
-			<? } ?>
-			<?
+			<?php } ?>
+			<?php
 			if ( $month != $mois && $year == $annee ) {
 				echo '<br>';
 			}
@@ -44,17 +44,17 @@
 				<div class = "inline applink retrait" style = "width:80px;vertical-align:middle;" >
 					<label class = "nolabel " ><span class = "borderb" ><?= fonctionsSite::mois_fr($mois) ?></span ></label >
 				</div >
-			<? } ?>
+			<?php } ?>
 			<div class = "inline applink aligncenter borderr" style = "width:30px;overflow:hidden;vertical-align:middle;" onclick = "reloadModule('<?=$path_to_devis?>devis_create_cabine','*','idproduit=<?= $idproduit ?>&idproduit_tarif=<?= $arrDate['idproduit_tarif'] ?>')" >
 				<label class = "autoToggle aligncenter nolabel" >
 					<input style = "height:0;width:0;position:absolute;visibility:hidden" type = "radio" name = "vars[idproduit_tarif]" value = "<?= $arrDate['idproduit_tarif'] ?>" /><?= $tabjour[$numjour] . ' ' . $jour ?>
 				</label >
 			</div >
-		<? } ?>
+		<?php } ?>
 </div >
 <div class = "spacer" ></div >
-<? if ( ! empty($arrP['grilleDateProduit'][0]) ) { ?>
+<?php if ( ! empty($arrP['grilleDateProduit'][0]) ) { ?>
 	<script >
 		reloadModule('<?=$path_to_devis?>devis_create_cabine', '*', 'idproduit_tarif=<?=$arrP['grilleDateProduit'][0]['idproduit_tarif']?>&idproduit=<?=$idproduit?>')
 	</script >
-<? } ?>
+<?php } ?>
