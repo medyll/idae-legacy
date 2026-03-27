@@ -10,7 +10,7 @@
 	$APP_DOC_TYPE = new App('document_type');
 	$APP_DOC_EXTENSION = new App('document_extension');
 	$_POST += $_GET;
-	array_walk_recursive($_POST, 'CleanStr', $_POST);
+	array_walk_recursive($_POST, 'CleanStr');
 
 	$time = time();
 	ini_set('display_errors', 55);
