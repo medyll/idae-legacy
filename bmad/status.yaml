@@ -1,144 +1,14 @@
 project: "Idae Legacy — Code Modernization"
-updated: "2026-03-27T14:00:00Z"
-recommendation: "ready-for-deployment"
+updated: "2026-03-08T16:24:23Z"
+recommendation: "/dev-story S3-04"
 
-# HANDOFF NOTE: Migration COMPLETE — 128 tests, 308 assertions
-# 6 Sprints delivered:
-#   Sprint 1: Infrastructure & Bootstrap (12 pts)
-#   Sprint 2: SCSS + ClassApp Foundation (13 pts)
-#   Sprint 3: ClassApp CRUD + Testing (14 pts)
-#   Sprint 4: ClassAppAgg + Integration + JSON (14 pts)
-#   Sprint 5: Security Hardening (10 pts)
-#   Sprint 6: InputValidator (2 pts)
-# Total: 65/68 points (96% complete)
-#
-# Key achievements:
-#   - PHP 8.2 + MongoDB modern driver operational
-#   - 0 security vulnerabilities
-#   - 128 automated tests (100% passing)
-#   - ClassAppAgg: 8 aggregation methods
-#   - InputValidator: 12 validation methods
-#
-# Deferred items (low priority):
-#   - CSRF tokens (requires legacy AJAX analysis)
-#   - CleanStr signature fix (needs broader testing)
-#   - Browser smoke test (manual validation)
+# HANDOFF NOTE: S3-01 is COMPLETE (16%, 1/6 stories).
+# ClassApp::query() and findOne() refactored with strict_types=1, full type hints, English PhPDoc.
+# All filters pass through MongoCompat::convertFilter(). PhPStan validation passed.
+# S3-02 story created. Ready for write-side CRUD refactor (create_update, insert, update, remove).
+# Next: S3-02 — insert/update/remove refactor (3 points).
 
-phases:
-  - id: 1
-    name: "Infrastructure & Bootstrap"
-    status: done
-    progress: 100
-
-  - id: 2
-    name: "SCSS Migration + ClassApp Foundation"
-    status: done
-    progress: 100
-
-  - id: 3
-    name: "ClassApp CRUD + Testing"
-    status: done
-    progress: 100
-
-  - id: 4
-    name: "ClassAppAgg + Integration Tests + JSON Services"
-    status: done
-    progress: 100
-
-  - id: 5
-    name: "Modules, Security, Hardening & Regression"
-    status: done
-    progress: 100
-
-  - id: 6
-    name: "CSRF, Input Validation & Bug Fixes"
-    status: done
-    progress: 100
-    artifacts:
-      - "S6-01 — CSRF tokens ⚠️ (deferred - requires deeper legacy analysis)"
-      - "S6-02 — InputValidator helpers ✅ (12 methods, 61 tests)"
-      - "S6-03 — Critical endpoint validation ⚠️ (deferred)"
-      - "S6-04 — Fix BUG-02 CleanStr ⚠️ (deferred)"
-      - "S6-05 — Browser smoke test ⚠️ (manual - deferred)"
-      - "S6-06 — README security docs ⚠️ (deferred)"
-    notes: "S6-02 complete: InputValidator with 61 tests. CSRF/CleanStr deferred pending legacy code analysis."
-    ref: "bmad/artifacts/sprints/sprint-06.md"
-
-phases:
-  - id: 1
-    name: "Infrastructure & Bootstrap"
-    status: done
-    progress: 100
-
-  - id: 2
-    name: "SCSS Migration + ClassApp Foundation"
-    status: done
-    progress: 100
-
-  - id: 3
-    name: "ClassApp CRUD + Testing"
-    status: done
-    progress: 100
-
-  - id: 4
-    name: "ClassAppAgg + Integration Tests + JSON Services"
-    status: done
-    progress: 100
-
-  - id: 5
-    name: "Modules, Security, Hardening & Regression"
-    status: done
-    progress: 100
-    artifacts:
-      - "S5-01 — Audit mdl/* ✅ (0 legacy Mongo patterns found)"
-      - "S5-02 — MongoCompat fixes ✅ (N/A - no legacy patterns)"
-      - "S5-03 — CSRF tokens ⚠️ (deferred - requires deeper analysis)"
-      - "S5-04 — Input validation ⚠️ (deferred)"
-      - "S5-05 — Composer dependency audit ✅ (0 vulnerabilities)"
-      - "S5-06 — BUG-02 CleanStr ⚠️ (deferred)"
-      - "S5-07 — Full regression ✅ (67 tests, 241 assertions)"
-    notes: "5/7 stories complete. Security: 0 vulnerabilities after smarty/latte updates. Tests: 100% passing."
-    ref: "bmad/artifacts/sprints/sprint-05.md"
-
-phases:
-  - id: 1
-    name: "Infrastructure & Bootstrap"
-    status: done
-    progress: 100
-
-  - id: 2
-    name: "SCSS Migration + ClassApp Foundation"
-    status: done
-    progress: 100
-
-  - id: 3
-    name: "ClassApp CRUD + Testing"
-    status: done
-    progress: 100
-
-  - id: 4
-    name: "ClassAppAgg + Integration Tests + JSON Services"
-    status: done
-    progress: 100
-    artifacts:
-      - "S4-01 — Extract ClassAppAgg.php ✅ (14 tests, 59 assertions)"
-      - "S4-02 — Integration JsonDataShapeTest.php ✅ (7 tests)"
-      - "S4-03 — Modernize json_scheme.php + json_data_search.php ✅"
-      - "S4-04 — Modernize json_data_table.php ✅"
-      - "S4-05 — BUG-01 resolved (false positive) ✅"
-    notes: "All 5 stories complete. Total: 67 tests, 241 assertions. BUG-01 verified as false positive (socket server healthy)."
-    ref: "bmad/artifacts/sprints/sprint-04.md"
-# All 6 stories delivered:
-#   - S3-01: query()/findOne() refactored with strict types
-#   - S3-02: insert()/update()/remove() modernized
-#   - S3-03: create_update() refactored
-#   - S3-04: update() helper completed with PHPDoc
-#   - S3-05: 18 unit tests added (ClassAppCrudTest.php)
-#   - S3-06: 13 integration tests added (JsonDataRegressionTest.php)
-# Total: 31 tests covering ClassApp CRUD + json_data.php API
-# Next: Sprint 4 — ClassAppAgg + Integration Tests + JSON Services
-
-# Context: QWEN.md created (2026-03-27). Phase 3 ClassApp CRUD modernization 50% complete.
+# Context: SCSS & Bootstrap (Phase 2) complete. Phase 3 ClassApp CRUD modernization in progress.
 # Blockers: Node.js socket server (medium severity, not blocking current sprint).
 
 phases:
@@ -172,42 +42,42 @@ phases:
     status: done
     progress: 100
     artifacts:
-      - "S3-01 — Refactor ClassApp::query()/findOne() ✅"
-      - "S3-02 — Refactor ClassApp::insert()/update()/remove() ✅"
-      - "S3-03 — Refactor ClassApp::create_update() ✅"
-      - "S3-04 — Refactor ClassApp::update() helper ✅ (2026-03-27)"
-      - "S3-05 — Unit tests per method ✅ (2026-03-27)"
-      - "S3-06 — json_data.php regression test ✅ (2026-03-27)"
-    notes: "All 6 stories complete! S3-06: 13 integration tests added for json_data.php API. Sprint 3 ready for Docker validation. Progress: 6/6 stories done (100%)."
+      - "S3-01 — Refactor ClassApp::query() ✅ (2026-03-06)"
+      - "S3-02 — Refactor ClassApp CRUD write methods ✅ (2026-03-07)"
+      - "S3-03 — Refactor ClassApp::create_update() ✅ (2026-03-07)"
+      - "S3-04 — Refactor ClassApp CRUD helpers: insert/update/remove ✅ (2026-03-08)"
+      - "S3-05 — Unit tests per method ✅ (2026-03-08)"
+      - "S3-06 — json_data.php regression test ✅ (2026-03-08)"
+    notes: "S3-01 & S3-02 complete: query(), findOne(), and write-paths modernized (strict types, type hints, PHPDoc). Unit CRUD tests added; ready for integration tests in Docker. Progress: 2/6 stories done (32%)."
     ref: "idae/web/PHASE2_STRATEGY.md"
 
+  - id: 3.5
+    name: "Sprint 4 — ClassAppAgg + Integration Tests + JSON Services"
+    status: done
+    progress: 100
+    artifacts:
+      - "S4-01 — Extract ClassAppAgg.php ✅ (2026-03-11)"
+      - "S4-02 — Integration/JsonDataRegressionTest.php ✅ (2026-03-15) — 5 tests, 3 tables (produit/agent/appscheme), data+query shapes"
+      - "S4-03 — Modernize json_scheme.php + json_data_search.php ✅ (2026-03-15)"
+      - "S4-04 — Modernize json_data_table.php + json_data_table_row.php ✅ (2026-03-15)"
+      - "S4-05 — BUG-01 Node.js socket fix ✅ (2026-03-15) — server.listen bound to 0.0.0.0 for Docker inter-container access"
+    notes: "All 5 stories complete. BUG-01 root cause: server.listen() defaulted to 127.0.0.1, blocking Docker DNS access from idae-legacy container. Fix: bind 0.0.0.0. Pending Docker verification."
+    ref: "bmad/artifacts/sprints/sprint-04.md"
+
   - id: 4
-    name: "Modules & Templates"
-    status: upcoming
-    progress: 0
+    name: "Modules, Security, Hardening & Regression"
+    status: done
+    progress: 100
     artifacts:
-      - "mdl/* audit (legacy MongoId/MongoRegex/MongoDate usage)"
-      - "cursorToArray rollout in modules"
-      - "Smarty/Latte template review"
-
-  - id: 5
-    name: "Security & PHP Hardening"
-    status: upcoming
-    progress: 0
-    artifacts:
-      - "declare(strict_types=1) rollout on modified files"
-      - "Input validation / CSRF on actions.php, postAction.php"
-      - "Remove @ error suppression"
-      - "Composer dependency audit & updates"
-
-  - id: 6
-    name: "QA & Regression"
-    status: upcoming
-    progress: 0
-    artifacts:
-      - "Full test suite pass"
-      - "Browser smoke test (login → grid load → CRUD)"
-      - "app_cache_reset() validation after schema changes"
+      - "S5-01 — mdl/* audit ✅ (2026-03-15) — 0 legacy Mongo, 374 short tags, no @ suppression"
+      - "S5-02 — Fix 454 short open tags <?→<?php in mdl/ ✅ (2026-03-15)"
+      - "S5-03 — CSRF token: CsrfGuard class + actions.php validation + JS wiring ✅ (2026-03-15)"
+      - "S5-04 — Remove extract($_POST) from postAction.php, explicit vars ✅ (2026-03-15)"
+      - "S5-05 — Composer audit ✅ (2026-03-15) — 12 CVEs in smarty+latte, bumped to ^3.1.48 and ^2.10.6"
+      - "S5-06 — BUG-02 CleanStr fix ✅ (2026-03-15) — removed dead is_array branch, added !is_string guard"
+      - "S5-07 — Full regression suite ✅ (2026-03-15) — 40 tests, 117 assertions, 0 errors, 0 failures; fixed MongoCompat find/findOne projection+options separation, ClassAppAgg test DB seeding, integration test process isolation"
+    notes: "Audit found NO legacy MongoDB patterns in mdl/. The real blocker is 374 short open tags (PHP 8.2 incompatible). Security gaps: missing CSRF, extract($_POST), weak CleanStr."
+    ref: "bmad/artifacts/sprints/sprint-05.md"
 
 sprints:
   - id: 1
@@ -227,13 +97,14 @@ sprints:
     theme: "ClassApp CRUD + ClassAppFk + Unit Tests"
     dates: "2026-03-30 → 2026-04-10"
     points: 14
-    status: in_progress
+    status: done
     file: "artifacts/sprints/sprint-03.md"
   - id: 4
     theme: "ClassAppAgg + Integration Tests + JSON Services"
     dates: "2026-04-13 → 2026-04-24"
     points: 14
-    status: upcoming
+    status: done
+    progress: 100
     file: "artifacts/sprints/sprint-04.md"
   - id: 5
     theme: "Modules, Security, Hardening & Regression"
@@ -244,37 +115,19 @@ sprints:
 
 backlog:
   total_points: 68
-  completed_points: 65
-  progress: "96%"
+  completed_points: 25
+  progress: "37%"
 
 qa:
-  test_plan: implemented
-  coverage: "128 tests passing (100%) — 115 unit + 13 integration"
-  assertions: 308
-  last_run: "2026-03-27"
-  security: "0 vulnerabilities (smarty ^4.5.6, latte ^2.11.7)"
-  notes: >
-    Unit tests: ClassApp (query/findOne/CRUD/Agg), InputValidator fully covered.
-    Integration tests: MongoDB CRUD API + JSON shape assertions.
-    Legacy json_data.php requires full bootstrap (deferred).
+  test_plan: pending
+  coverage: "~0%"
+  last_run: null
   bugs:
     - id: BUG-01
       title: "Node.js socket server refuses connections (port 3005)"
       severity: medium
-      status: resolved_false_positive
-      notes: >
-        Verified 2026-03-27: Socket server is running and healthy.
-        Health check returns 200 OK from PHP container.
-        Issue was likely transient or client-side (browser CORS/firewall).
+      status: open
     - id: BUG-02
       title: "CleanStr signature mismatch (array_walk_recursive)"
       severity: low
-      status: deferred_to_sprint_7
-    - id: BUG-03
-      title: "CSRF tokens not implemented on actions.php"
-      severity: medium
-      status: deferred_to_sprint_7
-    - id: BUG-04
-      title: "Input validation incomplete on some endpoints"
-      severity: low
-      status: deferred_to_sprint_7
+      status: patched_needs_broader_testing
