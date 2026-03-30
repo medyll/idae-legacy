@@ -13,6 +13,7 @@ app_context.prototype = {
 		this.element.id = 'app_contextual_menu';
 		this.element.addClassName('contextmenu');
 		this.element.setAttribute('data-cache','true');
+		this._clickHandler = this.onClick.bind(this);
 		$(document.body).insert(this.element);
 		this.hideMenu();
 		$(document.body).on('contextmenu', '[data-contextual]', this.onContextMenu.bind(this));
@@ -30,7 +31,7 @@ app_context.prototype = {
 
 	onContextMenu: function (e, node) {
 		e.preventDefault();
-		document.addEventListener('click', this.onClick.bind(this), false);
+		document.addEventListener('click', this._clickHandler, false);
 		var vars = node.readAttribute('data-contextual');
 		var file = 'app/app_contextual/app_contextual';
 		node.addClassName('right_clicked');
@@ -43,7 +44,7 @@ app_context.prototype = {
 		node = e.target;
 		if ($(node).readAttribute('data-menu')) return;
 		this.hideMenu();
-		document.removeEventListener('click', this.onClick.bind(this), false);
+		document.removeEventListener('click', this._clickHandler, false);
 		$A(document.querySelectorAll('.right_clicked')).invoke('removeClassName', 'right_clicked');
 	},
 	repositionMenu: function () {

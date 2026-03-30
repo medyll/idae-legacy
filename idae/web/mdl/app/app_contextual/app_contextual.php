@@ -19,22 +19,33 @@
 			$Table                = ucfirst($table);
 		endif;
 		//
-		$APPSC_HAS_FIELD   = new App('appscheme_has_field');
-		$APPSC_FIELD       = new App('appscheme_field');
 		$APP         = new App($table);
 		$TABLE_ONE   = $APP->app_table_one;
 		$idappscheme = (int)$APP->idappscheme;
-
-		$GRILLE_FK   = $APP->get_grille_fk();
-		$R_FK        = $APP->get_reverse_grille_fk($table, $table_value);
 		$table_value = (int)$_POST['table_value'];
 		$act_from    = empty($_POST['act_from']) ? '' : $_POST['act_from'];
 		$id          = 'id' . $table;
 		$nom         = 'nom' . ucfirst($table);
 		$arr         = $APP->query_one([$id => $table_value]);
-		//
-		$ARR_DIST  = $APPSC_HAS_FIELD->distinct('appscheme_field', ['idappscheme' => $idappscheme], 346, 'no_full', 'idappscheme_field');
-		$HAS_FIELD = $APPSC_FIELD->distinct('appscheme_field', ['idappscheme_field' => ['$in' => $ARR_DIST]], 346, 'no_full', 'codeAppscheme_field');
+
+		// GRILLE_FK : schema-driven, static per table — cache in session
+		$gfk_key = 'grille_fk_' . $idappscheme;
+		if (!isset($_SESSION[$gfk_key])) {
+			$_SESSION[$gfk_key] = $APP->get_grille_fk();
+		}
+		$GRILLE_FK = $_SESSION[$gfk_key];
+
+		$R_FK = $APP->get_reverse_grille_fk($table, $table_value);
+
+		// HAS_FIELD : schema-driven, static per table — cache in session
+		$hf_key = 'has_field_' . $idappscheme;
+		if (!isset($_SESSION[$hf_key])) {
+			$APPSC_HAS_FIELD = new App('appscheme_has_field');
+			$APPSC_FIELD     = new App('appscheme_field');
+			$ARR_DIST        = $APPSC_HAS_FIELD->distinct('appscheme_field', ['idappscheme' => $idappscheme], 346, 'no_full', 'idappscheme_field');
+			$_SESSION[$hf_key] = $APPSC_FIELD->distinct('appscheme_field', ['idappscheme_field' => ['$in' => $ARR_DIST]], 346, 'no_full', 'codeAppscheme_field');
+		}
+		$HAS_FIELD = $_SESSION[$hf_key];
 	?>
 </div>
 <div class="applink applinkblock toggler relative hide_gui_pane" style="width:250px;" >

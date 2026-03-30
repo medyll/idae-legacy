@@ -69,7 +69,9 @@ windowGui.prototype = {
 
 					return $(this.options.ident);
 				}
-
+				// FIX: fallback ajaxLoad quand socket indisponible et element deja existant
+				this.ajaxLoad();
+				return $(this.options.ident);
 			}
 
 			return $(this.options.ident);
