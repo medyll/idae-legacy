@@ -41,7 +41,7 @@ quickFind = function (value, where, tag, spy) {
 
 act_chrome_gui = function (file, vars, options) {
 
-	var vars = vars || '',
+	var vars = (vars || '').strip(),
 		filekey = clean_string(file + vars);
 
 	mdlDiv = ('["' + file + '"]').replace('/', '","', 'gi')
@@ -72,7 +72,7 @@ act_chrome_gui = function (file, vars, options) {
 	url = changeCnameTrick() + 'mdl/' + file;
 	// on ecrit options ident ( onlyfile par zefault )
 	temp = vars.toQueryParams();
-	if (temp.table && temp.table_value) {
+	if (temp && temp.table && temp.table_value) {
 		ajaxOption.ident = temp.table + temp.table_value;
 	}
 	var crh_gui = new windowGui(file, '', url, vars, ajaxOption);
@@ -84,9 +84,9 @@ act_chrome_gui = function (file, vars, options) {
 		value: valueMdl
 	})
 
-	if (temp.table && temp.table_value) {
+	if (temp && temp.table && temp.table_value) {
 		$(guiElement).writeAttribute({table: temp.table, scope: 'id' + temp.table, value: temp.table_value}); // , ident: temp.table + temp.table_value
-	} else if (temp.table) {
+	} else if (temp && temp.table) {
 		$(guiElement).writeAttribute({scope: temp.table, table: temp.table})
 	} else {
 		if (options.scope) {

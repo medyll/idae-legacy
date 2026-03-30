@@ -786,16 +786,23 @@
 
 	function droit_table($idagent, $code, $table) // code = CRUD // rapport au groupe_agent
 	{
-		$APP    = new App('agent'); // verification des droits utilisateur // code =  $code.'_'.$table
-		$APP_GD = new App('agent_groupe_droit'); // verification des droits utilisateur // code =  $code.'_'.$table
-		$arr_ag = $APP->findOne(['idagent' => (int)$idagent]);
-
-		$count = $APP_GD->find(['idagent_groupe' => (int)$arr_ag['idagent_groupe'], 'codeAppscheme' => $table, $code => true])->count();
-		if ($count == 0) {
-			return false;
+		$session_key = 'droit_' . (int)$idagent . '_' . $code . '_' . $table;
+		if (isset($_SESSION[$session_key])) {
+			return $_SESSION[$session_key];
 		}
 
-		return true;
+		$groupe_key = 'agent_groupe_' . (int)$idagent;
+		if (!isset($_SESSION[$groupe_key])) {
+			$APP = new App('agent');
+			$arr_ag = $APP->findOne(['idagent' => (int)$idagent]);
+			$_SESSION[$groupe_key] = (int)$arr_ag['idagent_groupe'];
+		}
+
+		$APP_GD = new App('agent_groupe_droit');
+		$count  = $APP_GD->find(['idagent_groupe' => $_SESSION[$groupe_key], 'codeAppscheme' => $table, $code => true])->count();
+		$_SESSION[$session_key] = ($count > 0);
+
+		return $_SESSION[$session_key];
 	}
 
 	function droit_table_multi($idagent, $code, $table = null) // code = CRUD // rapport au groupe_agent
