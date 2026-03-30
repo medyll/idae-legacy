@@ -120,7 +120,9 @@ DEFINE('HTTPHOSTNOPORT', $HTTP_PREFIX . DOCUMENTDOMAINNOPORT);
 // If host is localhost, leave cookie domain empty so browser binds cookie to host.
 $cookieDomain = ($host === 'localhost' || $host === '127.0.0.1') ? '' : $host;
 ini_set('session.use_cookies', '1');
-ini_set('session.cookie_httponly', '1');
+// DISABLE httponly in development - JavaScript needs to read PHPSESSID for localStorage
+// In production, set this to '1' for security
+ini_set('session.cookie_httponly', '0');
 ini_set('session.cookie_domain', $cookieDomain);
 // Use Lax for compatibility in dev (None requires Secure + HTTPS)
 ini_set('session.cookie_samesite', 'Lax');
