@@ -12,7 +12,13 @@
     box-sizing: border-box;
   }
   &>*:not(.flex_main) {
-    flex: 0 0 auto;
+    // Legacy flex.less compiled this as :not('.flex_main') — invalid selector,
+    // so "flex: 0 0 auto" never actually applied in production. Fixing the
+    // selector during the SCSS port activated it and broke every layout that
+    // relied on children shrinking (e.g. flex_wrap tile grids growing to
+    // max-content instead of wrapping). Keep the browser default basis but
+    // allow shrink, which is what legacy effectively ran with.
+    flex: 0 1 auto;
   }
   &.flex_inline {
     display: inline-flex !important;
@@ -26,6 +32,13 @@
     width: 100%;
     max-width: 100%;
   }
+  // Width utilities must beat the .flex_main stretch. Legacy never loaded
+  // flex.less (commented out in main.less), so .demi/.tiers/... always won;
+  // Sprint 02 wired css/flex in and silently broke 2-per-row layouts.
+  &>.flex_main.demi       { flex: 0 1 auto; min-width: 50%; width: 50%; max-width: 50%; }
+  &>.flex_main.tiers      { flex: 0 1 auto; width: 33%; max-width: 33%; }
+  &>.flex_main.quart      { flex: 0 1 auto; width: 25%; max-width: 25%; }
+  &>.flex_main.troisquart { flex: 0 1 auto; width: 75%; max-width: 75%; }
 }
 
 .flex_v {
