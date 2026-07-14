@@ -8,7 +8,8 @@
     "start": "node src/main.js",
     "dev": "nodemon src/main.js",
     "logs": "powershell Get-Content ../../../logs/php-error.log -Wait",
-    "build:css": "sass ../appcss/scss/main.scss ../appcss/dist/main.css --style=compressed --no-source-map",
+    "check:css": "node ../appcss/check-scss-wiring.mjs",
+    "build:css": "npm run check:css && sass ../appcss/scss/main.scss ../appcss/dist/main.css --style=compressed --no-source-map",
     "watch:css": "sass --watch ../appcss/scss/main.scss ../appcss/dist/main.css --style=expanded"
   },
   "dependencies": {

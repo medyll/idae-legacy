@@ -50,6 +50,9 @@ services:
       - LOG_DIR=/logs
     volumes:
       - ./idae/web/app_node:/app:cached
+      # Named volume: keeps Linux node_modules isolated from Windows bind mount
+      # (host pnpm symlinks previously broke npm install inside the container)
+      - node_modules_socket:/app/node_modules
       - ./logs:/logs
     depends_on:
       - mongo-test
@@ -71,3 +74,6 @@ services:
     tmpfs:
       - /data/db
     restart: "no"
+
+volumes:
+  node_modules_socket:

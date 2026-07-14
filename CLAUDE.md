@@ -140,6 +140,13 @@ Do not rewrite the loader or remove PrototypeJS. The JSON shape returned by `jso
 - Avoid `@` error suppression — use `try/catch`.
 - Prefer `error_log()` over any form of display output.
 
+### CSS Policy
+
+- **New styles = native nested CSS**, loaded explicitly (`<link>` in `index.php` or the bag.js manifest). Do not add new partials to `appcss/scss/`.
+- The existing SCSS tree (`appcss/scss/`) is legacy-frozen: maintain it, migrate partials to native `.css` opportunistically when touched, never grow it.
+- `index.php` only loads `appcss/dist/main.css`. Rebuild with `npm run build:css` in `idae/web/app_node/` after any SCSS change. The build runs `check-scss-wiring.mjs` first and fails if a partial under `scss/` is not reachable from `main.scss` — this prevents partials from silently dropping out of the bundle.
+- `css/windowGui/windowGui.css` is an orphan (referenced nowhere); the live source is `appcss/scss/app_window_gui/_app-window-gui.scss`.
+
 ## Key Reference Documents
 
 - `MONGOCOMPAT.md` — MongoCompat API reference
