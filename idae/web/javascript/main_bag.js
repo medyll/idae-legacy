@@ -53,6 +53,7 @@ var require_trame = {
 		'javascript/app/app_menu.js',
 		'javascript/app/app_quickfind.js',
 		'javascript/app/app_tree.js',
+		'javascript/app/app_webmcp.js',
 		'javascript/app/app_init_template.js',
 		'javascript/engine/engine.js?v=debug1',
 		'javascript/engine/afterAjaxCall.js',

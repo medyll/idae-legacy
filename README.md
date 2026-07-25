@@ -3,11 +3,10 @@
 A concise reference for the Idae-Legacy project: a migration of a legacy PHP 5.6 / Node.js / MongoDB CMS to modern tooling (PHP 8.2, modern MongoDB driver, Dockerized environment).
 
 ## Project Status
-- Migration branch: `migration` (work in progress)
-- Default branch: `main`
-- Current scope: application boots, UI functional (Phase 1). Phase 2 modernization in progress.
+- All work lands on `main`; feature branches (e.g. `migration-sprint-6`, `s3-04/refactor-classapp-crud`) are merged via PR and deleted afterward.
+- Current scope: application boots, UI functional (Phase 1). Phase 2 modernization in progress — core CRUD (`ClassApp`, `ClassAppAgg`), session handling, and Mongo driver migration are underway across several sprints.
 
-See the migration planning and status files for details: [MIGRATION_PHASE_2.md](MIGRATION_PHASE_2.md), [MIGRATION_STATUS.md](MIGRATION_STATUS.md), [MIGRATION.md](MIGRATION.md).
+See the migration planning and status files for details: [MIGRATION_PHASE_2.md](MIGRATION_PHASE_2.md), [MIGRATION_STATUS.md](MIGRATION_STATUS.md).
 
 ## Goals
 - Upgrade to PHP 8.2 and modern MongoDB driver
@@ -26,11 +25,23 @@ docker-compose up --build
 2. Open the web container endpoints as configured in `docker-compose.yml` or check `idae/web/README.md` for web-specific notes.
 
 ## Running Tests
-After the stack is up and services are available, run PHP test scripts located in `idae/web/`:
+PHPUnit is the primary suite (config in `idae/web/phpunit.xml`, tests under `idae/web/tests/`):
+
+```powershell
+cd idae/web
+composer install
+composer test
+```
+
+There are also standalone ad-hoc PHP scripts and a Playwright suite for UI/CRUD smoke checks:
 
 ```powershell
 php idae/web/test_migration.php
 php idae/web/test_integration.php
+
+cd playwright
+npm install
+npx playwright test
 ```
 
 ## Important Conventions and Compatibility Notes
@@ -39,9 +50,10 @@ php idae/web/test_integration.php
 - Use `error_log()` for server-side debugging — never echo debug output to the client (breaks AJAX responses).
 
 ## Useful Files and Locations
-- App/web root: `idae/web/` — primary PHP application and tests.
+- App/web root: `idae/web/` — primary PHP application, `composer.json`, and tests.
 - Node server: `idae/web/app_node/` — Socket.io and real-time services.
-- Migration docs: [MIGRATION.md](MIGRATION.md), [MONGOCOMPAT.md](MONGOCOMPAT.md), [MIGRATION_PHASE_2.md](MIGRATION_PHASE_2.md).
+- Playwright suite: `playwright/` — smoke, CRUD, and UI/UX browser tests.
+- Migration docs: [MONGOCOMPAT.md](MONGOCOMPAT.md), [MIGRATION_PHASE_2.md](MIGRATION_PHASE_2.md), [MIGRATION_STATUS.md](MIGRATION_STATUS.md).
 - Docker scripts: `docker-restart.ps1`, `docker-health.ps1`, `docker-logs.ps1`, `docker-emergency.ps1`.
 
 ## Development Guidelines
@@ -50,17 +62,17 @@ php idae/web/test_integration.php
 - Use composer for PHP dependencies placed under `idae/web/composer.json` when applicable.
 
 ## Contributing
-- Create feature branches from `migration` when working on modernization tasks.
-- Open a PR targeting `migration` for review; include tests or a migration checklist when relevant.
+- Create feature branches from `main` when working on modernization tasks.
+- Open a PR targeting `main` for review; include tests or a migration checklist when relevant.
 
 ## Troubleshooting
 - Check PHP logs in the container (Apache/PHP error log) and Node logs under `idae/web/app_node/logs/`.
-- If Mongo issues appear, review host connectivity — containers assume Mongo is reachable at `host.docker.internal` (see `DOCKER_SCRIPTS.md`).
+- If Mongo issues appear, review host connectivity — containers assume Mongo is reachable at `host.docker.internal`, and the PHPUnit suite uses the isolated `mongo-test` service instead.
 
 ## References
 - [AGENTS.md](AGENTS.md) — agent and workspace rules
 - [MONGOCOMPAT.md](MONGOCOMPAT.md) — Mongo compatibility helpers
-- [DOCKER_SCRIPTS.md](DOCKER_SCRIPTS.md) — helper scripts and diagnostics
+- `docker-restart.ps1`, `docker-health.ps1`, `docker-logs.ps1`, `docker-emergency.ps1` — helper scripts and diagnostics
 
 ## Contact
 If you need clarification about migration decisions, update the relevant MIGRATION docs or open an issue on the repository.
