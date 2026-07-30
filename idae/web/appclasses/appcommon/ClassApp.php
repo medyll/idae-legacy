@@ -1759,7 +1759,7 @@ return true;
 				endif;
 				//
 				// vardump_async($arr['nom' . $Name_table], true);
-				if (empty(trim($arr['nom' . $Name_table])) && empty($arr_new['nom' . $Name_table])):
+				if (empty(trim((string)($arr['nom' . $Name_table] ?? ''))) && empty($arr_new['nom' . $Name_table])):
 
 					$REVERSE_GRILLE_FK = array_reverse($GRILLE_FK);
 					foreach ($REVERSE_GRILLE_FK as $field):

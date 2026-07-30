@@ -47,7 +47,9 @@ sortableTable.prototype = {
 	setSizeTD     : function () {
 		var node = arguments[1] || arguments[0];
 		clearTimeout (this.timer);
-		if ( $ (node) ) this.timer = setTimeout ($ (node).previous ().setStyle ({ 'width' : node.up ().offsetWidth + 'px' }), 1);
+		if ( $ (node) ) this.timer = setTimeout (function () {
+			$ (node).previous ().setStyle ({ 'width' : node.up ().offsetWidth + 'px' });
+		}, 1);
 	},
 	setSizeHeader : function () {
 		console.log ("nooo setSize")

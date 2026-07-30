@@ -99,6 +99,7 @@
 <script>
 	load_table_in_zone ('groupBy=<?=$settings_button_group?>&<?=$APP->translate_vars($vars)?>&<?=http_build_query($_POST)?>&nbRows=<?=$nbRows?>&page=0', '<?=$zone?>');
 
+	<?php if (!empty($_POST['show_search'])) { ?>
 	$ ('app_liste_search_<?=$zone?>').on ('submit', 'form', function (event, node) {
 		var form_vars = $ (node).serialize ();
 		//alert(form_vars);
@@ -106,6 +107,7 @@
 
 		// $ ('contenu_explorer_<?= $zone ?>').loadModule ('app/app_liste/app_liste', 'table=<?= $table ?>&nbRows=750&' + form_vars);
 	}.bind (this));
+	<?php } ?>
 </script>
 <style>
 	<?='#'.$zone?>[data-dsp-mdl="app/app/app_fiche_forward"] > .div_tbody {

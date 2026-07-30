@@ -21,67 +21,81 @@ declare(strict_types=1);
 	//
 	if ($DEBUG && droit('DEV') ) {
 		skelMdl::send_cmd('act_notify', ['msg' => '<pre>  POST  => ' . json_encode($_POST, JSON_PRETTY_PRINT) . '</pre>', 'options' => ['sticky' => 1, 'id' => 'json_debug']], session_id());
-		// Continue processing using safe locals populated above
-		$APP = isset($GLOBALS['APP']) ? $GLOBALS['APP'] : null;
-		$APP_TABLE = isset($GLOBALS['APP_TABLE']) ? $GLOBALS['APP_TABLE'] : [];
-		$arrFields_all = isset($GLOBALS['arrFields_all']) ? $GLOBALS['arrFields_all'] : [];
-		$GRILLE_FK = isset($GLOBALS['GRILLE_FK']) ? $GLOBALS['GRILLE_FK'] : [];
-		$BASE_APP = isset($GLOBALS['BASE_APP']) ? $GLOBALS['BASE_APP'] : '';
-		$GRILLE_COUNT = isset($GLOBALS['GRILLE_COUNT']) ? $GLOBALS['GRILLE_COUNT'] : [];
-		$sortBy = isset($GLOBALS['sortBy']) ? $GLOBALS['sortBy'] : null;
-		$key_date = isset($GLOBALS['key_date']) ? $GLOBALS['key_date'] : null;
-		$MDL = isset($GLOBALS['MDL']) ? $GLOBALS['MDL'] : null;
-
-		// Build summary info
-		$out_more = ['icon' => $APP_TABLE['iconAppscheme'] ?? null, 'value' => $trvars['id' . $table], 'table_value' => $trvars['table_value'], 'table' => $table];
-
-		// Fields already processed above; ensure $out contains them
-		// Handle foreign keys (GRILLE_FK)
-		foreach ($GRILLE_FK as $field) {
-			$id_fk = $field['idtable_fk'] ?? null;
-			$val_fk = isset($arr[$id_fk]) ? $arr[$id_fk] : null;
-			$arrq = [];
-			if ($APP && !empty($field['base_fk']) && !empty($field['table_fk']) && !is_null($val_fk)) {
-				$arrq = $APP->plug($field['base_fk'], $field['table_fk'])->findOne([$field['idtable_fk'] => (int)$val_fk], [$field['idtable_fk'] => 1, $field['nomtable_fk'] => 1]);
-				if (is_array($arrq)) unset($arrq['_id']);
-			}
-			$dsp_name = isset($arrq['nom' . ucfirst($field['table_fk'])]) ? $arrq['nom' . ucfirst($field['table_fk'])] : null;
-			$out['id' . $field['table_fk']] = (int)($val_fk ?: 0);
-			$out['nom' . ucfirst($field['table_fk'])] = $dsp_name;
-			$out['grille_FK'][$field['table_fk']] = $arrq;
-		}
-
-		// Handle counts (GRILLE_COUNT)
-		foreach ($GRILLE_COUNT as $key_count => $field) {
-			$APP_TMP = new App($key_count);
-			$RS_TMP = $APP_TMP->find([$id => $trvars['table_value']], [$id => 1, "id$key_count" => 1]);
-			$count_ct = $RS_TMP->count();
-			$link = fonctionsJs::app_liste($key_count, '', ['vars' => [$id => $trvars['table_value']]]);
-			if ($count_ct == 1) {
-				$ARR_TMP = $RS_TMP->getNext();
-				$link = fonctionsJs::app_fiche($key_count, $ARR_TMP["id$key_count"], ['vars' => [$id => $trvars['table_value']]]);
-			}
-			$attr = " data-count='data-count' data-table='$key_count' data-vars='vars[$id]={$trvars['table_value']}' ";
-			$count_grille = (empty($count_ct)) ? '' : $count_ct;
-			$out['count_' . $key_count] = '<a onclick="' . $link . '"  ' . $attr . ' >' . $count_grille . '</a>' . ((!empty($count_ct)) ? "<span class='count_title'> $key_count</span>" : '');
-		}
-
-		if (!empty($key_date)) {
-			$out[$key_date] = '';
-		}
-
-		if (!empty($MDL)) $out_more['mdl'] = skelMdl::cf_module($MDL, ['table' => $table, 'table_value' => $trvars['table_value']]);
-
-		if (function_exists('droit') && droit('DEV') && $table == 'ville') {
-			if ((empty($arr['nomVille']) && !empty($arr['codeVille'])) && isset($APP) && isset($APP->codeAppscheme)) {
-				skelMdl::send_cmd('act_notify', ['msg' => '<br>' . $APP->codeAppscheme . ' ' . $arr['codeVille'] . ' => ' . $arr['nomVille'], 'options' => ['sticky' => 1], 'id' => 'json_debug'], session_id());
-				$APP->update(['id' . $APP->codeAppscheme => (int)$arr['id' . $APP->codeAppscheme]], ['nomVille' => ucfirst(strtolower($arr['codeVille']))]);
-			}
-		}
-
-		return array_merge(['html' => $out, 'md5' => md5(json_encode($out)), 'vars' => $trvars], $out_more);
-		$vars['idagent'] = (int)$_SESSION['idagent'];
 	}
+	//
+	if ($DEBUG && droit('DEV') && !empty($_POST['url_data'])) {
+		parse_str($_POST['url_data'], $out_url);
+		skelMdl::send_cmd('act_notify', ['msg' => '<pre>url_data => ' . json_encode($out_url, JSON_PRETTY_PRINT) . '</pre>', 'options' => ['sticky' => 1, 'id' => 'json_debug']], session_id());
+	}
+
+	// keep url_data
+	if (!empty($_POST['url_data'])) {
+		parse_str($_POST['url_data'], $arr_data);
+		if (empty($arr_data['vars'])) {
+			$arr_data['vars'] = [];
+		}
+		if (!empty($arr_data['vars_search_fk'])) {
+			$arr_data['vars_search_fk'] = array_filter($arr_data['vars_search_fk']);
+		}
+		unset($arr_data['stream_to'], $arr_data['PHPSESSID'], $arr_data['SESSID']);
+		$url_data = http_build_query($arr_data);
+	} else {
+		$tppost = $_POST;
+		unset($tppost['PHPSESSID'], $tppost['SESSID'], $tppost['stream_to'], $tppost['url_data']);
+		$url_data = http_build_query($tppost);
+	}
+	//
+	if (empty($_POST['table'])) {
+		return;
+	}
+	if (!empty($_POST['stream_to'])) {
+		if (!empty($_POST['url_data'])) {
+			$_POST['url_data'] .= '&stream_to=' . $_POST['stream_to'];
+		}
+	}
+	if (!empty($_POST['url_data'])) {
+		parse_str($_POST['url_data'], $_POST);
+	}
+	$uniqid = uniqid();
+	//
+	$table = $_POST['table'];
+	$Table = ucfirst($_POST['table']);
+	//
+	$APP = new App($table);
+	//
+	if (!empty($_SESSION['idagent'])) {
+		$vars_hist['table']   = $_POST['table'];
+		$vars_hist['groupBy'] = empty($_POST['groupBy']) ? '' : $_POST['groupBy'];
+		$vars_hist['search']  = empty($_POST['search']) ? '' : $_POST['search'];
+		$uid                  = md5(http_build_query($vars_hist));
+		$APP->set_hist($_SESSION['idagent'], ['uid' => $uid] + ['vars' => $vars_hist]);
+	}
+	//
+	$id       = 'id' . $table;
+	$nom      = 'nom' . ucfirst($table);
+	$id_type  = 'id' . $table . '_type';
+	$nom_type = 'nom' . ucfirst($table) . '_type';
+	$top      = 'estTop' . ucfirst($table);
+	$actif    = 'estActif' . ucfirst($table);
+	$visible  = 'estVisible' . ucfirst($table);
+
+	//
+	$vars            = empty($_POST['vars']) ? [] : fonctionsProduction::cleanPostMongo(array_filter($_POST['vars'], "my_array_filter_fn"), 1);
+	$vars_search     = empty($_POST['vars_search']) ? [] : fonctionsProduction::cleanPostMongo(array_filter($_POST['vars_search'], "my_array_filter_fn"), 1);
+	$vars_search_fk  = empty($_POST['vars_search_fk']) ? [] : fonctionsProduction::cleanPostMongo(array_filter($_POST['vars_search_fk'], "my_array_filter_fn"), 1);
+	$vars_search_rfk = empty($_POST['vars_search_rfk']) ? [] : fonctionsProduction::cleanPostMongo(array_filter($_POST['vars_search_rfk'], "my_array_filter_fn"), 1);
+
+	if ($DEBUG && droit('DEV') ) {
+		skelMdl::send_cmd('act_notify', ['msg' => '<pre>  $vars after INIT=> ' . json_encode($vars, JSON_PRETTY_PRINT) . '</pre>', 'options' => ['sticky' => 1, 'id' => 'json_debug']], session_id());
+	}
+
+	// Initialize variables early to prevent null pointer errors in PHP 8.2+
+	$strm = [];
+	$data_main = [];
+
+	if (!droit_table($_SESSION['idagent'], 'CONF', $table) && $APP->has_agent()):
+		$vars['idagent'] = (int)$_SESSION['idagent'];
+	endif;
 	if (!droit_table($_SESSION['idagent'], 'R', $table) && droit_table($_SESSION['idagent'], 'L', $table) && !$APP->has_agent()):
 		$_POST['vars']['idagent'] = (int)$_SESSION['idagent'];
 	endif;
@@ -113,7 +127,7 @@ declare(strict_types=1);
 		return;
 	}
 	
-	$GRILLE_FK       = $APP->get_fk_tables();
+	$GRILLE_FK       = $APP->get_grille_fk();
 	$GRILLE_COUNT    = $APP->get_grille_count($table);
 	$APP_DATE_FIELDS = $APP->get_date_fields($table);
 	$APP_FIELD_BOOL  = $APP->get_bool_fields($table);
@@ -125,8 +139,8 @@ declare(strict_types=1);
 	$sortBySecond  = empty($_POST['sortBySecond']) ? empty($APP_TABLE['sortFieldSecondName']) ? $nom : $APP_TABLE['sortFieldSecondName'] : $_POST['sortBySecond'];
 	$sortDirSecond = empty($_POST['sortDirSecond']) ? empty($APP_TABLE['sortFieldSecondOrder']) ? 1 : (int)$APP_TABLE['sortFieldSecondOrder'] : (int)$_POST['sortDirSecond'];
 
-	$page   = (!isset($_POST['page'])) ? 0 : $_POST['page'];
-	$nbRows = (empty($_POST['nbRows'])) ? empty($settings_nbRows) ? 500 : (int)$settings_nbRows : $_POST['nbRows'];
+	$page   = (!isset($_POST['page'])) ? 0 : (int)$_POST['page'];
+	$nbRows = (empty($_POST['nbRows'])) ? empty($settings_nbRows) ? 500 : (int)$settings_nbRows : (int)$_POST['nbRows'];
 	//
 	$MDL              = empty($_POST['mdl']) ? '' : $_POST['mdl'];
 	$strem_chunk_size = empty($MDL) ? 20 : 15;
