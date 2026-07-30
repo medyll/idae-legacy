@@ -3,7 +3,9 @@
     "allow": [
       "mcp__plugin_context-mode_context-mode__ctx_execute_file",
       "Bash(xargs grep:*)",
-      "Bash(docker-compose up *)"
+      "Bash(docker-compose up *)",
+      "PowerShell(Get-NetTCPConnection *)",
+      "PowerShell(Get-Process *)"
     ]
   }
 }
