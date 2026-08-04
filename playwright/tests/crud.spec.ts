@@ -4,8 +4,8 @@ import { test, expect } from '@playwright/test';
 
 test('crud: create -> list -> delete (probe)', async ({ request }) => {
   const base = process.env.BASE_URL || 'http://localhost:8080';
-  const user = process.env.PLAYWRIGHT_USER || 'Mydde';
-  const pass = process.env.PLAYWRIGHT_PASS || 'malaterre';
+  const user = process.env.PLAYWRIGHT_USER || '';
+  const pass = process.env.PLAYWRIGHT_PASS || '';
 
   // Login to get PHPSESSID
   const login = await request.post(base + '/mdl/app/app_login/actions.php', { form: {

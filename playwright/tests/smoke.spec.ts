@@ -1,9 +1,8 @@
 import { test, expect } from '@playwright/test';
 
 test('smoke: login and open grid (UI + socket)', async ({ page, request }) => {
-  // Use known dev admin credentials from conf_install_go
-  const user = process.env.PLAYWRIGHT_USER || 'Mydde';
-  const pass = process.env.PLAYWRIGHT_PASS || 'malaterre';
+  const user = process.env.PLAYWRIGHT_USER || '';
+  const pass = process.env.PLAYWRIGHT_PASS || '';
 
   // Use BASE_URL env or default to localhost
   const base = process.env.BASE_URL || 'http://localhost:8080';

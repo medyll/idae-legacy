@@ -1,17 +1,212 @@
 # Page snapshot
 
 ```yaml
-- generic [ref=e7]:
-  - generic [ref=e8]:
-    - generic [ref=e9]: Identification
-    - generic [ref=e10]:
-      - generic [ref=e11]: Login *
-      - textbox "Identification" [ref=e12]: Mydde
-    - generic [ref=e13]:
-      - generic [ref=e14]: Mot de passe *
-      - textbox "Mot de passe" [ref=e15]: malaterre
-    - button "Valider" [ref=e17] [cursor=pointer]
-  - generic [ref=e18]:
-    - generic [ref=e19]: 
-    - generic [ref=e20] [cursor=pointer]: Vider le cache d'application
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - generic [ref=e3]:
+      - generic [ref=e4]:
+        - generic [ref=e5]:
+          - generic [ref=e7] [cursor=pointer]: 
+          - text: 
+        - generic:  
+        - generic [ref=e10] [cursor=pointer]: 
+        - generic [ref=e11] [cursor=pointer]:
+          - text: "0"
+          - generic [ref=e12]: 
+        - generic [ref=e13]:
+          - generic [ref=e14] [cursor=pointer]:
+            - text: Meddy Lebrun
+            - generic [ref=e15]: 
+          - text:     
+        - generic [ref=e17]:
+          - text: 
+          - generic [ref=e18] [cursor=pointer]:
+            - generic [ref=e19]: 
+            - text: cache
+      - generic [ref=e23]:
+        - text:    redred  redred
+        - generic [ref=e27]:
+          - generic [ref=e28]:
+            - generic [ref=e29]:
+              - generic [ref=e33]:
+                - generic "app/app/app_fiche_icone" [ref=e35]:
+                  - generic "/app/app_custom/agent_table/agent_table_fiche_icone" [ref=e36]:
+                    - generic [ref=e37] [cursor=pointer]:
+                      - generic [ref=e38]:
+                        - generic [ref=e39]: 
+                        - generic [ref=e41]: 
+                      - generic [ref=e43]: prospect
+                - generic "app/app/app_fiche_icone" [ref=e45]:
+                  - generic "/app/app_custom/agent_table/agent_table_fiche_icone" [ref=e46]:
+                    - generic [ref=e47] [cursor=pointer]:
+                      - generic [ref=e48]:
+                        - generic [ref=e49]: 
+                        - generic [ref=e51]: 
+                      - generic [ref=e53]: contact
+                - generic "app/app/app_fiche_icone" [ref=e55]:
+                  - generic "/app/app_custom/agent_table/agent_table_fiche_icone" [ref=e56]:
+                    - generic [ref=e57] [cursor=pointer]:
+                      - generic [ref=e58]:
+                        - generic [ref=e59]: 
+                        - generic [ref=e61]: 
+                      - generic [ref=e63]: agent
+                - generic "app/app/app_fiche_icone" [ref=e65]:
+                  - generic "/app/app_custom/agent_table/agent_table_fiche_icone" [ref=e66]:
+                    - generic [ref=e67] [cursor=pointer]:
+                      - generic [ref=e68]:
+                        - generic [ref=e69]: 
+                        - generic [ref=e71]: 
+                      - generic [ref=e73]: appscheme
+                - generic "app/app/app_fiche_icone" [ref=e75]:
+                  - generic "/app/app_custom/agent_table/agent_table_fiche_icone" [ref=e76]:
+                    - generic [ref=e77] [cursor=pointer]:
+                      - generic [ref=e78]:
+                        - generic [ref=e79]: 
+                        - generic [ref=e81]: 
+                      - generic [ref=e83]: materiel
+                - generic "app/app/app_fiche_icone" [ref=e85]:
+                  - generic "/app/app_custom/agent_table/agent_table_fiche_icone" [ref=e86]:
+                    - generic [ref=e87] [cursor=pointer]:
+                      - generic [ref=e88]:
+                        - generic [ref=e89]: 
+                        - generic [ref=e91]: 
+                      - generic [ref=e93]: contrat
+                - generic "app/app/app_fiche_icone" [ref=e95]:
+                  - generic "/app/app_custom/agent_table/agent_table_fiche_icone" [ref=e96]:
+                    - generic [ref=e97] [cursor=pointer]:
+                      - generic [ref=e98]:
+                        - generic [ref=e99]: 
+                        - generic [ref=e101]: 
+                      - generic [ref=e103]: produit
+                - generic "app/app/app_fiche_icone" [ref=e105]:
+                  - generic "/app/app_custom/agent_table/agent_table_fiche_icone" [ref=e106]:
+                    - generic [ref=e107] [cursor=pointer]:
+                      - generic [ref=e108]:
+                        - generic [ref=e109]: 
+                        - generic [ref=e111]: 
+                      - generic [ref=e113]: scheme-field
+                - generic "app/app/app_fiche_icone" [ref=e115]:
+                  - generic "/app/app_custom/agent_table/agent_table_fiche_icone" [ref=e116]:
+                    - generic [ref=e117] [cursor=pointer]:
+                      - generic [ref=e118]:
+                        - generic [ref=e119]: 
+                        - generic [ref=e121]: 
+                      - generic [ref=e123]: client
+                - generic "app/app/app_fiche_icone" [ref=e125]:
+                  - generic "/app/app_custom/agent_table/agent_table_fiche_icone" [ref=e126]:
+                    - generic [ref=e127] [cursor=pointer]:
+                      - generic [ref=e128]:
+                        - generic [ref=e129]: 
+                        - generic [ref=e131]: 
+                      - generic [ref=e133]: entite
+                - generic "app/app/app_fiche_icone" [ref=e135]:
+                  - generic "/app/app_custom/agent_table/agent_table_fiche_icone" [ref=e136]:
+                    - generic [ref=e137] [cursor=pointer]:
+                      - generic [ref=e138]:
+                        - generic [ref=e139]: 
+                        - generic [ref=e141]: 
+                      - generic [ref=e143]: commande
+              - generic "app/app/app_fiche_mini" [ref=e149]:
+                - generic "module=app/app/fiche_mini" [ref=e150]:
+                  - generic "/app/app_custom/agent_tuile/agent_tuile_fiche_mini" [ref=e151]:
+                    - generic [ref=e153] [cursor=pointer]:
+                      - generic "app/app_gui/app_gui_tile_click" [ref=e155]:
+                        - generic "Enlever icone bureau" [ref=e157]:
+                          - generic [ref=e158]: 
+                      - generic [ref=e160]:
+                        - generic [ref=e161]:
+                          - generic [ref=e162]: 
+                          - generic [ref=e164]: 
+                        - generic [ref=e165]:
+                          - generic [ref=e166]: client
+                          - generic [ref=e167]: CARTADIS
+            - generic "app/app/app_fiche" [ref=e172]:
+              - generic "/app/app_custom/agent_note/agent_note_fiche" [ref=e173]:
+                - generic [ref=e175]:
+                  - generic [ref=e176]:
+                    - generic [ref=e178]: 
+                    - generic [ref=e179]: 26/11/2015
+                    - generic: 
+                  - generic "app/app/app_fiche_thumb" [ref=e181]:
+                    - generic [ref=e183] [cursor=pointer]:
+                      - generic [ref=e184]:
+                        - generic [ref=e186]: 
+                        - img [ref=e192]
+                      - generic [ref=e193]:
+                        - generic [ref=e195]: Falletta
+                        - generic [ref=e196]:
+                          - generic [ref=e199]:
+                            - generic "Prénom" [ref=e200]:
+                              - generic [ref=e202]: 
+                              - generic [ref=e203]: "prénom : antoine"
+                            - generic "Nom" [ref=e204]:
+                              - generic [ref=e206]: 
+                              - generic [ref=e207]: "nom : Falletta"
+                          - text: 
+                  - generic [ref=e209] [cursor=pointer]: test
+          - generic [ref=e210]:
+            - generic [ref=e211]:
+              - generic [ref=e212] [cursor=pointer]:
+                - generic [ref=e213]:
+                  - generic [ref=e215]: 
+                  - generic [ref=e217]: 
+                - generic [ref=e219]: Calendrier des taches
+              - generic [ref=e220] [cursor=pointer]:
+                - generic [ref=e221]:
+                  - generic [ref=e223]: 
+                  - generic [ref=e225]: 
+                - generic [ref=e227]: Taches à traiter
+                - generic [ref=e228]: "14"
+            - img [ref=e233] [cursor=pointer]
+          - generic [ref=e234]:
+            - generic "app/app_gui/app_gui_panel_list" [ref=e236]:
+              - generic [ref=e238]:
+                - generic [ref=e239]:
+                  - generic [ref=e240]:
+                    - generic [ref=e241]: 
+                    - text: CLIENT
+                  - generic [ref=e242] [cursor=pointer]: 
+                - generic [ref=e243]:
+                  - generic [ref=e246] [cursor=pointer]: studiel
+                  - generic [ref=e249] [cursor=pointer]: hotel fairmont
+                  - generic [ref=e252] [cursor=pointer]: 2pm monaco
+                  - generic [ref=e255] [cursor=pointer]: apst btp 06
+                  - generic [ref=e258] [cursor=pointer]: ciffreo bona cannes
+                  - generic [ref=e261] [cursor=pointer]: ciffreo bona nice
+                  - generic [ref=e264] [cursor=pointer]: societe karavel
+                  - generic [ref=e267] [cursor=pointer]: krustanova
+                  - generic [ref=e270] [cursor=pointer]: krustanord sa
+                  - generic [ref=e273] [cursor=pointer]: apajh
+                  - generic [ref=e276] [cursor=pointer]: apajh
+                  - generic [ref=e279] [cursor=pointer]: cartadis
+                  - generic [ref=e282] [cursor=pointer]: apajh
+                  - generic [ref=e285] [cursor=pointer]: avi serrurerie ste maxime
+                  - generic [ref=e288] [cursor=pointer]: semec
+              - generic [ref=e290]:
+                - generic [ref=e291]:
+                  - generic [ref=e292]:
+                    - generic [ref=e293]: 
+                    - text: PROSPECT
+                  - generic [ref=e294] [cursor=pointer]: 
+                - generic [ref=e295]:
+                  - generic [ref=e298] [cursor=pointer]: la compagnie immobiliere
+                  - generic [ref=e301] [cursor=pointer]: mag presse
+                  - generic [ref=e304] [cursor=pointer]: adsea
+                  - generic [ref=e307] [cursor=pointer]: grontmij / sudequip
+                  - generic [ref=e310] [cursor=pointer]: etude notariale charbonner
+                  - generic [ref=e313] [cursor=pointer]: eden hotel & spa
+                  - generic [ref=e316] [cursor=pointer]: confortica
+                  - generic [ref=e319] [cursor=pointer]: fortepharma
+                  - generic [ref=e322] [cursor=pointer]: 4% immobilier
+                  - generic [ref=e325] [cursor=pointer]: donnet sa
+                  - generic [ref=e328] [cursor=pointer]: lep pasteur
+                  - generic [ref=e331] [cursor=pointer]: association du groupe (mornay europe)
+                  - generic [ref=e334] [cursor=pointer]: gl monaco
+                  - generic [ref=e337] [cursor=pointer]: espeme
+                  - generic [ref=e340] [cursor=pointer]: adrexo
+            - generic "app/app_gui/app_gui_tile_user" [ref=e342]:
+              - generic [ref=e346] [cursor=pointer]: 
+    - generic [ref=e347]:
+      - generic "app/app_user_pref/app_user_pref_css"
+  - text: "* * "
 ```

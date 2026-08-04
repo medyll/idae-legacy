@@ -8,6 +8,7 @@
  * @package AppCommon
  * @version 1.0.0
  * @date 2026-02-02
+ * Modified: 2026-08-04
  */
 
 namespace AppCommon;
@@ -450,6 +451,18 @@ class MongoCollection {
     public function ensureIndex($keys, $options = []) {
         return $this->createIndex($keys, $options);
     }
+
+    public function deleteIndexes($options = []) {
+        try {
+            return $this->collection->dropIndexes($options);
+        } catch (\MongoDB\Driver\Exception\CommandException $exception) {
+            if ($exception->getCode() !== 26) {
+                throw $exception;
+            }
+
+            return true;
+        }
+    }
     
     public function distinct($field, $filter = [], array $options = []) {
         return $this->collection->distinct($field, $filter, $options);
@@ -474,6 +487,7 @@ class MongoCollection {
 
 class MongoGridFS {
     private $bucket;
+    private $filesCollection;
     
     public function __construct(MongoDriverDatabase $database, $bucketName = null) {
         $options = [];
@@ -481,6 +495,8 @@ class MongoGridFS {
             $options['bucketName'] = $bucketName;
         }
         $this->bucket = $database->selectGridFSBucket($options);
+        $filesCollectionName = ($bucketName ?: 'fs') . '.files';
+        $this->filesCollection = $database->selectCollection($filesCollectionName);
     }
     
     private function normalizeFilter($filter) {
@@ -502,6 +518,14 @@ class MongoGridFS {
     public function findOne($filter = [], $options = []) {
         $cursor = $this->find($filter, $options);
         return $cursor->getNext();
+    }
+
+    public function createIndex($keys, $options = []) {
+        return $this->filesCollection->createIndex($keys, $options);
+    }
+
+    public function ensureIndex($keys, $options = []) {
+        return $this->createIndex($keys, $options);
     }
     
     public function storeBytes($bytes, array $options = []) {
@@ -610,7 +634,13 @@ class MongoGridFSFile {
     }
 }
 
-class MongoCursor extends MongodbCursorWrapper {}
+class MongoCursor extends MongodbCursorWrapper {
+    /**
+     * Legacy compatibility property. Modern driver timeouts are configured
+     * through client or query options.
+     */
+    public static $timeout = 30000;
+}
 
 // Create global aliases for backward compatibility
 if (!class_exists('MongoClient', false)) {

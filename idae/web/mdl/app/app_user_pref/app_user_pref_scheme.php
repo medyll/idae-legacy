@@ -22,15 +22,12 @@
 		case 'app_search':
 			$titre_zone = 'Recherche rapide';
 			break;
-		default:
 		case 'app_panel':
 			$titre_zone = 'Panneau latéral droit';
 			break;
-		default:
 		case 'app_menu':
 			$titre_zone = 'Panneau latéral gauche';
 			break;
-		default:
 		case 'app_menu_start':
 			$titre_zone = 'Menu démarrer, accés aux espaces';
 			break;
