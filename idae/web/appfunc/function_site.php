@@ -248,7 +248,9 @@
 			return fonctionsProduction::andLast($tmplast);
 		}
 
-		function imageProduit ($idproduit , $size = 'small') {
+		// Modified: 2026-08-05 — both call sites are `fonctionsSite::imageProduit()`, which is a
+		// fatal error under PHP 8 on a non-static method. The body never touched $this.
+		static function imageProduit ($idproduit , $size = 'small') {
 			$APP = new App();
 
 			$arr   = $APP->plug('sitebase_production' , 'produit')->findOne(array( 'idproduit' => (int)$idproduit ));

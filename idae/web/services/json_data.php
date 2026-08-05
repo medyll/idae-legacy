@@ -8,6 +8,8 @@
 	 * 
 	 * MIGRATION NOTE: MongoId/MongoRegex converted to MongoCompat (2026-02-02)
 	 * Modified: 2026-03-15 — replace exit with return so file is require-safe for PHPUnit
+	 * TODO(rbac): this endpoint returns records for any `table` the caller names, with no
+	 * droit_table_enforce('R', $table) check. See the OPEN TODO section of SCHEMA-AUTH.md.
 	 */
 
 	include_once($_SERVER['CONF_INC']);
@@ -216,6 +218,11 @@
 	if ($PIECE == 'query') {
 		$q['count']=$rs->count();
 		$q['maxcount']=$max_count;
+		// Modified: 2026-08-05 — count()/maxcount() both count the current page only
+		// (MongodbCursorWrapper counts the materialized documents, and the cursor already
+		// carries skip/limit). `total` is the real match count, so a paging caller can tell
+		// a complete answer from a truncated one.
+		$q['total']=$APP->plug($APP_TABLE['codeAppscheme_base'], $table)->count(\AppCommon\MongoCompat::convertFilter($vars + $where));
 		$q['rs']= $JSON_STR;
 		echo  trim(json_encode($q));
 		return;

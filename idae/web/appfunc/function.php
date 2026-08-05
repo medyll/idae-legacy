@@ -829,6 +829,46 @@
 		}
 	}
 
+	/**
+	 * Authorization gate for server-side entry points (action handlers, JSON services).
+	 * Modified: 2026-08-05 — droit_table() was only ever called by the form-render pages,
+	 * so direct POSTs and the WebMCP bridge reached the data layer unchecked.
+	 *
+	 * Rules, in order:
+	 *  - no authenticated agent                     → deny
+	 *  - app-level ADMIN or DEV flag                → allow
+	 *  - table never declared in agent_groupe_droit → allow (unconfigured internal table:
+	 *    preserves legacy behaviour for agent_tuile, agent_table…)
+	 *  - otherwise                                  → droit_table()
+	 *
+	 * @param string $code  C / R / U / D / L / CONF
+	 * @param string $table codeAppscheme
+	 */
+	function droit_table_enforce($code, $table) {
+		if (empty($table)) {
+			return false;
+		}
+		$idagent = empty($_SESSION['idagent']) ? 0 : (int)$_SESSION['idagent'];
+		if (empty($idagent)) {
+			error_log('[droit] ' . $code . ' on ' . $table . ' denied: no authenticated agent');
+
+			return false;
+		}
+		if (droit('ADMIN') || droit('DEV')) {
+			return true;
+		}
+		$APP_GD = new App('agent_groupe_droit');
+		if ($APP_GD->find(['codeAppscheme' => $table])->count() === 0) {
+			return true;
+		}
+		if (droit_table($idagent, $code, $table)) {
+			return true;
+		}
+		error_log('[droit] agent ' . $idagent . ' denied ' . $code . ' on table ' . $table);
+
+		return false;
+	}
+
 	function droit($code) {
 		//if ($code == 'ADMIN') return true;
 		$APP = new App('agent'); // verification des droits utilisateur

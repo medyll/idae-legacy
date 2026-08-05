@@ -4,8 +4,8 @@ import { test, expect } from '@playwright/test';
 
 test('uiux: basic layout and responsive checks', async ({ page, request }) => {
   const base = process.env.BASE_URL || 'http://localhost:8080';
-  const user = process.env.PLAYWRIGHT_USER || 'Mydde';
-  const pass = process.env.PLAYWRIGHT_PASS || 'malaterre';
+  const user = process.env.PLAYWRIGHT_USER || '';
+  const pass = process.env.PLAYWRIGHT_PASS || '';
 
   // Quick session check via server-side login
   const login = await request.post(base + '/mdl/app/app_login/actions.php', { form: { F_action: 'app_log', type: 'agent', loginAgent: user, passwordAgent: pass }});

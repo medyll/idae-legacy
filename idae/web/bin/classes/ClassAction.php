@@ -14,7 +14,21 @@
 			return parent::__construct($table);
 		}
 
+		/**
+		 * Authorization gate for the CRUD entry points — see droit_table_enforce()
+		 * in appfunc/function.php for the rules.
+		 * Modified: 2026-08-05 — only the legacy form-render pages called droit_table();
+		 * the action handlers never did, so any direct POST (or WebMCP tool call)
+		 * bypassed authorization entirely.
+		 */
+		private function droit_ok($code, $table) {
+			return droit_table_enforce($code, $table);
+		}
+
 		public function app_create($ARGS) {
+			if (!$this->droit_ok('C', empty($ARGS['table']) ? '' : $ARGS['table'])) {
+				return $ARGS;
+			}
 			if ($ARGS['table'] == 'agent_note') {
 				if (is_array($ARGS['vars']['idagent'])) {
 					$daarr = $ARGS['vars']['idagent'];
@@ -157,6 +171,9 @@
 			return $ARGS;
 		}
 		public function app_update($ARGS) {
+			if (!$this->droit_ok('U', empty($ARGS['table']) ? '' : $ARGS['table'])) {
+				return $ARGS;
+			}
 			$table       = $ARGS['table'];
 			$name_id     = 'id' . $table;
 			$Table       = ucfirst($table);
@@ -290,6 +307,9 @@
 		}
 
 		public function app_delete($ARGS) {
+			if (!$this->droit_ok('D', empty($ARGS['table']) ? '' : $ARGS['table'])) {
+				return false;
+			}
 			$table       = $ARGS['table'];
 			$table_value = (int)$ARGS['table_value'];
 			$id          = 'id' . $table;
@@ -322,6 +342,10 @@
 		public function app_multi_delete($ARGS) {
 			$table = $ARGS['table'];
 			if (empty($table)) {
+				return $ARGS;
+			}
+			// Same hole as app_delete, in bulk — gating one without the other is pointless.
+			if (!$this->droit_ok('D', $table)) {
 				return $ARGS;
 			}
 
@@ -445,21 +469,11 @@
 			return $ARGS;
 		}
 
-		public function set_settings($ARGS) {
-			$APP   = new App();
-			$key   = $ARGS['key'];
-			$value = $ARGS['value'];
-			$APP->set_settings($_SESSION['idagent'], [$key => $value]);
-
-			return $ARGS;
-		}
-
-		public function del_settings($ARGS) {
-			$APP   = new App();
-			$key   = $ARGS['key'];
-			$value = $ARGS['value'];
-			$test  = $APP->del_settings($_SESSION['idagent'], [$key => $value]);
-
-			return $ARGS;
-		}
+		/*
+		 * Modified: 2026-08-05 — set_settings()/del_settings() used to be redeclared here with
+		 * an $ARGS signature incompatible with App::set_settings($idagent, $vars), which is a
+		 * fatal error under PHP 8: the class could not be loaded at all, so EVERY F_action
+		 * routed through actions.php's `new Action()` default branch died with a 500.
+		 * Both wrappers moved to the switch in mdl/app/actions.php, which calls App directly.
+		 */
 	}

@@ -6,6 +6,8 @@ declare(strict_types=1);
  *
  * Date: 07/07/14
  * Modified: 2026-03-15 — <?php open tag, strict_types, array() → [], MongoCompat require, English comments
+ * TODO(rbac): this endpoint returns records for any `table` the caller names, with no
+ * droit_table_enforce('R', $table) check. See the OPEN TODO section of SCHEMA-AUTH.md.
  */
 	include_once($_SERVER['CONF_INC']);
 	require_once(__DIR__ . '/../appclasses/appcommon/MongoCompat.php');
@@ -78,7 +80,9 @@ declare(strict_types=1);
 	//
 	$rs = $APP->query($vars + $where);
 	$maxcount = $rs->count();
-	$rs = $APP->query($vars + $where,$page,$nbRows)->sort(array($sortBy => $sortDir));
+	// $page/$nbRows come straight off $_POST as strings; App::query() is typed int since the
+	// PHP 8 migration and fatals on them.
+	$rs = $APP->query($vars + $where, (int)$page, (int)$nbRows)->sort(array($sortBy => $sortDir));
 	//
 
 	//

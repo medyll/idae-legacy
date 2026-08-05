@@ -75,6 +75,24 @@ class CsrfGuard
     }
 
     /**
+     * Enforce CSRF on a mutating request: on failure, answer 403 and stop.
+     * Emits no HTML body — every caller is an AJAX endpoint whose response is
+     * eval'd or parsed by the SPA, so stray output would corrupt it.
+     */
+    public static function validateOrDie(): void
+    {
+        if (self::check()) {
+            return;
+        }
+        if (!headers_sent()) {
+            header('HTTP/1.1 403 Forbidden');
+            header('Content-Type: text/plain; charset=UTF-8');
+        }
+        echo 'CSRF_FAILED';
+        exit;
+    }
+
+    /**
      * Regenerate the token (e.g. after login to prevent session fixation).
      */
     public static function regenerate(): void
