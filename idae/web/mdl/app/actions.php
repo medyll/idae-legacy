@@ -1,7 +1,9 @@
 <?php
 	include_once($_SERVER['CONF_INC']);
 	require_once(__DIR__ . '/../../appclasses/appcommon/MongoCompat.php');
+	require_once(__DIR__ . '/../../appclasses/appcommon/CsrfGuard.php');
 	use AppCommon\MongoCompat;
+	use AppCommon\CsrfGuard;
 
 	array_walk_recursive($_POST, 'CleanStr');
 
@@ -11,9 +13,26 @@
 		exit;
 	}
 
+	// Modified: 2026-08-05 — every mutating F_action must carry the session CSRF token.
+	// ajaxValidation()/ajaxFormValidation() append it; re-entrant runModule('app/actions')
+	// calls reuse the same $_POST, so the check is idempotent.
+	CsrfGuard::validateOrDie();
+
 	// do the before
 	include_once(__DIR__ . '/actions_pre.php');
 	switch ($F_action) {
+		// Modified: 2026-08-05 — moved off Action:: (signature clash with App::set_settings
+		// made the whole Action class unloadable under PHP 8).
+		case "set_settings":
+			if (!empty($_POST['key'])) {
+				(new App())->set_settings($_SESSION['idagent'], [$_POST['key'] => $_POST['value'] ?? '']);
+			}
+			break;
+		case "del_settings":
+			if (!empty($_POST['key'])) {
+				(new App())->del_settings($_SESSION['idagent'], $_POST['key']);
+			}
+			break;
 		case "hide":
 			if (empty($_POST['table'])) exit;
 			$table = $_POST['table'];

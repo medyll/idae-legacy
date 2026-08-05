@@ -5,6 +5,7 @@
  *
  * Date: 07/07/14
  * Modified: 2026-03-15 — <?php tag, CSRF validation, exit→return, English comments
+ * Modified: 2026-08-05 — CsrfGuard was imported but never invoked; enforce it
  */
 	include_once($_SERVER['CONF_INC']);
 	require_once(__DIR__ . '/appclasses/appcommon/CsrfGuard.php');
@@ -15,6 +16,8 @@
 	} else {
 		return;
 	}
+
+	CsrfGuard::validateOrDie();
 
 	array_walk_recursive($_POST, 'CleanStr');
 
