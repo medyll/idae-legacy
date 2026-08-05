@@ -2,8 +2,59 @@
 
 This file documents the authorization model used by the Idae system: Agent → Agent Group → Group Rights (per table). It includes the main helper semantics, representative sample documents, and a compact Mermaid diagram.
 
+## OPEN TODO — read paths are not access-controlled
+
+**Status: open as of 2026-08-05. Anyone touching `services/json_data*.php` should read this first.**
+
+Write paths are gated: `app_create` / `app_update` / `app_delete` / `app_multi_delete` in
+`idae/web/bin/classes/ClassAction.php` and `services/json_action.php` all call
+`droit_table_enforce()`, and both action dispatchers enforce CSRF.
+
+**Read paths are not.** These endpoints return records for any `table` the caller names, with
+no rights check at all — an authenticated agent can read every collection regardless of its
+`agent_groupe_droit` rows:
+
+| Endpoint | Notes |
+|---|---|
+| `services/json_data.php` | main read path for the SPA and the WebMCP `idae-query-entity` tool |
+| `services/json_data_table.php` | grid data |
+| `services/json_data_search.php` | cross-table search |
+| `services/json_data_row.php`, `json_data_table_row.php` | single-row fetches |
+| `services/json_scheme.php` | exposes the full entity/field catalogue |
+
+The `R` filter applied by the WebMCP bridge (`javascript/app/app_webmcp.js`, fed by
+`services/json_droit_table.php`) is **cosmetic** — it only stops the model from proposing calls;
+a direct POST still reads anything.
+
+### What the fix looks like
+
+Add at the top of each endpoint, right after `$table` is read:
+
+```php
+if (!droit_table_enforce('R', $table)) {
+    echo json_encode([]);   // or 403 — pick one shape and apply it everywhere
+    return;
+}
+```
+
+`droit_table_enforce()` already exists in `appfunc/function.php` and handles the
+no-session / ADMIN / unconfigured-table cases.
+
+### Why it was not done in the same pass
+
+`json_data.php` is the read path of the entire SPA. Turning rights on there changes what every
+existing screen displays for non-admin agents, and no agent group other than the admin one has
+been exercised since the PHP 8 migration. It needs its own pass with a non-admin test account
+and a screen-by-screen check — not a drive-by edit.
+
+---
+
 ## Key runtime helpers
 
+- `droit_table_enforce($code, $table)` — **the one to call from server-side entry points.** Wraps
+  `droit_table()` with the rules: no authenticated agent → deny; app-level `ADMIN` or `DEV` → allow;
+  table never declared in `agent_groupe_droit` → allow (unconfigured internal tables such as
+  `agent_tuile`); otherwise `droit_table()`. Denials are logged via `error_log('[droit] …')`.
 - `droit_table($idagent, $code, $table)` — checks whether an agent (by `idagent`) has the operation `code` (single letter: `C`, `R`, `U`, `D`, `L`, `CONF`, ...) on `table`. Implementation: find agent by `idagent` → read `idagent_groupe` → query `agent_groupe_droit` for `idagent_groupe` + `codeAppscheme` == `table` with the requested `code` flag true. (See `idae/web/appfunc/function.php`.)
 - `droit_table_multi($idagent, $code, $table)` — returns a single permitted table name or a list of permitted tables for that group, depending on `table` param.
 - `droit($code)` — app-level check against `agent.droit_app.<CODE>` on the agent record (ADMIN/DEV/CONF, etc.).

@@ -10,6 +10,9 @@ declare(strict_types=1);
  * @package Idae\Services
  * Date: 2007-XX-XX (Legacy)
  * Modified: 2026-03-27 — Added strict_types, MongoCompat::toRegex usage verified
+ * TODO(rbac): this endpoint searches every scheme without a droit_table_enforce('R', …)
+ * check, so results can include tables the agent has no rights on. See the OPEN TODO
+ * section of SCHEMA-AUTH.md.
  */
 
 include_once($_SERVER['CONF_INC']);

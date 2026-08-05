@@ -89,10 +89,16 @@ Use `AppCommon\MongoCompat::toFieldName($code, $table)` to compute field names p
 
 ### Authorization Model
 
-Three helpers in `appfunc/function.php`:
+Helpers in `appfunc/function.php`:
+- `droit_table_enforce($code, $table)` — **call this from server-side entry points.** Wraps `droit_table()` with the no-session / ADMIN-DEV / unconfigured-table rules.
 - `droit_table($idagent, $code, $table)` — checks single operation (`C`/`R`/`U`/`D`/`L`/`CONF`) for an agent on a table.
 - `droit_table_multi($idagent, $code)` — returns list of permitted tables.
 - `droit($code)` — checks app-level flag (`ADMIN`/`DEV`/`CONF`) on the agent record.
+
+Write paths (`ClassAction` CRUD, `services/json_action.php`) are gated and CSRF-protected.
+**Read paths are not** — `services/json_data*.php` and `json_scheme.php` still serve any table
+to any authenticated agent. Open TODO, details and fix recipe in `SCHEMA-AUTH.md`.
+Mutating endpoints must carry `_csrf` (`window.APP.CSRF_TOKEN`, or the `X-CSRF-Token` header).
 
 Data model: `agent` → `agent_groupe` → `agent_groupe_droit` (per-table boolean flags).
 

@@ -6,6 +6,8 @@ declare(strict_types=1);
  *
  * Date: 07/07/14
  * Modified: 2026-03-15 — strict_types, exit→return, English comments
+ * TODO(rbac): this endpoint exposes the full entity/field catalogue regardless of the
+ * agent's agent_groupe_droit rows. See the OPEN TODO section of SCHEMA-AUTH.md.
  */
 
 include_once($_SERVER['CONF_INC']);
