@@ -54,17 +54,43 @@ Le shim ne peut pas être validé sans référence. On capture le comportement *
 
 Config existante : `playwright/playwright.config.ts`, `baseURL` = `http://localhost:8080`, specs dans `playwright/tests/`.
 
-- [ ] `fixtures/auth.ts` — helper de login réutilisable (extraire de `smoke.spec.ts`) + `storageState`
-- [ ] `helpers/console-guard.ts` — fixture qui échoue le test sur toute erreur console. **Détecteur principal** de régression : un `$` manquant ou un `Element.xxx is not a function` remonte immédiatement
-- [ ] `prototype-surface.spec.ts` — assertion de la surface d'API via `page.evaluate()` : `$`, `$$`, `$A`, `$H`, `$w`, `$F`, `$R`, `Class.create`, `Object.extend`, `Ajax.*`, les ~45 `Element.*` utilisées, extensions `Array`/`String`, `Effect.*`. **Doit passer identiquement avant et après le swap — c'est le contrat du shim**
-- [ ] `datatable.spec.ts` — `app_datatable.js` (442 hits) + `TableGrid.js` (412) : chargement, tri, filtre, pagination, ouverture de ligne
-- [ ] `window-gui.spec.ts` — `app_window.js` (238) : ouverture/fermeture/drag de fenêtre, effets `crossfade`/`growler`
-- [ ] `explorer.spec.ts` — `myddeExplorer.js` (370) + `myddeDatalist.js` (194)
+- [x] `fixtures/auth.ts` — login + `storageState` via `global-setup.ts`, et `waitForAppReady()`
+- [x] `fixtures/app.ts` — `openChrome` / `openRecord` / `openList` + attente des `.cf_module`
+- [x] `helpers/console-guard.ts` — fixture qui échoue le test sur toute erreur console. **Détecteur principal** de régression : un `$` manquant ou un `Element.xxx is not a function` remonte immédiatement
+- [x] `prototype-surface.spec.ts` — assertion de la surface d'API via `page.evaluate()`. **Doit passer identiquement avant et après le swap — c'est le contrat du shim**
+- [x] `window-gui.spec.ts` — `app_window.js` (238) : ouverture/fermeture d'une fiche et d'une liste, deux fenêtres coexistantes
+- [ ] `datatable.spec.ts` — `app_datatable.js` (442) : colonnes issues du schéma, barre d'outils, footer, recherche
+- [ ] `explorer.spec.ts` — `myddeExplorer.js` (370) + `myddeDatalist.js` (194) : panneau de droite du bureau
 - [ ] `insertionq.spec.ts` — `app_insertionQ.js` (300) : pipeline « mutation DOM → ré-extension Prototype ». **Couplage le plus dur à défaire**
-- [ ] `forms.spec.ts` — `$F()`, sérialisation de formulaire, Autocompleter, ComboBox, DatePicker
+- [ ] `forms.spec.ts` — onglet Modifier (`app/app/app_update`), `$F()`, sérialisation, validation
+- [ ] Réparer ou remplacer `smoke.spec.ts` et `uiux.spec.ts` (rouges : ils attendent `#main, .app-gui, #grid` qui n'existent pas)
 - [ ] Snapshots de référence (`toHaveScreenshot`) sur 3-4 écrans clés, pour attraper les régressions de `setStyle`/`getDimensions`
 - [ ] Script `"test:baseline": "npx playwright test --update-snapshots"` dans `playwright/package.json`
 - [ ] **Critère de sortie : suite verte, Prototype chargé, snapshots commités**
+
+### Ce que l'exploration a établi
+
+**Amorçage.** `main_bag.js` ajoute un cache-buster à chaque entrée, donc le cache de `bag.js` ne sert jamais : ~60 scripts recharge à chaque visite, 10-20 s avant que l'app soit utilisable. D'où le timeout à 120 s.
+
+**Signal de ready.** `APP.APPSCHEMES` se peuple **aussi pour un visiteur anonyme** — une page non authentifiée a donc l'air « bootée ». La condition retenue est `APPSCHEMES` peuplé **et** `#desktop` présent. On évite volontairement `#main_progress_hold` masqué, qui dépend de `Effect.Fade`.
+
+**Prototype patche `HTMLElement.prototype`, pas `Element.prototype`.** Le contrat vérifie donc les méthodes sur un élément vivant : c'est ce dont le code dépend réellement, et ça laisse le shim libre de choisir son hôte.
+
+**Sélecteurs stables** (relevés sur l'app réelle) :
+
+| Élément | Sélecteur |
+|---|---|
+| Navigation | `act_chrome_gui(file, vars)` — ex. `('app/app/app_fiche', 'table=client&table_value=63376')` |
+| Fenêtre | `.containerdisp`, id = `container` + slug(file+vars) |
+| Barre de titre | `.handledisp .titlefrm` / `.buttonclose` / `.buttonreduce` / `.popperdisp` |
+| Contenu | `.innerdisp[table][mdl]` |
+| Placeholders de module | `.cf_module[mdl=...]`, remplis par un second aller-retour AJAX |
+| Datatable | `#app_liste_{table}_`, `table.ethop.table_groupe`, `tbody.div_tbody`, `.tbl_footer` |
+| Onglets de fiche | `a.cancelClose` avec `onclick="act_chrome_gui(...)"` ou `ajaxInMdl(...)` |
+
+**Code mort confirmé** — non chargé par `main_bag.js` et non référencé côté PHP : `myui/DatePicker.js`, `myui/ComboBox.js`, `myui/Autocompleter.js`, `librairie/crossfade.js`, `app/app_websocket.js`, `app/app_prototype.js`. `myui/TableGrid.js` (412 hits) n'est chargé qu'à la demande par `mdl/app/app_dyn_table.php`, et `librairie/canvasjs.min.js` par `mdl/app/app_stat/statistique.php`. Ça retire ~1 000 appels Prototype du périmètre réel et **change l'ordre de la Phase 5**.
+
+**À élucider** : la liste `client` affiche « 0 résultats » alors que l'explorateur de droite montre des dizaines de clients. Les lignes ne se chargent ni au bout de 16 s, ni via la recherche. À comprendre avant d'écrire `datatable.spec.ts` — soit un filtre par défaut, soit un déclencheur (scroll, tri) non identifié.
 
 ---
 
@@ -127,14 +153,17 @@ Emplacement : `idae/web/javascript/vendor/idae-be-shim/` (colocalisé avec le bu
 
 Prototype sorti, on migre fichier par fichier vers l'API idae-be native, du plus dense au moins dense. Chaque fichier = un commit + la spec Playwright correspondante qui reste verte.
 
+Ordre revu après vérification de ce que `main_bag.js` charge vraiment :
+
 - [ ] `app/app_datatable.js` (442)
-- [ ] `myui/TableGrid.js` (412)
 - [ ] `librairie/myddeExplorer.js` (370)
 - [ ] `app/app_insertionQ.js` (300)
 - [ ] `engine/methods.js` (253)
 - [ ] `app/app_window.js` (238)
 - [ ] `librairie/myddeDatalist.js` (194)
 - [ ] `librairie/picPicker.js` (179)
+- [ ] `myui/TableGrid.js` (412) — chargé à la demande par `mdl/app/app_dyn_table.php`, pas au boot
+- [ ] Supprimer le code mort plutôt que le migrer : `myui/DatePicker.js`, `myui/ComboBox.js`, `myui/Autocompleter.js`, `librairie/crossfade.js`, `app/app_websocket.js`, `app/app_prototype.js`
 - [ ] Supprimer chaque fichier de shim quand `IDAE_SHIM_WARN` ne remonte plus aucun call-site pour sa famille
 
 Les templates PHP/Latte (719 `$()`) viennent en dernier, ou jamais — le shim `$`/`$$` peut rester en place indéfiniment pour eux, c'est ~30 lignes.
