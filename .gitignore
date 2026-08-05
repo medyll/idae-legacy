@@ -152,3 +152,4 @@ dist
 # Exclure le contenu de tous les dossiers /cache
 **/cache/*
 !**/cache/.gitkeep
+test-results/

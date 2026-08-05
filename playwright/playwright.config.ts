@@ -22,9 +22,16 @@ export default defineConfig({
   use: {
     baseURL: process.env.BASE_URL || 'http://localhost:8080',
     headless: true,
-    viewport: { width: 1280, height: 720 },
+    viewport: { width: 1400, height: 900 },
     ignoreHTTPSErrors: true,
+    // Written by global-setup.ts, which runs before any test.
+    storageState: 'tests/.auth/state.json',
+    trace: 'retain-on-failure',
   },
   testDir: './tests',
-  timeout: 30000,
+  globalSetup: './global-setup.ts',
+  // A cold SPA boot loads ~60 scripts sequentially through bag.js, with a
+  // cache-buster on every entry. 10-20s before the app is usable is normal.
+  timeout: 120000,
+  expect: { timeout: 15000 },
 });

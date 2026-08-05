@@ -7,7 +7,8 @@
       "PowerShell(Get-NetTCPConnection *)",
       "PowerShell(Get-Process *)",
       "Bash(docker exec *)",
-      "PowerShell($env:MSYS_NO_PATHCONV=\"1\"; @\\('appfunc/function.php','bin/classes/ClassAction.php','actions.php','mdl/app/actions.php','services/json_droit_table.php','appclasses/appcommon/CsrfGuard.php'\\) | ForEach-Object { docker exec idae-legacy php -l \"/var/www/html/$_\" })"
+      "PowerShell($env:MSYS_NO_PATHCONV=\"1\"; @\\('appfunc/function.php','bin/classes/ClassAction.php','actions.php','mdl/app/actions.php','services/json_droit_table.php','appclasses/appcommon/CsrfGuard.php'\\) | ForEach-Object { docker exec idae-legacy php -l \"/var/www/html/$_\" })",
+      "Bash(git checkout *)"
     ]
   }
 }
