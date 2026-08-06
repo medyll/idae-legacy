@@ -10,6 +10,7 @@
     "logs": "powershell Get-Content ../../../logs/php-error.log -Wait",
     "check:css": "node ../appcss/check-scss-wiring.mjs",
     "build:css": "npm run check:css && sass ../appcss/scss/main.scss ../appcss/dist/main.css --style=compressed --no-source-map && node -e \"require('node:fs').mkdirSync('../appcss/dist/images',{recursive:true});require('node:fs').copyFileSync('../css/images/spinner.gif','../appcss/dist/images/spinner.gif')\"",
+    "build:idae-be": "esbuild @medyll/idae-be --bundle --format=iife --global-name=IdaeBe --target=es2017 --sourcemap --outfile=../javascript/vendor/idae-be/idae-be.iife.js",
     "watch:css": "sass --watch ../appcss/scss/main.scss ../appcss/dist/main.css --style=expanded"
   },
   "dependencies": {
@@ -25,6 +26,8 @@
     "winston": "^3.19.0"
   },
   "devDependencies": {
+    "@medyll/idae-be": "file:D:/development/idae/packages/idae-be",
+    "esbuild": "^0.20.0",
     "nodemon": "^3.1.14",
     "sass": "^1.97.3"
   },

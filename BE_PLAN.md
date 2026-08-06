@@ -117,12 +117,12 @@ Phase 2 (bundle esbuild d'idae-be) — voir plus bas, rien n'a changé. Démarre
 
 `@medyll/idae-be` est de l'ESM pur non bundlé (ES2020+, 89 KB sur 15 fichiers), sans deps runtime. Un seul esbuild suffit.
 
-- [ ] Ajouter `@medyll/idae-be` en devDependency de `idae/web/app_node/` via `file:D:/development/idae/packages/idae-be` (tant que non publié) plutôt qu'un chemin relatif fragile
-- [ ] Script `build:idae-be` dans `idae/web/app_node/package.json` (là où vit déjà `build:css`) :
+- [x] Ajouter `@medyll/idae-be` en devDependency de `idae/web/app_node/` via `file:D:/development/idae/packages/idae-be` (tant que non publié) plutôt qu'un chemin relatif fragile
+- [x] Script `build:idae-be` dans `idae/web/app_node/package.json` (là où vit déjà `build:css`) :
       `esbuild @medyll/idae-be --bundle --format=iife --global-name=IdaeBe --target=es2017 --sourcemap --outfile=../javascript/vendor/idae-be/idae-be.iife.js`
-- [ ] Confirmer le navigateur cible minimum réel avant de figer `--target` (downlevel de `?.` / `??` / champs privés)
-- [ ] Commiter la sortie dans `idae/web/javascript/vendor/idae-be/` — le repo n'a aucun build à l'exécution, tout le vendor est commité
-- [ ] Vérifier `window.IdaeBe` en console
+- [x] Cible `es2017` retenue : le bundle charge déjà Chart.js / swiper / tinymce, qui exigent ce niveau — pas de navigateur plus ancien à préserver
+- [x] Commiter la sortie dans `idae/web/javascript/vendor/idae-be/` — le repo n'a aucun build à l'exécution, tout le vendor est commité (90,9 Ko + sourcemap)
+- [x] Vérifier `window.IdaeBe` en console — 20 exports, `IdaeBe.be('#id')` opérationnel sur un élément vivant
 
 ---
 
