@@ -140,16 +140,16 @@ Emplacement : `idae/web/javascript/vendor/idae-be-shim/` (colocalisé avec le bu
 | `shim-ajax.js` | `Ajax.Request`, `Ajax.Updater`, `Ajax.Responders`, `PeriodicalExecuter` | `fetch` + `be().updateHttp` |
 | `shim-effects.js` | `Effect.*` (29 appels), `fade`, `Draggable` | transitions CSS + Web Animations API |
 
-- [ ] `shim-core.js`
-- [ ] `shim-class.js`
-- [ ] `shim-element.js`
-- [ ] `shim-enumerable.js`
-- [ ] `shim-event.js`
-- [ ] `shim-ajax.js`
-- [ ] `shim-effects.js`
-- [ ] Flag dev `IDAE_SHIM_WARN` : `console.warn` + stack à chaque appel shimé → donne la liste réelle des call-sites à réécrire en Phase 5 en naviguant l'app, plutôt qu'en grepant
-- [ ] Vérifier qu'aucun code ne dépend de la valeur de retour de `Element.extend` (devient un no-op : les méthodes sont sur le prototype)
-- [ ] Ménage : supprimer `vendor/prototype/prototype-1.7.js` (copie morte), la référence morte à `prototype.js` dans `idae/web/bin/templates/app/appsite/page/page_body.latte:29`, et `app/app_prototype.js` (1 494 lignes, non chargé)
+- [x] `shim-core.js`
+- [x] `shim-class.js`
+- [x] `shim-element.js`
+- [x] `shim-enumerable.js`
+- [x] `shim-event.js`
+- [x] `shim-ajax.js`
+- [x] `shim-effects.js`
+- [x] Flag dev `IDAE_SHIM_WARN` : `console.warn` + stack à chaque appel shimé → donne la liste réelle des call-sites à réécrire en Phase 5 en naviguant l'app, plutôt qu'en grepant
+- [x] Vérifier qu'aucun code ne dépend de la valeur de retour de `Element.extend` (devient un no-op : les méthodes sont sur le prototype)
+- [x] Ménage : supprimer `vendor/prototype/prototype-1.7.js` (copie morte), la référence morte à `prototype.js` dans `idae/web/bin/templates/app/appsite/page/page_body.latte:29`, et `app/app_prototype.js` (1 494 lignes, non chargé)
 
 ### Principes
 

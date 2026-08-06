@@ -7,6 +7,7 @@
  * before `waitForAppReady()` resolves.
  */
 import type { APIRequestContext, Page } from '@playwright/test';
+import { installShimPreview } from './shim-preview';
 
 export const BASE = process.env.BASE_URL || 'http://localhost:8080';
 export const USER = process.env.PLAYWRIGHT_USER || '';
@@ -88,6 +89,11 @@ export async function waitForAppReady(page: Page, timeout = 90_000): Promise<voi
 
 /** Navigates to the app root, logs in if needed, and waits for the boot to finish. */
 export async function openApp(page: Page): Promise<void> {
+  // SHIM_PREVIEW=1 swaps Prototype/Scriptaculous for the idae-be bundle +
+  // shims at the network layer (see fixtures/shim-preview.ts).
+  if (process.env.SHIM_PREVIEW === '1') {
+    await installShimPreview(page);
+  }
   await page.goto(BASE + '/', { waitUntil: 'domcontentloaded' });
 
   // Either the stored session already holds and the desktop appears, or the
