@@ -1978,7 +1978,9 @@ return true;
 					$value = "<i class='fa fa-square' style='color:$value ;margin:auto auto;position:relative;'  ></i>";
 					break;
 				case 'textelibre':
-					$value = nl2br(stripslashes($value));
+					// $value can be null for an empty field; stripslashes() is
+					// strict about its argument type since PHP 8.1.
+					$value = nl2br(stripslashes((string)$value));
 					break;
 			endswitch;
 			$str = "$value";
@@ -2233,7 +2235,9 @@ return true;
 					$value = "<i class='fa fa-circle' style='color:$value ;margin:auto auto;position:relative;'  ></i>";
 					break;
 				case 'textelibre':
-					$value = nl2br(stripslashes($value));
+					// $value can be null for an empty field; stripslashes() is
+					// strict about its argument type since PHP 8.1.
+					$value = nl2br(stripslashes((string)$value));
 					break;
 			endswitch;
 			$str = "$value";

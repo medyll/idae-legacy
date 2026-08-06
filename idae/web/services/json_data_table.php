@@ -475,7 +475,11 @@ declare(strict_types=1);
 				case 'field':
 				case 'integer':
 				case 'string':
-					$vars_rfk['vars'] = [$groupBy => $arr_dist[$groupBy]];
+					// $arr_dist is the scalar distinct value here (see $table_value above),
+					// not a record — indexing it by field name is a PHP7-era bug that PHP8.2
+					// promotes from a silent "Illegal string offset" warning to a fatal
+					// TypeError ("Cannot access offset of type string on string").
+					$vars_rfk['vars'] = [$groupBy => $arr_dist];
 					break;
 			endswitch;
 
