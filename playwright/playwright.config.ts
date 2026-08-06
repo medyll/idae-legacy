@@ -30,6 +30,11 @@ export default defineConfig({
   },
   testDir: './tests',
   globalSetup: './global-setup.ts',
+  // All specs share one storageState, hence one PHPSESSID. Running contexts
+  // in parallel means concurrent server-side requests on the same PHP
+  // session — this has taken down the socket bridge under load. One worker
+  // until specs get per-test sessions.
+  workers: 1,
   // A cold SPA boot loads ~60 scripts sequentially through bag.js, with a
   // cache-buster on every entry. 10-20s before the app is usable is normal.
   timeout: 120000,
