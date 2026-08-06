@@ -64,17 +64,15 @@ Config existante : `playwright/playwright.config.ts`, `baseURL` = `http://localh
 - [x] `smoke.spec.ts` / `uiux.spec.ts` réécrits contre de vrais sélecteurs (`#desktop`, `.ms-Icon--waffle`) — ils pollaient `#main, .app-gui, #grid`, inexistants dans cette app
 - [x] `insertionq.spec.ts` — `app_insertionQ.js` (300) : **écrit, vérifié vert** (2/2, ~45 s à environnement sain)
 - [x] `forms.spec.ts` — onglet Modifier (`app/app/app_update`), `$F()`, sérialisation (`Form.serialize` + `Ajax.Updater`), auto-close. A révélé un crash PHP 8.2 (`skelMdl::doCurl` non statique, `postAction.php:201`) et un asset manquant (`appcss/dist/images/spinner.gif`) — corrigés
-- [ ] Snapshots de référence (`toHaveScreenshot`) sur 3-4 écrans clés, pour attraper les régressions de `setStyle`/`getDimensions`
-- [ ] Script `"test:baseline": "npx playwright test --update-snapshots"` dans `playwright/package.json`
-- [ ] **Critère de sortie : suite verte, Prototype chargé, snapshots commités** — reste les snapshots
+- [x] Snapshots de référence (`toHaveScreenshot`) sur 4 écrans clés (bureau, liste, fiche, onglet Modifier) — zones à données vivantes masquées (tuiles, notes, calendrier, panneau historique, lignes groupées), tolérance 0,5 % sur le bureau pour le jitter de bordure des zones masquées
+- [x] Script `"test:baseline": "npx playwright test --update-snapshots"` dans `playwright/package.json`
+- [x] **Critère de sortie : suite verte (20/20), Prototype chargé, snapshots commités. Phase 1 close.**
 
-### À reprendre — prochaine session
+**Perf suite — constat de session** : chaque test reboote toute l'app (~60 scripts, cache-buster systématique) ; à froid ~45 s pour 2 tests, mais sous charge Docker (Desktop up plusieurs jours) un boot peut atteindre 60-90 s. Si l'environnement devient lent en cours de session : `docker restart idae-legacy idae-socket` suffit — inutile de toucher aux tests. Piste d'accélération non implémentée : page partagée par fichier (`test.beforeAll` + contexte réutilisé) pour diviser le nombre de boots par spec.
 
-**1. Snapshots de référence** (dernier item avant de clore la Phase 1) : `toHaveScreenshot` sur 3-4 écrans clés (bureau, liste `client`, fiche `client`, onglet Modifier) + script `test:baseline`, puis commit des snapshots.
+### Prochaine session — Phase 2
 
-**2. Puis Phase 2** (bundle esbuild d'idae-be) — voir plus bas, rien n'a changé.
-
-**Perf suite — constat de session** : chaque test reboote toute l'app (~60 scripts, cache-buster systématique) ; à froid ~45 s pour 2 tests, mais sous charge Docker (Desktop up plusieurs jours) un boot peut atteindre 60-90 s et la suite complète dépasse le plafond d'exécution d'une commande. Suite vérifiée verte en lots (16/16, 2026-08-06) : prototype-surface 3/3, smoke 1/1, uiux 2/2, explorer 3/3, window-gui 2/2, datatable 2/2, insertionq 2/2, forms 2/2, crud 1/1. Piste d'accélération non implémentée : page partagée par fichier (`test.beforeAll` + contexte réutilisé) pour diviser le nombre de boots par spec. Si l'environnement devient lent en cours de session : `docker restart idae-legacy idae-socket` suffit — inutile de toucher aux tests.
+Phase 2 (bundle esbuild d'idae-be) — voir plus bas, rien n'a changé. Démarrer par l'ajout de `@medyll/idae-be` en devDependency de `idae/web/app_node/`.
 
 ### Ce que l'exploration a établi
 

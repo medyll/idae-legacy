@@ -3,7 +3,8 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "test": "npx playwright test"
+    "test": "npx playwright test",
+    "test:baseline": "npx playwright test --update-snapshots"
   },
   "devDependencies": {
     "@playwright/test": "^1.38.0"
