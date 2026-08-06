@@ -62,39 +62,19 @@ Config existante : `playwright/playwright.config.ts`, `baseURL` = `http://localh
 - [x] `datatable.spec.ts` — `app_datatable.js` (442) : colonnes issues du schéma, chargement des lignes via le canal socket, filtre de recherche côté client
 - [x] `explorer.spec.ts` — panneau « historique » du bureau (`app_gui_panel.php`) : liens réels via `[act_chrome_gui]`, `[auto_tree]`/`.auto_tree_caret`
 - [x] `smoke.spec.ts` / `uiux.spec.ts` réécrits contre de vrais sélecteurs (`#desktop`, `.ms-Icon--waffle`) — ils pollaient `#main, .app-gui, #grid`, inexistants dans cette app
-- [~] `insertionq.spec.ts` — `app_insertionQ.js` (300) : **écrit, partiellement vérifié seulement.** Voir "À reprendre" ci-dessous.
-- [ ] `forms.spec.ts` — onglet Modifier (`app/app/app_update`), `$F()`, sérialisation, validation
+- [x] `insertionq.spec.ts` — `app_insertionQ.js` (300) : **écrit, vérifié vert** (2/2, ~45 s à environnement sain)
+- [x] `forms.spec.ts` — onglet Modifier (`app/app/app_update`), `$F()`, sérialisation (`Form.serialize` + `Ajax.Updater`), auto-close. A révélé un crash PHP 8.2 (`skelMdl::doCurl` non statique, `postAction.php:201`) et un asset manquant (`appcss/dist/images/spinner.gif`) — corrigés
 - [ ] Snapshots de référence (`toHaveScreenshot`) sur 3-4 écrans clés, pour attraper les régressions de `setStyle`/`getDimensions`
 - [ ] Script `"test:baseline": "npx playwright test --update-snapshots"` dans `playwright/package.json`
-- [ ] **Critère de sortie : suite verte, Prototype chargé, snapshots commités**
+- [ ] **Critère de sortie : suite verte, Prototype chargé, snapshots commités** — reste les snapshots
 
 ### À reprendre — prochaine session
 
-**1. Finir `insertionq.spec.ts` (priorité).** Fichier : [playwright/tests/insertionq.spec.ts](playwright/tests/insertionq.spec.ts). Deux tests :
-   - `an auto-count badge fills in via the socket round trip` — **vérifié vert**, ~15s.
-   - `a second window's dynamic content re-extends independently` — **écrit mais jamais vérifié jusqu'au bout**. Le premier passage a pris >5 min avant qu'on ne le tue (mauvais import dynamique `await import(...)`, corrigé depuis en import statique). Un second passage a été coupé par un timeout artificiel de 200s côté outil, pas par le test lui-même. Reste à faire :
-     ```bash
-     cd playwright && ./node_modules/.bin/playwright test insertionq --reporter=line
-     ```
-     Si le 2e test dépasse ~60-90s, soupçonner : deux `openList()` séquentiels = deux boucles complètes de chargement de table (chacune peut prendre 15-30s de son côté) — c'est peut-être juste lent, pas cassé. Si c'est le cas, envisager de réduire la portée du test (une seule table suffit peut-être à prouver la ré-extension) plutôt que de fixer un timeout plus long.
+**1. Snapshots de référence** (dernier item avant de clore la Phase 1) : `toHaveScreenshot` sur 3-4 écrans clés (bureau, liste `client`, fiche `client`, onglet Modifier) + script `test:baseline`, puis commit des snapshots.
 
-   **Commande de contrôle rapide de l'environnement avant de lancer quoi que ce soit :**
-   ```bash
-   docker ps --format "{{.Names}}\t{{.Status}}"
-   ```
-   Les 4 containers (`idae-app`, `idae-mongo`, `idae-socket`, `idae-legacy`) doivent être `healthy`. Si `idae-socket` est `unhealthy` : `docker restart idae-socket`, attendre ~10s, revérifier.
+**2. Puis Phase 2** (bundle esbuild d'idae-be) — voir plus bas, rien n'a changé.
 
-**2. `forms.spec.ts`** — non commencé. Cible : onglet « Modifier » d'une fiche (`act_chrome_gui('app/app/app_update', 'table=X&table_value=Y')`, vu dans l'exploration : `onclick="act_chrome_gui('app/app/app_update','table=client&table_value=63376&...)"`, disponible via `openChrome()` dans [fixtures/app.ts](playwright/tests/fixtures/app.ts) ou une variante `openRecord` avec un autre mdl). Points à couvrir : présence d'un `<form>`, `$F()` (récupération de valeur de champ Prototype), sérialisation à la soumission, retour visuel de validation (`ajaxFormValidation` dans `engine/engine.js`).
-
-**3. Une fois insertionq + forms verts : suite complète.**
-   ```bash
-   cd playwright && rm -rf test-results && ./node_modules/.bin/playwright test --reporter=line --workers=1
-   ```
-   16 tests attendus au total (14 actuels + 2 forms). Commiter + pousser sur `feat/idae-be-migration`, mettre à jour ce fichier (cases à cocher).
-
-**4. Puis les items encore non commencés** : snapshots de référence, script `test:baseline`, et la fermeture de la Phase 1 pour passer à la Phase 2 (bundle esbuild d'idae-be) — voir plus bas dans ce fichier, rien n'a changé sur ces phases-là.
-
-**État du dépôt à la reprise** : branche `feat/idae-be-migration`, tout poussé jusqu'au commit `64e6e15` inclus. `git log --oneline -8` pour se remettre dans le bain. Rien en attente localement, aucun conflit connu avec `main`.
+**Perf suite — constat de session** : chaque test reboote toute l'app (~60 scripts, cache-buster systématique) ; à froid ~45 s pour 2 tests, mais sous charge Docker (Desktop up plusieurs jours) un boot peut atteindre 60-90 s et la suite complète dépasse le plafond d'exécution d'une commande. Suite vérifiée verte en lots (16/16, 2026-08-06) : prototype-surface 3/3, smoke 1/1, uiux 2/2, explorer 3/3, window-gui 2/2, datatable 2/2, insertionq 2/2, forms 2/2, crud 1/1. Piste d'accélération non implémentée : page partagée par fichier (`test.beforeAll` + contexte réutilisé) pour diviser le nombre de boots par spec. Si l'environnement devient lent en cours de session : `docker restart idae-legacy idae-socket` suffit — inutile de toucher aux tests.
 
 ### Ce que l'exploration a établi
 
@@ -125,7 +105,9 @@ Config existante : `playwright/playwright.config.ts`, `baseURL` = `http://localh
    - [json_data_table.php:478](idae/web/services/json_data_table.php:478) — la liste `client` s'ouvre par défaut avec `groupBy=telephoneClient` (bouton « Grouper » actif dans l'UI). Pour les branches non-`grille`, `$arr_dist` est déjà la valeur scalaire du groupe (voir `$table_value` juste au-dessus dans chaque `case`), pas un enregistrement — l'indexer par nom de champ (`$arr_dist[$groupBy]`) était un warning PHP7 silencieux (« Illegal string offset »), devenu `TypeError` fatal en PHP8.
    - [ClassApp.php:2236](idae/web/appclasses/appcommon/ClassApp.php:2236) — `stripslashes(null)` sur un champ `textelibre` vide, strict depuis PHP 8.1.
 
-   Commits : `2358881` (fixes PHP), `49d0ef4` (harness + spec).
+   Commits : `2358881` (fixes PHP), `49d0ef4` (harness + spec). Suivi par un 3e crash du même acabit, révélé par `forms.spec.ts` : `skelMdl::doCurl` appelé statiquement alors qu'il était déclaré en méthode d'instance — fatal en PHP 8 (`postAction.php:201` à chaque soumission de formulaire `auto_close`). Déclaré `static` (il n'utilise pas `$this`). Asset manquant découvert au passage : `.loading` référence `images/spinner.gif` relatif à `appcss/dist/`, absent du build commité → copie de `css/images/spinner.gif` vers `appcss/dist/images/` (dossier ignoré par git) et ajout de la copie au script `build:css` pour qu'elle survive à un rebuild.
+
+**Piège de données de test** : le 2e test d'`insertionq.spec.ts` ouvrait une liste `prospect` — table absente du dataset de test, la fenêtre ne rend jamais `table.table_groupe`. Réduit à liste `client` + fiche `client` (couple déjà éprouvé par `window-gui.spec.ts`) : prouver la ré-extension ne demande pas deux tables, seulement deux sous-arbres insérés dynamiquement. Ne pas hardcoder de nom de table non vérifié dans un spec.
 
 **Piège de test découvert en écrivant `datatable.spec.ts`** : la recherche (`input[placeholder=Rechercher]`) est branchée sur `keyup` via délégation Prototype (`myddeExplorer.js`), pas sur `input` — `Locator.fill()` ne déclenche rien, il faut `pressSequentially()`. Et `act_search` par défaut (`where_search:'local'`) ne re-requête jamais le serveur : il masque/affiche les `<tr>` déjà chargées en place, le compteur du footer ne bouge pas.
 

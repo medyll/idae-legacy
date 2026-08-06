@@ -9,7 +9,7 @@
     "dev": "nodemon src/main.js",
     "logs": "powershell Get-Content ../../../logs/php-error.log -Wait",
     "check:css": "node ../appcss/check-scss-wiring.mjs",
-    "build:css": "npm run check:css && sass ../appcss/scss/main.scss ../appcss/dist/main.css --style=compressed --no-source-map",
+    "build:css": "npm run check:css && sass ../appcss/scss/main.scss ../appcss/dist/main.css --style=compressed --no-source-map && node -e \"require('node:fs').mkdirSync('../appcss/dist/images',{recursive:true});require('node:fs').copyFileSync('../css/images/spinner.gif','../appcss/dist/images/spinner.gif')\"",
     "watch:css": "sass --watch ../appcss/scss/main.scss ../appcss/dist/main.css --style=expanded"
   },
   "dependencies": {

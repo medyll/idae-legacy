@@ -18,8 +18,8 @@
  * `Element.update` wrong leaves this badge permanently empty, silently.
  */
 import { test, expect } from '@playwright/test';
-import { openApp } from './fixtures/auth';
-import { openList } from './fixtures/app';
+import { openApp, TABLE, TABLE_VALUE } from './fixtures/auth';
+import { openList, openRecord } from './fixtures/app';
 import { watchConsole } from './helpers/console-guard';
 
 test('insertionQ: an auto-count badge fills in via the socket round trip', async ({ page }) => {
@@ -43,14 +43,15 @@ test('insertionQ: a second window\'s dynamic content re-extends independently', 
 
   // Two windows opened back to back means insertionQ has to correctly
   // re-scope its watchers to freshly-inserted subtrees twice in a row,
-  // rather than once at boot.
-  const first = await openList(page, 'client');
-  const second = await openList(page, 'prospect');
+  // rather than once at boot. A list then a record sheet: both module graphs
+  // are known-good (window-gui.spec.ts drives the same pair), whereas a
+  // second hardcoded table name is not guaranteed to exist in every dataset.
+  const list = await openList(page, TABLE);
+  const record = await openRecord(page, TABLE, TABLE_VALUE);
 
-  await expect(first.locator('table.table_groupe')).toBeVisible();
-  await expect(second.locator('table.table_groupe')).toBeVisible();
-  await expect(first.locator('tbody.div_tbody tr')).not.toHaveCount(0, { timeout: 30_000 });
-  await expect(second.locator('tbody.div_tbody tr')).not.toHaveCount(0, { timeout: 30_000 });
+  await expect(list.locator('table.table_groupe')).toBeVisible();
+  await expect(record.locator('.innerdisp')).toBeVisible();
+  await expect(list.locator('tbody.div_tbody tr')).not.toHaveCount(0, { timeout: 30_000 });
 
   guard.assertClean();
 });
