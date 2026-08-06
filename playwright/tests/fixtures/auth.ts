@@ -17,8 +17,27 @@ export const TABLE_VALUE = process.env.TEST_TABLE_VALUE || '';
 /** Storage state produced by global-setup.ts and consumed by playwright.config.ts. */
 export const STORAGE_STATE = 'tests/.auth/state.json';
 
-/** Server-side login. Returns the PHPSESSID handed out by the session. */
-export async function apiLogin(request: APIRequestContext): Promise<string> {
+export interface ApiSession {
+  phpsessid: string;
+  /** `idagent`, mirrored into `localStorage.SESSID` by the app's own login flow. */
+  sessid: string;
+}
+
+/**
+ * Server-side login. Returns the identifiers the SPA itself mirrors into
+ * `localStorage` after a real form login (see `mdl/app/app_login/actions.php`
+ * and `javascript/app/app_bootstrap_init.js`).
+ *
+ * Getting the HTTP cookie is not the whole story: `services/json_data_table.php`
+ * and friends are called from the browser through socket.io
+ * (`javascript/app/app.js` → `get_data`/`socket.emit`), and the Node bridge
+ * (`app_node/src/services/phpBridge.js`) authenticates its server-to-server
+ * call to PHP using `PHPSESSID` read out of the emitted payload — which the
+ * client reads from `localStorage`, not from the cookie jar. A page that only
+ * has the cookie renders a logged-in shell but gets empty data back from every
+ * socket-backed list.
+ */
+export async function apiLogin(request: APIRequestContext): Promise<ApiSession> {
   const resp = await request.post(BASE + '/mdl/app/app_login/actions.php', {
     form: { F_action: 'app_log', type: 'agent', loginAgent: USER, passwordAgent: PASS },
   });
@@ -29,7 +48,7 @@ export async function apiLogin(request: APIRequestContext): Promise<string> {
   if (!sess || typeof sess.idagent !== 'number' || sess.idagent <= 0) {
     throw new Error(`login did not open a session: ${JSON.stringify(sess)}`);
   }
-  return String(sess.PHPSESSID || '');
+  return { phpsessid: String(sess.PHPSESSID || ''), sessid: String(sess.idagent) };
 }
 
 /**

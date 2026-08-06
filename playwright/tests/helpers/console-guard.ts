@@ -42,7 +42,7 @@ export function watchConsole(page: Page): ConsoleGuard {
   page.on('console', (msg) => {
     if (msg.type() === 'error') record(`console.error: ${msg.text()}`);
   });
-  page.on('pageerror', (err) => record(`pageerror: ${err.message}`));
+  page.on('pageerror', (err) => record(`pageerror: ${err.message}\n${err.stack || ''}`));
 
   return {
     get errors() {
