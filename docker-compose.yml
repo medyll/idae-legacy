@@ -40,7 +40,19 @@ services:
     image: node:20-slim
     container_name: idae-socket
     working_dir: /app
-    command: sh -c "npm install --no-audit --no-fund && npm run start"
+    # --omit=dev: devDependencies include @medyll/idae-be as a file: link to
+    # a host path (D:/development/idae/...) that only exists on Windows, not
+    # inside this Linux container. The socket runtime (src/main.js) needs
+    # none of the devDeps (esbuild/idae-be/sass/nodemon are host-side build
+    # tooling).
+    # --package-lock=false: package-lock.json resolves that file: dep to
+    # ../../../../idae/packages/idae-be, which npm's arborist still touches
+    # during install even with --omit=dev (a known npm bug on local file:
+    # devDeps, surfaces as "Cannot read properties of undefined (reading
+    # 'extraneous')" and crash-loops the container). Skipping the lockfile
+    # makes npm resolve straight from package.json's dependencies, never
+    # reaching the broken entry.
+    command: sh -c "npm install --omit=dev --package-lock=false --no-audit --no-fund && npm run start"
     ports:
       - "3005:3005"
     env_file:
