@@ -33,6 +33,10 @@ export default defineConfig({
     trace: 'retain-on-failure',
   },
   testDir: './tests',
+  // Bridge probe before any worker starts: fails in ~15s with an actionable
+  // message when Apache/phpBridge is wedged, instead of letting every spec
+  // burn its 2x120s boot retries. See global-setup.ts and HANG_TEST.md.
+  globalSetup: './global-setup.ts',
   // No globalSetup: login is now a worker-scoped fixture
   // (fixtures/test-base.ts), so it runs once per worker, lazily, instead of
   // once for the whole run before any worker starts.
@@ -51,13 +55,16 @@ export default defineConfig({
   // across the tests in a spec file via test.describe + beforeAll), not
   // concurrency — noted as unimplemented in BE_PLAN.md.
   workers: 1,
-  // A cold SPA boot loads ~60 scripts sequentially through bag.js, with a
-  // cache-buster on every entry — 10-20s on a quiet container, observed up
-  // to ~90-120s under load. Each worker now boots twice back-to-back (the
-  // worker-scoped login in fixtures/test-base.ts, then the shared boot in
-  // fixtures/shared-boot.ts's beforeAll) before any test body runs, so the
-  // hook timeout needs real headroom above either single boot's ceiling.
-  timeout: 180000,
+  // Measured directly (Chromium, real network, 2026-08-08) after the
+  // per-file cache-busting fix (f4f090a): cold boot to login-form-visible
+  // ~11.3s (106 requests), warm (bag.js IndexedDB cache hit) ~8.9s (16
+  // requests). The old 180s budget dated from before that fix and was never
+  // re-measured — do not widen this back out without a fresh measurement to
+  // justify it. Each worker boots twice back-to-back (the worker-scoped
+  // login in fixtures/test-base.ts, then the shared boot in
+  // fixtures/shared-boot.ts's beforeAll) before any test body runs; 45s
+  // covers 2x the measured cold-boot ceiling plus the test body itself.
+  timeout: 45000,
   expect: { timeout: 15000 },
   // main_bag.js's boot is genuinely flaky under the current WSL2 backend —
   // reproduced outside Playwright entirely (plain Chromium via the Playwright

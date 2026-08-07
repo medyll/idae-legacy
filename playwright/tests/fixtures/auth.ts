@@ -67,7 +67,7 @@ export async function apiLogin(request: APIRequestContext): Promise<ApiSession> 
  */
 export async function uiLogin(page: Page): Promise<void> {
   const login = page.locator('input[name=loginAgent]');
-  await login.waitFor({ state: 'visible', timeout: 60_000 });
+  await login.waitFor({ state: 'visible', timeout: 15_000 });
   await login.fill(USER);
   await page.locator('input[name=passwordAgent]').fill(PASS);
   await page.locator('#formIdentificationUtilisateur input[type=submit], #formIdentificationUtilisateur button').first().click();
@@ -81,7 +81,7 @@ export async function uiLogin(page: Page): Promise<void> {
  * is faded out by Scriptaculous `Effect.Fade`, which the idae-be migration
  * removes. This condition stays valid on both sides of the swap.
  */
-export async function waitForAppReady(page: Page, timeout = 120_000): Promise<void> {
+export async function waitForAppReady(page: Page, timeout = 20_000): Promise<void> {
   await page.waitForFunction(
     () => {
       const app = (window as any).APP;
@@ -104,17 +104,18 @@ export async function openApp(page: Page): Promise<void> {
 
   // Either the stored session already holds and the desktop appears, or the
   // login panel does and we authenticate through it.
-  // 120s, matching waitForAppReady below: main_bag.js cache-busts every
-  // script on every load, so a boot regularly takes 60-90s under load, not
-  // just the 10-20s a quiet container gives you (see BE_PLAN.md) — and this
-  // fixture can run a *second* boot back-to-back in the same worker (see
-  // fixtures/shared-boot.ts), which has been observed pushing past 90s even
-  // on an otherwise idle container.
+  // 20s: measured directly (Chromium, real network, 2026-08-08) after the
+  // per-file cache-busting fix (f4f090a) — cold boot to login-form-visible
+  // is ~11.3s (106 requests), warm (bag.js IndexedDB cache hit) ~8.9s (16
+  // requests). The "60-90s under load" figure this comment used to cite
+  // predates that fix and was never re-measured; do not resurrect it as a
+  // reason to widen this back out. 20s leaves ~2x headroom over the
+  // measured cold-boot ceiling for CI/worker contention.
   const desktop = page.locator('#desktop');
   const loginForm = page.locator('input[name=loginAgent]');
   await Promise.race([
-    desktop.waitFor({ state: 'attached', timeout: 120_000 }),
-    loginForm.waitFor({ state: 'visible', timeout: 120_000 }),
+    desktop.waitFor({ state: 'attached', timeout: 20_000 }),
+    loginForm.waitFor({ state: 'visible', timeout: 20_000 }),
   ]);
 
   if ((await desktop.count()) === 0) {
