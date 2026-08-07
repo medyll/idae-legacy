@@ -11,10 +11,14 @@ var require_trame = {
 		'javascript/vendor/moment.js',
 		'javascript/vendor/polyfill/json2.js'],
 	require_hell       : [
-		'javascript/vendor/prototype/prototype-1.7.3.js',
-		'javascript/vendor/scriptaculous/scriptaculous.js',
-		'javascript/vendor/scriptaculous/effects.js',
-		'javascript/vendor/scriptaculous/dragdrop.js',
+		'javascript/vendor/idae-be/idae-be.iife.js',
+		'javascript/vendor/idae-be-shim/shim-core.js',
+		'javascript/vendor/idae-be-shim/shim-class.js',
+		'javascript/vendor/idae-be-shim/shim-enumerable.js',
+		'javascript/vendor/idae-be-shim/shim-element.js',
+		'javascript/vendor/idae-be-shim/shim-event.js',
+		'javascript/vendor/idae-be-shim/shim-ajax.js',
+		'javascript/vendor/idae-be-shim/shim-effects.js',
 	],
 	require_insertionQ : ['javascript/app/app.js',/*'javascript/app/app_mutateobserve.js',*/'javascript/vendor/insertionQ.js', 'javascript/app/app_insertionQ.js'],
 	require_to_log     : [

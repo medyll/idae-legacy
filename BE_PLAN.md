@@ -161,9 +161,9 @@ Emplacement : `idae/web/javascript/vendor/idae-be-shim/` (colocalisé avec le bu
 
 ## Phase 4 — Swap dans le loader
 
-- [ ] Remplacer le contenu de `require_hell` dans `idae/web/javascript/main_bag.js` par le bundle idae-be + les 7 shims, **au même rang** dans `require_trame` (3e sur 9) — tout ce qui suit dépend de la présence des globals
-- [ ] Vérifier que `fade` est bien shimé : `main_bag.js` appelle lui-même `$('main_progress_hold').fade('bounce')` et `$('body').setStyle({...})` après drainage de la queue
-- [ ] Rejouer la suite Playwright **sans `--update-snapshots`** : zéro erreur console, zéro diff de snapshot
+- [x] Remplacer le contenu de `require_hell` dans `idae/web/javascript/main_bag.js` par le bundle idae-be + les 7 shims, **au même rang** dans `require_trame` (3e sur 9) — tout ce qui suit dépend de la présence des globals
+- [x] Vérifier que `fade` est bien shimé : `main_bag.js` appelle lui-même `$('main_progress_hold').fade('bounce')` et `$('body').setStyle({...})` après drainage de la queue
+- [x] Rejouer la suite Playwright **sans `--update-snapshots`** : zéro erreur console, zéro diff de snapshot — tous les specs verts (retries de boot flake inclus ; `datatable: search hides non-matching rows` reste flaky mais échoue **aussi sans le swap** — `.fire` sur élément disparu, `app_socket.js:278`, apparu avec `d0c6ece` — pas une régression du shim). Ajout : sonde bridge `playwright/global-setup.ts`, échec explicite en 15 s si Apache/phpBridge est wedged (HANG_TEST.md)
 - [ ] Évaluer la suppression de `vendor/sizzle.js` (chargé dans `require_scripts`, redondant avec `querySelectorAll`) — à valider séparément
 
 ---
