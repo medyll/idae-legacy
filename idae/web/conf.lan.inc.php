@@ -29,8 +29,24 @@ $projectRoot = realpath($webDir . DIRECTORY_SEPARATOR . '..') . DIRECTORY_SEPARA
 
 // Host detection
 $http_host = str_replace('www.', '', $_SERVER['HTTP_HOST']);
-$host      = explode(':', $http_host)[0];
-$host_port = explode(':', $http_host)[1] ?? '';
+// IPv6 literals arrive bracketed ("[::1]:8080"), so the port split has to
+// happen on the last colon outside the brackets, not the first one.
+if (str_starts_with($http_host, '[')) {
+    $close     = strpos($http_host, ']');
+    $host      = substr($http_host, 1, $close - 1);
+    $host_port = ltrim(substr($http_host, $close + 1), ':');
+} else {
+    $host      = explode(':', $http_host)[0];
+    $host_port = explode(':', $http_host)[1] ?? '';
+}
+// Loopback aliases resolve to the same dev host entry. Without this, hitting
+// the stack over 127.0.0.1 (the only address Docker's WSL2 port-forward
+// actually binds — "localhost" resolves to ::1 first on Windows and stalls
+// ~21s on the SYN retries before falling back) dies on the hosts lookup
+// below, and $host_name would degrade to "127".
+if (in_array($host, ['127.0.0.1', '::1', '0.0.0.0'], true)) {
+    $host = 'localhost';
+}
 $host_name = explode('.', $host)[0];
 $host_parts = explode('.', $host);
 

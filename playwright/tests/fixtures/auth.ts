@@ -9,7 +9,16 @@
 import type { APIRequestContext, Page } from '@playwright/test';
 import { installShimPreview } from './shim-preview';
 
-export const BASE = process.env.BASE_URL || 'http://localhost:8080';
+/**
+ * 127.0.0.1, not "localhost": on Windows "localhost" resolves to ::1 first,
+ * and Docker's WSL2 port-forward only binds IPv4. Chromium hides this behind
+ * Happy Eyeballs (~250ms fallback), but Playwright's `request` fixture is
+ * Node-side HTTP with `verbatim` DNS ordering and no fallback race, so every
+ * fresh connection stalled ~21s on SYN retries before reaching the stack.
+ * conf.lan.inc.php aliases the loopback addresses onto the `localhost` host
+ * entry so the app's host detection accepts this.
+ */
+export const BASE = process.env.BASE_URL || 'http://127.0.0.1:8080';
 export const USER = process.env.PLAYWRIGHT_USER || '';
 export const PASS = process.env.PLAYWRIGHT_PASS || '';
 export const TABLE = process.env.TEST_TABLE || 'client';

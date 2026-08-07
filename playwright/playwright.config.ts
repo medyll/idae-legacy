@@ -20,7 +20,10 @@ process.env.PLAYWRIGHT_PASS ??= process.env.TEST_PASSWORD;
 
 export default defineConfig({
   use: {
-    baseURL: process.env.BASE_URL || 'http://localhost:8080',
+    // 127.0.0.1 rather than localhost — see the BASE comment in
+    // tests/fixtures/auth.ts (IPv6-first resolution stalls ~21s per fresh
+    // Node-side connection).
+    baseURL: process.env.BASE_URL || 'http://127.0.0.1:8080',
     headless: true,
     viewport: { width: 1400, height: 900 },
     ignoreHTTPSErrors: true,

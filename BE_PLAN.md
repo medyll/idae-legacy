@@ -206,10 +206,30 @@ Hypothèse retenue (non vérifiée formellement, mais cohérente avec toutes les
 Mitigation en attendant : `retries: 2` dans `playwright.config.ts`, `waitForAppReady`/`openApp` à 120-180s. Confirmé (par le retour utilisateur direct) que l'usage réel — un seul onglet, une seule connexion socket — n'est jamais exposé à ce flake ; c'est spécifique aux boots automatisés rapprochés.
 
 Côté suite Playwright, deux optimisations orthogonales au fix cache (commit `73938f5`) :
-- **Session par worker** (`fixtures/test-base.ts`) au lieu d'une session `storageState` unique partagée — celle-ci forçait `workers: 1` (PHP sérialise les requêtes concurrentes sur un même fichier de session). Pas d'enforcement mono-session côté serveur, donc chaque worker peut avoir son propre `PHPSESSID` en toute sécurité.
+- **Session par worker** (`fixtures/test-base.ts`) au lieu d'une session `storageState` unique partagée. Pas d'enforcement mono-session côté serveur, donc chaque worker peut avoir son propre `PHPSESSID` en toute sécurité. *(Correction : la justification initiale — « PHP sérialise les requêtes concurrentes sur un même fichier de session » — est fausse ici, voir la section verrou de session ci-dessous. La fixture reste souhaitable pour l'isolation, mais elle ne débloquait pas ce qu'on croyait.)*
 - **Un seul boot par fichier de spec** (`fixtures/shared-boot.ts`) au lieu d'un boot par test — `test.beforeAll` + page réutilisée. Convertit `window-gui`, `datatable`, `explorer`, `insertionq`, `forms`, `uiux`, `snapshots`. Chaque test qui ouvre une fenêtre doit maintenant la fermer explicitement (plus d'isolation implicite page-par-test) — piège trouvé dans `snapshots.spec.ts` : une fenêtre non fermée s'empilait dans la capture d'écran du test suivant.
 
 `workers` reste à **1** — le passage à 4 a été tenté deux fois ce soir et annulé les deux fois, à cause du flake socket ci-dessus (pas d'une vraie limite de ressources ; testé après le fix WSL2/Hyper-V avec 15.5GB de marge). La fixture per-worker est prête pour quand cette instabilité sera résolue ou jugée acceptable en pratique.
+
+## Perf — `localhost` → `::1`, 21s perdues par connexion froide
+
+Point de départ : « quand un travail PHP tourne en arrière-plan, impossible de recharger l'app, parfois il faut redémarrer le serveur » — un bug de longue date. Deux causes distinctes trouvées, une morte et une bien vivante.
+
+**Le bug historique (mort).** `services/json_data_event.php` : endpoint SSE avec `set_time_limit(0)` + `while(true)` + `sleep(1)`, et surtout `session_write_close()` **commenté** (ligne 26). Sous l'ancien handler de sessions en fichiers, ce `session_start()` gardait un `flock` exclusif sur `/tmp/sess_<PHPSESSID>` pour toute la durée — c'est-à-dire indéfiniment. Toute autre requête du même navigateur bloquait dans `session_start()`, et seul un redémarrage d'Apache tuait le worker qui tenait le verrou. Exactement le symptôme décrit. Déjà neutralisé depuis : `die()` en ligne 5, et `app_sse.js` n'est plus dans `require_trame`.
+
+Vérifié qu'il ne peut plus se reproduire : `.htaccess:7` coupe `session.auto_start`, et le handler actif est `user` (le handler Mongo de `ClassSession.php`), qui n'implémente aucun verrou. Test empirique — requête lente de 6s en vol, requête concurrente **même session** : bloquée 0,13s. Zéro sérialisation. Les `/tmp/sess_*` résiduels sont des fichiers à 0 octet.
+
+Reste latent mais inoffensif tant qu'on est sur Mongo : `mdl/app/app_admin/app_csv.php` et `app_csv_contact.php` font `ignore_user_abort(true)` + `set_time_limit(0)` sans `session_write_close()`. Un retour aux sessions fichier ramènerait le gel.
+
+**Le bug actif.** `localhost` résout `::1` en premier sur Windows, et le port-forward WSL2 de Docker ne binde qu'en IPv4. Chaque connexion TCP neuve mange ~21s de retries SYN avant de retomber sur IPv4. Mesuré : `[::1]:8080` → 21,06s (timeout), `127.0.0.1:8080` → 0,05s.
+
+Invisible au quotidien parce que Chrome fait du Happy Eyeballs (bascule en ~250ms) et met le résultat en cache — d'où « dans la vraie vie l'app charge en 5 secondes ». Mais **Playwright y est exposé** : `apiLogin` passe par `context.request`, du HTTP côté Node, avec un ordre DNS `verbatim` et sans course de fallback. Chaque connexion fraîche stallait 21s. Candidat sérieux pour la lenteur et les timeouts de la suite depuis le début.
+
+Fix : `BASE`/`baseURL` passent à `http://127.0.0.1:8080` (`fixtures/auth.ts`, `playwright.config.ts`). Comme la détection d'hôte rejetait l'IP (`Host non configuré dans lan-hosts.json`), `conf.lan.inc.php` aliase maintenant `127.0.0.1`/`::1`/`0.0.0.0` sur l'entrée `localhost` — plutôt que dupliquer un bloc de credentials dans le JSON — et gère au passage le split de port sur les littéraux IPv6 bracketés (`[::1]:8080`, que l'`explode(':')` d'origine cassait). Sans l'alias, `$host_name` dégradait aussi en `"127"`.
+
+Vérifié après fix : `json_ssid.php` répond en 0,39s sur 127.0.0.1, et le coût d'une connexion froide passe de **22,52s à 1,21s**.
+
+À noter, vu au passage : `idae/config/lan-hosts.json` contient des mots de passe SMTP et MySQL en clair, committés dans git.
 
 ---
 
