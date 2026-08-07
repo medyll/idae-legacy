@@ -98,18 +98,35 @@ var require_sheet = [
 	HTTPCSS + 'officeui/fabric.components.css',
 	HTTPCSS + 'vendor/animate/animate-min.css'
 ];
-// BANG
-// Force cache refresh
-var cache_buster = '?v=' + new Date().getTime();
+// Per-file cache-busting: index.php injects window.FILE_VERSIONS, a
+// {relative_path: mtime} map built server-side (appfunc/asset_versions.php).
+// A file's query string only changes when the file's own mtime does, so
+// bag.js's IndexedDB cache actually gets used — a page-appended
+// Date.now() busted every file on every load, forever, defeating that
+// cache entirely. Falls back to Date.now() for a path with no manifest
+// entry (e.g. a file added after the manifest was generated in this
+// request — shouldn't happen since both come from the same request, but
+// cheap insurance) so a missing entry never means "silently uncached
+// forever" instead of "cached like normal after the next load".
+var FILE_VERSIONS = window.FILE_VERSIONS || {};
+// Strips any pre-existing query string before the manifest lookup and
+// before rebuilding the URL — engine.js shipped with a hardcoded
+// '?v=debug1' manual cache-bust that the automatic system below makes
+// unnecessary; left as-is it would double up into '?v=debug1?v=169...',
+// a malformed URL that also never benefited from the manifest lookup.
+var version_of = function (path) {
+	var clean = path.split('?')[0];
+	return clean + '?v=' + (FILE_VERSIONS[clean] || new Date().getTime());
+};
 for (var key in require_trame) {
     if (require_trame.hasOwnProperty(key)) {
         for(var i=0; i<require_trame[key].length; i++) {
-        	require_trame[key][i] += cache_buster;
+        	require_trame[key][i] = version_of(require_trame[key][i]);
         }
     }
 }
 for(var i=0; i<require_sheet.length; i++) {
-    require_sheet[i] += cache_buster;
+    require_sheet[i] = version_of(require_sheet[i]);
 }
 
 var app_dom_loaded = false;
@@ -186,7 +203,10 @@ function require_progress(value, max, text) {
 	}
 }
 
-var require_boot = ['javascript/vendor/js.cookie.js' + cache_buster, 'javascript/vendor/socket.io.js' + cache_buster];
+var require_boot = [
+	version_of('javascript/vendor/js.cookie.js'),
+	version_of('javascript/vendor/socket.io.js')
+];
 bag.require (require_sheet).then (function () {
 	bag.require (require_boot).then (
 		function () {
