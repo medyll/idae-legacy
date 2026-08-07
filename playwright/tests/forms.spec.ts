@@ -14,19 +14,26 @@
  * form-side counterpart of prototype-surface.spec.ts: it fails the moment
  * `$F`/`Form.serialize`/`Ajax.Updater`/`Element#fire` drifts.
  */
-import { test, expect } from '@playwright/test';
-import { openApp, TABLE, TABLE_VALUE } from './fixtures/auth';
-import { openChrome } from './fixtures/app';
+import { test, expect } from './fixtures/test-base';
+import { TABLE, TABLE_VALUE } from './fixtures/auth';
+import { closeWindow, openChrome } from './fixtures/app';
+import { sharedPage } from './fixtures/shared-boot';
 import { watchConsole } from './helpers/console-guard';
+
+// One boot for both tests below — see fixtures/shared-boot.ts. Both tests
+// open the *same* update-tab window (same table/table_value → same window
+// id, per fixtures/app.ts) — each must close it, or the next test's
+// openChrome() call waits forever for a "new" window id that never appears.
+const getPage = sharedPage();
 
 /** Opens the update tab for the reference record. */
 function openUpdate(page: Parameters<typeof openChrome>[0]) {
   return openChrome(page, 'app/app/app_update', `table=${TABLE}&table_value=${TABLE_VALUE}`);
 }
 
-test('forms: update tab renders a form with a readable field value ($F)', async ({ page }) => {
+test('forms: update tab renders a form with a readable field value ($F)', async () => {
+  const page = getPage();
   const guard = watchConsole(page);
-  await openApp(page);
 
   const win = await openUpdate(page);
   const form = win.locator('form.Form');
@@ -46,12 +53,13 @@ test('forms: update tab renders a form with a readable field value ($F)', async 
   const viaF = await page.evaluate((el) => (window as any).$F(el), handle);
   expect(viaF).toEqual(domValue);
 
+  await closeWindow(win);
   guard.assertClean();
 });
 
-test('forms: submitting posts the serialized form and auto-closes it', async ({ page }) => {
+test('forms: submitting posts the serialized form and auto-closes it', async () => {
+  const page = getPage();
   const guard = watchConsole(page);
-  await openApp(page);
 
   const win = await openUpdate(page);
   const form = win.locator('form.Form');

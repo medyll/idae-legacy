@@ -10,9 +10,12 @@
  * the symbol there, and is it the right kind of thing", which is what catches a
  * shim file that forgot an export. Behaviour is covered by the feature specs.
  */
-import { test, expect } from '@playwright/test';
-import { openApp } from './fixtures/auth';
+import { test, expect } from './fixtures/test-base';
+import { sharedPage } from './fixtures/shared-boot';
 import { watchConsole } from './helpers/console-guard';
+
+// One boot for all three tests below — see fixtures/shared-boot.ts.
+const getPage = sharedPage();
 
 /** Globals the app calls directly. */
 const GLOBAL_FUNCTIONS = ['$', '$$', '$A', '$H', '$w', '$F', '$R'];
@@ -85,9 +88,9 @@ const NAMESPACED = [
   ['Position', 'relativize'],
 ];
 
-test('prototype surface: every API the app calls is present', async ({ page }) => {
+test('prototype surface: every API the app calls is present', async () => {
+  const page = getPage();
   const guard = watchConsole(page);
-  await openApp(page);
 
   const missing = await page.evaluate(
     ([globalFns, globalObjs, ctors, elementMethods, arrayMethods, stringMethods, fnMethods, numberMethods, namespaced]) => {
@@ -140,9 +143,9 @@ test('prototype surface: every API the app calls is present', async ({ page }) =
   guard.assertClean();
 });
 
-test('prototype surface: core helpers actually behave', async ({ page }) => {
+test('prototype surface: core helpers actually behave', async () => {
+  const page = getPage();
   const guard = watchConsole(page);
-  await openApp(page);
 
   const results = await page.evaluate(() => {
     const w = window as any;
@@ -212,14 +215,9 @@ test('prototype surface: core helpers actually behave', async ({ page }) => {
   guard.assertClean();
 });
 
-test('boot: cold load and login produce no console errors', async ({ page }) => {
-  const guard = watchConsole(page);
-  await openApp(page);
-
-  // The desktop shell is the visible proof the SPA finished wiring itself up.
-  await expect(page.locator('#desktop')).toBeAttached();
-  await expect(page.locator('#mainApp')).toBeAttached();
-  await expect(page.locator('#taskBar')).toBeAttached();
-
-  guard.assertClean();
-});
+// A third test used to live here re-checking a cold boot's console output
+// and desktop landmarks. Once this file shares one boot across its tests
+// (see fixtures/shared-boot.ts), a test called that would no longer be
+// checking a *cold* load — it'd be checking state after the two tests above
+// already ran. smoke.spec.ts asserts the same thing (#desktop, #taskBar,
+// zero console errors) against a genuinely fresh boot; nothing lost.

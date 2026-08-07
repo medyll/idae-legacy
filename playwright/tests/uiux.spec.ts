@@ -6,13 +6,16 @@
  * `toBeGreaterThanOrEqual(0)`, true unconditionally. Rewritten against real
  * selectors from the desktop shell.
  */
-import { test, expect } from '@playwright/test';
-import { openApp } from './fixtures/auth';
+import { test, expect } from './fixtures/test-base';
+import { sharedPage } from './fixtures/shared-boot';
 import { watchConsole } from './helpers/console-guard';
 
-test('uiux: desktop shell renders with a title and a menu toggle', async ({ page }) => {
+// One boot for both tests below — see fixtures/shared-boot.ts.
+const getPage = sharedPage();
+
+test('uiux: desktop shell renders with a title and a menu toggle', async () => {
+  const page = getPage();
   const guard = watchConsole(page);
-  await openApp(page);
 
   expect(await page.title()).not.toBe('');
   await expect(page.locator('#desktop')).toBeAttached();
@@ -26,9 +29,9 @@ test('uiux: desktop shell renders with a title and a menu toggle', async ({ page
   guard.assertClean();
 });
 
-test('uiux: menu toggle still works at a mobile viewport', async ({ page }) => {
+test('uiux: menu toggle still works at a mobile viewport', async () => {
+  const page = getPage();
   const guard = watchConsole(page);
-  await openApp(page);
   await page.setViewportSize({ width: 375, height: 800 });
 
   // The waffle's onclick is `$('gui_pane').toggle()` — a Prototype Element

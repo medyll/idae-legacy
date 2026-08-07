@@ -17,14 +17,18 @@
  * migration: a shim that gets `MutationObserver`-driven extension or
  * `Element.update` wrong leaves this badge permanently empty, silently.
  */
-import { test, expect } from '@playwright/test';
-import { openApp, TABLE, TABLE_VALUE } from './fixtures/auth';
-import { openList, openRecord } from './fixtures/app';
+import { test, expect } from './fixtures/test-base';
+import { TABLE, TABLE_VALUE } from './fixtures/auth';
+import { closeWindow, openList, openRecord } from './fixtures/app';
+import { sharedPage } from './fixtures/shared-boot';
 import { watchConsole } from './helpers/console-guard';
 
-test('insertionQ: an auto-count badge fills in via the socket round trip', async ({ page }) => {
+// One boot for both tests below — see fixtures/shared-boot.ts.
+const getPage = sharedPage();
+
+test('insertionQ: an auto-count badge fills in via the socket round trip', async () => {
+  const page = getPage();
   const guard = watchConsole(page);
-  await openApp(page);
 
   const badge = page.locator('.tile_count[data-count][data-count_auto]').first();
   await expect(badge).toBeVisible({ timeout: 30_000 });
@@ -37,9 +41,9 @@ test('insertionQ: an auto-count badge fills in via the socket round trip', async
   guard.assertClean();
 });
 
-test('insertionQ: a second window\'s dynamic content re-extends independently', async ({ page }) => {
+test('insertionQ: a second window\'s dynamic content re-extends independently', async () => {
+  const page = getPage();
   const guard = watchConsole(page);
-  await openApp(page);
 
   // Two windows opened back to back means insertionQ has to correctly
   // re-scope its watchers to freshly-inserted subtrees twice in a row,
@@ -53,5 +57,7 @@ test('insertionQ: a second window\'s dynamic content re-extends independently', 
   await expect(record.locator('.innerdisp')).toBeVisible();
   await expect(list.locator('tbody.div_tbody tr')).not.toHaveCount(0, { timeout: 30_000 });
 
+  await closeWindow(record);
+  await closeWindow(list);
   guard.assertClean();
 });

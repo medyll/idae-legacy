@@ -8,14 +8,19 @@
  * `Element.observe`, `Element.up`, or `Class.create`, the close button stops
  * responding and this spec fails.
  */
-import { test, expect } from '@playwright/test';
-import { openApp, TABLE, TABLE_VALUE } from './fixtures/auth';
+import { test, expect } from './fixtures/test-base';
+import { TABLE, TABLE_VALUE } from './fixtures/auth';
 import { closeWindow, openList, openRecord } from './fixtures/app';
+import { sharedPage } from './fixtures/shared-boot';
 import { watchConsole } from './helpers/console-guard';
 
-test('window: open a record sheet, then close it', async ({ page }) => {
+// One boot for both tests below — see fixtures/shared-boot.ts. Both tests
+// already close every window they open, so nothing carries over.
+const getPage = sharedPage();
+
+test('window: open a record sheet, then close it', async () => {
+  const page = getPage();
   const guard = watchConsole(page);
-  await openApp(page);
 
   const win = await openRecord(page, TABLE, TABLE_VALUE);
 
@@ -36,9 +41,9 @@ test('window: open a record sheet, then close it', async ({ page }) => {
   guard.assertClean();
 });
 
-test('window: two windows coexist and close independently', async ({ page }) => {
+test('window: two windows coexist and close independently', async () => {
+  const page = getPage();
   const guard = watchConsole(page);
-  await openApp(page);
 
   const record = await openRecord(page, TABLE, TABLE_VALUE);
   const list = await openList(page, TABLE);

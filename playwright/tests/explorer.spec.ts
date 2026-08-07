@@ -11,14 +11,17 @@
  * from a synthetic call — it's what breaks first if the shim's insertionQ
  * hookup silently no-ops.
  */
-import { test, expect } from '@playwright/test';
-import { openApp } from './fixtures/auth';
+import { test, expect } from './fixtures/test-base';
 import { closeWindow } from './fixtures/app';
+import { sharedPage } from './fixtures/shared-boot';
 import { watchConsole } from './helpers/console-guard';
 
-test('desktop panel: recently-viewed records are real clickable links', async ({ page }) => {
+// One boot for all three tests below — see fixtures/shared-boot.ts.
+const getPage = sharedPage();
+
+test('desktop panel: recently-viewed records are real clickable links', async () => {
+  const page = getPage();
   const guard = watchConsole(page);
-  await openApp(page);
 
   const panelLink = page.locator('#desktop [act_chrome_gui="app/app/app_fiche"]').first();
   await expect(panelLink).toBeVisible({ timeout: 30_000 });
@@ -30,9 +33,9 @@ test('desktop panel: recently-viewed records are real clickable links', async ({
   guard.assertClean();
 });
 
-test('desktop panel: clicking a record link opens its window', async ({ page }) => {
+test('desktop panel: clicking a record link opens its window', async () => {
+  const page = getPage();
   const guard = watchConsole(page);
-  await openApp(page);
 
   const panelLink = page.locator('#desktop [act_chrome_gui="app/app/app_fiche"]').first();
   await expect(panelLink).toBeVisible({ timeout: 30_000 });
@@ -50,9 +53,9 @@ test('desktop panel: clicking a record link opens its window', async ({ page }) 
   guard.assertClean();
 });
 
-test('desktop panel: caret collapses and expands the section', async ({ page }) => {
+test('desktop panel: caret collapses and expands the section', async () => {
+  const page = getPage();
   const guard = watchConsole(page);
-  await openApp(page);
 
   // The div carrying `onclick="save_setting_autoNext(...)"` only persists the
   // collapsed/expanded preference (app_functions.js) — it reads the current

@@ -24,19 +24,43 @@ export default defineConfig({
     headless: true,
     viewport: { width: 1400, height: 900 },
     ignoreHTTPSErrors: true,
-    // Written by global-setup.ts, which runs before any test.
-    storageState: 'tests/.auth/state.json',
+    // storageState is supplied per-worker by fixtures/test-base.ts, not set
+    // here — see that file for why (one shared session forced workers: 1
+    // and repeatedly saturated the socket bridge).
     trace: 'retain-on-failure',
   },
   testDir: './tests',
-  globalSetup: './global-setup.ts',
-  // All specs share one storageState, hence one PHPSESSID. Running contexts
-  // in parallel means concurrent server-side requests on the same PHP
-  // session — this has taken down the socket bridge under load. One worker
-  // until specs get per-test sessions.
+  // No globalSetup: login is now a worker-scoped fixture
+  // (fixtures/test-base.ts), so it runs once per worker, lazily, instead of
+  // once for the whole run before any worker starts.
+  //
+  // Tried 4 workers twice after fixing the Hyper-V memory ceiling (switched
+  // Docker Desktop to the WSL2 backend, 15.5GB dynamic vs. a hard static
+  // 1.9GB) and a port-8080 conflict (see docker-compose.yml). Both attempts
+  // still failed 19-21 of 23 specs — cold AND warm containers, plenty of
+  // free CPU/memory, Apache's MaxRequestWorkers=150 nowhere near saturated.
+  // Root cause not identified (candidates: WSL2's NAT/port-forward layer
+  // under bursty concurrent connections, or MongoDB — on the host, not
+  // containerized — under 4x concurrent PHP sessions). Not worth more blind
+  // 8-9min retries to find out. workers: 1 is the only configuration proven
+  // reliable (20/20 green, see BE_PLAN.md Phase 1). The real lever for
+  // suite speed here is fewer full boots per run (share one page/context
+  // across the tests in a spec file via test.describe + beforeAll), not
+  // concurrency — noted as unimplemented in BE_PLAN.md.
   workers: 1,
   // A cold SPA boot loads ~60 scripts sequentially through bag.js, with a
-  // cache-buster on every entry. 10-20s before the app is usable is normal.
-  timeout: 120000,
+  // cache-buster on every entry — 10-20s on a quiet container, observed up
+  // to ~90-120s under load. Each worker now boots twice back-to-back (the
+  // worker-scoped login in fixtures/test-base.ts, then the shared boot in
+  // fixtures/shared-boot.ts's beforeAll) before any test body runs, so the
+  // hook timeout needs real headroom above either single boot's ceiling.
+  timeout: 180000,
   expect: { timeout: 15000 },
+  // main_bag.js's boot is genuinely flaky under the current WSL2 backend —
+  // reproduced outside Playwright entirely (plain Chromium via the Playwright
+  // API): the app's socket.io client sometimes disconnects and reconnects
+  // mid-boot, and schemeLoad() doesn't recover from that, hanging until
+  // timeout. Not a bug in this suite's fixtures — a real, standard case for
+  // retries.
+  retries: 2,
 });

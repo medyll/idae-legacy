@@ -18,10 +18,16 @@
  *
  * Baselines are (re)generated with: npm run test:baseline
  */
-import { test, expect, type Locator } from '@playwright/test';
+import { test, expect, type Locator } from './fixtures/test-base';
 import { openApp, TABLE, TABLE_VALUE } from './fixtures/auth';
-import { openChrome, openList, openRecord } from './fixtures/app';
+import { closeWindow, openChrome, openList, openRecord } from './fixtures/app';
+import { sharedPage } from './fixtures/shared-boot';
 import { watchConsole } from './helpers/console-guard';
+
+// One boot for all four tests below — see fixtures/shared-boot.ts. Every
+// test after the first opens a window for its screenshot; each must close
+// it, or the next screenshot shows leftover windows stacked on top.
+const getPage = sharedPage();
 
 /** Live-data regions that change between runs without being regressions. */
 function dynamicMasks(page: Parameters<typeof openApp>[0]) {
@@ -44,9 +50,9 @@ async function settled(win: Locator): Promise<void> {
   await expect(win.locator('.loading')).toHaveCount(0, { timeout: 30_000 });
 }
 
-test('snapshots: desktop shell', async ({ page }) => {
+test('snapshots: desktop shell', async () => {
+  const page = getPage();
   const guard = watchConsole(page);
-  await openApp(page);
 
   await expect(page).toHaveScreenshot('desktop.png', {
     mask: dynamicMasks(page),
@@ -60,9 +66,9 @@ test('snapshots: desktop shell', async ({ page }) => {
   guard.assertClean();
 });
 
-test('snapshots: list view', async ({ page }) => {
+test('snapshots: list view', async () => {
+  const page = getPage();
   const guard = watchConsole(page);
-  await openApp(page);
 
   const win = await openList(page, TABLE);
   await expect(win.locator('tbody.div_tbody tr').first()).toBeVisible({ timeout: 30_000 });
@@ -77,28 +83,31 @@ test('snapshots: list view', async ({ page }) => {
     mask: [win.locator('tbody.div_tbody')],
     animations: 'disabled',
   });
+  await closeWindow(win);
   guard.assertClean();
 });
 
-test('snapshots: record sheet', async ({ page }) => {
+test('snapshots: record sheet', async () => {
+  const page = getPage();
   const guard = watchConsole(page);
-  await openApp(page);
 
   const win = await openRecord(page, TABLE, TABLE_VALUE);
   await settled(win);
 
   await expect(win).toHaveScreenshot('record.png', { animations: 'disabled' });
+  await closeWindow(win);
   guard.assertClean();
 });
 
-test('snapshots: update tab form', async ({ page }) => {
+test('snapshots: update tab form', async () => {
+  const page = getPage();
   const guard = watchConsole(page);
-  await openApp(page);
 
   const win = await openChrome(page, 'app/app/app_update', `table=${TABLE}&table_value=${TABLE_VALUE}`);
   await expect(win.locator('form.Form')).toBeVisible({ timeout: 30_000 });
   await settled(win);
 
   await expect(win).toHaveScreenshot('update-form.png', { animations: 'disabled' });
+  await closeWindow(win);
   guard.assertClean();
 });

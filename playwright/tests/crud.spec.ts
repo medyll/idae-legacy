@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './fixtures/test-base';
 
 // Best-effort CRUD probe using server endpoints. May require tuning for specific tables/fields.
 

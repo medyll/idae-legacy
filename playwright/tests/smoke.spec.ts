@@ -7,7 +7,7 @@
  * correctly (including the localStorage mirror the socket data channel
  * needs — see `datatable.spec.ts` for why that matters).
  */
-import { test, expect } from '@playwright/test';
+import { test, expect } from './fixtures/test-base';
 import { openApp } from './fixtures/auth';
 import { watchConsole } from './helpers/console-guard';
 

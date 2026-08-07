@@ -15,9 +15,6 @@ export const PASS = process.env.PLAYWRIGHT_PASS || '';
 export const TABLE = process.env.TEST_TABLE || 'client';
 export const TABLE_VALUE = process.env.TEST_TABLE_VALUE || '';
 
-/** Storage state produced by global-setup.ts and consumed by playwright.config.ts. */
-export const STORAGE_STATE = 'tests/.auth/state.json';
-
 export interface ApiSession {
   phpsessid: string;
   /** `idagent`, mirrored into `localStorage.SESSID` by the app's own login flow. */
@@ -75,7 +72,7 @@ export async function uiLogin(page: Page): Promise<void> {
  * is faded out by Scriptaculous `Effect.Fade`, which the idae-be migration
  * removes. This condition stays valid on both sides of the swap.
  */
-export async function waitForAppReady(page: Page, timeout = 90_000): Promise<void> {
+export async function waitForAppReady(page: Page, timeout = 120_000): Promise<void> {
   await page.waitForFunction(
     () => {
       const app = (window as any).APP;
@@ -98,11 +95,17 @@ export async function openApp(page: Page): Promise<void> {
 
   // Either the stored session already holds and the desktop appears, or the
   // login panel does and we authenticate through it.
+  // 120s, matching waitForAppReady below: main_bag.js cache-busts every
+  // script on every load, so a boot regularly takes 60-90s under load, not
+  // just the 10-20s a quiet container gives you (see BE_PLAN.md) — and this
+  // fixture can run a *second* boot back-to-back in the same worker (see
+  // fixtures/shared-boot.ts), which has been observed pushing past 90s even
+  // on an otherwise idle container.
   const desktop = page.locator('#desktop');
   const loginForm = page.locator('input[name=loginAgent]');
   await Promise.race([
-    desktop.waitFor({ state: 'attached', timeout: 60_000 }),
-    loginForm.waitFor({ state: 'visible', timeout: 60_000 }),
+    desktop.waitFor({ state: 'attached', timeout: 120_000 }),
+    loginForm.waitFor({ state: 'visible', timeout: 120_000 }),
   ]);
 
   if ((await desktop.count()) === 0) {

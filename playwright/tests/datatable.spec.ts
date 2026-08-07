@@ -12,7 +12,7 @@
  * as a cookie-only `storageState` does — and the window renders correctly
  * with a real column header pulled from the schema, but every list silently
  * shows "0 résultats" with no console error and no failed request to blame.
- * `fixtures/auth.ts` / `global-setup.ts` carry the fix.
+ * `fixtures/auth.ts` / `fixtures/test-base.ts` carry the fix.
  *
  * Chasing that symptom down also surfaced two unrelated, real PHP 8.2
  * crashes on this exact request path — `services/json_data_table.php:478`
@@ -22,14 +22,18 @@
  * `textelibre` field). Both were silent under PHP 7 and fatal under 8.2;
  * fixed alongside this spec.
  */
-import { test, expect } from '@playwright/test';
-import { openApp, TABLE } from './fixtures/auth';
+import { test, expect } from './fixtures/test-base';
+import { TABLE } from './fixtures/auth';
 import { closeWindow, openList } from './fixtures/app';
+import { sharedPage } from './fixtures/shared-boot';
 import { watchConsole } from './helpers/console-guard';
 
-test('datatable: list loads real rows through the socket data channel', async ({ page }) => {
+// One boot for both tests below — see fixtures/shared-boot.ts.
+const getPage = sharedPage();
+
+test('datatable: list loads real rows through the socket data channel', async () => {
+  const page = getPage();
   const guard = watchConsole(page);
-  await openApp(page);
 
   const win = await openList(page, TABLE);
   const table = win.locator('table.table_groupe');
@@ -50,9 +54,9 @@ test('datatable: list loads real rows through the socket data channel', async ({
   guard.assertClean();
 });
 
-test('datatable: search hides non-matching rows client-side', async ({ page }) => {
+test('datatable: search hides non-matching rows client-side', async () => {
+  const page = getPage();
   const guard = watchConsole(page);
-  await openApp(page);
 
   const win = await openList(page, TABLE);
   const rows = win.locator('tbody.div_tbody tr');
@@ -75,5 +79,6 @@ test('datatable: search hides non-matching rows client-side', async ({ page }) =
   await search.press('Backspace');
   await expect(rows.filter({ visible: true })).not.toHaveCount(0, { timeout: 15_000 });
 
+  await closeWindow(win);
   guard.assertClean();
 });

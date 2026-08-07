@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './fixtures/test-base';
 import { openApp } from './fixtures/auth';
 
 test('IDAE_SHIM_WARN logs shimmed calls', async ({ page }) => {
