@@ -191,6 +191,28 @@ Remontée upstream vers `@medyll/idae-be` à envisager plus tard pour ce qui est
 
 ---
 
+## Perf — cache-busting cassé, et l'instabilité socket sous WSL2
+
+**Cache-busting.** `main_bag.js` faisait `?v=<Date.now()>` sur les ~90 fichiers JS/CSS à **chaque** chargement — pas un souci de dev, un souci de prod : tout utilisateur réel retéléchargeait tout, à chaque visite, pour toujours, sans jamais toucher le cache IndexedDB de `bag.js`. Fixé (commit `f4f090a`) : `appfunc/asset_versions.php` construit un manifeste `{chemin: mtime}` en scannant `javascript/`+`css/` récursivement (aucune liste dupliquée à synchroniser avec `require_trame`), injecté via `window.FILE_VERSIONS` avant `main_bag.js`. Chaque fichier n'est reversionné que si son mtime a changé.
+
+Vérifié : 90 requêtes à froid → 3 si rien ne change (bag.js + main_bag.js, toujours frais par design, + un `<link>` orphelin non versionné) → **4 si exactement 1 fichier est modifié**, et c'est bien ce fichier-là le seul refetché.
+
+Piège trouvé en même temps : `.htaccess` mettait **`index.php` lui-même** en cache navigateur 60h (`max-age=216000`, hérité de la règle générique `\.(html|php)$`). Comme `index.php` embarque le manifeste `FILE_VERSIONS` généré à la volée, un visiteur revenant dans les 60h gardait un manifeste figé, peu importe les vrais changements disque — ça neutralisait le fix silencieusement. Override `no-cache` ajouté spécifiquement pour `index.php`/`reindex.php` ; la règle générique (qui met potentiellement en cache navigateur d'autres endpoints `.php` dynamiques — `json_data.php`, `json_scheme.php`, etc. s'ils sont appelés en GET) n'a **pas** été touchée — à auditer séparément si ça devient un problème, hors scope ce soir.
+
+**Instabilité socket.io pendant le boot Playwright.** Sous WSL2, les boots automatisés (Chromium piloté par Playwright) montraient parfois `WebSocket is closed before the connection is established` en plein milieu du chargement, suivi d'une reconnexion avec un nouveau socket ID — `schemeLoad()` ne survit pas à ce changement d'ID et reste bloqué jusqu'au timeout. **Isolé et innocenté le réseau** : un stress-test Node pur (socket.io-client, 15 connexions/déconnexions rapprochées, sans navigateur ni Playwright) donne 15/15 propre à la fois via le port forwardé WSL2 (`localhost:3005`, ~309ms/connexion) et via le réseau Docker interne (`idae-socket:3005`, sans passer par WSL2 du tout, ~3ms/connexion). Le port-forwarding WSL2 ajoute de la latence mais n'introduit aucune instabilité.
+
+Hypothèse retenue (non vérifiée formellement, mais cohérente avec toutes les observations) : le boot exécute ~90 scripts de façon synchrone sur le thread JS principal (lecture/écriture IndexedDB + eval par `bag.js`) ; si ce thread reste bloqué assez longtemps, le client socket.io rate sa fenêtre de heartbeat et se croit déconnecté côté client, alors que la connexion réseau réelle n'a jamais bronché — faux positif déclenché par la charge CPU du boot, pas par le réseau. Le fix cache-busting réduit directement ce volume de travail synchrone (moins de fichiers à parser/eval sur un chargement répété), donc devrait atténuer ce risque sans action supplémentaire. Non re-testé formellement après le fix (session déjà très longue) — à confirmer à la prochaine suite complète.
+
+Mitigation en attendant : `retries: 2` dans `playwright.config.ts`, `waitForAppReady`/`openApp` à 120-180s. Confirmé (par le retour utilisateur direct) que l'usage réel — un seul onglet, une seule connexion socket — n'est jamais exposé à ce flake ; c'est spécifique aux boots automatisés rapprochés.
+
+Côté suite Playwright, deux optimisations orthogonales au fix cache (commit `73938f5`) :
+- **Session par worker** (`fixtures/test-base.ts`) au lieu d'une session `storageState` unique partagée — celle-ci forçait `workers: 1` (PHP sérialise les requêtes concurrentes sur un même fichier de session). Pas d'enforcement mono-session côté serveur, donc chaque worker peut avoir son propre `PHPSESSID` en toute sécurité.
+- **Un seul boot par fichier de spec** (`fixtures/shared-boot.ts`) au lieu d'un boot par test — `test.beforeAll` + page réutilisée. Convertit `window-gui`, `datatable`, `explorer`, `insertionq`, `forms`, `uiux`, `snapshots`. Chaque test qui ouvre une fenêtre doit maintenant la fermer explicitement (plus d'isolation implicite page-par-test) — piège trouvé dans `snapshots.spec.ts` : une fenêtre non fermée s'empilait dans la capture d'écran du test suivant.
+
+`workers` reste à **1** — le passage à 4 a été tenté deux fois ce soir et annulé les deux fois, à cause du flake socket ci-dessus (pas d'une vraie limite de ressources ; testé après le fix WSL2/Hyper-V avec 15.5GB de marge). La fixture per-worker est prête pour quand cette instabilité sera résolue ou jugée acceptable en pratique.
+
+---
+
 ## Fichiers critiques
 
 - `idae/web/javascript/main_bag.js` — graphe de chargement, groupe `require_hell`
