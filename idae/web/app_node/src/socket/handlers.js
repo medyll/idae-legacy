@@ -41,8 +41,11 @@ export function registerHandlers(io, socket) {
     }
 
     // --- Heartbeat ---
+    // Only heartbeat_app (app_socket.js's dedicated, silent handler) — the
+    // duplicate emit on the generic "message" event doubled the interval,
+    // and app_socket.js's "message" handler console.logs every payload,
+    // spamming the client console every 10s with nothing but a timestamp.
     const sender = setInterval(function () {
-        socket.emit("message", Date.now());
         socket.emit("heartbeat_app", Date.now());
     }, 10000);
 
