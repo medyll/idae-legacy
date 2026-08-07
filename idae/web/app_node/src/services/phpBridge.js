@@ -5,6 +5,15 @@ import axios from 'axios';
 import qs from 'qs';
 import logger from '../config/logger.js';
 
+// No request here had a timeout: axios defaults to 0 (wait forever). If
+// Apache stops answering, the promise never settles, the socket handler's
+// callback is never invoked, and the client hangs silently — no error, no
+// rejection, indistinguishable from a slow-but-alive request until someone
+// notices and restarts the container. Every call gets a bound now; only
+// runModule (CSV exports, set_time_limit(0) on the PHP side) opts into a
+// longer one via the timeoutMs param.
+const DEFAULT_TIMEOUT_MS = 30000;
+
 /**
  * Wrapper for PHP Legacy calls
  */
@@ -28,11 +37,11 @@ export const phpBridge = {
     /**
      * Call PHP Script via POST
      */
-    async post(url, data, bodyOverride = null) {
+    async post(url, data, bodyOverride = null, timeoutMs = DEFAULT_TIMEOUT_MS) {
         try {
             const body = bodyOverride || qs.stringify(data.vars || {});
             const headers = this.buildHeaders(data);
-            
+
             // Console log for debug
             // logger.info(`[PHP-BRIDGE] POST ${url}`, { headers, bodyLength: body.length });
 
@@ -40,6 +49,7 @@ export const phpBridge = {
                 headers: headers,
                 // Handle redirects if needed, though usually PHP API won't redirect
                 maxRedirects: 0,
+                timeout: timeoutMs,
                 validateStatus: function (status) {
                     return status >= 200 && status < 500; // Resolve even if 400/500 to handle PHP errors gracefully
                 },
@@ -51,7 +61,11 @@ export const phpBridge = {
                  logger.info(`[PHP-BRIDGE] Redirect detected from ${url} -> ${error.response.headers.location}`);
                  return { data: "", status: error.response.status, location: error.response.headers.location };
              }
-            logger.error(`[PHP-BRIDGE] Error posting to ${url}:`, error.message);
+            if (error.code === 'ECONNABORTED') {
+                logger.error(`[PHP-BRIDGE] Timeout after ${timeoutMs}ms posting to ${url}`);
+            } else {
+                logger.error(`[PHP-BRIDGE] Error posting to ${url}:`, error.message);
+            }
             throw error;
         }
     },
@@ -59,25 +73,30 @@ export const phpBridge = {
     /**
      * Call PHP Script via GET
      */
-    async get(url, data) {
+    async get(url, data, timeoutMs = DEFAULT_TIMEOUT_MS) {
          try {
             const headers = this.buildHeaders(data);
             const response = await axios.get(url, {
                 headers: headers,
                 params: data.vars || {},
                 maxRedirects: 0,
+                timeout: timeoutMs,
                 validateStatus: status => status < 500
             });
             return response.data;
         } catch (error) {
             if (error.response && error.response.status >= 300 && error.response.status < 400) {
                  logger.info(`[PHP-BRIDGE] Redirect detected from ${url} -> ${error.response.headers.location}`);
-                 // Return empty JSON or indication of redirect? 
+                 // Return empty JSON or indication of redirect?
                  // For get_data('json_ssid'), return default structure?
                  return { error: 'redirect', location: error.response.headers.location };
              }
-            logger.error(`[PHP-BRIDGE] Error getting ${url}:`, error.message);
+            if (error.code === 'ECONNABORTED') {
+                logger.error(`[PHP-BRIDGE] Timeout after ${timeoutMs}ms getting ${url}`);
+            } else {
+                logger.error(`[PHP-BRIDGE] Error getting ${url}:`, error.message);
+            }
             throw error;
-        }       
+        }
     }
 };

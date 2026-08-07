@@ -219,16 +219,19 @@ export function registerHandlers(io, socket) {
         }
     });
     
-    // runModule
+    // runModule — includes long-running work (CSV exports via
+    // myddeExplorer.js's csv_export=1, PHP-side set_time_limit(0)), so it
+    // gets a longer bound than the other bridge calls instead of the 30s
+    // default.
     socket.on("runModule", async function (data) {
          const DOCUMENTDOMAIN = cleanDomain(data.DOCUMENTDOMAIN) || "appgem.destinationsreve.com";
          const url = `http://${DOCUMENTDOMAIN}/${data.file}.php`;
-         
+
          logger.info(`[runModule] DOMAIN=${DOCUMENTDOMAIN} file=${data.file} PHPSESSID=${data.PHPSESSID || 'none'} vars=${data.vars || ''}`);
          logger.info(`[runModule] -> ${url}`);
          const body = typeof data.vars === 'string' ? data.vars : qs.stringify(data.vars);
          try {
-             await phpBridge.post(url, data, body);
+             await phpBridge.post(url, data, body, 300000); // 5 min
              logger.info(`[runModule] <- done`);
          } catch (e) {
              logger.error(`[runModule] ERROR: ${e.message}`);
