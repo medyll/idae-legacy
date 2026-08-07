@@ -115,4 +115,18 @@ Pull `83ef31c` avant de relancer la suite complète — sinon ton `get_data('jso
 
 Reste non résolu, comme noté plus haut : pourquoi Apache s'est tu la première fois. Le fix rend l'incident visible et récupérable, il ne l'empêche pas.
 
+## Mise à jour — le lien Node↔Apache lui-même, certifié innocent
+
+Demande explicite : certifier que le hang ne vient pas du lien réseau `idae-socket`↔`idae-legacy`. Trois tests, dans l'ordre, depuis l'intérieur du conteneur `idae-socket` — même chemin qu'utilise `phpBridge` pendant le boot (`json_scheme.php`, même headers), en montant progressivement la charge :
+
+1. **200 requêtes, concurrence 8, sans timeout** → 0 erreur, 0 hang, max 2,8s.
+2. **17508 requêtes / 3 min, concurrence 16** — première tentative : 100% en erreur (`ERR_BAD_RESPONSE`). Fausse alerte, pas un vrai problème : bug dans mon propre script de stress (header `Host` oublié → rejeté par `conf.lan.inc.php`, comportement normal du garde-fou de détection d'hôte).
+3. **960 requêtes (60 rounds × 16 concurrentes), 5 min 20 s soutenues, `validateStatus: () => true` + garde-fou 20s** (assez large pour distinguer un vrai hang d'une simple lenteur) → **960/960 à 200, zéro erreur, zéro timeout déclenché**.
+
+Pendant le run #3 : Apache `BusyWorkers` plafonne à 25/150 (jamais proche de la saturation), `Load1≈4.1` (chargé, pas en détresse), zéro worker mort, zéro segfault dans `error.log`. `TIME_WAIT` monte pendant la charge (61→335 en 60s) — attendu, axios n'a pas de `keepAlive` agent explicite donc ouvre une connexion neuve par requête ; ça se résorbe, pas un leak.
+
+**Verdict : le lien Node↔Apache lui-même n'est pas la cause.** 960 requêtes identiques à celle que le boot fait, en charge concurrente soutenue pendant plus de 5 minutes, n'ont jamais calé. Si le hang se reproduit, la cause est ailleurs — soit en amont dans PHP sous un état/une charge que je n'ai pas reproduite ici (differente de "juste beaucoup de requêtes concurrentes identiques"), soit côté client (bag.js/Chromium/socket.io pendant un vrai boot navigateur, terrain déjà exploré dans BE_PLAN.md sans conclusion définitive).
+
+Scripts de stress supprimés après usage, rien laissé dans le repo ni dans le conteneur.
+
 — Claude
