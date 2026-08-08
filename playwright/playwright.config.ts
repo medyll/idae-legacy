@@ -33,11 +33,11 @@ export default defineConfig({
     trace: 'retain-on-failure',
   },
   testDir: './tests',
-  // Bridge probe before any worker starts: fails in ~15s with an actionable
+  // Bridge probe before any worker starts: fails in ~10s with an actionable
   // message when Apache/phpBridge is wedged, instead of letting every spec
-  // burn its 2x120s boot retries. See global-setup.ts and HANG_TEST.md.
+  // burn its boot retries. See global-setup.ts and HANG_TEST.md.
   globalSetup: './global-setup.ts',
-  // No globalSetup: login is now a worker-scoped fixture
+  // No globalSetup for auth: login is a worker-scoped fixture
   // (fixtures/test-base.ts), so it runs once per worker, lazily, instead of
   // once for the whole run before any worker starts.
   //
@@ -46,25 +46,37 @@ export default defineConfig({
   // 1.9GB) and a port-8080 conflict (see docker-compose.yml). Both attempts
   // still failed 19-21 of 23 specs — cold AND warm containers, plenty of
   // free CPU/memory, Apache's MaxRequestWorkers=150 nowhere near saturated.
-  // Root cause not identified (candidates: WSL2's NAT/port-forward layer
+  // Root cause not identified then (candidates: WSL2's NAT/port-forward layer
   // under bursty concurrent connections, or MongoDB — on the host, not
-  // containerized — under 4x concurrent PHP sessions). Not worth more blind
-  // 8-9min retries to find out. workers: 1 is the only configuration proven
-  // reliable (20/20 green, see BE_PLAN.md Phase 1). The real lever for
-  // suite speed here is fewer full boots per run (share one page/context
-  // across the tests in a spec file via test.describe + beforeAll), not
-  // concurrency — noted as unimplemented in BE_PLAN.md.
+  // containerized — under concurrent PHP sessions).
+  //
+  // 2026-08-08: retried at workers: 2 (half the failed concurrency) now that
+  // the swap is live, cache-busting is fixed (f4f090a), and timeouts are
+  // retuned to measured reality. Same failure signature reproduced: 3 specs
+  // (forms, explorer, insertionq) exhausted all retries on "beforeAll hook
+  // timeout ... waiting for locator('#desktop')" — 4 simultaneous boots (2
+  // workers × 2 boots each) contending for something, cascading into every
+  // downstream test failing instantly once the shared page never came up.
+  // Deliberately isolated whether this is the idae-be swap itself: logged in
+  // through a single uncontended browser tab (no Playwright, no concurrency)
+  // against the same live container — #desktop rendered, 87 schemes loaded,
+  // real data in every panel, zero console errors. The swap is clean in
+  // normal use; the failure is concurrency contention, not a rendering
+  // regression. workers: 1 remains the only configuration proven reliable.
   workers: 1,
   // Measured directly (Chromium, real network, 2026-08-08) after the
   // per-file cache-busting fix (f4f090a): cold boot to login-form-visible
   // ~11.3s (106 requests), warm (bag.js IndexedDB cache hit) ~8.9s (16
-  // requests). The old 180s budget dated from before that fix and was never
-  // re-measured — do not widen this back out without a fresh measurement to
-  // justify it. Each worker boots twice back-to-back (the worker-scoped
+  // requests). Each worker boots twice back-to-back (the worker-scoped UI
   // login in fixtures/test-base.ts, then the shared boot in
-  // fixtures/shared-boot.ts's beforeAll) before any test body runs; 45s
-  // covers 2x the measured cold-boot ceiling plus the test body itself.
-  timeout: 45000,
+  // fixtures/shared-boot.ts's beforeAll) before any test body runs. First
+  // workers:2 attempt at 45s failed 2 specs on "beforeAll hook timeout of
+  // 45000ms exceeded" waiting on #desktop — legitimate boot contention
+  // under 2 concurrent workers (4 simultaneous boots), not a fixture bug.
+  // 60s (2026-08-08): still low relative to the 180s this used to be, but
+  // gives real headroom above the 45s ceiling that just failed instead of
+  // guessing again. Do not widen further without a fresh measurement.
+  timeout: 60000,
   expect: { timeout: 15000 },
   // main_bag.js's boot is genuinely flaky under the current WSL2 backend —
   // reproduced outside Playwright entirely (plain Chromium via the Playwright
