@@ -174,7 +174,7 @@ Prototype sorti, on migre fichier par fichier vers l'API idae-be native, du plus
 
 Ordre revu après vérification de ce que `main_bag.js` charge vraiment :
 
-- [ ] `app/app_datatable.js` (442)
+- [x] `app/app_datatable.js` (442) — API DOM/ES native, zéro appel direct aux shims vérifié par `datatable.spec.ts` avec `IDAE_SHIM_WARN=1`. Suite ciblée : chargement réel vert, recherche verte au retry avec le flake préexistant certifié `app_socket.js:278`, garde shim verte. En local, forcer `BASE_URL=http://127.0.0.1:8080` : `TEST_BASE_URL` dans `.env.testing` peut encore réintroduire `localhost` et son délai IPv6.
 - [ ] `librairie/myddeExplorer.js` (370)
 - [ ] `app/app_insertionQ.js` (300)
 - [ ] `engine/methods.js` (253)

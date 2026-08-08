@@ -1,9 +1,14 @@
 create_element_in = function (tag, node, attributes) {
-    var a = new Element(tag);
-    if (typeof (attributes) == 'object') a.writeAttribute(attributes);
+    var a = document.createElement(tag);
+    if (attributes && typeof attributes == 'object') {
+        Object.entries(attributes).forEach(function ([name, value]) {
+            if (name === 'className') a.className = value;
+            else a.setAttribute(name, value);
+        });
+    }
     // console.log(tag, node, attributes)
-    $(node).appendChild(a);
-    return $(a)
+    node.appendChild(a);
+    return a
 }
 create_element_of = function (text) {
     var fragment_main = document.createDocumentFragment();
@@ -25,32 +30,32 @@ create_element_of = function (text) {
     fragment_main.appendChild(element_child);
     delete fragment_in;
     //
-    return $(element_child);
+    return element_child;
 }
 tag_elem_table = function (elem, table_name, table_value) {
     //
-    $(elem).setAttribute('data-table', table_name);
-    $(elem).setAttribute('data-table_value', table_value);
-    $(elem).setAttribute('value', table_value);
-    $(elem).setAttribute('data-contextual', 'table=' + table_name + '&table_value=' + table_value);
-    $(elem).setAttribute('vars', 'table=' + table_name + '&table_value=' + table_value);
-    $(elem).setAttribute('data-vars', 'table=' + table_name + '&table_value=' + table_value);
+    elem.setAttribute('data-table', table_name);
+    elem.setAttribute('data-table_value', table_value);
+    elem.setAttribute('value', table_value);
+    elem.setAttribute('data-contextual', 'table=' + table_name + '&table_value=' + table_value);
+    elem.setAttribute('vars', 'table=' + table_name + '&table_value=' + table_value);
+    elem.setAttribute('data-vars', 'table=' + table_name + '&table_value=' + table_value);
 }
 tag_elem_table_field = function (elem, field_name, field_name_raw, field_value, field_className = '') {
     field_value = field_value || '';
-    $(elem).innerHTML = tag_elem_table_value(field_name, field_name_raw, field_value, field_className);
-    if (field_className) $(elem).addClassName(field_className);
+    elem.innerHTML = tag_elem_table_value(field_name, field_name_raw, field_value, field_className);
+    if (field_className) elem.classList.add(...field_className.split(/\s+/).filter(Boolean));
 }
 tag_elem_table_value = function (field_name, field_name_raw, field_value = '', field_className = '') {
     return '<div class="' + field_className + '" data-field_name="' + field_name + '" data-field_name_raw="' + field_name_raw + '" style="white-space:nowrap;text-overflow:ellipsis;overflow:hidden;max-width:100%;">' + field_value + '</div>';
 }
 tag_elem_table_field_labelled = function (elem, field_name, field_name_raw, field_value, field_title, field_className) {
     field_value = field_value || '';
-    $(elem).innerHTML = '<div class="flex_h borderb padding"><div class="label ellipsis textgris" style="width:80px;">' + field_title + '&nbsp;</div><div class="has_data" style="white-space:nowrap;text-overflow: ellipsis;overflow:hidden;">' + field_value + '</div></div>';
-    dyn_elem = $(elem).select('.has_data').first();
-    $(dyn_elem).setAttribute('data-field_name', field_name);
-    $(dyn_elem).setAttribute('data-field_name_raw', field_name_raw);
-    if (field_className) $(dyn_elem).addClassName(field_className);
+    elem.innerHTML = '<div class="flex_h borderb padding"><div class="label ellipsis textgris" style="width:80px;">' + field_title + '&nbsp;</div><div class="has_data" style="white-space:nowrap;text-overflow: ellipsis;overflow:hidden;">' + field_value + '</div></div>';
+    dyn_elem = elem.querySelector('.has_data');
+    dyn_elem.setAttribute('data-field_name', field_name);
+    dyn_elem.setAttribute('data-field_name_raw', field_name_raw);
+    if (field_className) dyn_elem.classList.add(...field_className.split(/\s+/).filter(Boolean));
 }
 /**
  *
@@ -60,24 +65,26 @@ tag_elem_table_field_labelled = function (elem, field_name, field_name_raw, fiel
  */
 
 load_table_in_zone = function (url_data, zone, options) {
-    var data = url_data.replace('&&', '&').toQueryParams();
+    var data = Object.fromEntries(new URLSearchParams(url_data.replace('&&', '&')));
 
     if (typeof data.groupBy != 'string') delete data.groupBy;
     data = array_unique(data)
     var table = data.table;
     var table_groupby = data.groupBy || '';
-    var da_options = Object.extend({
+    var da_options = Object.assign({
         table_name: table,
         groupBy: table_groupby,
         url_data: url_data,
         post_data: data
     }, options || {});
-    new BuildTbl($(zone), da_options);
+    new BuildTbl(zone, da_options);
 }
 
 if (!window.APP) window.APP = {}
 if (!window.APP.APPTPL) window.APP.APPTPL = {}
-BuildTbl = Class.create();
+BuildTbl = function () {
+    this.initialize.apply(this, arguments);
+};
 /**
  *
  * @type {{frag_table: string, frag_table_reporter: string, frag_table_footer: string, initialize: Function, set_options: Function, watch_vars: Function, build_bottom: Function, getCount: Function, build_gallery: Function, build_overlay: Function, build_table_div_gallery:  Function, build_scheme_header_table_div: Function, build_table: Function, build_scheme_header: Function, reload_data: Function, load_data: Function, build_data: Function, build_data_thumb: Function, build_data_note: Function, cache_data: Function}}
@@ -102,8 +109,8 @@ BuildTbl.prototype = {
     table_activity_pager_more: null,
     //
     initialize: function (element, options) {
-        this.element = $(element)
-        this.options = Object.extend({
+        this.element = typeof element === 'string' ? document.getElementById(element) : element
+        this.options = Object.assign({
             table_name: 'produit',
             table_groupby: '',
             url_data: '',
@@ -124,14 +131,16 @@ BuildTbl.prototype = {
         //
         this.options.Table_name = ucfirst(this.options.table_name);
         this.options.table_scheme = window.APP.APPSCHEMES[this.options.table_name];
-        this.element.purge();
-        this.element.identify();
+        if (this.element.__buildTblAbortController) {
+            this.element.__buildTblAbortController.abort();
+        }
+        this.abortController = new AbortController();
+        this.element.__buildTblAbortController = this.abortController;
+        if (!this.element.id) this.element.id = uniqid('datatable');
         this.ARR_CACHE_MONGO_KEY = [];
-        this.element.writeAttribute({
-            app_datatable: true
-        });
-        if (this.element.readAttribute('data-data_model')) {
-            this.options.data_model = this.element.readAttribute('data-data_model');
+        this.element.setAttribute('app_datatable', 'true');
+        if (this.element.getAttribute('data-data_model')) {
+            this.options.data_model = this.element.getAttribute('data-data_model');
         } //  DATA_QUERY
 
         this.DATA_QUERY = [] // url to query params
@@ -179,33 +188,33 @@ BuildTbl.prototype = {
         this.DATA_MODEL = this.options.table_scheme[this.options.data_model] || this.options.table_scheme.defaultModel;
         // rebuild ::
         this.RAW_DATA_MODEL_ALL_FIELDS = [];
-        this.DATA_MODEL_ALL_FIELDS.each(function (h_node) {
+        this.DATA_MODEL_ALL_FIELDS.forEach(function (h_node) {
             this.RAW_DATA_MODEL_ALL_FIELDS[h_node.field_name] = h_node;
         }.bind(this));
         //
         this.RAW_DATA_MODEL_DEFAULT = [];
-        this.DATA_MODEL_DEFAULT.each(function (h_node) {
+        this.DATA_MODEL_DEFAULT.forEach(function (h_node) {
             this.RAW_DATA_MODEL_DEFAULT[h_node.field_name] = h_node;
         }.bind(this));
         //
         this.RAW_DATA_MODEL = [];
-        this.DATA_MODEL.each(function (h_node) {
+        this.DATA_MODEL.forEach(function (h_node) {
             this.RAW_DATA_MODEL[h_node.field_name] = h_node;
         }.bind(this));
         this.set_observers();
         this.element.setAttribute('data-table', this.options.table_name);
         //
-        this.tr_piece = new Element('tr');
-        this.td_piece = new Element('td');
-        this.div_piece = new Element('div');
+        this.tr_piece = document.createElement('tr');
+        this.td_piece = document.createElement('td');
+        this.div_piece = document.createElement('div');
         //
         this.uniqid = uniqid(this.options.table_name);
         this.element.setAttribute('data-uniqid', this.uniqid);
         //
-        if (!this.element.readAttribute('data-dsp')) {
+        if (!this.element.getAttribute('data-dsp')) {
             this.element.setAttribute('data-dsp', 'table');
         }
-        switch (this.element.readAttribute('data-dsp')) {
+        switch (this.element.getAttribute('data-dsp')) {
             case 'table':
             case 'table_icon':
                 this.build_table();
@@ -214,11 +223,11 @@ BuildTbl.prototype = {
             case 'icon':
             case 'thumb':
                 this.build_gallery();
-                this.tbody.addClassName('flex_h flex_wrap flex_align_stretch flex_align_top')
+                this.tbody.classList.add('flex_h', 'flex_wrap', 'flex_align_stretch', 'flex_align_top')
                 break;
             case 'image':
                 this.build_gallery();
-                this.tbody.addClassName('flex_h flex_wrap flex_align_stretch flex_align_middle')
+                this.tbody.classList.add('flex_h', 'flex_wrap', 'flex_align_stretch', 'flex_align_middle')
                 break;
             case 'conge':
             case 'planning':
@@ -235,7 +244,7 @@ BuildTbl.prototype = {
         }
         this.build_bottom();
         //
-        if (this.options.className) this.table.addClassName(this.options.className);
+        if (this.options.className) this.table.classList.add(...this.options.className.split(/\s+/).filter(Boolean));
 
         this.load_data();
         this.watch_vars();
@@ -243,14 +252,16 @@ BuildTbl.prototype = {
     },
     set_observers: function () {
         //
-        this.element.on('dom:load_data', this.load_data_again.bind(this))
-        this.element.observe('dom:data_reload', function (event) {
+        this.element.addEventListener('dom:load_data', this.load_data_again.bind(this), {
+            signal: this.abortController.signal
+        })
+        this.element.addEventListener('dom:data_reload', function (event) {
             /*console.log('no data_reload');
              return;*/
             var res_tmp = event.memo;
             var tablevalue = res_tmp.table_value;
             //  this.reload_data();
-            if (this.element.select('[data-table_value=' + tablevalue + ']').size() == 0) {
+            if (this.element.querySelectorAll('[data-table_value="' + CSS.escape(String(tablevalue)) + '"]').length == 0) {
                 this.reload_data();
             } else {
                 var objs = {
@@ -260,18 +271,22 @@ BuildTbl.prototype = {
                     sort: this.options.sort,
                     verify: tablevalue
                 }
-                var url = Object.toQueryString(objs) + '&' + this.element.readAttribute('vars');
+                var url = new URLSearchParams(Object.entries(objs).filter(function ([, value]) {
+                    return value !== undefined && value !== null;
+                })).toString() + '&' + this.element.getAttribute('vars');
                 objs.url_data = url;
                 get_data('json_data_table', objs, function (err) {
                 }).then(function (res) {
                     if (res == 'NULL') {
-                        this.element.select('[data-table_value=' + tablevalue + ']').invoke('kill');
+                        this.element.querySelectorAll('[data-table_value="' + CSS.escape(String(tablevalue)) + '"]').forEach(function (node) {
+                            node.remove();
+                        });
                     }
                 }.bind(this));
             }
             ;
-        }.bind(this));
-        this.element.observe('dom:stream_chunk', function (event) {
+        }.bind(this), { signal: this.abortController.signal });
+        this.element.addEventListener('dom:stream_chunk', function (event) {
 
             var res_tmp = event.memo;
             var data = window.register_stream[res_tmp]['data'];
@@ -293,20 +308,22 @@ BuildTbl.prototype = {
             }
             this.build_data(data_main);
 
-        }.bind(this));
+        }.bind(this), { signal: this.abortController.signal });
     },
     set_options: function (hash) {
-        this.options = Object.extend(hash, this.options || {});
+        this.options = Object.assign(hash, this.options || {});
     },
     watch_vars: function () {
         if (!this.old_vars) {
-            this.old_vars = this.element.readAttribute('vars')
+            this.old_vars = this.element.getAttribute('vars')
         }
         this.timer_watch_vars = setTimeout(function () {
-            if (this.old_vars == this.element.readAttribute('vars')) {
+            if (this.old_vars == this.element.getAttribute('vars')) {
             } else {
-                this.old_vars = this.element.readAttribute('vars');
-                this.element.fire('dom:vars_changed');
+                this.old_vars = this.element.getAttribute('vars');
+                var event = new CustomEvent('dom:vars_changed', { bubbles: true, cancelable: true });
+                event.memo = {};
+                this.element.dispatchEvent(event);
                 clearTimeout(this.timer_watch_vars);
             }
         }.bind(this), 1000)
@@ -314,29 +331,27 @@ BuildTbl.prototype = {
     activate_fragment: function (html_fragment, frag_name) {
         var ret = [];
         this[frag_name] = create_element_of(this[html_fragment]);
-        if (this[frag_name].readAttribute('auto_tag')) {
-            ret[this[frag_name].readAttribute('auto_tag')] = $(this[frag_name]);
+        if (this[frag_name].getAttribute('auto_tag')) {
+            ret[this[frag_name].getAttribute('auto_tag')] = this[frag_name];
         }
         // new
-        $(this[frag_name]).select('[auto_tag]').forEach(function (node, index) {
-            ret[node.readAttribute('auto_tag')] = $(node);
-            $(node).setAttribute(node.readAttribute('auto_tag'), 'true');
+        this[frag_name].querySelectorAll('[auto_tag]').forEach(function (node, index) {
+            ret[node.getAttribute('auto_tag')] = node;
+            node.setAttribute(node.getAttribute('auto_tag'), 'true');
         }.bind(this))
         return ret;
     },
     build_bottom: function () {
         this.activity_zone = create_element_of(this.frag_table_test); //  table_activity_icon table_activity_count table_activity_pager_zone table_activity_pager_select table_activity_pager
         // new
-        $(this.activity_zone).select('[auto_tag]').forEach(function (node, index) {
-            this[node.readAttribute('auto_tag')] = $(node);
-            $(node).setAttribute(node.readAttribute('auto_tag'), true);
+        this.activity_zone.querySelectorAll('[auto_tag]').forEach(function (node, index) {
+            this[node.getAttribute('auto_tag')] = node;
+            node.setAttribute(node.getAttribute('auto_tag'), 'true');
         }.bind(this))
-        if (this.tfooter) this.tfooter.insert({
-            top: this.activity_zone
-        });
+        if (this.tfooter) this.tfooter.prepend(this.activity_zone);
         // return;
-        if (this.element.readAttribute('data-dsp') == 'table') {
-            this.tfooter.addClassName('flex_h flex_align_middle margin bordert');
+        if (this.element.getAttribute('data-dsp') == 'table') {
+            this.tfooter.classList.add('flex_h', 'flex_align_middle', 'margin', 'bordert');
             // old
             this.loader_zone = create_element_in('div', this.tfooter, {
                 className: 'padding'
@@ -346,21 +361,20 @@ BuildTbl.prototype = {
             });
             //this.count_zone.writeAttribute({'data-menu': 'data-menu', 'data-clone': 'data-clone'});
         }
-        if (this.element.readAttribute('data-dsp-pager')) {
+        if (this.element.getAttribute('data-dsp-pager')) {
 
-            this.tbody.insert({
-                after: this.activity_zone
-            })
-            if ($(this.element.readAttribute('data-dsp-pager'))) {
+            this.tbody.after(this.activity_zone)
+            if (document.getElementById(this.element.getAttribute('data-dsp-pager'))) {
                 /*this.dsp_pager = $(this.element.readAttribute('data-dsp-pager')).update();
                  this.loader_zone = create_element_in('div', this.dsp_pager, {className: 'padding'});
                  this.count_zone = create_element_in('div', this.dsp_pager, {className: 'padding'});
                  this.pager_zone = create_element_in('div', this.dsp_pager, {className: 'padding applink flex_h '});*/
                 // this.count_zone.writeAttribute({'data-menu': 'data-menu', 'data-clone': 'data-clone'});
             }
-        } else if (this.element.select('[data-dsp-pager]').first()) {
+        } else if (this.element.querySelector('[data-dsp-pager]')) {
 
-            this.dsp_pager = $(this.element.select('[data-dsp-pager]').first()).update();
+            this.dsp_pager = this.element.querySelector('[data-dsp-pager]');
+            this.dsp_pager.replaceChildren();
             this.loader_zone = create_element_in('div', this.dsp_pager, {
                 className: 'padding'
             });
@@ -370,77 +384,77 @@ BuildTbl.prototype = {
             this.pager_zone = create_element_in('div', this.dsp_pager, {
                 className: 'padding applink flex_h  appcontext_menu '
             });
-            this.count_zone.writeAttribute({
-                'data-menu': 'data-menu',
-                'data-clone': 'data-clone'
-            });
+            this.count_zone.setAttribute('data-menu', 'data-menu');
+            this.count_zone.setAttribute('data-clone', 'data-clone');
         }
     },
     build_table: function () {
-        $(this.element).update('<section class="flex_v relative" style="height:100%;overflow:hidden;"><div main_zone="main_zone" class="_flex_main" style="overflow-y:auto;width:100%;height:100%;">' + this.frag_table + '</div>' + this.frag_table_reporter + this.frag_table_footer + '</section>');
-        this.zone = $($(this.element).querySelector('[main_zone]'));
+        this.element.innerHTML = '<section class="flex_v relative" style="height:100%;overflow:hidden;"><div main_zone="main_zone" class="_flex_main" style="overflow-y:auto;width:100%;height:100%;">' + this.frag_table + '</div>' + this.frag_table_reporter + this.frag_table_footer + '</section>';
+        this.zone = this.element.querySelector('[main_zone]');
         console.log('zone', this.zone)
-        this.table = $($(this.element).querySelector('table'));
-        this.table.addClassName('explorer act_sort ethop');
-        if (this.element.readAttribute('data-classname')) {
-            this.table.addClassName(this.element.readAttribute('data-classname'));
-            this.table.removeClassName('explorer');
+        this.table = this.element.querySelector('table');
+        this.table.classList.add('explorer', 'act_sort', 'ethop');
+        if (this.element.getAttribute('data-classname')) {
+            this.table.classList.add(...this.element.getAttribute('data-classname').split(/\s+/).filter(Boolean));
+            this.table.classList.remove('explorer');
         }
         if (this.DATA_QUERY.groupBy) {
-            this.table.addClassName('table_groupe');
-            this.table.removeClassName('explorer');
+            this.table.classList.add('table_groupe');
+            this.table.classList.remove('explorer');
         }
 
-        this.thead = $(this.table.querySelector('thead'));
-        this.colgroup = $(this.table.querySelector('colgroup'));
-        this.thead_tr = $(this.thead.querySelector('tr'));
-        this.tfooter = $(this.element.querySelector('.tbl_footer'));
-        this.treporter = $(this.element.querySelector('.tbl_reporter'));
+        this.thead = this.table.querySelector('thead');
+        this.colgroup = this.table.querySelector('colgroup');
+        this.thead_tr = this.thead.querySelector('tr');
+        this.tfooter = this.element.querySelector('.tbl_footer');
+        this.treporter = this.element.querySelector('.tbl_reporter');
         this.build_scheme_header();
-        this.tbody = $(this.table.querySelector('tbody'));
+        this.tbody = this.table.querySelector('tbody');
         new autoToggle(this.tbody);
         this.element.setAttribute('data-uniqid', this.uniqid);
     },
     build_gallery: function () {
-        $(this.element).update('<div class="div_tbody" main_zone="main_zone" style="overflow:auto;max-height:100%;width:100%;"></div>' + this.frag_table_reporter + this.frag_table_footer);
-        this.zone = $($(this.element).querySelector('[main_zone]'));
-        this.treporter = $(this.element.querySelector('.tbl_reporter'));
-        this.tbody = $(this.element.querySelector('.div_tbody'));
-        if (this.element.readAttribute('data-sort')) {
+        this.element.innerHTML = '<div class="div_tbody" main_zone="main_zone" style="overflow:auto;max-height:100%;width:100%;"></div>' + this.frag_table_reporter + this.frag_table_footer;
+        this.zone = this.element.querySelector('[main_zone]');
+        this.treporter = this.element.querySelector('.tbl_reporter');
+        this.tbody = this.element.querySelector('.div_tbody');
+        if (this.element.getAttribute('data-sort')) {
             this.tbody.setAttribute('sort_zone_drag', 'true')
         }
         new autoToggle(this.tbody);
     },
     build_overlay: function () {
-        $(this.element).addClassName('div_tbody');
-        this.zone = $(this.element);
+        this.element.classList.add('div_tbody');
+        this.zone = this.element;
         console.log('zone', this.zone)
-        this.tbody = $(this.element);
+        this.tbody = this.element;
         this.element.setAttribute('data-uniqid', this.uniqid);
     },
     build_scheme_header: function () {
         if (!this.has_header) {
-            var tmp_td = new Element('td');//this.td_piece.cloneNode (false);
-            tmp_td.addClassName('avoid aligncenter padding chk_show').update('<input dachk type="checkbox" class="avoid">');
+            var tmp_td = document.createElement('td');//this.td_piece.cloneNode (false);
+            tmp_td.classList.add('avoid', 'aligncenter', 'padding', 'chk_show');
+            tmp_td.innerHTML = '<input dachk type="checkbox" class="avoid">';
             this.thead_tr.appendChild(tmp_td);
-            this.DATA_MODEL.each(function (h_node) { //  columnModel // addcheck
-                var tmp_td = new Element('td');
+            this.DATA_MODEL.forEach(function (h_node) { //  columnModel // addcheck
+                var tmp_td = document.createElement('td');
                 tmp_td.innerHTML = h_node.title || '...';
-                if (h_node.className) tmp_td.addClassName(h_node.className);
+                if (h_node.className) tmp_td.classList.add(...h_node.className.split(/\s+/).filter(Boolean));
                 this.thead_tr.appendChild(tmp_td);
             }.bind(this));
             this.has_header = true;
         }
     },
     get_header: function () {
-        var export_elem = new Element('tr');
+        var export_elem = document.createElement('tr');
         var tmp_td = create_element_of('<td></td>');
-        $(tmp_td).addClassName('avoid aligncenter padding chk_show chk_group').update('<input dachk type="checkbox" class="avoid">');
+        tmp_td.classList.add('avoid', 'aligncenter', 'padding', 'chk_show', 'chk_group');
+        tmp_td.innerHTML = '<input dachk type="checkbox" class="avoid">';
         export_elem.appendChild(tmp_td);
-        this.DATA_MODEL.each((h_node)=> {
+        this.DATA_MODEL.forEach((h_node)=> {
             var tmp_td = this.td_piece.cloneNode(false);
             tmp_td.innerHTML = h_node.title || '...';
-            if (h_node.className) tmp_td.addClassName(h_node.className);
+            if (h_node.className) tmp_td.classList.add(...h_node.className.split(/\s+/).filter(Boolean));
             export_elem.appendChild(tmp_td);
         });
 
@@ -457,12 +471,20 @@ BuildTbl.prototype = {
             return;
         }
         this.reloading = true;
-        if (this.table_activity_icon) this.table_activity_icon.toggleContent();
-        if (!this.element.readAttribute('vars')) {
+        if (this.table_activity_icon) {
+            var iconPosition = getComputedStyle(this.table_activity_icon).position;
+            this.table_activity_icon.hidden = false;
+            this.table_activity_icon.style.position = 'absolute';
+            Array.from(this.table_activity_icon.parentNode.children).forEach(function (node) {
+                if (node !== this.table_activity_icon && !node.classList.contains('avoid')) node.hidden = true;
+            }.bind(this));
+            this.table_activity_icon.style.position = iconPosition;
+        }
+        if (!this.element.getAttribute('vars')) {
             this.element.setAttribute('vars', this.options.url_data);
         }
-        if (this.element.readAttribute('data-dsp-mdl')) {
-            var mdl = '&mdl=' + this.element.readAttribute('data-dsp-mdl');
+        if (this.element.getAttribute('data-dsp-mdl')) {
+            var mdl = '&mdl=' + this.element.getAttribute('data-dsp-mdl');
         } else {
             var mdl = '';
         }
@@ -483,7 +505,12 @@ BuildTbl.prototype = {
         }).then(function (res) {
             this.reloading = false;
             this.getCount();
-            if (this.table_activity_icon) this.table_activity_icon.unToggleContent();
+            if (this.table_activity_icon) {
+                this.table_activity_icon.hidden = true;
+                Array.from(this.table_activity_icon.parentNode.children).forEach(function (node) {
+                    if (node !== this.table_activity_icon && !node.classList.contains('avoid')) node.hidden = false;
+                }.bind(this));
+            }
             // console.log ('end reload_data '+this.options.table_name);
         }.bind(this));
     },
@@ -491,7 +518,7 @@ BuildTbl.prototype = {
         newvars = event.memo.url_data;
         srt = [];
 
-        this.tbody.update();
+        this.tbody.replaceChildren();
         this.element.setAttribute('vars', newvars);
         this.options.url_data = newvars;
         this.load_data();
@@ -507,18 +534,17 @@ BuildTbl.prototype = {
         if (!this.page) this.page = 0;
         if (!this.count) this.count = 0;
         if (!this.maxcount) this.maxcount = 0;
-        if (!this.element.readAttribute('vars')) {
+        if (!this.element.getAttribute('vars')) {
             this.element.setAttribute('vars', this.options.url_data);
         }
         this.element.setAttribute('data-uniqid', this.uniqid);
-        if (this.element.readAttribute('data-dsp-mdl')) {
-            var mdl = '&mdl=' + this.element.readAttribute('data-dsp-mdl');
+        if (this.element.getAttribute('data-dsp-mdl')) {
+            var mdl = '&mdl=' + this.element.getAttribute('data-dsp-mdl');
         } else {
             var mdl = '';
         } // extraction vars pour page, nbRows ..
 
-        var data_vars = this.element.readAttribute('vars').toQueryParams();
-        var data_vars_str = $H(data_vars).toQueryString()
+        var data_vars = Object.fromEntries(new URLSearchParams(this.element.getAttribute('vars')));
         // console.log ({ vars : this.element.readAttribute ('vars'), data_vars, data_vars_str });
         this.page = data_vars.page || this.page;
         var url_data = this.options.url_data + '&page=' + this.page + mdl;
@@ -533,7 +559,13 @@ BuildTbl.prototype = {
         };
 
         if (this.table_activity_icon) {
-            $(this.table_activity_icon).toggleContent();
+            var iconPosition = getComputedStyle(this.table_activity_icon).position;
+            this.table_activity_icon.hidden = false;
+            this.table_activity_icon.style.position = 'absolute';
+            Array.from(this.table_activity_icon.parentNode.children).forEach(function (node) {
+                if (node !== this.table_activity_icon && !node.classList.contains('avoid')) node.hidden = true;
+            }.bind(this));
+            this.table_activity_icon.style.position = iconPosition;
         }
         this.app_cache_key = build_cache_key(this.options.table_name, url_data);
 
@@ -552,7 +584,10 @@ BuildTbl.prototype = {
                 //console.log ('get from cache !!', this.app_cache_key, err);
                 this.cache = [];
                 this.from_cache = true;
-                let cache_data_chunk = cache_data.chunk(50);
+                let cache_data_chunk = [];
+                for (let index = 0; index < cache_data.length; index += 50) {
+                    cache_data_chunk.push(cache_data.slice(index, index + 50));
+                }
                 for (const data_chunk of cache_data_chunk) {
                     this.build_data(data_chunk);
                 }
@@ -579,8 +614,13 @@ BuildTbl.prototype = {
     },
     load_data_end: function () {
         this.loading = false;
-        if (this.loader_zone) this.loader_zone.hide();
-        if (this.table_activity_icon) this.table_activity_icon.unToggleContent();
+        if (this.loader_zone) this.loader_zone.hidden = true;
+        if (this.table_activity_icon) {
+            this.table_activity_icon.hidden = true;
+            Array.from(this.table_activity_icon.parentNode.children).forEach(function (node) {
+                if (node !== this.table_activity_icon && !node.classList.contains('avoid')) node.hidden = false;
+            }.bind(this));
+        }
         this.getCount();
         this.getSum();
     },
@@ -596,7 +636,7 @@ BuildTbl.prototype = {
          this.table_zone_current.addClassName ('explorer');
          this.thead_zone_current.update(this.get_header());
          }*/
-        if (this.thead) this.thead.hide();
+        if (this.thead) this.thead.hidden = true;
         switch (data_dsp) {
             case 'table_div':
                 var col_span_entete = create_element_of(`<div class="css_row"><td class="css_cell" colspan="${col_span_value}">${tr_data.html}</td></tr>`);
@@ -604,14 +644,14 @@ BuildTbl.prototype = {
 
                 var tmp_tr = create_element_in('div', this.tbody);
                 //
-                tmp_tr.addClassName('css_row css_row_entete');
-                this.DATA_MODEL.each(function (h_node) {
+                tmp_tr.classList.add('css_row', 'css_row_entete');
+                this.DATA_MODEL.forEach(function (h_node) {
                     var tmp_td = create_element_in('div', tmp_tr);
                     var tmp_div = create_element_in('div', tmp_td);
                     tmp_div.innerHTML = h_node.title || '...';
-                    tmp_td.addClassName('css_cell')
-                    if (h_node.className) tmp_td.addClassName(h_node.className);
-                    tmp_div.addClassName('ellipsis');
+                    tmp_td.classList.add('css_cell')
+                    if (h_node.className) tmp_td.classList.add(...h_node.className.split(/\s+/).filter(Boolean));
+                    tmp_div.classList.add('ellipsis');
                     tmp_tr.appendChild(tmp_td);
                 }.bind(this));
 
@@ -619,12 +659,12 @@ BuildTbl.prototype = {
                 break;
             case 'table_icon':
             case 'table':
-                var col_span_value = this.DATA_MODEL.size() + 1;
+                var col_span_value = this.DATA_MODEL.length + 1;
 
                 var col_span_entete = create_element_of(`<tr class="entete_groupe"><td colspan="${col_span_value}">${tr_data.html}</td></tr>`);
                 this.tbody.appendChild(col_span_entete);
                 var col_head = this.get_header();
-                $(col_head).addClassName('css_row_entete');
+                col_head.classList.add('css_row_entete');
                 return [col_span_entete, col_head];
                 break;
             default :
@@ -645,7 +685,7 @@ BuildTbl.prototype = {
                     var tmp_td = create_element_of('<td class="aligncenter chk_show"></td>');
                     tmp_td.appendChild(chk);
                     tmp_tr.appendChild(tmp_td);
-                    chk.show();
+                    chk.hidden = false;
                 }
                 for (var field_key in this.RAW_DATA_MODEL) {
                     if (this.RAW_DATA_MODEL.hasOwnProperty(field_key)) {
@@ -682,7 +722,7 @@ BuildTbl.prototype = {
                 tag_elem_table_field(tmp_td, 'descriptionNote', 'description', data_html.descriptionNote, 'border4 margin padding');
                 var tmp_tr = crh_prg.innerDisp;
                 tmp_tr.setAttribute('id', id_tr);
-                tmp_tr.update(tmp_td);
+                tmp_tr.replaceChildren(tmp_td);
 
                 return tmp_tr;
                 break;
@@ -700,7 +740,7 @@ BuildTbl.prototype = {
                     var html_tag = tag_elem_table_value(field_name, field_name_raw, field_value);
                     var html_value = `<div class="flex_h flex_align_middle fiche_field"><div class="label_field_icon"><i class="fa fa-${field_icon}"></i><span>${field_name}</span></div><div class="${field_className}" >${html_tag}</div></div>`;
                     tmp_tr.appendChild(tmp_div);
-                    $(tmp_div).update(html_value);
+                    tmp_div.innerHTML = html_value;
                     console.log('html_tag', field_value, html_tag);
                 }
                 tmp_tr.setAttribute('act_preview_mdl', 'app/app/app_fiche_preview');
@@ -709,15 +749,15 @@ BuildTbl.prototype = {
                 break;
             case 'image':
                 var tmp_tr = this.div_piece.cloneNode(false);
-                tmp_tr.addClassName('autoToggle');
+                tmp_tr.classList.add('autoToggle');
 
                 var data_model = this.DATA_MODEL.filter(function (n) {
                     return n.field_name == 'nom' + ucfirst(this.options.table_name) || n.field_name == 'code' + ucfirst(this.options.table_name);
                 }.bind(this));
-                tmp_tr.update('<div class="tile_image"  >' +
+                tmp_tr.innerHTML = '<div class="tile_image"  >' +
                     '<div class="tile_image_in"><img src="http://' + window.location.host + '/img_src-' + this.options.table_name + '-square-' + tr_data.table_value + '.jpg"></div>' +
                     '<div class="tile_text">' + tr_data.html['nom' + ucfirst(this.options.table_name)] + '</div>' +
-                    '</div>');
+                    '</div>';
                 tmp_tr.appendChild(chk);
                 tmp_tr.setAttribute('act_preview_mdl', 'app/app_img/image_app_liste_img');
                 return tmp_tr;
@@ -740,7 +780,7 @@ BuildTbl.prototype = {
                         var html_tag = tag_elem_table_value(field_name, field_name_raw, field_value);
                         var html_value = `<div class="flex_h flex_wrap flex_align_middle fiche_field" style="min-width:50%;"><div class="label_field_icon"><i class="fa fa-${field_icon}"></i><span>${field_name}</span></div><div>${html_tag}</div></div>`;
                         tmp_tr.appendChild(tmp_div);
-                        $(tmp_div).update(html_value);
+                        tmp_div.innerHTML = html_value;
                     }
                 }
                 tmp_tr.setAttribute('act_preview_mdl', 'app/app/app_fiche_preview');
@@ -748,20 +788,20 @@ BuildTbl.prototype = {
                 return tmp_tr;
                 break;
         }
-        chk.hide();
-        var id_tr = this.element.id + '_' + this.options.table_name + '_' + tr_data.table_value + '-' + this.element.identify();
-        if ($(id_tr)) return $(id_tr);
+        chk.hidden = true;
+        var id_tr = this.element.id + '_' + this.options.table_name + '_' + tr_data.table_value + '-' + this.element.id;
+        if (document.getElementById(id_tr)) return document.getElementById(id_tr);
 
     },
     setIndex: function (index) {
 
     },
     build_data: function (args) {
-        if (!this.element.select('[expl_count]').first()) {
-            this.expl_count = new Element('div');
+        if (!this.element.querySelector('[expl_count]')) {
+            this.expl_count = document.createElement('div');
             this.expl_count.setAttribute('expl_count', 'true')
-            this.element.insert(this.expl_count)
-            this.expl_count.hide();
+            this.element.append(this.expl_count)
+            this.expl_count.hidden = true;
         }
         if (args[0]) if (args[0]['maxcount']) this.maxcount = args[0]['maxcount'];
         if (args[0]) if (args[0]['count']) this.count = args[0]['count'];
@@ -779,12 +819,12 @@ BuildTbl.prototype = {
         var iter = args || this.options.table_data;
 
         var DATA_MODEL_DEFAULT = [];
-        this.DATA_MODEL_DEFAULT.each(function (h_node) {
+        this.DATA_MODEL_DEFAULT.forEach(function (h_node) {
             DATA_MODEL_DEFAULT[h_node.field_name] = h_node;
         });
         //
         var DATA_MODEL = [];
-        this.DATA_MODEL.each(function (h_node) {
+        this.DATA_MODEL.forEach(function (h_node) {
             DATA_MODEL[h_node.field_name_raw] = h_node;
         });
 
@@ -796,49 +836,58 @@ BuildTbl.prototype = {
             this.cache = this.cache.concat(args);
         }
 
-        iter.each(function (data) {
+        iter.forEach(function (data) {
             var tr_data = data
             debug_ct++;
 
-            if (this.table_activity_count) this.table_activity_count.update(this.cache.size())// nouveau tr si pas groupbyc
+            if (this.table_activity_count) this.table_activity_count.textContent = this.cache.length// nouveau tr si pas groupbyc
             if (!tr_data.groupBy) {
                 var data_vars = tr_data.vars;
                 if (!data_vars) {
                     console.log('Allerrttte : ', tr_data);
                 }
                 var data_html = tr_data.html;
-                var id_tr = this.element.id + '_' + this.options.table_name + '_' + data_vars.table_value + '-' + this.element.identify();
+                var id_tr = this.element.id + '_' + this.options.table_name + '_' + data_vars.table_value + '-' + this.element.id;
 
 
-                if (!$(id_tr) && data_vars) {
+                if (!document.getElementById(id_tr) && data_vars) {
 
-                    var chk = new Element('input');
+                    var chk = document.createElement('input');
                     chk.setAttribute('type', 'checkbox')
                     chk.setAttribute('name', 'id[]')
                     chk.setAttribute('value', tr_data.table_value)
-                    chk.hide();
+                    chk.hidden = true;
                     var i_ct = 0;
-                    switch (this.element.readAttribute('data-dsp')) {
+                    switch (this.element.getAttribute('data-dsp')) {
                         case 'planning':
                             var dateDebut = data_html['dateDebut' + this.options.Table_name],
                                 heureDebut = data_html['heureDebut' + this.options.Table_name],
                                 heureFin = data_html['heureFin' + this.options.Table_name];
-                            if ($(this.tbody).select('[data-droptache="dropzone"][dropvalue="' + dateDebut + '"]').size() == 0) break;
-                            var tmp_tr = $(this.div_piece.cloneNode(false));
-                            if ($(this.tbody).select('[data-droptache="dropzone"][dropvalue="' + dateDebut + '"][heuredebut="' + heureDebut + '"]').size() != 0) {
-                                $(this.tbody).select('[data-droptache="dropzone"][dropvalue="' + dateDebut + '"][heuredebut="' + heureDebut + '"]').each(function (node_parent) {
-                                    $(node_parent).appendChild(tmp_tr);
-                                    $(node_parent).fire('dom:resizetache');
+                            var dateSelector = '[data-droptache="dropzone"][dropvalue="' + CSS.escape(String(dateDebut)) + '"]';
+                            if (this.tbody.querySelectorAll(dateSelector).length == 0) break;
+                            var tmp_tr = this.div_piece.cloneNode(false);
+                            var exactSelector = dateSelector + '[heuredebut="' + CSS.escape(String(heureDebut)) + '"]';
+                            var morningSelector = dateSelector + '[heuredebut="AM"]';
+                            if (this.tbody.querySelectorAll(exactSelector).length != 0) {
+                                this.tbody.querySelectorAll(exactSelector).forEach(function (node_parent) {
+                                    node_parent.appendChild(tmp_tr);
+                                    var resizeEvent = new CustomEvent('dom:resizetache', { bubbles: true, cancelable: true });
+                                    resizeEvent.memo = {};
+                                    node_parent.dispatchEvent(resizeEvent);
                                 }.bind(this));
-                            } else if ($(this.tbody).select('[data-droptache="dropzone"][dropvalue="' + dateDebut + '"][heuredebut="AM"]').size() != 0) {
-                                $(this.tbody).select('[data-droptache="dropzone"][dropvalue="' + dateDebut + '"][heuredebut="AM"]').each(function (node_parent) {
-                                    $(node_parent).appendChild(tmp_tr);
-                                    $(node_parent).fire('dom:resizetache');
+                            } else if (this.tbody.querySelectorAll(morningSelector).length != 0) {
+                                this.tbody.querySelectorAll(morningSelector).forEach(function (node_parent) {
+                                    node_parent.appendChild(tmp_tr);
+                                    var resizeEvent = new CustomEvent('dom:resizetache', { bubbles: true, cancelable: true });
+                                    resizeEvent.memo = {};
+                                    node_parent.dispatchEvent(resizeEvent);
                                 }.bind(this))
-                            } else if ($(this.tbody).select('[data-droptache="dropzone"][dropvalue="' + dateDebut + '"]').size() != 0) {
-                                $(this.tbody).select('[data-droptache="dropzone"][dropvalue="' + dateDebut + '"]').each(function (node_parent) {
-                                    $(node_parent).appendChild(tmp_tr);
-                                    $(node_parent).fire('dom:resizetache');
+                            } else {
+                                this.tbody.querySelectorAll(dateSelector).forEach(function (node_parent) {
+                                    node_parent.appendChild(tmp_tr);
+                                    var resizeEvent = new CustomEvent('dom:resizetache', { bubbles: true, cancelable: true });
+                                    resizeEvent.memo = {};
+                                    node_parent.dispatchEvent(resizeEvent);
                                 }.bind(this));
                             }
                             ;
@@ -848,12 +897,14 @@ BuildTbl.prototype = {
                                 'data-dateDebut': dateDebut,
                                 'data-heureDebut': heureDebut,
                                 'data-dragtache': 'tache',
-                                'data-parent': this.tbody.identify()
+                                'data-parent': this.tbody.id || (this.tbody.id = uniqid('datatable_body'))
                             }
-                            tmp_tr.writeAttribute(attr);
-                            tmp_tr.update('<div style="height:100%;overflow:hidden;" act_defer mdl="app/app_planning/app_planning_tache" vars="idtache=' + tr_data.table_value + '"></div>');
-                            tmp_tr.addClassName('absolute dyntache tachehebdo');
-                            $(tmp_tr).fire('dom:resizetache');
+                            Object.entries(attr).forEach(function ([name, value]) { tmp_tr.setAttribute(name, value); });
+                            tmp_tr.innerHTML = '<div style="height:100%;overflow:hidden;" act_defer mdl="app/app_planning/app_planning_tache" vars="idtache=' + tr_data.table_value + '"></div>';
+                            tmp_tr.classList.add('absolute', 'dyntache', 'tachehebdo');
+                            var resizeEvent = new CustomEvent('dom:resizetache', { bubbles: true, cancelable: true });
+                            resizeEvent.memo = {};
+                            tmp_tr.dispatchEvent(resizeEvent);
                             break;
                         case 'conge':
 
@@ -875,25 +926,25 @@ BuildTbl.prototype = {
                                 'data-dateFin': dateFin,
                                 'data-heureFin': heureFin,
                                 'data-dragconge': 'conge',
-                                'data-parent': this.tbody.identify()
+                                'data-parent': this.tbody.id || (this.tbody.id = uniqid('datatable_body'))
                             }
-                            tmp_tr.writeAttribute(attr);
+                            Object.entries(attr).forEach(function ([name, value]) { tmp_tr.setAttribute(name, value); });
 
-                            $(this.tbody).select('[data-idconge="' + idconge + '"]').invoke('remove');
-                            tmp_tr.update('<div  act_defer mdl="app/app_conge/app_conge_drag" vars="idconge=' + tr_data.table_value + '"></div>')
+                            this.tbody.querySelectorAll('[data-idconge="' + CSS.escape(String(idconge)) + '"]').forEach(function (node) { node.remove(); });
+                            tmp_tr.innerHTML = '<div  act_defer mdl="app/app_conge/app_conge_drag" vars="idconge=' + tr_data.table_value + '"></div>';
 
-                            $(this.tbody).appendChild(tmp_tr);
+                            this.tbody.appendChild(tmp_tr);
                             break;
                         case 'mdl':
                             var tmp_tr = this.div_piece.cloneNode(false);
-                            tmp_tr.update(tr_data.mdl);
+                            tmp_tr.innerHTML = tr_data.mdl;
                             break;
                         case 'table_div':
-                            var tmp_tr = new Element('div');
+                            var tmp_tr = document.createElement('div');
                             //	console.log(tmp_tr);
-                            tmp_tr.addClassName('css_row autoToggle');
+                            tmp_tr.classList.add('css_row', 'autoToggle');
                             tmp_tr.setAttribute('act_preview_mdl', 'app/app/app_fiche_preview');
-                            tmp_tr.setStyle({
+                            Object.assign(tmp_tr.style, {
                                 'width': '350px',
                                 overflow: 'hidden'
                             });
@@ -909,7 +960,8 @@ BuildTbl.prototype = {
                                         field_value = tr_data.html[field_name],
                                         field_icon = model.icon || '',
                                         field_className = model.className || '';
-                                    var tmp_td = create_element_in('div', tmp_tr).addClassName('css_cell padding');
+                                    var tmp_td = create_element_in('div', tmp_tr);
+                                    tmp_td.classList.add('css_cell', 'padding');
                                     field_value = '<span class="flex_h"><i class="textgris padding fa fa-' + field_icon + ' border"></i><span class="flex_main">' + field_value + '</span></span>';
                                     tag_elem_table_field(tmp_td, field_name, field_name_raw, field_value, field_className);
                                 }
@@ -917,10 +969,10 @@ BuildTbl.prototype = {
                             break;
                         case 'group_vertical':
                             var tmp_tr = this.div_piece.cloneNode(false);
-                            tmp_tr.addClassName('border4 margin blanc');
+                            tmp_tr.classList.add('border4', 'margin', 'blanc');
                             tmp_tr.appendChild(chk);
                             tmp_tr.setAttribute('act_preview_mdl', 'app/app/app_fiche_preview');
-                            this.DATA_MODEL.each(function (h_node) { // opportunites , micro fiches
+                            this.DATA_MODEL.forEach(function (h_node) { // opportunites , micro fiches
                                 var field_title = h_node.title
                                 var field_name = h_node.field_name
                                 var field_name_raw = h_node.field_name_raw
@@ -934,49 +986,49 @@ BuildTbl.prototype = {
                             break;
                         case 'icon':
                             var tmp_tr = this.div_piece.cloneNode(false);
-                            tmp_tr.addClassName('autoToggle inline tile');
+                            tmp_tr.classList.add('autoToggle', 'inline', 'tile');
                             tmp_tr.setAttribute('act_preview_mdl', 'app/app/app_fiche_preview');
-                            tmp_tr.update('<div class="inline relative padding"  >'
+                            tmp_tr.innerHTML = '<div class="inline relative padding"  >'
                                 + '<i class="fa fa-file-o fa-2x textgris"></i><br>'
                                 + '  <div class="inline absolute"  style="top:10px">'
                                 + ' <i class="fa fa-' + this.options.table_scheme.icon + ' fa-2x"></i>'
                                 + ' </div>'
                                 + '</div>'
-                                + '<div class="tile_text aligncenter"> <span class=""> ' + this.options.table_name + ' </span></div>')
+                                + '<div class="tile_text aligncenter"> <span class=""> ' + this.options.table_name + ' </span></div>';
                             tmp_tr.appendChild(chk);
                             var data_model = this.DATA_MODEL.filter(function (n) {
                                 return n.field_name == 'nom' + ucfirst(this.options.table_name) || n.field_name == 'code' + ucfirst(this.options.table_name);
                             });
-                            if (data_model.size() == 0) data_model = this.DATA_MODEL.filter(function (n) {
+                            if (data_model.length == 0) data_model = this.DATA_MODEL.filter(function (n) {
                                 return n.field_name == 'code' + ucfirst(this.options.table_name);
                             });
-                            data_model.each(function (h_node) {
+                            data_model.forEach(function (h_node) {
                                 var field_name = h_node.field_name
                                 var field_name_raw = h_node.field_name_raw
                                 var field_value = tr_data.html[field_name];
                                 var field_className = h_node.className || 'flex_main';
                                 //
-                                var tmp_div = new Element('span');
-                                tmp_tr.insert(tmp_div);
+                                var tmp_div = document.createElement('span');
+                                tmp_tr.append(tmp_div);
                                 tag_elem_table_field(tmp_div, field_name, field_name_raw, field_value, field_className);
                             }.bind(this));
                             break;
                         case 'flex_line':
                             var tmp_tr = this.div_piece.cloneNode(false);
-                            tmp_tr.addClassName('app_line applink applinkblock ');
-                            tmp_tr.setStyle({
+                            tmp_tr.classList.add('app_line', 'applink', 'applinkblock');
+                            Object.assign(tmp_tr.style, {
                                 'width': '250px',
                                 'max-width': '250px',
                                 'overflow': 'hidden'
                             }) // ,'max-width':'50%'
-                            var tmp_div_cont = new Element('a');
-                            tmp_div_cont.addClassName('autoToggle');
+                            var tmp_div_cont = document.createElement('a');
+                            tmp_div_cont.classList.add('autoToggle');
                             tmp_tr.appendChild(tmp_div_cont);
                             tmp_div_cont.appendChild(chk);
                             var data_model = this.DATA_MODEL.filter(function (n) {
                                 return n.field_name == 'nom' + ucfirst(this.options.table_name);
                             }.bind(this));
-                            if (data_model.size() == 0) {
+                            if (data_model.length == 0) {
                                 data_model = this.DATA_MODEL.filter(function (n) {
                                     return n.field_name == 'code' + ucfirst(this.options.table_name);
                                 }.bind(this));
@@ -984,7 +1036,7 @@ BuildTbl.prototype = {
                             var data_model_statut = this.DATA_MODEL.filter(function (n) {
                                 return n.field_name == 'color' + ucfirst(this.options.table_name) + '_statut';
                             }.bind(this));
-                            data_model_statut.each(function (h_node) {
+                            data_model_statut.forEach(function (h_node) {
                                 var field_name = h_node.field_name
                                 var field_name_raw = h_node.field_name_raw
                                 var field_value = tr_data.html[field_name];
@@ -993,31 +1045,32 @@ BuildTbl.prototype = {
                                 var tmp_div = create_element_in('div', tmp_div_cont);
                                 tag_elem_table_field(tmp_div, field_name, field_name_raw, field_value, field_className);
                             }.bind(this));
-                            data_model.each(function (h_node) {
+                            data_model.forEach(function (h_node) {
                                 var field_value = tr_data.html[h_node.field_name];
                                 var field_className = h_node.className || 'flex_main';
                                 //
                                 var tmp_div = create_element_in('div', tmp_div_cont);
-                                tmp_div.update('<i class="textgrisfonce padding fa fa-' + this.options.table_scheme.icon + '"></i>');
+                                tmp_div.innerHTML = '<i class="textgrisfonce padding fa fa-' + this.options.table_scheme.icon + '"></i>';
                                 var tmp_div = create_element_in('div', tmp_div_cont);
-                                tmp_div.setStyle({
+                                Object.assign(tmp_div.style, {
                                     overflow: 'hidden'
                                 });
                                 tag_elem_table_field(tmp_div, h_node.field_name, h_node.field_name_raw, field_value, field_className);
                             }.bind(this));
                             // data-dsp_fields
-                            if (this.element.readAttribute('data-dsp_fields')) {
-                                tmp_div_cont.addClassName('flex flex_h flex_align_middle');
-                                var add_field_model = explode(';', this.element.readAttribute('data-dsp_fields'));
-                                add_field_model.each(function (field_key) {
+                            if (this.element.getAttribute('data-dsp_fields')) {
+                                tmp_div_cont.classList.add('flex', 'flex_h', 'flex_align_middle');
+                                var add_field_model = explode(';', this.element.getAttribute('data-dsp_fields'));
+                                add_field_model.forEach(function (field_key) {
                                     var h_node = DATA_MODEL_DEFAULT[field_key],
                                         field_value = tr_data.html[field_key],
                                         field_className = h_node.className || 'flex_main ellipsis';
                                     //
                                     var tmp_div = create_element_in('div', tmp_div_cont);
-                                    tmp_div.setStyle({
+                                    Object.assign(tmp_div.style, {
                                         overflow: 'hidden'
-                                    }).addClassName('textgrisfonce')
+                                    });
+                                    tmp_div.classList.add('textgrisfonce');
                                     tag_elem_table_field(tmp_div, h_node.field_name, h_node.field_name_raw, field_value, field_className);
                                 }.bind(this))
                             }
@@ -1038,18 +1091,18 @@ BuildTbl.prototype = {
                             var data_model = this.DATA_MODEL.filter(function (n) {
                                 return n.field_name == 'nom' + ucfirst(this.options.table_name);
                             }.bind(this));
-                            if (data_model.size() == 0) {
+                            if (data_model.length == 0) {
                                 data_model = this.DATA_MODEL.filter(function (n) {
                                     return n.field_name == 'code' + ucfirst(this.options.table_name);
                                 }.bind(this));
                             } //
 
                             // data-dsp_fields
-                            if (this.element.readAttribute('data-dsp_fields')) {
+                            if (this.element.getAttribute('data-dsp_fields')) {
                                 // console.log(explode(';', this.element.readAttribute('data-dsp_fields')));
                             }
 
-                            data_model.each(function (h_node) {
+                            data_model.forEach(function (h_node) {
                                 var field_name = h_node.field_name
                                 var field_name_raw = h_node.field_name_raw
                                 var field_value = tr_data.html[field_name];
@@ -1060,7 +1113,7 @@ BuildTbl.prototype = {
                                     className: 'flex_main'
                                 });
 
-                                tmp_div1.update('<i class="padding fa fa-' + SCHEME_ICON + '" style="color:' + SCHEME_COLOR + '"></i>');
+                                tmp_div1.innerHTML = '<i class="padding fa fa-' + SCHEME_ICON + '" style="color:' + SCHEME_COLOR + '"></i>';
                                 tag_elem_table_field(tmp_div2, field_name, field_name_raw, field_value, field_className);
 
                             }.bind(this));
@@ -1079,12 +1132,15 @@ BuildTbl.prototype = {
 
                             }
 
-                            tpl_tr['table_item_main'].addClassName('app_line applink ' + (field_className || ''));
+                            tpl_tr['table_item_main'].classList.add('app_line', 'applink');
+                            if (field_className) tpl_tr['table_item_main'].classList.add(...field_className.split(/\s+/).filter(Boolean));
                             var attr_tr = {
                                 'data-link': true,
                                 'data-vars': 'table=' + this.options.table_name + '&table_value=' + data_vars.table_value
                             }
-                            tpl_tr['table_item_main'].writeAttribute(attr_tr);
+                            Object.entries(attr_tr).forEach(function ([name, value]) {
+                                tpl_tr['table_item_main'].setAttribute(name, value);
+                            });
 
                             if (tr_data.html[field_name]) {
                                 var content = '<i class="textbleu padding fa fa-' + this.options.table_scheme.icon + '"></i>' + tr_data.html[field_name] + '&nbsp;';
@@ -1092,7 +1148,7 @@ BuildTbl.prototype = {
                                 var content = '<i class="textbleu padding fa fa-' + this.options.table_scheme.icon + '"></i>' + '&nbsp;';
                             }
                             // console.log('tr_data',tr_data.html)
-                            this.DATA_MODEL.each(function (h_node) {
+                            this.DATA_MODEL.forEach(function (h_node) {
                                 if (h_node.field_name_raw != named_field) {
                                     var field_name = h_node.field_name;
                                     var field_name_raw = h_node.field_name_raw;
@@ -1102,7 +1158,7 @@ BuildTbl.prototype = {
 
                                     // console.log(field_name,field_name_raw,tr_data.html[field_name]);
 
-                                    if (tr_data.html[field_name] && trim(tr_data.html[field_name]).stripTags() != '') {
+                                    if (tr_data.html[field_name] && String(tr_data.html[field_name]).replace(/<[^>]*>/g, '').trim() != '') {
                                         if (field_className != 'nb_field') {
                                             if (tr_data.html[field_name]) {
                                                 str = '<i class="padding fa fa-' + field_icon + ' textgris"></i>';
@@ -1112,20 +1168,20 @@ BuildTbl.prototype = {
                                             } else {
                                                 str = '<div>Vide !!! </div>';
                                             }
-                                            tpl_tr['table_item_data_fk'].insert(str);
+                                            tpl_tr['table_item_data_fk'].insertAdjacentHTML('beforeend', str);
                                         } else {
                                             var table_fk = field_name_raw.replace('count_', '');
                                             var table_fk_vars = 'table=' + table_fk + '&nbRows=15&vars[id' + this.options.table_name + ']=' + tr_data.html['id' + this.options.table_name];
                                             var str = tr_data.html[field_name] || '';
                                             // console.log( ' table_fk '+ table_fk)
-                                            if (trim(str.stripTags()) != '') {
+                                            if (String(str).replace(/<[^>]*>/g, '').trim() != '') {
 
-                                                tpl_tr['table_item_count_zone'].insert({top: str});
-                                                tpl_tr['table_line_item_more_title'].update(table_fk);
-                                                tpl_tr['table_line_item_more_fk'].insert({top: '<div class=""><div class="flex_main" data-data_model="' + this.options.data_model + '" data-dsp_liste="dsp_liste" data-vars="' + table_fk_vars + '" data-dsp="table_line">' + field_name + ' </div></div>'});
+                                                tpl_tr['table_item_count_zone'].insertAdjacentHTML('afterbegin', str);
+                                                tpl_tr['table_line_item_more_title'].textContent = table_fk;
+                                                tpl_tr['table_line_item_more_fk'].insertAdjacentHTML('afterbegin', '<div class=""><div class="flex_main" data-data_model="' + this.options.data_model + '" data-dsp_liste="dsp_liste" data-vars="' + table_fk_vars + '" data-dsp="table_line">' + field_name + ' </div></div>');
 
                                             } else {
-                                                tpl_tr['table_line_item_more_fk'].insert({top: '<div>Vide !!! </div>'});
+                                                tpl_tr['table_line_item_more_fk'].insertAdjacentHTML('afterbegin', '<div>Vide !!! </div>');
                                             }
 
                                         }
@@ -1139,32 +1195,32 @@ BuildTbl.prototype = {
                             if (this.options.table_scheme.grilleRFK) {
                                 this.options.table_scheme.grilleRFK.forEach(function (node, index) {
                                     var del_fk = node.table;
-                                    tmp_div_cont.insert(del_fk);
+                                    tmp_div_cont.insertAdjacentHTML('beforeend', del_fk);
                                 }.bind(this))
                             }
 
                             break;
                         case 'line_fk':
                             var tmp_tr = this.div_piece.cloneNode(false);
-                            tmp_tr.addClassName('app_line applink applinkblock ellipsis');
-                            var tmp_div_cont = new Element('a');
-                            var tmp_div_chk = new Element('div');
-                            tmp_div_chk.update(chk);
+                            tmp_tr.classList.add('app_line', 'applink', 'applinkblock', 'ellipsis');
+                            var tmp_div_cont = document.createElement('a');
+                            var tmp_div_chk = document.createElement('div');
+                            tmp_div_chk.replaceChildren(chk);
                             tmp_div_cont.appendChild(tmp_div_chk);
-                            tmp_div_cont.addClassName('autoToggle flex_h flex_inline padding');
+                            tmp_div_cont.classList.add('autoToggle', 'flex_h', 'flex_inline', 'padding');
                             tmp_tr.appendChild(tmp_div_cont);
                             var data_model = this.DATA_MODEL.filter(function (n) {
                                 return n.field_name == 'nom' + ucfirst(this.options.table_name);
                             }.bind(this));
-                            if (data_model.size() == 0) data_model = this.DATA_MODEL.filter(function (n) {
+                            if (data_model.length == 0) data_model = this.DATA_MODEL.filter(function (n) {
                                 return n.field_name == 'code' + ucfirst(this.options.table_name);
                             }.bind(this));
                             // data_model // this.options.table_scheme.columnModel
-                            data_model.each(function (h_node) {
+                            data_model.forEach(function (h_node) {
                                 var field_name = h_node.field_name
                                 var field_name_raw = h_node.field_name_raw
                                 var field_value = '<div class="ellipsis"><i class="textbleu padding fa fa-' + this.options.table_scheme.icon + '"></i>' + tr_data.html[field_name] + '</div>';
-                                var tmp_div = new Element('div');
+                                var tmp_div = document.createElement('div');
                                 tmp_div_cont.appendChild(tmp_div);
                                 if (tr_data.html.grille_FK) {
                                     var fk_g = tr_data.html.grille_FK;
@@ -1175,7 +1231,7 @@ BuildTbl.prototype = {
                                             } else {
                                                 var content = '&nbsp;/&nbsp;';
                                             }
-                                            tmp_div_cont.insert('<div   style="width:110px;max-width:110px;" class="textgrisfonce"><div class="ellipsis"><i class="fa fa-' + h_node.icon + '"></i>' + content + '</div></div>');
+                                            tmp_div_cont.insertAdjacentHTML('beforeend', '<div   style="width:110px;max-width:110px;" class="textgrisfonce"><div class="ellipsis"><i class="fa fa-' + h_node.icon + '"></i>' + content + '</div></div>');
                                         }
                                     }
                                 }
@@ -1183,10 +1239,11 @@ BuildTbl.prototype = {
                                 //
                                 tag_elem_table_field(tmp_div, field_name, field_name_raw, field_value, field_className);
                                 //
-                                tmp_div.setStyle({
+                                Object.assign(tmp_div.style, {
                                     width: '512px',
                                     'max-width': '250px'
-                                }).addClassName('flex_main')
+                                });
+                                tmp_div.classList.add('flex_main');
                             }.bind(this));
                             tmp_tr.setAttribute('data-link', true);
                             tmp_tr.setAttribute('data-vars', 'table=' + this.options.table_name + '&table_value=' + data_vars.table_value);
@@ -1212,11 +1269,11 @@ BuildTbl.prototype = {
                     }
                     if (tmp_tr) {
 
-                        tmp_tr.addClassName('autoToggle');
+                        tmp_tr.classList.add('autoToggle');
                         tmp_tr.setAttribute('id', id_tr);
                         tmp_tr.setAttribute('md5', tr_data.md5 || '');
                         tag_elem_table(tmp_tr, this.options.table_name, data_vars.table_value);
-                        if (this.element.readAttribute('data-dsp') != 'planning') {
+                        if (this.element.getAttribute('data-dsp') != 'planning') {
                             /*if ( this.last_inserted_elem && this.last_inserted_elem.parentNode ) {
                              this.last_inserted_elem.parentNode.insertBefore (tmp_tr, this.last_inserted_elem.nextSibling);
                              } else {
@@ -1224,27 +1281,25 @@ BuildTbl.prototype = {
                              }*/
                             this.tbody.appendChild(tmp_tr);
                         }
-                        if (this.element.readAttribute('data-sort')) {
-                            tmp_tr.writeAttribute({
-                                'draggable': 'true',
-                                'data-sort_element': 'true'
-                            });
+                        if (this.element.getAttribute('data-sort')) {
+                            tmp_tr.setAttribute('draggable', 'true');
+                            tmp_tr.setAttribute('data-sort_element', 'true');
                         }
-                        this.last_inserted_elem = $(tmp_tr);
+                        this.last_inserted_elem = tmp_tr;
                     }
                 } else {
-                    if (this.element.readAttribute('data-dsp') == 'planning') {
+                    if (this.element.getAttribute('data-dsp') == 'planning') {
                     }
-                    this.last_inserted_elem = $(id_tr);
+                    this.last_inserted_elem = document.getElementById(id_tr);
                 }
             }
             if (tr_data.groupBy) {
 
                 var id_row_groupBy = this.element.id + '_' + this.options.table_name + '_' + tr_data.table_value + '-' + tr_data.table;
-                if ($(id_row_groupBy)) {
-                    return $(id_row_groupBy);
+                if (document.getElementById(id_row_groupBy)) {
+                    return document.getElementById(id_row_groupBy);
                 }
-                var tmp_groupBy = this.build_data_row_groupby(tr_data, this.element.readAttribute('data-dsp'));
+                var tmp_groupBy = this.build_data_row_groupby(tr_data, this.element.getAttribute('data-dsp'));
                 if (tmp_groupBy) {
                     for (const tmp_g of tmp_groupBy) {
                         if (this.last_inserted_elem && this.last_inserted_elem.parentNode) {
@@ -1252,13 +1307,13 @@ BuildTbl.prototype = {
                         } else {
                             this.tbody.appendChild(tmp_g);
                         }
-                        this.last_inserted_elem = $(tmp_g);
+                        this.last_inserted_elem = tmp_g;
                         this.last_inserted_elem.setAttribute('id', id_row_groupBy);
                     }
                 }
                 this.last_inserted_elem.setAttribute('id', id_row_groupBy);
             }
-            if (tr_data.chunk && tr_data.chunks && (tr_data.chunk == tr_data.chunks) && debug_ct == iter.size()) {
+            if (tr_data.chunk && tr_data.chunks && (tr_data.chunk == tr_data.chunks) && debug_ct == iter.length) {
                 if (this.from_cache !== true) {
                    // this.cache_data();
                     //console.log('end cache '+this.options.table_scheme.nomAppscheme,tr_data.chunk , tr_data.chunks);
@@ -1272,43 +1327,43 @@ BuildTbl.prototype = {
     },
     getCount: function () {
 
-        if (this.element.select('[expl_count]').first()) {
-            if (this.count == this.maxcount) this.expl_count.update(this.count)
-            else this.expl_count.update(this.count + ' / ' + this.maxcount)
+        if (this.element.querySelector('[expl_count]')) {
+            if (this.count == this.maxcount) this.expl_count.textContent = this.count
+            else this.expl_count.textContent = this.count + ' / ' + this.maxcount
         } // new
 
-        if ($(this.table_activity_count)) {
-            if (this.count == this.maxcount) this.table_activity_count.update(this.count + ' résultats')
+        if (this.table_activity_count) {
+            if (this.count == this.maxcount) this.table_activity_count.textContent = this.count + ' résultats'
             else {
-                this.table_activity_count.update(this.count + ' résultats sur ' + this.maxcount);
-                if ($(this.table_activity_pager_select)) {
-                    this.table_activity_pager_select.update(Math.ceil((this.maxcount / this.count)) + ' pages')
+                this.table_activity_count.textContent = this.count + ' résultats sur ' + this.maxcount;
+                if (this.table_activity_pager_select) {
+                    this.table_activity_pager_select.textContent = Math.ceil((this.maxcount / this.count)) + ' pages'
                 }
             }
 
             this.nbPage = Math.ceil((this.maxcount / this.count));
             if (this.nbPage >= 8) {
             }
-            if (this.count != this.maxcount && (this.table_activity_pager.childElements().size() != this.nbPage)) {
-                this.table_activity_pager.update();
+            if (this.count != this.maxcount && (this.table_activity_pager.children.length != this.nbPage)) {
+                this.table_activity_pager.replaceChildren();
                 if (this.nbPage <= 8) {
-                    this.table_activity_pager_more_trigger.hide();
+                    this.table_activity_pager_more_trigger.hidden = true;
                 } else {
-                    this.table_activity_pager_more_trigger.show();
+                    this.table_activity_pager_more_trigger.hidden = false;
                 }
                 add_page = function (page) {
                     var css = (this.page == page) ? 'active' : '';
                     if (page > 8) {
                         if (this.table_activity_pager_more)
-                            this.table_activity_pager_more.insert('<div class="' + css + ' autoToggle" app_button_scope="app_button_scope" vars="page=' + page + '">' + page + '</div>')
+                            this.table_activity_pager_more.insertAdjacentHTML('beforeend', '<div class="' + css + ' autoToggle" app_button_scope="app_button_scope" vars="page=' + page + '">' + page + '</div>')
                     } else {
-                        this.table_activity_pager.insert('<div class="' + css + ' autoToggle" app_button_scope="app_button_scope" vars="page=' + page + '">' + page + '</div>')
+                        this.table_activity_pager.insertAdjacentHTML('beforeend', '<div class="' + css + ' autoToggle" app_button_scope="app_button_scope" vars="page=' + page + '">' + page + '</div>')
                     }
                 };
-                (this.nbPage).times(add_page.bind(this));
+                for (var page = 0; page < this.nbPage; page++) add_page.call(this, page);
             } else {
             }
-            if ($(this.table_activity_count_menu) && $(this.table_activity_count_menu).empty()) {
+            if (this.table_activity_count_menu && !this.table_activity_count_menu.textContent.trim()) {
                 [
                     10,
                     50,
@@ -1317,33 +1372,31 @@ BuildTbl.prototype = {
                     500,
                     1500,
                     3000
-                ].reverse().each(function (value) {
-                    this.table_activity_count_menu.insert('<a class="autoToggle" app_button_scope="app_button_scope" vars="nbRows=' + value + '">' + value + '</a>')
+                ].reverse().forEach(function (value) {
+                    this.table_activity_count_menu.insertAdjacentHTML('beforeend', '<a class="autoToggle" app_button_scope="app_button_scope" vars="nbRows=' + value + '">' + value + '</a>')
                 }.bind(this))
             }
         }
-        this.element.writeAttribute({
-            'data-table_count': this.count,
-            'data-table_count_max': this.maxcount
-        }) // this.RAW_DATA_MODEL_DEFAULT => les champs pour le prix /  field_name_group
+        this.element.setAttribute('data-table_count', this.count);
+        this.element.setAttribute('data-table_count_max', this.maxcount);
 //
     },
     getSum: function () {
-        if (this.element.readAttribute('data-dsp-sum')) {
-            if ($(this.element.readAttribute('data-dsp-sum'))) {
-                this.treporter.update();
+        if (this.element.getAttribute('data-dsp-sum')) {
+            if (document.getElementById(this.element.getAttribute('data-dsp-sum'))) {
+                this.treporter.replaceChildren();
                 this.sum_zone_tmp = create_element_in('div', this.treporter, {
                     className: 'flex_h flex_align_middle padding'
                 });
-                this.sum_zone_tmp.update('<div class="border4"><i class="fa fa-calculator textbold"></i> Total</div><div class="sum_zone flex_h"></div>');
-                this.sum_zone = $(this.element.querySelector('.sum_zone'));
+                this.sum_zone_tmp.innerHTML = '<div class="border4"><i class="fa fa-calculator textbold"></i> Total</div><div class="sum_zone flex_h"></div>';
+                this.sum_zone = this.element.querySelector('.sum_zone');
                 this.moy_zone_tmp = create_element_in('div', this.treporter, {
                     className: 'flex_h flex_align_middle padding'
                 });
-                this.moy_zone_tmp.update('<div><i class="fa fa-calculator textbold"></i> Moyenne</div><div class="moy_zone"></div>');
-                this.moy_zone = $(this.element.querySelector('.treporter'))
-                this.sum_zone_tmp.hide();
-                this.moy_zone_tmp.hide();
+                this.moy_zone_tmp.innerHTML = '<div><i class="fa fa-calculator textbold"></i> Moyenne</div><div class="moy_zone"></div>';
+                this.moy_zone = this.element.querySelector('.treporter')
+                this.sum_zone_tmp.hidden = true;
+                this.moy_zone_tmp.hidden = true;
                 for (var field_key in this.RAW_DATA_MODEL) {
                     if (this.RAW_DATA_MODEL.hasOwnProperty(field_key)) {
                         var model = this.RAW_DATA_MODEL[field_key];
@@ -1351,29 +1404,31 @@ BuildTbl.prototype = {
                         var field_name_raw = model.field_name_raw;
                         if (!empty(window.APP.APPFIELDS[field_name_raw])) {
                             if (!empty(window.APP.APPFIELDS[field_name_raw]['has_totalAppscheme_field'])) {
-                                var childs = this.element.select('[data-field_name=' + model.field_name + ']');
+                                var childs = this.element.querySelectorAll('[data-field_name="' + CSS.escape(String(model.field_name)) + '"]');
                                 var total_ligne = 0;
-                                childs.each(function (child) {
-                                    var a = child.innerHTML.stripTags().replace(' ', '', 'gi').replace('&nbsp;', '', 'gi').replace('€', '', 'gi');
-                                    total_ligne += eval(a) || 0
+                                childs.forEach(function (child) {
+                                    var a = child.textContent.replace(/\s|€|\u00a0/g, '');
+                                    total_ligne += Number(a) || 0
                                 }.bind(this))
-                                create_element_in('div', this.sum_zone, {
+                                var totalNode = create_element_in('div', this.sum_zone, {
                                     className: 'padding'
-                                }).update(model.title + ' : ' + Math.round(total_ligne, 2));
-                                this.sum_zone_tmp.show();
+                                });
+                                totalNode.textContent = model.title + ' : ' + Math.round(total_ligne, 2);
+                                this.sum_zone_tmp.hidden = false;
                             }
                             if (!empty(window.APP.APPFIELDS[field_name_raw]['has_moyenneAppscheme_field'])) {
-                                var childs = this.element.select('[data-field_name=' + model.field_name + ']');
+                                var childs = this.element.querySelectorAll('[data-field_name="' + CSS.escape(String(model.field_name)) + '"]');
                                 var moyenne_ligne = 0;
-                                childs.each(function (child) {
-                                    var a = child.innerHTML.stripTags().replace(' ', '', 'gi').replace('&nbsp;', '', 'gi').replace('€', '', 'gi');
-                                    moyenne_ligne += eval(a) || 0
+                                childs.forEach(function (child) {
+                                    var a = child.textContent.replace(/\s|€|\u00a0/g, '');
+                                    moyenne_ligne += Number(a) || 0
                                 }.bind(this))
-                                moyenne_ligne = moyenne_ligne / childs.size();
-                                create_element_in('div', this.moy_zone, {
+                                moyenne_ligne = moyenne_ligne / childs.length;
+                                var averageNode = create_element_in('div', this.moy_zone, {
                                     className: 'padding'
-                                }).update(model.title + ' : ' + Math.round(moyenne_ligne, 4));
-                                this.moy_zone_tmp.show();
+                                });
+                                averageNode.textContent = model.title + ' : ' + Math.round(moyenne_ligne, 4);
+                                this.moy_zone_tmp.hidden = false;
                             }
                         }
                     }
@@ -1399,17 +1454,17 @@ BuildTbl.prototype = {
                 this.cache_clone[cache_index.table + '-' + cache_index.table_value] = cache_index.md5 || 'md5';
             }
         }
-        $(this.tbody).childElements().forEach((node)=> {
-            if ($(node).readAttribute('data-table')) {
-                if ($(node).readAttribute('data-table_value')) {
-                    let key = $(node).readAttribute('data-table') + '-' + $(node).readAttribute('data-table_value');
+        Array.from(this.tbody.children).forEach((node)=> {
+            if (node.getAttribute('data-table')) {
+                if (node.getAttribute('data-table_value')) {
+                    let key = node.getAttribute('data-table') + '-' + node.getAttribute('data-table_value');
                     if (this.cache_clone[key]) {
-                        if (this.cache_clone[key] != node.readAttribute('md5')) {
-                            console.log('changed ', this.cache_clone[key], node.readAttribute('md5'))
+                        if (this.cache_clone[key] != node.getAttribute('md5')) {
+                            console.log('changed ', this.cache_clone[key], node.getAttribute('md5'))
                             //$(node).update('update');
                         }
                     } else {
-                        $(node).remove();
+                        node.remove();
                     }
                 }
             }
@@ -1424,25 +1479,27 @@ BuildTbl.prototype = {
     }
 }
 
-BuildSearch = Class.create();
+BuildSearch = function () {
+    this.initialize.apply(this, arguments);
+};
 BuildSearch.prototype = {
     apptpl_table: '<table ><thead><tr></tr></thead><tbody class="toggler div_tbody" ></tbody></table>',
     apptpl_table_footer: '<div class="bordert"><div class="padding"></div></div>',
     initialize: function (element, options) {
-        this.element = $(element)
-        this.options = Object.extend({
+        this.element = typeof element === 'string' ? document.getElementById(element) : element
+        this.options = Object.assign({
             url_data: '',
             table_scheme: {},
             nbRows: 10
         }, options || {});
 //
 // this.options.table_scheme = window.APP.APPSCHEMES[this.options.table_name];
-        this.element.identify();
-        this.tbody = new Element('div');
-        this.tbody.addClassName('relative');
-        this.div_piece = new Element('div');
-        this.element.update(this.tbody);
-        this.element.observe('dom:stream_chunk', function (event) {
+        if (!this.element.id) this.element.id = uniqid('search');
+        this.tbody = document.createElement('div');
+        this.tbody.classList.add('relative');
+        this.div_piece = document.createElement('div');
+        this.element.replaceChildren(this.tbody);
+        this.element.addEventListener('dom:stream_chunk', function (event) {
             var res_tmp = event.memo;
             var data = window.register_stream[res_tmp]['data'];
             var data_main = data['data_main'];
@@ -1451,8 +1508,8 @@ BuildSearch.prototype = {
         }.bind(this));
     },
     load_data: function (args) {
-        search_args = args.toQueryParams();
-        this.tbody.update();
+        search_args = Object.fromEntries(new URLSearchParams(args));
+        this.tbody.replaceChildren();
         if (!this.page) this.page = 0;
         if (!this.count) this.count = 0;
         if (!this.maxcount) this.maxcount = 0;
@@ -1485,13 +1542,13 @@ BuildSearch.prototype = {
         }
         args = data_vars;
         var iter = args || this.options.table_data;
-        this.tbody.addClassName('flex_v')
-        iter.each(function (tr_data) {
+        this.tbody.classList.add('flex_v')
+        iter.forEach(function (tr_data) {
 // nouveau tr si pas groupby
             if (!tr_data.groupBy) {
                 var data_html = tr_data.html;
                 var id_tr = this.element.id + '-' + tr_data.name_id + '_' + tr_data.value;
-                if (!$(id_tr)) {
+                if (!document.getElementById(id_tr)) {
                     var tmp_tr = this.div_piece.cloneNode(false);
                     var i_ct = 0;
                     var field_name = tr_data.name_id
@@ -1505,17 +1562,17 @@ BuildSearch.prototype = {
                     tmp_tr.appendChild(tmp_div);
 // tmp_tr.appendChild(tmp_div_fk);
                     tmp_tr.setAttribute('data-groupIn', tr_data.table);
-                    tmp_tr.addClassName('animated bounce');
+                    tmp_tr.classList.add('animated', 'bounce');
 //
                     tag_elem_table_field(tmp_div, field_name, field_name_raw, val_data);
                     tag_elem_table(tmp_tr, tr_data.table, tr_data.value);
-                    if (this.tbody.select('[data-groupBy=' + tr_data.table + ']')) {
-                        this.tbody.select('[data-groupBy=' + tr_data.table + ']').first().appendChild(tmp_tr);
+                    if (this.tbody.querySelector('[data-groupBy="' + CSS.escape(String(tr_data.table)) + '"]')) {
+                        this.tbody.querySelector('[data-groupBy="' + CSS.escape(String(tr_data.table)) + '"]').appendChild(tmp_tr);
                     } else {
                         this.tbody.appendChild(tmp_tr);
                     }
                 } else {
-                    this.last_inserted_elem = $(id_tr);
+                    this.last_inserted_elem = document.getElementById(id_tr);
                 }
             }
             if (tr_data.groupBy) {
@@ -1534,26 +1591,24 @@ BuildSearch.prototype = {
 //
     },
     reposition: function () {
-        this.tbody.select('[data-groupBy]').each(function (node) {
+        this.tbody.querySelectorAll('[data-groupBy]').forEach(function (node) {
 // node.setStyle({position: 'absolute',width:'100%'});
         }.bind(this))
-        this.sortedRows = this.tbody.select('[data-groupBy]').sortBy(function (node) {
-            return node.childNodes.length;
+        this.sortedRows = Array.from(this.tbody.querySelectorAll('[data-groupBy]')).sort(function (nodeA, nodeB) {
+            return nodeA.childNodes.length - nodeB.childNodes.length;
         }.bind(this))
         var y = 0;
-        this.sortedRows.each(function (node, i) {
+        this.sortedRows.forEach(function (node, i) {
 //  this.tbody.appendChild(node) ;
-            node.setStyle({
-                'order': i,
-                top: y + 'px'
-            });
+            node.style.order = i;
+            node.style.top = y + 'px';
 //  node.style.order=i;
-            y += node.getHeight();
+            y += node.getBoundingClientRect().height;
         }.bind(this));
-        this.tbody.select('[data-groupBy=appscheme]').invoke('setStyle', {
-            order: -1
-        })
-        this.tbody.select('[data-groupBy]').each(function (node) {
+        this.tbody.querySelectorAll('[data-groupBy="appscheme"]').forEach(function (node) {
+            node.style.order = -1;
+        });
+        this.tbody.querySelectorAll('[data-groupBy]').forEach(function (node) {
 //  node.setStyle({position:'relative',top:''});
         }.bind(this))
     }

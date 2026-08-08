@@ -28,7 +28,7 @@ import { closeWindow, openList } from './fixtures/app';
 import { sharedPage } from './fixtures/shared-boot';
 import { watchConsole } from './helpers/console-guard';
 
-// One boot for both tests below — see fixtures/shared-boot.ts.
+// One boot for all tests below — see fixtures/shared-boot.ts.
 const getPage = sharedPage();
 
 test('datatable: list loads real rows through the socket data channel', async () => {
@@ -81,4 +81,29 @@ test('datatable: search hides non-matching rows client-side', async () => {
 
   await closeWindow(win);
   guard.assertClean();
+});
+
+test('datatable: native implementation does not call compatibility shims', async () => {
+  const page = getPage();
+  const datatableWarnings: string[] = [];
+
+  page.on('console', (message) => {
+    if (message.type() !== 'warning' || !message.text().includes('[idae-shim]')) return;
+
+    const directCaller = message.text().split('\n').find((line) =>
+      line.includes('javascript/') && !line.includes('vendor/idae-be-shim/'),
+    );
+    if (directCaller?.includes('app/app_datatable.js')) datatableWarnings.push(message.text());
+  });
+
+  await page.evaluate(() => {
+    (window as any).IDAE_SHIM_WARN = 1;
+    (window as any).__idaeShimInstallWarn();
+  });
+
+  const win = await openList(page, TABLE);
+  await expect(win.locator('tbody.div_tbody tr')).not.toHaveCount(0, { timeout: 30_000 });
+  await closeWindow(win);
+
+  expect(datatableWarnings).toEqual([]);
 });
