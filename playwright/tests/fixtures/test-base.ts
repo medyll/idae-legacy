@@ -18,7 +18,7 @@
 import { test as base, expect } from '@playwright/test';
 import { mkdirSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
-import { apiLogin, BASE, waitForAppReady } from './auth';
+import { BASE, uiLogin, waitForAppReady } from './auth';
 
 export const test = base.extend<{}, { workerStorageState: string }>({
   storageState: ({ workerStorageState }, use) => use(workerStorageState),
@@ -31,17 +31,18 @@ export const test = base.extend<{}, { workerStorageState: string }>({
       const context = await browser.newContext();
       const page = await context.newPage();
 
-      // Visit the origin first so localStorage has somewhere to attach, then
-      // log in over HTTP and mirror the session into localStorage the same
-      // way the SPA's own login flow does — see fixtures/auth.ts for why the
-      // cookie alone isn't enough (the socket data channel reads
-      // PHPSESSID/SESSID from localStorage, never from the cookie jar).
+      // Real UI login only — no direct POST/GET against actions.php or
+      // json_ssid.php from Node. Those endpoints and the localStorage mirror
+      // they require (see fixtures/auth.ts: the socket data channel reads
+      // PHPSESSID/SESSID from localStorage, never from the cookie jar) are
+      // handled entirely client-side by the SPA's own login flow — a raw
+      // HTTP call from the test runner has to hand-replicate that mirroring
+      // to fake it, which drifts silently the moment the client flow
+      // changes. Given how much of this stack is still shaky (see
+      // BE_PLAN.md, HANG_TEST.md), the fixture should exercise the exact
+      // path a real user takes, not a shortcut around it.
       await page.goto(BASE + '/', { waitUntil: 'domcontentloaded' });
-      const session = await apiLogin(context.request);
-      await page.evaluate((s) => {
-        localStorage.setItem('PHPSESSID', s.phpsessid);
-        localStorage.setItem('SESSID', s.sessid);
-      }, session);
+      await uiLogin(page);
       await waitForAppReady(page);
 
       await context.storageState({ path: statePath });

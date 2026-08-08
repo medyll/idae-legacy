@@ -6,7 +6,7 @@
  * from the bag cache and a cold boot takes 10-20s. Never assert on the DOM
  * before `waitForAppReady()` resolves.
  */
-import type { APIRequestContext, Page } from '@playwright/test';
+import type { Page } from '@playwright/test';
 import { installShimPreview } from './shim-preview';
 
 /**
@@ -24,42 +24,20 @@ export const PASS = process.env.PLAYWRIGHT_PASS || '';
 export const TABLE = process.env.TEST_TABLE || 'client';
 export const TABLE_VALUE = process.env.TEST_TABLE_VALUE || '';
 
-export interface ApiSession {
-  phpsessid: string;
-  /** `idagent`, mirrored into `localStorage.SESSID` by the app's own login flow. */
-  sessid: string;
-}
-
-/**
- * Server-side login. Returns the identifiers the SPA itself mirrors into
- * `localStorage` after a real form login (see `mdl/app/app_login/actions.php`
- * and `javascript/app/app_bootstrap_init.js`).
- *
- * Getting the HTTP cookie is not the whole story: `services/json_data_table.php`
- * and friends are called from the browser through socket.io
- * (`javascript/app/app.js` → `get_data`/`socket.emit`), and the Node bridge
- * (`app_node/src/services/phpBridge.js`) authenticates its server-to-server
- * call to PHP using `PHPSESSID` read out of the emitted payload — which the
- * client reads from `localStorage`, not from the cookie jar. A page that only
- * has the cookie renders a logged-in shell but gets empty data back from every
- * socket-backed list.
- */
-export async function apiLogin(request: APIRequestContext): Promise<ApiSession> {
-  const resp = await request.post(BASE + '/mdl/app/app_login/actions.php', {
-    form: { F_action: 'app_log', type: 'agent', loginAgent: USER, passwordAgent: PASS },
-  });
-  if (!resp.ok()) throw new Error(`login failed: HTTP ${resp.status()}`);
-
-  const check = await request.get(BASE + '/services/json_ssid.php');
-  const sess = await check.json();
-  if (!sess || typeof sess.idagent !== 'number' || sess.idagent <= 0) {
-    throw new Error(`login did not open a session: ${JSON.stringify(sess)}`);
-  }
-  return { phpsessid: String(sess.PHPSESSID || ''), sessid: String(sess.idagent) };
-}
-
 /**
  * Fills and submits the in-page login form.
+ *
+ * Deliberately the *only* way this suite logs in. An earlier version had an
+ * `apiLogin` shortcut that POSTed straight to `actions.php` and GETed
+ * `json_ssid.php` from Node, bypassing the browser entirely — then had to
+ * hand-replicate what the SPA's own login flow does client-side (mirroring
+ * `PHPSESSID`/`SESSID` into `localStorage`, since the socket data channel
+ * reads credentials from there, never from the cookie jar — see
+ * `app_bootstrap_init.js`). That mirror was a guess at the client's
+ * behavior, not the client's behavior, and would drift silently the moment
+ * the real login flow changed. Given how much of this stack is still shaky
+ * (BE_PLAN.md, HANG_TEST.md), the fixture exercises the exact path a real
+ * user takes instead of a shortcut around it.
  *
  * Only reached when the stored session is missing or expired — the schema JSON
  * loads for anonymous visitors too, so an unauthenticated page still looks
