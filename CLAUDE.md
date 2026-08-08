@@ -109,10 +109,10 @@ A 2015-era SPA built without bundlers:
 - **`javascript/vendor/bag.js`** — custom asset loader; caches scripts as blobs in IndexedDB.
 - **`javascript/main_bag.js`** — defines the dependency graph (`require_trame`) and drives sequential loading via `dyn_require()`.
 - **`javascript/app/app_bootstrap.js`** — calls `schemeLoad()` to fetch schema JSON from PHP, populates `window.APP.APPSCHEMES` / `window.APP.APPFIELDS`.
-- **PrototypeJS 1.7.3** (`require_hell` bundle) — extends native `Array`, `String`, `Element`. Cannot be replaced; patterns like `$A()`, `Class.create()`, `$('id')` are ubiquitous.
+- **`require_hell` bundle** — as of `feat/idae-be-migration` Phase 4 (`41d3985`), this is `@medyll/idae-be` (`javascript/vendor/idae-be/idae-be.iife.js`) plus 7 compatibility shims (`javascript/vendor/idae-be-shim/shim-*.js`), **not PrototypeJS/Scriptaculous** — those were swapped out and removed. The shims exist to keep the ~1,667 `$()` / ~2,074 `Element.*` / `Class.create` / `Ajax.*` / `Effect.*` call sites working unmodified (patterns like `$A()`, `Class.create()`, `$('id')` are still ubiquitous in app code — only their implementation changed). Full plan, phase checklist, and what's still native-Prototype-shaped vs. migrated: `BE_PLAN.md` at the repo root. Do not reintroduce `vendor/prototype/` or `vendor/scriptaculous/` — they were deleted in Phase 3 as dead weight once the shim covered their surface.
 - **`app_cache.js`** — data/state cache via `localforage`. Call `app_cache_reset()` after schema changes to avoid stale client state.
 
-Do not rewrite the loader or remove PrototypeJS. The JSON shape returned by `json_data.php` / `json_scheme.php` must remain structurally identical to legacy output.
+The loader (`bag.js`/`main_bag.js`) itself is stable and should not be rewritten — only its `require_hell` payload changed. The JSON shape returned by `json_data.php` / `json_scheme.php` must remain structurally identical to legacy output.
 
 ## Critical Conventions
 

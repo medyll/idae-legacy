@@ -223,13 +223,25 @@ Reste latent mais inoffensif tant qu'on est sur Mongo : `mdl/app/app_admin/app_c
 
 **Le bug actif.** `localhost` résout `::1` en premier sur Windows, et le port-forward WSL2 de Docker ne binde qu'en IPv4. Chaque connexion TCP neuve mange ~21s de retries SYN avant de retomber sur IPv4. Mesuré : `[::1]:8080` → 21,06s (timeout), `127.0.0.1:8080` → 0,05s.
 
-Invisible au quotidien parce que Chrome fait du Happy Eyeballs (bascule en ~250ms) et met le résultat en cache — d'où « dans la vraie vie l'app charge en 5 secondes ». Mais **Playwright y est exposé** : `apiLogin` passe par `context.request`, du HTTP côté Node, avec un ordre DNS `verbatim` et sans course de fallback. Chaque connexion fraîche stallait 21s. Candidat sérieux pour la lenteur et les timeouts de la suite depuis le début.
+Invisible au quotidien parce que Chrome fait du Happy Eyeballs (bascule en ~250ms) et met le résultat en cache — d'où « dans la vraie vie l'app charge en 5 secondes ». Mais **Playwright y était exposé** : à l'époque de ce fix, `apiLogin` (helper `context.request`, HTTP côté Node, ordre DNS `verbatim`, sans course de fallback) faisait le login pour chaque worker. Chaque connexion fraîche stallait 21s. `apiLogin` a depuis été **supprimé** (`f71a326`, voir plus bas) — le point IPv6 reste vrai et corrigé, mais ce chemin de code n'existe plus.
 
 Fix : `BASE`/`baseURL` passent à `http://127.0.0.1:8080` (`fixtures/auth.ts`, `playwright.config.ts`). Comme la détection d'hôte rejetait l'IP (`Host non configuré dans lan-hosts.json`), `conf.lan.inc.php` aliase maintenant `127.0.0.1`/`::1`/`0.0.0.0` sur l'entrée `localhost` — plutôt que dupliquer un bloc de credentials dans le JSON — et gère au passage le split de port sur les littéraux IPv6 bracketés (`[::1]:8080`, que l'`explode(':')` d'origine cassait). Sans l'alias, `$host_name` dégradait aussi en `"127"`.
 
 Vérifié après fix : `json_ssid.php` répond en 0,39s sur 127.0.0.1, et le coût d'une connexion froide passe de **22,52s à 1,21s**.
 
 À noter, vu au passage : `idae/config/lan-hosts.json` contient des mots de passe SMTP et MySQL en clair, committés dans git.
+
+## Perf — login UI-only, retest workers:2, swap idae-be innocenté
+
+**`apiLogin` supprimé** (`f71a326`). Faisait un POST/GET direct vers `actions.php`/`json_ssid.php` depuis Node (`context.request`), hors navigateur, puis répliquait à la main ce que le vrai flux de login fait côté client (mirror `PHPSESSID`/`SESSID` dans `localStorage` — le canal socket lit les identifiants là, jamais dans le cookie, cf. section « canal d'auth séparé » plus haut). Cette réplique manuelle était une hypothèse sur le comportement du client, pas le comportement réel — dérive silencieuse garantie si le flux de login change. `fixtures/test-base.ts` fait maintenant `page.goto` + `uiLogin` (vrai formulaire, vrai clic) pour chaque worker ; `uiLogin` est désormais le seul chemin de login de toute la suite.
+
+**Timeouts retaillés sur mesure réelle, pas estimation.** Mesuré au navigateur (Chromium, réseau réel, hors Playwright) : boot froid à `#desktop` ~11,3s (106 requêtes), boot chaud (cache IndexedDB `bag.js`) ~8,9s (16 requêtes) — très loin du chiffre fossile « 60-90s sous charge » qui traînait dans les commentaires depuis avant le fix cache-busting (`f4f090a`) et n'avait jamais été remesuré. `openApp`/`waitForAppReady` : 120s → 20s. Sonde bridge (`global-setup.ts`) : 15s → 10s. `playwright.config.ts` `timeout` : 180s → 45s puis 60s (voir plus bas).
+
+**Retest `workers: 2`, deux fois, même échec.** Avec le swap Phase 4 en place et les timeouts retaillés, deux tentatives à 2 workers (une à `timeout: 45000`, une à `timeout: 60000` après bump) — même signature les deux fois : 2-3 specs (`prototype-surface`, `uiux`, puis `forms`, `explorer`, `insertionq` au deuxième essai) épuisent leurs 2 retries sur `"beforeAll" hook timeout ... waiting for locator('#desktop')`. Le hook `beforeAll` de `shared-boot.ts` lui-même ne trouve jamais `#desktop` — 4 boots simultanés (2 workers × 2 boots chacun, cf. `test-base.ts` + `shared-boot.ts`) qui se contentent quelque part. Signature identique au mystère 4-workers documenté plus haut, jamais résolu, qui préexistait au swap.
+
+**Le swap a été isolé et innocenté.** Pendant que le 2e retest tournait, login manuel via un seul onglet navigateur (aucune concurrence, même conteneur en vie) : `#desktop` rendu, 87 schemes chargés, données réelles dans tous les panneaux (clients, prospects, calendrier, badge tâches), **zéro erreur console**. Le swap idae-be est propre en usage normal — l'échec à 2+ workers est de la contention de concurrence, pas une régression de rendu de la Phase 4. La cause de la contention elle-même (NAT WSL2, Mongo hôte sous sessions concurrentes, autre chose) reste non identifiée.
+
+**`workers` reste à 1** (`bf0f576`) — seule config prouvée fiable à ce jour. `timeout` reste à 60000 (marge inoffensive, gardée même à workers:1).
 
 ---
 
