@@ -39,7 +39,9 @@ var afterAjaxCall = function (div) {
 			$(frm).unToggleContent();
 		}
 		if ($(element).hasClassName('cancelFade')) {
-			$(frm).fade({afterFinish: function () {
+			// Was Scriptaculous' Effect.Fade via the shim; fadeElement
+			// (engine/methods.js) is the native replacement, same contract.
+			fadeElement($(frm), {afterFinish: function () {
 				$(frm).remove()
 			}})
 			Event.stop(event);

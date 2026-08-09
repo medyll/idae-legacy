@@ -93,6 +93,9 @@ function request_login() {
 function hide_login() {
 	// $('main_progress').hide();
 	if ( !$ ('div_login') ) return;
-	$ ('div_login').fade ();
+	// Was Scriptaculous' Effect.Fade via the shim, replaced by a native
+	// opacity transition (fadeElement, engine/methods.js) — same contract:
+	// fade to 0, then hide and restore opacity for the next show().
+	fadeElement ($ ('div_login'));
 
 }

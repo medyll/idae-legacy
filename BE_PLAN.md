@@ -231,7 +231,16 @@ Mesuré en instrumentant l'app réelle : boot + liste + fiche + onglet Modifier,
 
 **Ce que ça change au plan.** La liste de Phase 5 avait été ordonnée par comptage `grep` statique sur les anciens fichiers. Aucun des 10 fichiers ci-dessus n'y figurait — et les fichiers qui y figuraient sont maintenant tous migrés ou supprimés. L'ordre réel, dicté par la mesure, est : `app_socket.js`, `sorttable.js`, `afterAjaxCall.js`, `engine.js`, `autoToggle.js`, `app_tree.js`, `module.js`.
 
-**Le gain le plus rapide n'est pas le plus gros fichier** : remplacer les trois `fade()` restants supprime `shim-effects` et 58 % du trafic shim total, pour trois lignes.
+**Correction du 2026-08-09, plus tard le même jour** : les trois `fade()` mesurés (`app_bootstrap_init.js`, `afterAjaxCall.js`, `myddeAttach.js:42`) étaient les seuls **déclenchés par les écrans de la sonde** — pas les seuls qui existent. Un grep sur `Effect.*`/`fade(` a trouvé beaucoup plus d'appelants réellement chargés par `main_bag.js`, jamais atteints parce que rien dans la sonde n'ouvrait de table éditable, d'upload, ou de notification : `librairie/appGui.js` (`Effect.Move`), `librairie/myddeAttach.js` (3 `fade()` de plus, non touchés), `librairie/myddeNotifier.js` (`Effect.Opacity`), `librairie/myddeupload.js`, `librairie/tableGui.js` (`Effect.Appear`), `librairie/validation.js` (`Effect.Appear`). `shim-effects` reste en place.
+
+Les trois `fade()` mesurés sont remplacés par `fadeElement()` (helper natif partagé, `engine/methods.js` — même contrat : fondu vers 0, masquage, restauration de l'opacité, callback `afterFinish`). Vérifié en conditions réelles (pas seulement Playwright) : `hide_login()` fond, se masque, restaure son opacité, zéro erreur console.
+
+Trouvé au passage, même motif que `picPicker`/`TableGrid` — du code chargé ou référencé mais mort :
+- `librairie/growler.js` — non chargé par `main_bag.js`, zéro référence ailleurs. Supprimé.
+- `librairie/myddeSlide.js` — définit la classe `myddeSlide`, jamais instanciée. Le seul appelant (`page_body.latte:295`) instancie `myddeSlideBox`, qui n'existe nulle part — référence déjà cassée avant cette suppression, comme `MY.TableGrid`. Supprimé.
+- `app/app_bootstrap_init_old.js` — zéro référence dans tout le dépôt. Supprimé.
+
+**Reste à faire pour supprimer `shim-effects`** : migrer `Effect.Move`/`Effect.Opacity`/`Effect.Appear`/`Effect.Parallel` dans les six fichiers listés ci-dessus, plus les 3 `fade()` non touchés de `myddeAttach.js`. Pas fait dans cette passe — la sonde d'inventaire ne les avait pas vus, donc le chiffrer aurait été une estimation, pas une mesure.
 
 Réserve de méthode : aucun appel n'a été attribué à `inline (PHP/Latte)` sur ces écrans, mais ce n'est **pas** une preuve que les 719 `$()` des templates sont inertes — ils vivent surtout dans des attributs `onclick`, que cette sonde n'a pas déclenchés. Il faut une passe qui clique réellement avant de conclure sur `shim-core`.
 

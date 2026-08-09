@@ -39,7 +39,9 @@ myddeAttach.prototype = {
 		$(document.body).observe("dragenter", this.dragEnter.bindAsEventListener(this), false)
 		$(document.body).on("dragend", function (event) {
 			this.dragEnd(event);
-			if ($(this.zone)){$(this.zone).fade();}
+			// Was Scriptaculous' Effect.Fade via the shim; fadeElement
+			// (engine/methods.js) is the native replacement, same contract.
+			if ($(this.zone)){fadeElement($(this.zone));}
 		}.bind(this))
 		/*$(document.body).on("dragexit", function (event) {
 			this.dragEnd(event);

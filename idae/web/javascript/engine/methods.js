@@ -28,6 +28,39 @@ function prefixedCalc() {
 	}
 }
 
+/**
+ * Scriptaculous' Effect.Fade, reduced to the three call sites left in the
+ * app once the DOM migration reaches them (app_bootstrap_init.js,
+ * afterAjaxCall.js, myddeAttach.js): fade opacity to 0 over `duration` ms,
+ * then hide the node and restore its opacity so the next `show()` isn't
+ * invisible, then call `afterFinish`.
+ *
+ * Shared here rather than duplicated per file (unlike the other migrated
+ * files' local helpers) because it is the one piece all three callers need
+ * verbatim, and this file already loads before every one of them
+ * (main_bag.js's require_trame). Doing this removes the app's last caller of
+ * `.fade()`, which was 1204 of the 2099 shim calls measured in BE_PLAN.md's
+ * 2026-08-09 inventory — not because the call itself was hot, but because
+ * shim-effects' animation loop drives Element.setOpacity on every frame.
+ * Once nothing calls it, shim-effects.js can be deleted outright.
+ */
+function fadeElement(node, options) {
+	if (!node) return node;
+	options = options || {};
+	var duration = (options.duration || 1.0) * 1000;
+	var oldOpacity = window.getComputedStyle(node).opacity || '1';
+	var previousTransition = node.style.transition;
+	node.style.transition = 'opacity ' + duration + 'ms linear';
+	node.style.opacity = '0';
+	setTimeout(function () {
+		node.style.display = 'none';
+		node.style.transition = previousTransition;
+		node.style.opacity = oldOpacity;
+		if (options.afterFinish) options.afterFinish({element: node});
+	}, duration);
+	return node;
+}
+
 (function (global) {
 
 	/* ------------------------------------------------------------------ *
