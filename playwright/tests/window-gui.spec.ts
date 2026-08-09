@@ -80,6 +80,16 @@ test('window: the reduce button hides the window into the task bar', async () =>
   // depends on it still being there.
   expect(await page.locator(`#${containerId}`).count()).toBe(1);
 
+  // Clean up: a reduced window is still in the DOM under the same id, so the
+  // next test's openRecord() would wait forever for a "new" window that never
+  // appears. initialize() parks the instance's own close() on the innerdisp
+  // element (id = the container id minus its "container" prefix).
+  await page.evaluate((id) => {
+    const inner = document.getElementById(id.replace(/^container/, ''));
+    if (inner && typeof (inner as any).close === 'function') (inner as any).close();
+  }, containerId!);
+  await expect(page.locator(`#${containerId}`)).toHaveCount(0, { timeout: 15_000 });
+
   guard.assertClean();
 });
 
