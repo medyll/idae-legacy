@@ -106,7 +106,10 @@ function prefixedCalc() {
 		// instead (see app_window.js's give_focus).
 		kill: function () {
 			try {
-				this.remove()
+				// removeChild, not this.remove(): the shim replaces
+				// Element.prototype.remove with Prototype's version, so calling
+				// it would route straight back through the shim.
+				if (this.parentNode) this.parentNode.removeChild(this);
 			} catch (e) {
 			}
 		},

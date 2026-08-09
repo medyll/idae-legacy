@@ -57,3 +57,56 @@ test('window: two windows coexist and close independently', async () => {
   await expect(page.locator('.containerdisp')).toHaveCount(0);
   guard.assertClean();
 });
+
+test('window: the reduce button hides the window into the task bar', async () => {
+  const page = getPage();
+  const guard = watchConsole(page);
+
+  // isReduced() used to call Scriptaculous' Effect.Fade; it now runs a native
+  // opacity transition (wg_fadeOut in app_window.js). The contract is
+  // unchanged and is what this asserts: the window goes away visually, and
+  // appGui puts a button for it in the task bar.
+  const win = await openRecord(page, TABLE, TABLE_VALUE);
+  const containerId = await win.getAttribute('id');
+
+  const buttonsBefore = await page.locator('#taskBar > *').count();
+
+  await win.locator('.handledisp .buttonreduce').click();
+
+  await expect(win).toBeHidden({ timeout: 15_000 });
+  await expect(page.locator('#taskBar > *')).toHaveCount(buttonsBefore + 1, { timeout: 15_000 });
+
+  // The container is only hidden, never removed — reopening from the task bar
+  // depends on it still being there.
+  expect(await page.locator(`#${containerId}`).count()).toBe(1);
+
+  guard.assertClean();
+});
+
+test('window: native implementation does not call compatibility shims', async () => {
+  const page = getPage();
+  const windowWarnings: string[] = [];
+
+  page.on('console', (message) => {
+    if (message.type() !== 'warning' || !message.text().includes('[idae-shim]')) return;
+
+    const directCaller = message.text().split('\n').find((line) =>
+      line.includes('javascript/') && !line.includes('vendor/idae-be-shim/'),
+    );
+    if (directCaller?.includes('app/app_window.js')) windowWarnings.push(message.text());
+  });
+
+  await page.evaluate(() => {
+    (window as any).IDAE_SHIM_WARN = 1;
+    (window as any).__idaeShimInstallWarn();
+  });
+
+  // Build, focus, drag-position and tear down: the full lifecycle in one pass.
+  const first = await openRecord(page, TABLE, TABLE_VALUE);
+  const second = await openList(page, TABLE);
+  await first.locator('.handledisp').click();
+  await closeWindow(second);
+  await closeWindow(first);
+
+  expect(windowWarnings).toEqual([]);
+});
