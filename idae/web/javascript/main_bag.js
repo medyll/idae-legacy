@@ -75,7 +75,6 @@ var require_trame = {
 		'javascript/librairie/sortdiv.js',
 		'javascript/librairie/tableGui.js',
 		'javascript/librairie/textarea.js',
-		'javascript/librairie/picPicker.js',
 		'javascript/librairie/mask.js',
 		'javascript/librairie/myddeupload.js',
 		'javascript/librairie/myddeAttach.js',

@@ -120,7 +120,6 @@ var require_trame = {
 		'javascript/librairie/tableGui.js',
 		'jsoncookie',
 		'javascript/librairie/textarea.js',
-		'javascript/librairie/picPicker.js',
 		'javascript/librairie/mask.js',
 		'javascript/librairie/myddeupload.js',
 		'javascript/librairie/myddeAttach.js',

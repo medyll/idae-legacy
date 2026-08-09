@@ -194,9 +194,13 @@ Ordre revu après vérification de ce que `main_bag.js` charge vraiment :
 - [x] `librairie/myddeDatalist.js` (194) — natif, garde `IDAE_SHIM_WARN` verte. Aucune spec ne le couvrait : nouveau `datalist.spec.ts`. Mauvais fichier à laisser sans filet — il réécrit le DOM autour d'un input qu'il ne possède pas (l'enveloppe dans un nouveau parent, injecte un caret, et pose son dropdown sur `document.body` plutôt qu'à côté du champ), et chacune de ces étapes échoue en silence : un `wrap` cassé laisse l'input fonctionnel et les suggestions inatteignables, un dropdown non positionné rend en 0,0 derrière la fenêtre. L'onglet Modifier porte 4 de ces inputs dans le dataset de test.
 
   Portés à la main : `clonePosition` (variante Prototype, comme dans insertionQ), `viewportOffset`, `scrollTo`, `empty`, `previous`/`next` avec sélecteur. Corrigé au passage : `Entrée` sans élément surligné plantait sur `.first().readAttribute(...)` — la touche est déjà absorbée plus haut, on sort maintenant sans exception.
-- [ ] `librairie/picPicker.js` (179)
+- [x] ~~`librairie/picPicker.js` (179)~~ — **supprimé, pas migré.** Chargé par `main_bag.js` mais jamais instancié : recherche sur tout le dépôt, `new picPicker(` n'existe nulle part, et la seule autre occurrence du nom était l'entrée du loader. 179 lignes de Prototype qui partaient au navigateur à chaque visite pour rien.
 - [ ] `myui/TableGrid.js` (412) — chargé à la demande par `mdl/app/app_dyn_table.php`, pas au boot
-- [ ] Supprimer le code mort plutôt que le migrer : `myui/DatePicker.js`, `myui/ComboBox.js`, `myui/Autocompleter.js`, `librairie/crossfade.js`, `app/app_websocket.js`, `app/app_prototype.js`
+- [~] Supprimer le code mort plutôt que le migrer :
+  - [x] `librairie/crossfade.js` et `app/app_websocket.js` — supprimés, zéro référence dans le dépôt.
+  - [x] `app/app_prototype.js` — déjà supprimé en Phase 3.
+  - [x] `librairie/picPicker.js` — supprimé, voir ci-dessus.
+  - [ ] `myui/DatePicker.js`, `myui/ComboBox.js`, `myui/Autocompleter.js` — **pas encore supprimables** : `myui/TableGrid.js` et `myui/myui.js` les référencent. À traiter avec `TableGrid.js`, ci-dessous.
 - [ ] Supprimer chaque fichier de shim quand `IDAE_SHIM_WARN` ne remonte plus aucun call-site pour sa famille
 
 Les templates PHP/Latte (719 `$()`) viennent en dernier, ou jamais — le shim `$`/`$$` peut rester en place indéfiniment pour eux, c'est ~30 lignes.
