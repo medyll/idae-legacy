@@ -203,6 +203,38 @@ Ordre revu après vérification de ce que `main_bag.js` charge vraiment :
   - [x] `myui/DatePicker.js`, `myui/ComboBox.js`, `myui/Autocompleter.js` — partis avec tout l'arbre `myui/`, voir ci-dessous.
 - [ ] Supprimer chaque fichier de shim quand `IDAE_SHIM_WARN` ne remonte plus aucun call-site pour sa famille
 
+### Inventaire runtime des call-sites restants (2026-08-09)
+
+Mesuré en instrumentant l'app réelle : boot + liste + fiche + onglet Modifier, chaque appel shimé attribué à son fichier appelant par lecture de la pile. **2 099 appels**, dont :
+
+- **1 209 sont internes au shim** — dont 1 204 `Element.setOpacity` émis par la boucle d'animation de `shim-effects.js:110`. Ce ne sont pas des call-sites applicatifs : ils disparaissent avec `shim-effects`. Ils sont déclenchés par deux `fade()` au boot (`app_bootstrap_init.js:96`, plus `afterAjaxCall.js:42`) — deux appels qui génèrent 1 204 itérations.
+- **890 sont de vrais call-sites applicatifs**, répartis sur 10 fichiers.
+
+| Shim | Appels applicatifs |
+|---|---|
+| `shim-core` (`$`, `$$`, `$A`, `$H`, `$w`) | 394 |
+| `shim-element` | 227 |
+| `shim-enumerable` | 131 |
+| `shim-event` | 93 |
+| `shim-class` (`Object.extend`, `Object.isString`) | 45 |
+
+| Fichier appelant | Appels | API principales |
+|---|---|---|
+| `app/app_socket.js` | 318 | `$` 82, `$$` 65, `fire` 51+51, `Array.size` 23 |
+| `librairie/sorttable.js` | 199 | `$` 76, `bindAsEventListener` 20, `Object.isString` 14 |
+| `engine/afterAjaxCall.js` | 196 | `$` 92, `observe` 32+32, `$A` 10 |
+| `engine/engine.js` | 68 | `$` 16, `Object.extend` 10, `writeAttribute` 8 |
+| `librairie/autoToggle.js` | 45 | `$` 27, `Object.extend` 9, `cleanWhitespace` 9 |
+| `app/app_tree.js` | 40 | `$A` 8, `Array.each` 8, `$w` 4 |
+| `engine/module.js` | 17 | dispersé |
+| `librairie/myddeNotifier.js`, `myddeview.js`, `app.js` | 7 | résiduel |
+
+**Ce que ça change au plan.** La liste de Phase 5 avait été ordonnée par comptage `grep` statique sur les anciens fichiers. Aucun des 10 fichiers ci-dessus n'y figurait — et les fichiers qui y figuraient sont maintenant tous migrés ou supprimés. L'ordre réel, dicté par la mesure, est : `app_socket.js`, `sorttable.js`, `afterAjaxCall.js`, `engine.js`, `autoToggle.js`, `app_tree.js`, `module.js`.
+
+**Le gain le plus rapide n'est pas le plus gros fichier** : remplacer les trois `fade()` restants supprime `shim-effects` et 58 % du trafic shim total, pour trois lignes.
+
+Réserve de méthode : aucun appel n'a été attribué à `inline (PHP/Latte)` sur ces écrans, mais ce n'est **pas** une preuve que les 719 `$()` des templates sont inertes — ils vivent surtout dans des attributs `onclick`, que cette sonde n'a pas déclenchés. Il faut une passe qui clique réellement avant de conclure sur `shim-core`.
+
 Les templates PHP/Latte (719 `$()`) viennent en dernier, ou jamais — le shim `$`/`$$` peut rester en place indéfiniment pour eux, c'est ~30 lignes.
 
 Remontée upstream vers `@medyll/idae-be` à envisager plus tard pour ce qui est générique : délégation d'événements, `Form.serialize`, Ajax robuste (le package n'a actuellement **aucune gestion d'erreur** dans `updateHttp`/`insertHttp` — un 404 est injecté comme contenu).
