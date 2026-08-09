@@ -195,12 +195,12 @@ Ordre revu après vérification de ce que `main_bag.js` charge vraiment :
 
   Portés à la main : `clonePosition` (variante Prototype, comme dans insertionQ), `viewportOffset`, `scrollTo`, `empty`, `previous`/`next` avec sélecteur. Corrigé au passage : `Entrée` sans élément surligné plantait sur `.first().readAttribute(...)` — la touche est déjà absorbée plus haut, on sort maintenant sans exception.
 - [x] ~~`librairie/picPicker.js` (179)~~ — **supprimé, pas migré.** Chargé par `main_bag.js` mais jamais instancié : recherche sur tout le dépôt, `new picPicker(` n'existe nulle part, et la seule autre occurrence du nom était l'entrée du loader. 179 lignes de Prototype qui partaient au navigateur à chaque visite pour rien.
-- [ ] `myui/TableGrid.js` (412) — chargé à la demande par `mdl/app/app_dyn_table.php`, pas au boot
+- [x] ~~`myui/TableGrid.js` (412)~~ — **tout l'arbre `myui/` supprimé** (12 fichiers, 5 320 lignes). La note « chargé à la demande par `mdl/app/app_dyn_table.php` » était fausse sur deux points : ce module ne charge aucun script, et rien n'appelle ce module. Le mot `myui` n'apparaît nulle part hors du dossier lui-même, et `MY` — l'objet racine sur lequel tout repose — n'est défini que dans `myui/myui.js`, que rien ne charge. `app_dyn_table.php` lève donc `MY is not defined` aujourd'hui déjà ; le supprimer ne change rien à son état. Le fichier PHP est conservé (un nom de module peut être référencé depuis Mongo, ce qu'un grep ne voit pas), mais il est mort.
 - [~] Supprimer le code mort plutôt que le migrer :
   - [x] `librairie/crossfade.js` et `app/app_websocket.js` — supprimés, zéro référence dans le dépôt.
   - [x] `app/app_prototype.js` — déjà supprimé en Phase 3.
   - [x] `librairie/picPicker.js` — supprimé, voir ci-dessus.
-  - [ ] `myui/DatePicker.js`, `myui/ComboBox.js`, `myui/Autocompleter.js` — **pas encore supprimables** : `myui/TableGrid.js` et `myui/myui.js` les référencent. À traiter avec `TableGrid.js`, ci-dessous.
+  - [x] `myui/DatePicker.js`, `myui/ComboBox.js`, `myui/Autocompleter.js` — partis avec tout l'arbre `myui/`, voir ci-dessous.
 - [ ] Supprimer chaque fichier de shim quand `IDAE_SHIM_WARN` ne remonte plus aucun call-site pour sa famille
 
 Les templates PHP/Latte (719 `$()`) viennent en dernier, ou jamais — le shim `$`/`$$` peut rester en place indéfiniment pour eux, c'est ~30 lignes.
