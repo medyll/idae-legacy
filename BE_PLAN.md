@@ -243,6 +243,33 @@ Vérifié après fix : `json_ssid.php` répond en 0,39s sur 127.0.0.1, et le co�
 
 **`workers` reste à 1** (`bf0f576`) — seule config prouvée fiable à ce jour. `timeout` reste à 60000 (marge inoffensive, gardée même à workers:1).
 
+## Résolu — le « mystère des 4 workers » était un nom d'hôte
+
+Tout ce qui précède sur la « contention de concurrence » (NAT WSL2, Mongo hôte, Apache) était faux. La cause tient en une ligne : `.env.testing` (non versionné) pose `TEST_BASE_URL=http://localhost:8080`, qui gagne sur le défaut `127.0.0.1` de `playwright.config.ts`.
+
+Le client socket.io dérive son hôte de `document.domain` (`javascript/app/app_socket.js:26`), donc une page servie sur `localhost` ouvre `ws://localhost:3005` — résolution IPv6-first sous Windows contre un port-forward WSL2 qui ne binde qu'en IPv4. HTTP y survit grâce au Happy Eyeballs de Chrome ; **le WebSocket non** : sous boots concurrents il meurt en pleine poignée de main (`WebSocket is closed before the connection is established`), socket.io se reconnecte avec un nouveau sid, et le serveur répond les acks en vol à la connexion morte.
+
+Mesuré (2026-08-09, boots à froid simultanés jusqu'à une UI utilisable) :
+
+| Hôte | 4 boots | 8 boots |
+|---|---|---|
+| `localhost` | 1/4 | — |
+| `127.0.0.1` | 4/4 (~9 s) | 8/8 (9-12,5 s) |
+
+Ce n'était donc jamais de la lenteur : c'était un boot **pendu**. `get_data()` (`javascript/app/app.js`) n'avait aucune borne — un ack perdu laissait la promesse en attente pour toujours, `schemeLoad()` ne résolvait jamais, `APPSCHEMES` restait vide, ni formulaire de login ni `#desktop`, et pas une seule erreur console. C'est le « bug UI » qui faisait passer chaque échec pour de la contention.
+
+Trois correctifs :
+
+1. **`playwright.config.ts`** — `BASE_URL` est normalisé de `//localhost` vers `//127.0.0.1`, quoi que dise `.env.testing`. Le fichier d'env n'est pas versionné : le corriger localement ne protège personne d'autre.
+2. **`javascript/app/app.js`** — `get_data()` a deux voies de récupération : ré-émission des requêtes en vol sur reconnexion socket (le vrai signal), et ré-émission courte à 10 s (3 tentatives) pour ce qui est ré-émissible. Ce qui streame (`stream_to`) ou écrit (`csv_export`) n'est jamais ré-émis — juste un filet à 45 s, au-dessus de la borne 30 s du pont Node, pour qu'un `json_data_table` lent ne soit pas pris pour un ack perdu. Revue Codex (via acp-team) sur cette version : rien de restant.
+3. **`conf.lan.inc.php`** — révélé par le passage à `127.0.0.1`. `$host` était réécrit en `localhost` **avant** `DOCUMENTDOMAIN` et toutes les URL absolues, donc une page servie sur `127.0.0.1` rendait `<form action="http://localhost:8080/...">` : origine différente, cookie de session non envoyé, POST non authentifié, formulaire jamais fermé. Séparé en `$request_host` (tout ce qui part vers le navigateur) et `$host` (clé de lookup config uniquement).
+
+Corrigé au passage, le plus vieux flake de la suite : `app_socket.js:278` refaisait `$$('[data-uniqid=…]')[0].fire()` 500 ms plus tard sans revérifier que le nœud existait encore.
+
+**Résultat : 23/23 vert, 1,7 min, zéro flaky.** `workers` passe de 1 à **2**. 4 workers passe aussi (23/23) mais en 2,3 min — au-delà de 2, les boots se contentent entre eux ; ce n'est pas un problème de fiabilité, juste un plafond de débit tant que le boot reste un mur de scripts évalués en synchrone.
+
+Caveat pré-existant relevé par la revue Codex, non corrigé : le Node construit `http://${DOCUMENTDOMAIN}/...` sans port (`app_node/src/web/routes.js:35,57,74`, `src/socket/handlers.js:161,180,199,228`). Sur un Apache hors port 80, ces callbacks tombent à côté. Antérieur à ce travail.
+
 ---
 
 ## Fichiers critiques

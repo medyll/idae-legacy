@@ -275,7 +275,13 @@ socket.on ('receive_cmd', function (data) {
 
 				$$ ('[data-uniqid=' + stream_to + ']')[0].fire ('dom:stream_chunk', tmp_stream);
 				setTimeout (function () {
-					$$ ('[data-uniqid=' + stream_to + ']')[0].fire ('content:loaded', tmp_stream);
+					// Re-query: half a second is long enough for the window to
+					// have been closed or the table rebuilt, and firing on
+					// [0] of an empty result threw "Cannot read properties of
+					// undefined (reading 'fire')" — the suite's oldest flake.
+					var target = $$ ('[data-uniqid=' + stream_to + ']')[0];
+					if ( !target ) return;
+					target.fire ('content:loaded', tmp_stream);
 				}.bind (this), 500);
 
 			} else {
