@@ -182,6 +182,13 @@ windowGui.prototype = {
 	},
 	give_focus: function () {
 		// console.log(this.container_id);
+		// The window may already be gone: closing it removes the container
+		// while the click that closed it is still bubbling, and this handler
+		// sits on the container itself. Prototype hid that — kill() called
+		// purge(), which detached every observer before the event reached
+		// them. Nothing native does that, and nothing should: focusing a
+		// destroyed window is meaningless, so bail instead.
+		if (!$(this.container_id)) return;
 		$(this.container_id).makeOnTop();
 		if (!$(this.container_id).hasClassName('active')) {
 			$(this.container_id).siblings().invoke('removeClassName', 'active');

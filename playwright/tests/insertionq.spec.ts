@@ -66,16 +66,14 @@ test('insertionQ: native implementation does not call compatibility shims', asyn
   const page = getPage();
   const insertionWarnings: string[] = [];
 
-  // Methods this app defines itself through Element.addMethods
-  // (engine/methods.js). They are registered *via* the shim, so IDAE_SHIM_WARN
-  // reports them, but they are not Prototype API and calling them is not what
-  // this guard is looking for — they disappear when engine/methods.js itself
-  // migrates, which is a later item in BE_PLAN.md's phase 5 list.
-  const APP_OWN_ELEMENT_METHODS = /Element\.(socketModule|loadModule|loadFragment|toggleContent|unToggleContent|doRedim|doCheck|doUnCheck|makeLoading|undoLoading|kill)\b/;
-
+  // No exclusion list here any more. The app's own Element methods
+  // (socketModule, loadModule, toggleContent, doRedim, doCheck…) used to be
+  // registered through the shim's Element.addMethods, so IDAE_SHIM_WARN
+  // reported them and this guard had to skip them. engine/methods.js installs
+  // them natively now, so calling them is silent — which is exactly what makes
+  // this assertion proof that it migrated.
   page.on('console', (message) => {
     if (message.type() !== 'warning' || !message.text().includes('[idae-shim]')) return;
-    if (APP_OWN_ELEMENT_METHODS.test(message.text())) return;
 
     const directCaller = message.text().split('\n').find((line) =>
       line.includes('javascript/') && !line.includes('vendor/idae-be-shim/'),
