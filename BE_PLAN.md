@@ -175,7 +175,7 @@ Prototype sorti, on migre fichier par fichier vers l'API idae-be native, du plus
 Ordre revu après vérification de ce que `main_bag.js` charge vraiment :
 
 - [x] `app/app_datatable.js` (442) — API DOM/ES native, zéro appel direct aux shims vérifié par `datatable.spec.ts` avec `IDAE_SHIM_WARN=1`. Suite ciblée : chargement réel vert, recherche verte au retry avec le flake préexistant certifié `app_socket.js:278`, garde shim verte. En local, forcer `BASE_URL=http://127.0.0.1:8080` : `TEST_BASE_URL` dans `.env.testing` peut encore réintroduire `localhost` et son délai IPv6.
-- [ ] `librairie/myddeExplorer.js` (370)
+- [x] `librairie/myddeExplorer.js` (370) — natif, garde `IDAE_SHIM_WARN` verte (`explorer-shell.spec.ts`). Le fichier est passé en IIFE exposant `window.myddeExplorer` : il avait besoin de sept helpers locaux (délégation d'événements, `Form.serialize` sur un conteneur quelconque, `wrap`, `cleanWhitespace`, `stripTags`, query-string ↔ objet, `fire`), qu'idae-be ne fournit pas et qui n'ont pas été hissés dans un module partagé — ça imposerait de toucher le graphe de chargement de `main_bag.js`, ce que la Phase 5 n'a aucune raison de bousculer. Restent volontairement appelées : `socketModule`, `doCheck`/`doUnCheck` — API de l'app définie par `engine/methods.js`, pas API Prototype ; elles migreront avec ce fichier-là. Nouvelle spec : construction DOM (`act_expl_search_input` : attributs réécrits, `wrap()`, menu de portée à deux options), idempotence sur réouverture (`act_processed`), et garde anti-shim. Le chemin de recherche délégué était déjà couvert par `datatable.spec.ts`.
 - [ ] `app/app_insertionQ.js` (300)
 - [ ] `engine/methods.js` (253)
 - [ ] `app/app_window.js` (238)
