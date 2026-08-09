@@ -20,7 +20,14 @@ const getPage = sharedPage();
 /** Globals the app calls directly. */
 const GLOBAL_FUNCTIONS = ['$', '$$', '$A', '$H', '$w', '$F', '$R'];
 
-const GLOBAL_OBJECTS = ['Prototype', 'Ajax', 'Event', 'Element', 'Effect', 'Position', 'Insertion', 'Try'];
+// 'Effect' dropped 2026-08-09: shim-effects.js was deleted once every real
+// caller of Effect.*/Element#fade() migrated to native code (fadeElement/
+// appearElement in engine/methods.js, or a small file-local helper — see
+// BE_PLAN.md's 2026-08-09 entries). This spec is the contract for what the
+// app still depends on, not a museum of what Prototype once offered — an
+// API this file asserted forever after its last caller was gone would have
+// blocked deleting the shim that provided it.
+const GLOBAL_OBJECTS = ['Prototype', 'Ajax', 'Event', 'Element', 'Position', 'Insertion', 'Try'];
 
 const CONSTRUCTORS = ['Class', 'Template', 'Hash', 'ObjectRange', 'PeriodicalExecuter', 'Draggable', 'Draggables'];
 
@@ -38,8 +45,6 @@ const ELEMENT_METHODS = [
   'getWidth', 'childElements', 'previous', 'visible', 'empty', 'wrap', 'clonePosition',
   'cumulativeOffset', 'siblings', 'scrollTo', 'toggleClassName', 'setOpacity', 'classNames',
   'toggle', 'makePositioned', 'viewportOffset', 'inspect', 'purge', 'relativize', 'replace',
-  // Scriptaculous, called by main_bag.js itself on the boot progress bar
-  'fade', 'appear', 'morph',
 ];
 
 const ARRAY_METHODS = [
@@ -69,14 +74,6 @@ const NAMESPACED = [
   ['Event', 'element'],
   ['Element', 'extend'],
   ['Element', 'addMethods'],
-  ['Effect', 'Appear'],
-  ['Effect', 'Fade'],
-  ['Effect', 'Parallel'],
-  ['Effect', 'Opacity'],
-  ['Effect', 'Move'],
-  ['Effect', 'Scale'],
-  ['Effect', 'SlideUp'],
-  ['Effect', 'SlideDown'],
   ['Insertion', 'After'],
   ['Insertion', 'Before'],
   ['Insertion', 'Top'],

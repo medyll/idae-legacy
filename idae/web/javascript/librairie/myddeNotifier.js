@@ -76,7 +76,9 @@ myddeNotifier = Class.create({
 				this.removeNotice(notice)
 			}.bind(this));
 		}
-		new Effect.Opacity(notice, {to: 0.85, duration: this.options.speedin});
+		// Was Scriptaculous' Effect.Opacity via the shim; appearElement
+		// (engine/methods.js) is the native replacement, same contract.
+		appearElement(notice, {to: 0.85, duration: this.options.speedin});
 		if (!this.options.sticky) {
 			var zz = setTimeout(function () {
 				this.removeNotice(notice);

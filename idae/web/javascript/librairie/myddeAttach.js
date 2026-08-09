@@ -194,14 +194,16 @@ myddeAttach.prototype = {
 
 	    xhr.onload = function() {
 		    this.Progress[index].value = this.Progress[index].innerHTML = 100;
-		    this.Progress[index].fade({
+		    // Was Scriptaculous' Effect.Fade via the shim; fadeElement
+		    // (engine/methods.js) is the native replacement, same contract.
+		    fadeElement(this.Progress[index], {
 			    afterFinish : function() {
 				    this.Progress[index].remove();
 			    }.bind(this)
 		    });
 		    if(index == eval(this.total-1)){
 			    this.dropped = false;
-			    if(this.options.show_hide){$(this.element).fade();}
+			    if(this.options.show_hide){fadeElement($(this.element));}
 		    }
 	    }.bind(this);
 	    xhr.onloadend = function(event) {

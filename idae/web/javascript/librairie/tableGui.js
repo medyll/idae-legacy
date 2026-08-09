@@ -51,9 +51,11 @@ tableGui.prototype = {
 										}
 									}.bind(this));
 		this.allChild.each(function(node,index){
-									try{Effect.Appear($(node),{duration: 0.2,position: 'front'}); }catch(e){} 
+									try{appearElement($(node),{duration: 0.2}); }catch(e){}
 									});
-		 Effect.Appear($(this.element),{duration: 0.1})
+		 // Was Scriptaculous' Effect.Appear via the shim; appearElement
+	 // (engine/methods.js) is the native replacement, same contract.
+	 appearElement($(this.element),{duration: 0.1})
 		/* console.log(this.element ,this.element.up() )*/
 		if(this.element.scrollHeight > this.element.up().offsetHeight){
 			//this.element.up().style.height = this.element.offsetHeight +'px'

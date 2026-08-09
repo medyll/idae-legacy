@@ -153,11 +153,12 @@ Object.extend(Validation, {
 				    }
 					advice = Validation.getAdvice(name, elm);
 				}
-				if(typeof Effect == 'undefined') {
-					advice.style.display = 'block';
-				} else {
-					new Effect.Appear(advice, {duration : 1 });
-				}
+				// Was Scriptaculous' Effect.Appear via the shim; appearElement
+				// (engine/methods.js) is the native replacement, same contract
+				// — and actually reveals `advice` (built with
+				// style="display:none" a few lines up), which the shim's
+				// version never did. See appearElement's doc comment.
+				appearElement(advice, {duration : 1 });
 			}
 			elm[prop] = true;
 			elm.removeClassName('validation-passed');

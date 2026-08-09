@@ -18,7 +18,7 @@ var require_trame = {
 		'javascript/vendor/idae-be-shim/shim-element.js',
 		'javascript/vendor/idae-be-shim/shim-event.js',
 		'javascript/vendor/idae-be-shim/shim-ajax.js',
-		'javascript/vendor/idae-be-shim/shim-effects.js',
+		'javascript/vendor/idae-be-shim/shim-draggable.js',
 	],
 	require_insertionQ : ['javascript/app/app.js',/*'javascript/app/app_mutateobserve.js',*/'javascript/vendor/insertionQ.js', 'javascript/app/app_insertionQ.js'],
 	require_to_log     : [
@@ -202,7 +202,13 @@ function require_progress(value, max, text) {
 	}
 	//
 	if ( value == max ) {
-		$ ('main_progress_hold').fade ('bounce');
+		// Was Scriptaculous' Effect.Fade via the shim; fadeElement
+		// (engine/methods.js) is the native replacement, same contract.
+		// The 'bounce' argument was already inert under the shim — Element#
+		// fade(options) only ever read an options *object* (from/to/
+		// afterFinish); a string doesn't have those keys, so this always ran
+		// the plain default fade, never an actual bounce effect.
+		fadeElement (document.getElementById ('main_progress_hold'));
 	}
 }
 

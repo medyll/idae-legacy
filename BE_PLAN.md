@@ -242,6 +242,28 @@ Trouvé au passage, même motif que `picPicker`/`TableGrid` — du code chargé 
 
 **Reste à faire pour supprimer `shim-effects`** : migrer `Effect.Move`/`Effect.Opacity`/`Effect.Appear`/`Effect.Parallel` dans les six fichiers listés ci-dessus, plus les 3 `fade()` non touchés de `myddeAttach.js`. Pas fait dans cette passe — la sonde d'inventaire ne les avait pas vus, donc le chiffrer aurait été une estimation, pas une mesure.
 
+## Suppression de `shim-effects.js` (2026-08-09, suite)
+
+Fait, avec un imprévu qui a changé la forme du travail.
+
+**Les six callers réels, tous migrés :**
+- `librairie/appGui.js:139` (`Effect.Move`, mode absolu) → `moveElementTo()`, helper local (un seul appelant dans tout le dépôt).
+- `librairie/myddeNotifier.js:79`, `librairie/tableGui.js:54,56`, `librairie/validation.js:159` (`Effect.Opacity`/`Effect.Appear`) → `appearElement()`, partagé dans `engine/methods.js` (trois appelants réels).
+- `main_bag.js:205` (`$('main_progress_hold').fade('bounce')`) → `fadeElement()`. L'argument `'bounce'` était déjà mort sous le shim : `Element#fade(options)` ne lit qu'un objet (`from`/`to`/`afterFinish`), jamais une chaîne — `Object.extend` sur une string itère ses index de caractères, ce qui ne produit aucune clé utile. Le fondu par défaut tournait déjà, sans jamais de « bounce ».
+- `librairie/myddeAttach.js` : 2 vrais appelants migrés (`Progress[index]`, `this.element`) ; 3 autres (lignes 48, 232, 239) sont du code déjà mort — l'un dans un bloc commenté, les deux autres après un `return;` inconditionnel ligne 226. Laissés tels quels : ils ne chargent jamais le shim.
+
+**Bug latent trouvé et corrigé, pas reproduit** : l'`Effect.Appear` du shim ne restaurait jamais `display` — seul `opacity` était animé (`setOpacity` dans `shim-element.js` ne touche que ça). Un élément inséré avec `style="display:none"` — exactement le cas de `validation.js`, qui construit ainsi son message d'erreur — restait invisible quelle que soit la durée du fondu, sur la branche de code censée le montrer. `appearElement()` restaure `display` si l'élément était masqué. Vérifié en conditions réelles : `myddeNotifier` → `growl()` → `appearElement` produit `opacity: 0.85` exactement (la cible passée), toast visible, texte présent. Le chemin `validation.js` n'a pas pu être déclenché par le jeu de données de test (le champ sondé n'a pas de règle active) — pas creusé davantage ; le code est le même que celui déjà vérifié pour `myddeNotifier`.
+
+**L'imprévu : `Draggable`/`Draggables` vivaient dans le même fichier.** `shim-effects.js` ne portait pas que `Effect.*` — son en-tête l'annonçait (« … and Draggable(s) ») mais l'inventaire du matin n'avait mesuré que la famille `Effect`. Deux appelants réels et chargés : `librairie/cropper.js` (`CropDraggable` hérite de `Draggable` via `Class.create(Draggable, {...})` et surcharge plusieurs de ses méthodes) et `librairie/resizeGui.js`. Migrer `Draggable` en natif aurait voulu soit reproduire toute sa surface de méthodes pour que l'héritage de `CropDraggable` continue de fonctionner, soit réécrire à l'aveugle le comportement de sélection au clic-glissé de `cropper.js` — les deux plus risqués que d'isoler.
+
+Extrait en fichier séparé, `vendor/idae-be-shim/shim-draggable.js` (Draggable/Draggables seuls, ~155 lignes), qui devient la dernière entrée de `require_hell` (c'est lui qui porte l'armement de `IDAE_SHIM_WARN` en fin de chaîne). `shim-effects.js` (441 lignes) supprimé.
+
+**Nettoyage en cascade** : `shim-element.js` gardait cinq méthodes (`visualEffect`, `fade`, `appear`, `morph`, `highlight`) qui référençaient le `Effect` global — devenu `undefined` après la suppression. Zéro appelant, mais chacune aurait levé `Effect is not defined` à l'exécution : une mine plutôt qu'un mort inoffensif. Supprimées.
+
+`prototype-surface.spec.ts` (le contrat de Phase 1/4) affirmait la présence de `Effect` et de huit de ses méthodes statiques — obsolète par construction, puisque plus rien n'y appelle. Ce n'est pas une régression à corriger, c'est le contrat qui doit suivre ce que l'app appelle réellement, comme documenté dans son propre en-tête. Mis à jour : `Effect` retiré de `GLOBAL_OBJECTS`, ses huit entrées retirées de `NAMESPACED`, `fade`/`appear`/`morph` retirés de `ELEMENT_METHODS`.
+
+**Suite : 32/32.**
+
 Réserve de méthode : aucun appel n'a été attribué à `inline (PHP/Latte)` sur ces écrans, mais ce n'est **pas** une preuve que les 719 `$()` des templates sont inertes — ils vivent surtout dans des attributs `onclick`, que cette sonde n'a pas déclenchés. Il faut une passe qui clique réellement avant de conclure sur `shim-core`.
 
 Les templates PHP/Latte (719 `$()`) viennent en dernier, ou jamais — le shim `$`/`$$` peut rester en place indéfiniment pour eux, c'est ~30 lignes.

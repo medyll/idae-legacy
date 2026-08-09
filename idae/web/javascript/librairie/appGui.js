@@ -1,3 +1,26 @@
+/**
+ * Scriptaculous' Effect.Move (mode: 'absolute'), reduced to what the one
+ * caller below needs: animate an already-positioned element's `left`/`top`
+ * to the given absolute pixel values over `duration` seconds. Effect.Move
+ * defaulted unspecified x/y to 0, so the caller passing only `x` also slid
+ * `top` back to 0 — kept here explicitly rather than reproduced implicitly.
+ */
+function moveElementTo(node, x, y, duration) {
+	if ( !node ) return node;
+	x = x || 0;
+	y = y || 0;
+	duration = (duration || 1.0) * 1000;
+	if ( window.getComputedStyle (node).position === 'static' ) node.style.position = 'relative';
+	var previousTransition = node.style.transition;
+	node.style.transition = 'left ' + duration + 'ms ease, top ' + duration + 'ms ease';
+	node.style.left = x + 'px';
+	node.style.top = y + 'px';
+	setTimeout (function () {
+		node.style.transition = previousTransition;
+	}, duration);
+	return node;
+}
+
 var appGui       = Class.create ();
 appGui.prototype = {
 	initialize    : function (element, options) {
@@ -136,7 +159,7 @@ appGui.prototype = {
 			if ( options.fitScreen != true ) {
 				delta = eval (parent.offsetLeft) - eval (eval (document.body.offsetWidth) / 5)
 			}
-			new Effect.Move ($ (options.container), { x : eval (-1) * delta, mode : 'absolute', duration : 0.1, queue : 'end' });
+			moveElementTo ($ (options.container), eval (-1) * delta, 0, 0.1);
 			$ (options.onglet_id).show ();
 		} else {
 			$ (options.onglet_id).show ();

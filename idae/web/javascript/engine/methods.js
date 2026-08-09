@@ -61,6 +61,46 @@ function fadeElement(node, options) {
 	return node;
 }
 
+/**
+ * Scriptaculous' Effect.Appear/Effect.Opacity, reduced to what the three
+ * remaining callers need (librairie/myddeNotifier.js, librairie/tableGui.js,
+ * librairie/validation.js): reveal `node` if it was hidden, then animate its
+ * opacity from `options.from` to `options.to` (default 1) over
+ * `options.duration` seconds (default 1.0), then call `afterFinish`.
+ *
+ * The shim's Effect.Appear never restored `display`, only ever animated
+ * `opacity` (setOpacity in shim-element.js touches nothing else) — a latent
+ * bug: an element inserted with `style="display:none"` (validation.js's
+ * error advice, built that way in its template string) stayed invisible no
+ * matter how long the fade ran, on the branch of code that is supposed to
+ * be the one that shows it. Fixed here rather than reproduced. myddeNotifier
+ * and tableGui's callers don't hit this path — their elements are already
+ * visible — so the fix is inert for them; the other behavior is unchanged.
+ */
+function appearElement(node, options) {
+	if (!node) return node;
+	options = options || {};
+	var wasHidden = window.getComputedStyle(node).display === 'none';
+	var from = options.from !== undefined ? options.from :
+		(wasHidden ? 0 : (parseFloat(window.getComputedStyle(node).opacity) || 1));
+	var to = options.to !== undefined ? options.to : 1;
+	var duration = (options.duration || 1.0) * 1000;
+	if (wasHidden) node.style.display = '';
+	node.style.opacity = from;
+	// Force layout so the browser commits the starting opacity before the
+	// transition below is armed — otherwise both values can collapse into
+	// one frame and the fade never visibly plays.
+	void node.offsetHeight;
+	var previousTransition = node.style.transition;
+	node.style.transition = 'opacity ' + duration + 'ms ease';
+	node.style.opacity = to;
+	setTimeout(function () {
+		node.style.transition = previousTransition;
+		if (options.afterFinish) options.afterFinish({element: node});
+	}, duration);
+	return node;
+}
+
 (function (global) {
 
 	/* ------------------------------------------------------------------ *

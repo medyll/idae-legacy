@@ -1,11 +1,10 @@
 /**
  * shim-element.js — PrototypeJS compatibility layer over @medyll/idae-be
  * Element.prototype methods, Element.extend/addMethods, Insertion.*,
- * Position.*, plus fade/appear/morph element shortcuts (Effect.Methods
- * surface; the heavy lifting lives in shim-effects.js).
+ * Position.*.
  *
  * Depends on: shim-core.js, shim-class.js, shim-enumerable.js
- * Optional (loaded later): shim-event.js (observe/fire), shim-effects.js
+ * Optional (loaded later): shim-event.js (observe/fire)
  *
  * @package idae-be-shim
  * @date 2026-08-06
@@ -535,17 +534,13 @@
             return '<' + this.tagName.toLowerCase() + id + cls + '>';
         },
 
-        /* ---- Scriptaculous shortcuts (Effect.Methods) ---- */
-        visualEffect: function (name, options) {
-            name = name.camelize().capitalize();
-            if (Effect[name]) return new Effect[name](this, options || {});
-        },
-        fade: function (options) { return new Effect.Fade(this, options || {}); },
-        appear: function (options) { return new Effect.Appear(this, options || {}); },
-        morph: function (style, options) { return new Effect.Morph(this, Object.extend({ style: style }, options || {})); },
-        highlight: function (options) {
-            if (Effect.Highlight) return new Effect.Highlight(this, options || {});
-        }
+        /* Scriptaculous shortcuts (visualEffect/fade/appear/morph/highlight)
+         * removed 2026-08-09 — they delegated to the global `Effect`, which
+         * no longer exists (shim-effects.js was deleted once the app's last
+         * real caller of it was migrated to native code; see BE_PLAN.md).
+         * Nothing called these five Element methods themselves, but leaving
+         * them in place would have been a landmine: each one threw
+         * `Effect is not defined` the moment anything did. */
     };
 
     /* ------------------------------------------------------------------ *
