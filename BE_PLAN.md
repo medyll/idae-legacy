@@ -270,6 +270,20 @@ Les templates PHP/Latte (719 `$()`) viennent en dernier, ou jamais — le shim `
 
 Remontée upstream vers `@medyll/idae-be` à envisager plus tard pour ce qui est générique : délégation d'événements, `Form.serialize`, Ajax robuste (le package n'a actuellement **aucune gestion d'erreur** dans `updateHttp`/`insertHttp` — un 404 est injecté comme contenu).
 
+## Migration d'`app/app_socket.js` (2026-08-09)
+
+Le fichier le plus appelé de l'inventaire (318 appels). Le dispatcheur de commandes socket.io : `receive_cmd` (switch `act_count`/`act_stream_to`/`act_progress`/…) et le handler `socketModule` qui injecte chaque fragment AJAX de l'app. Natif désormais, garde `IDAE_SHIM_WARN` verte (nouveau `socket.spec.ts`).
+
+Détails mécaniques : `$$`/`$A` remplacés par `sk_qsa`, une tolérance générique aux valeurs d'attribut non citées (chiffre en tête, points) — copiée de `shim-core.js`'s `tolerantQueryAll` plutôt qu'appelée, pour que le fichier ne dépende plus de `shim-core.js` du tout. `node.remove()` évité (même piège que `app_window.js`/`myddeDatalist.js` : le shim le remplace, `parentNode.removeChild` est le seul vrai natif). Les trois blocs `data-count` identiques (`act_close_mdl`/`act_upd_data`/`act_add_data`) factorisés en `sk_refreshCounts()`, en préservant la divergence pré-existante entre eux (`act_close_mdl` passe `'id'+vars.table` à `runModule`, les deux autres `vars.table` — pas à cette passe de trancher si c'est un bug).
+
+**Régression réelle introduite puis corrigée : `sk_fire` avec `.detail` au lieu de `.memo`.** `dom:stream_chunk` porte sa charge dans `event.memo` (lu ainsi par `app_datatable.js:291,1502`) — j'avais câblé un `CustomEvent` à la main avec `detail` sur ce site précis au lieu de passer par mon propre helper `sk_fire`. Suite verte au premier passage (32/32) parce qu'aucun test n'exerçait ce chemin de re-diffusion précis avec des données réellement en vol à ce moment — attrapé seulement à la relecture finale du fichier.
+
+**La vraie régression, celle qui a pris du temps : `sk_update`/`sk_insert` n'exécutaient jamais les `<script>` injectés.** `Element#update()` de Prototype extrait les balises `<script>` avant l'assignation `innerHTML`, puis les `eval()` en différé (`.defer()`, ~10 ms) en scope global. `node.innerHTML = html` ne le fait jamais, dans aucun navigateur — un piège déjà rencontré et corrigé sur `app_window.js` (voir son entrée plus haut), mais que je n'ai pas anticipé en écrivant celui-ci. La moitié des fragments rendus côté serveur se terminent par un tel `<script>` : `mdl/app/app_liste/app_liste.php:100` appelle `load_table_in_zone(...)` en JS inline — c'est comme ça, et seulement comme ça, qu'une liste demande ses lignes. Sans l'`eval` différé, la fenêtre s'ouvre normalement (en-têtes, barre de recherche) mais reste vide pour toujours, **sans la moindre erreur console** — exactement le genre de silence que `socket.spec.ts` existe maintenant pour attraper.
+
+Diagnostic : suite passée de 32/32 à 22/32 (10 échecs, dont `datatable: list loads real rows`), reproductible sur stack fraîche. Remonté par comparaison directe des logs serveur (`docker logs idae-socket`) entre la version originale (via shim, instrumentée au `sed`) et la mienne : même réponse `socketModule` de 28223 octets dans les deux cas, mais seule la version Prototype envoyait ensuite la requête `get_data(json_data_table, table=client, stream_to=...)` — la mienne ne l'envoyait jamais, parce que le `<script>` qui la déclenche n'était jamais exécuté. Correctif : `sk_update`/`sk_insertAt` reproduisent l'algorithme exact (`stripScripts` avant insertion, `eval` indirect différé sur le HTML original, scope global comme Prototype).
+
+**Suite : 34/34** (32 + les 2 nouveaux tests de `socket.spec.ts`).
+
 ---
 
 ## Perf — cache-busting cassé, et l'instabilité socket sous WSL2
