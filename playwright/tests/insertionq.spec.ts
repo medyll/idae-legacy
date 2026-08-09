@@ -61,3 +61,43 @@ test('insertionQ: a second window\'s dynamic content re-extends independently', 
   await closeWindow(list);
   guard.assertClean();
 });
+
+test('insertionQ: native implementation does not call compatibility shims', async () => {
+  const page = getPage();
+  const insertionWarnings: string[] = [];
+
+  // Methods this app defines itself through Element.addMethods
+  // (engine/methods.js). They are registered *via* the shim, so IDAE_SHIM_WARN
+  // reports them, but they are not Prototype API and calling them is not what
+  // this guard is looking for — they disappear when engine/methods.js itself
+  // migrates, which is a later item in BE_PLAN.md's phase 5 list.
+  const APP_OWN_ELEMENT_METHODS = /Element\.(socketModule|loadModule|loadFragment|toggleContent|unToggleContent|doRedim|doCheck|doUnCheck|makeLoading|undoLoading|kill)\b/;
+
+  page.on('console', (message) => {
+    if (message.type() !== 'warning' || !message.text().includes('[idae-shim]')) return;
+    if (APP_OWN_ELEMENT_METHODS.test(message.text())) return;
+
+    const directCaller = message.text().split('\n').find((line) =>
+      line.includes('javascript/') && !line.includes('vendor/idae-be-shim/'),
+    );
+    if (directCaller?.includes('app/app_insertionQ.js')) insertionWarnings.push(message.text());
+  });
+
+  await page.evaluate(() => {
+    (window as any).IDAE_SHIM_WARN = 1;
+    (window as any).__idaeShimInstallWarn();
+  });
+
+  // Opening a list and a record sheet re-runs most of the watcher registry
+  // against two freshly inserted subtrees — [data-count], [act_chrome_gui],
+  // [act_defer], [auto_tree], .toggler, form, [datalist] all fire here.
+  const list = await openList(page, TABLE);
+  await expect(list.locator('tbody.div_tbody tr')).not.toHaveCount(0, { timeout: 30_000 });
+  const record = await openRecord(page, TABLE, TABLE_VALUE);
+  await expect(record.locator('.innerdisp')).toBeVisible();
+
+  await closeWindow(record);
+  await closeWindow(list);
+
+  expect(insertionWarnings).toEqual([]);
+});
