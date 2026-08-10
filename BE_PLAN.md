@@ -466,6 +466,18 @@ Suivant par taille (34 occurrences) — mort. Bibliothèque tierce vendorée («
 
 Supprimé, retiré des deux listes de chargement (`main.js:113`, `main_bag.js:69`). `smoke.spec.ts` revérifié vert.
 
+## Migration de `librairie/myddeSelection.js` (2026-08-10)
+
+31 occurrences, `Class.create` — sélection au lasso (rubber-band) sur la zone fichier d'une liste. Vrai appelant : `myddeExplorer.js:711` (`act_drag_selection_zone`).
+
+**Portée réelle plus étroite que prévu.** L'instanciation est conditionnée par `build_expl_drag_selection_zone` (ligne 208), qui exige un attribut `expl_drag_selection_zone` dans le markup — présent sur exactement **deux** écrans dans tout le dépôt : `app_document/document_liste.php:53` et `app_prod/app_prod.php:43`. La liste générique utilisée par le reste de la suite n'en construit jamais. Trouvé en debug : la première version du test dispatché sur `[expl_file_zone]` d'une liste client ne déclenchait rien, aucun garde ni exception — simplement aucun listener sur ce nœud.
+
+**Deux bugs préexistants portés verbatim, commentés dans le code :**
+1. `this.startX = Event.pointerX` (et `startY`) assignent la *fonction*, jamais son résultat — l'original n'a jamais passé `event`. `startY` n'est lu nulle part, et l'unique comparaison sur `startX` dans `onMouseMove` garde un bloc vide (`//code`) : rien d'observable n'en dépend.
+2. `document.viewport.getScrollOffsets()` renvoyait un tableau-like `[x, y]` (accès indexé OK), mais `getDimensions()` renvoie un `{width, height}` nu — donc `vp_size[1]` est, et a toujours été, `undefined`. La branche de scroll-vers-le-bas compare contre `NaN` et n'a jamais pu s'exécuter ; seul le scroll-vers-le-haut fonctionne. Porté tel quel.
+
+Nouveau `myddeselection.spec.ts` : classe instanciée directement sur une fixture construite (même approche qu'`app-chat`/`app-keepon`/`myddeattach`, plutôt que de traîner la suite vers des données de test document/prod), avec deux items positionnés en absolu — un dans le rectangle de drag, un hors champ. Vérifie création/position/opacité/`startPos` de `#drag_selection`, son dimensionnement au `mousemove`, sa suppression au `mouseup`, et que `checkSelect` ne marque `.selected` que l'item qui chevauche. Garde `IDAE_SHIM_WARN`. **3/3 vert**, plus `smoke`/`explorer-shell` revérifiés propres (4/4).
+
 ## Perf — cache-busting cassé, et l'instabilité socket sous WSL2
 
 **Cache-busting.** `main_bag.js` faisait `?v=<Date.now()>` sur les ~90 fichiers JS/CSS à **chaque** chargement — pas un souci de dev, un souci de prod : tout utilisateur réel retéléchargeait tout, à chaque visite, pour toujours, sans jamais toucher le cache IndexedDB de `bag.js`. Fixé (commit `f4f090a`) : `appfunc/asset_versions.php` construit un manifeste `{chemin: mtime}` en scannant `javascript/`+`css/` récursivement (aucune liste dupliquée à synchroniser avec `require_trame`), injecté via `window.FILE_VERSIONS` avant `main_bag.js`. Chaque fichier n'est reversionné que si son mtime a changé.
