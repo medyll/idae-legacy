@@ -332,6 +332,18 @@ Nouveau test dans `forms.spec.ts` (garde anti-shim sur le double chemin `act_chr
 
 **Suite : 40/40** (1 flaky lié au timing de boot, vert au retry — dégradation d'environnement déjà documentée, pas une régression).
 
+## Migration de `librairie/autoToggle.js` (2026-08-10)
+
+45 appels dans l'inventaire. Gère `.autoToggle` : « un seul élément actif à la fois » sous un conteneur — chaque LIGNE de tableau en est une (`app_datatable.js:752` et alentours), donc instancié à chaque rendu de liste (`app_datatable.js:413,424`). Natif désormais.
+
+`autoPush`, la seconde classe que ce fichier définissait, supprimée plutôt que migrée : zéro appelant dans tout le dépôt (`new autoPush(` n'apparaît nulle part hors de sa propre définition) — même motif que `picPicker`/`TableGrid`/`growler` plus haut.
+
+**Fausse piste suivie jusqu'au bout, et bien qu'elle ait été fausse.** Deux passes consécutives de la suite complète ont échoué sur `sorttable: constructs on a real list` — toujours le même test, jamais un autre — avec des durées de 16-18 min contre 2-8 min habituelles. Deux échecs identiques, ce n'est pas le bruit habituel (qui varie de run en run, documenté partout ailleurs dans ce fichier) : traité comme causal, pas comme de l'environnement. A/B propre : `git stash` sur `autoToggle.js` pour revenir à la version shimée, suite complète — 8 min, zéro échec sur `sorttable`, juste le bruit habituel. Restauration de ma version, deux passes de plus : l'une propre en 7,5 min, l'autre propre en 6 min. Sur quatre passes à code identique (ma version), deux échouent et deux réussissent — ce n'est donc **pas** une régression déterministe, malgré la coïncidence troublante des deux premières. Conclusion : volatilité réelle de l'environnement ce soir-là, plus sévère que d'habitude, pas causée par cette migration. Le protocole (isoler, comparer contre l'original, répéter avant de conclure) était le bon même si la conclusion finale infirme l'hypothèse de départ — mieux vaut ce détour que de committer une fausse cause ou, à l'inverse, de rejeter un vrai bug en l'attribuant trop vite à Docker.
+
+Nouveau `autotoggle.spec.ts` : aucune spec n'exerçait le comportement réel avant (chaque ouverture de liste instancie déjà `autoToggle`, mais rien ne cliquait une ligne pour vérifier). Clic sur deux lignes successives, vérifié que la seconde devient active et la première le redevient pas.
+
+**Suite : 42/42.**
+
 ---
 
 ## Perf — cache-busting cassé, et l'instabilité socket sous WSL2
