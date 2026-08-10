@@ -546,6 +546,23 @@ Quirk préexistant porté verbatim : le `<span>` de mesure est mesuré **avant**
 
 Nouveau `textarea.spec.ts` : épingle les deux comportements qui échoueraient en silence — quel `nl2br` gagne réellement, et le fait que le span de mesure soit bien attaché puis re-mesuré à la frappe. Garde `IDAE_SHIM_WARN`. **3/3 vert au premier essai**, plus `datalist` (consommateur réel de `resizeInput`) et `smoke` revérifiés propres — **7/7**.
 
+## Migration d'`app/app_functions.js` (2026-08-11)
+
+22 occurrences, fourre-tout de globals. Recensement des appelants fonction par fonction avant de toucher quoi que ce soit — 16 fonctions, split net : 9 vivantes, 7 à zéro appelant.
+
+**Supprimées (0 appelant, grep sur tout le dépôt hors `vendor/`/`flotr/`) :**
+- `registerMdl` — corps déjà inatteignable de toute façon (`return ''` en première ligne), et personne ne l'appelait.
+- `chekIdle` / `isIdle` / `isIdleMove` / `isIdleMoveOut` — tout le cluster « idle ». Son seul point d'entrée était `$('body').observe('mousemove', chekIdle)`, commenté, comme les hooks focus/blur juste en dessous. **Sa suppression élimine les trois `Ajax.Request` du fichier** (les deux autres étaient dans `registerMdl`).
+- `gereDate`, `edit_in_place` — aucun appelant.
+
+**Migrées (appelants réels) :** `openDoc` (6), `mce_area` (3), `changeCnameTrick` (4), `popopen` (7), `chkDispZone` (3), `clean_string` (5), `save_setting_autoNext` (11), `save_settings` (**39**), `del_settings` (3).
+
+**`changeCnameTrick` : cassée, laissée cassée exprès.** Elle retourne `'<?= rtrim(HTTPCUSTOMERSITE, '/') ?>/'` — mais c'est un `.js` servi tel quel, aucun handler PHP n'est configuré pour cette extension (vérifié dans `.htaccess`), donc la balise part littéralement dans la chaîne. Ses quatre appelants (`engine.js:251,327`, `module.js:143,183`) construisent tous une URL du type `changeCnameTrick() + 'mdl/' + file` — et sont tous à l'intérieur des replis `typeof socket == 'object'`, jamais exécutés puisqu'`app_socket.js` définit toujours `socket`. C'est précisément pour ça qu'une valeur de retour aussi cassée n'a jamais fait surface. La corriger reviendrait à modifier un chemin inatteignable et non testé, et le vrai correctif (faire entrer une constante serveur dans un `.js` statique) est une décision séparée.
+
+Quirk porté verbatim dans `openDoc` : le `{document.body.appendChild(down_doc)}` n'est pas un `else` mais un bloc nu, donc l'`appendChild` s'exécute à chaque appel et re-parente la même iframe.
+
+Nouveau `app-functions.spec.ts` : vérifie que les 9 globals vivants existent **et que les 7 supprimés ont bien disparu**, puis épingle les deux qui calculent réellement contre le DOM (`chkDispZone` ramène un nœud hors-écran dans le viewport ; `save_setting_autoNext` poste bien le `display` du **frère suivant**, après son debounce de 500 ms) plus `clean_string`. Garde `IDAE_SHIM_WARN`. **5/5 vert au premier essai**, plus `smoke`/`forms` revérifiés propres — **9/9**.
+
 ## Note de méthode — redémarrer Docker entre deux fichiers est inutile (2026-08-10)
 
 Pendant une bonne partie de cette session j'ai relancé `docker restart idae-socket idae-legacy` après chaque fichier migré, avant de lancer la suite. Inutile, vérifié :
