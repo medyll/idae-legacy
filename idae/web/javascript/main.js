@@ -121,7 +121,6 @@ var require_trame = {
 		'jsoncookie',
 		'javascript/librairie/textarea.js',
 		'javascript/librairie/mask.js',
-		'javascript/librairie/myddeupload.js',
 		'javascript/librairie/myddeAttach.js',
 		'javascript/librairie/myddeview.js',
 		'javascript/librairie/myddeSelection.js',

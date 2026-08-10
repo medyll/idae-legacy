@@ -422,6 +422,12 @@ Bloc mort laissé tel quel : `UploadFile` a un `return;` inconditionnel avant to
 
 Nouveau `myddeattach.spec.ts` : construit un élément + formulaire en fixture, vérifie que `dragenter` construit `.zone` (enfant réel, visible), que `dragend` sans drop la ré-cache, que `drop` lit bien `action` du formulaire et bascule `dropped`. Garde `IDAE_SHIM_WARN`. **3/3 vert au premier essai** — pas de piège cette fois, `smoke.spec.ts` revérifié propre.
 
+## Suppression de `librairie/myddeupload.js` (2026-08-10)
+
+Prochain candidat par taille après `myddeAttach.js` (46 occurrences). Même famille que `picPicker.js`/`myui/`/`growler.js`/`myddeSlide.js`/`app_bootstrap_init_old.js`/`go_json` : **zéro appelant réel**, confirmé par grep sur tout le dépôt hors `vendor/`. La classe `myddeUpload` n'est instanciée nulle part. Les deux seuls autres hits pour « myddeUpload/myddeupload » : les deux entrées de chargement (`main.js`, `main_bag.js`) et un `id="myddeUpload<?=$time?>"` dans `app_img_upload.php` — une coïncidence de nommage, cet écran instancie en réalité `myddeAttach`, pas cette classe.
+
+Migration commencée par erreur (fichier entièrement réécrit en natif) avant de vérifier les appelants — reprise dans le bon ordre pour les fichiers suivants : vérifier zéro-appelant *avant* de migrer, pas après. Fichier supprimé, retiré des deux listes de chargement (`main.js:124`, `main_bag.js:79`). `smoke.spec.ts` revérifié vert après suppression.
+
 ## Perf — cache-busting cassé, et l'instabilité socket sous WSL2
 
 **Cache-busting.** `main_bag.js` faisait `?v=<Date.now()>` sur les ~90 fichiers JS/CSS à **chaque** chargement — pas un souci de dev, un souci de prod : tout utilisateur réel retéléchargeait tout, à chaque visite, pour toujours, sans jamais toucher le cache IndexedDB de `bag.js`. Fixé (commit `f4f090a`) : `appfunc/asset_versions.php` construit un manifeste `{chemin: mtime}` en scannant `javascript/`+`css/` récursivement (aucune liste dupliquée à synchroniser avec `require_trame`), injecté via `window.FILE_VERSIONS` avant `main_bag.js`. Chaque fichier n'est reversionné que si son mtime a changé.
