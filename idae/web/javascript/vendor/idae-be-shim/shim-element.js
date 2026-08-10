@@ -198,7 +198,16 @@
         /* ---- attributes ---- */
         readAttribute: function (name) { return readAttribute(this, name); },
         writeAttribute: function (name, value) { return writeAttribute(this, name, value); },
-        hasAttribute: function (name) { return this.hasAttribute(name); },
+        // No hasAttribute entry: this used to read `this.hasAttribute(name)`,
+        // installed onto NativeElement.prototype below via Object.extend —
+        // which shadows the browser's real Element.prototype.hasAttribute
+        // with a function whose body calls itself. Every hasAttribute() call
+        // anywhere in the app, migrated or not, recursed until stack
+        // overflow. Native Element.prototype already provides this method
+        // with identical semantics; no shim needed at all. Found migrating
+        // app_planning.js (BE_PLAN.md phase 5) — its drop handler's
+        // `node.hasAttribute('heuredebut')` was the first native call site to
+        // actually hit this.
         identify: (function () {
             var counter = 0;
             return function () {
