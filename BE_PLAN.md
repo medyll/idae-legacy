@@ -438,6 +438,18 @@ Découverte en le lisant : `chat_user_add`/`chat_user_update`/`chat_user_remove`
 
 Helpers `kp_*` habituels. Nouveau `app-keepon.spec.ts` : exerce `kp_show`/`kp_hide`/`kp_update` sur le vrai `#socket_keep_on_status` du bureau, et le délégué `glue_reserve` (fixture construite, `socket_keep_on.emit` intercepté pour vérifier `RESERVEDID`/`IDAGENT`). Garde `IDAE_SHIM_WARN`. **3/3 vert**, plus `smoke`/`app-chat` revérifiés propres (4/4).
 
+## Migration de `librairie/observers.js` (2026-08-10)
+
+Suivant par taille (40 occurrences), un seul délégué click global (`selfObservers`, instancié une fois au boot par `engine/initApp.js:3`) : bascule checkbox (`doCheck`/`doUnCheck`), révélation `.autoNext`, fermeture `.hide_on_click` sur clic extérieur. Réel et vérifié load-bearing — enregistré sur `document` directement, donc actif dès le boot.
+
+`document.on('click', handler)` (2 arguments, sans sélecteur) → même règle que `myddeAttach.js`/`myddeupload.js` : pas de la délégation, `shim-event.js` patche aussi `Document.prototype`/`HTMLDocument.prototype` en plus d'`Element.prototype` pour ça. Traduit en `document.addEventListener` nu.
+
+Deux pièges trouvés dans le test, aucun dans le code migré :
+1. La checkbox de liste ciblée porte `class="avoid"` et n'est révélée qu'au survol de ligne (CSS) — invisible par défaut. `box.click()` de Playwright attend une vraie visibilité et boucle 60s avant d'échouer. `force: true` contourne l'attente d'actionabilité (le hover CSS n'est pas ce qui est testé ici).
+2. Cette liste groupe ses lignes : la première `<tr>` est une ligne d'en-tête de groupe (`class="entete_groupe"`), sans checkbox. `tbody tr:first` récupérait la mauvaise ligne pour vérifier `.selected`. Corrigé en remontant depuis la checkbox elle-même (`box.locator('xpath=ancestor::tr[1]')`) plutôt que de deviner l'index de ligne.
+
+Nouveau `observers.spec.ts` : clic réel sur une checkbox de liste (bugchk + `tr.selected`), fixture construite pour `.autoNext`/`.hide_on_click`. Garde `IDAE_SHIM_WARN`. **3/3 vert**, plus `smoke`/`myddeview-notifier` revérifiés propres (5/5).
+
 ## Perf — cache-busting cassé, et l'instabilité socket sous WSL2
 
 **Cache-busting.** `main_bag.js` faisait `?v=<Date.now()>` sur les ~90 fichiers JS/CSS à **chaque** chargement — pas un souci de dev, un souci de prod : tout utilisateur réel retéléchargeait tout, à chaque visite, pour toujours, sans jamais toucher le cache IndexedDB de `bag.js`. Fixé (commit `f4f090a`) : `appfunc/asset_versions.php` construit un manifeste `{chemin: mtime}` en scannant `javascript/`+`css/` récursivement (aucune liste dupliquée à synchroniser avec `require_trame`), injecté via `window.FILE_VERSIONS` avant `main_bag.js`. Chaque fichier n'est reversionné que si son mtime a changé.
