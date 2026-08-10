@@ -410,6 +410,18 @@ Nouveau `app-planning.spec.ts` : construit un `[data-dragtache]`/`[data-droptach
 
 Incident d'environnement au passage : les conteneurs `idae-legacy`/`idae-socket` ont disparu de `docker ps -a` en cours de session (ni arrêtés ni visibles, juste absents) — recréés via `docker compose up -d`, aucune perte de données (Mongo tourne dans un conteneur séparé, `idae-mongo-test`, resté up 2 jours sans interruption).
 
+## Migration de `librairie/myddeAttach.js` (2026-08-10)
+
+Troisième plus gros fichier mesuré (49 occurrences), classe `Class.create` — widget drag & drop / upload par input fichier. Réel et largement instancié : `app_wallpaper.php`, `app_img_upload.php`, `mail_send.php` (×2), `document_liste_drop.php`, `app_fiche_document.php`, `app_fiche_maxi_entete.php` (`new myddeAttach(...)`, confirmé par grep sur `mdl/`).
+
+Helpers `ma_*` habituels. Point notable : `.on(event, handler)` à deux arguments (sans sélecteur) — vu dans ce fichier pour `dragend` sur `document.body` — n'est **pas** de la délégation : `shim-event.js:175` (`delegateOn`) route ce cas vers `Event.observe(this, eventName, selector)` quand `handler` est `undefined`, donc un simple listener direct sur l'élément. Traduit en `addEventListener` nu, sans wrapper de délégation.
+
+Formulaire sérialisé via `engine_formSerialize` (`engine/engine.js`, déjà natif, chargé avant ce fichier) plutôt que de réimplémenter `Form.serialize`. `String#evalScripts.bind(content).defer()` (réponse XHR à évaluer, pas du HTML à insérer) → `setTimeout(() => engine_evalScripts(content), 10)`, même contrat de défilement à 10 ms que `Function#defer`.
+
+Bloc mort laissé tel quel : `UploadFile` a un `return;` inconditionnel avant tout le second XHR (`this.xhrArr[index] = ...`) — déjà signalé mort dans `496f371` (commit des `Effect.*`), pas retouché, toujours du Prototype verbatim en dessous.
+
+Nouveau `myddeattach.spec.ts` : construit un élément + formulaire en fixture, vérifie que `dragenter` construit `.zone` (enfant réel, visible), que `dragend` sans drop la ré-cache, que `drop` lit bien `action` du formulaire et bascule `dropped`. Garde `IDAE_SHIM_WARN`. **3/3 vert au premier essai** — pas de piège cette fois, `smoke.spec.ts` revérifié propre.
+
 ## Perf — cache-busting cassé, et l'instabilité socket sous WSL2
 
 **Cache-busting.** `main_bag.js` faisait `?v=<Date.now()>` sur les ~90 fichiers JS/CSS à **chaque** chargement — pas un souci de dev, un souci de prod : tout utilisateur réel retéléchargeait tout, à chaque visite, pour toujours, sans jamais toucher le cache IndexedDB de `bag.js`. Fixé (commit `f4f090a`) : `appfunc/asset_versions.php` construit un manifeste `{chemin: mtime}` en scannant `javascript/`+`css/` récursivement (aucune liste dupliquée à synchroniser avec `require_trame`), injecté via `window.FILE_VERSIONS` avant `main_bag.js`. Chaque fichier n'est reversionné que si son mtime a changé.
