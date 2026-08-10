@@ -460,6 +460,12 @@ Branche laissée inatteignable, comme d'habitude documentée plutôt que retiré
 
 Nouveau `app-calendrier.spec.ts` : ouvre le vrai écran via `openChrome`, vérifie que les deux zones `.cf_module` (`data-nav_zone`/`data-nav_cal`) reçoivent le même `scope`/`value` généré par `identify()`, puis clique `.previous_month` en conditions réelles (aller-retour serveur) et vérifie que le titre du mois change effectivement. Garde `IDAE_SHIM_WARN`. **2/2 vert au premier essai**, `smoke` revérifié propre.
 
+## Suppression de `librairie/validation.js` (2026-08-10)
+
+Suivant par taille (34 occurrences) — mort. Bibliothèque tierce vendorée (« Really Easy Field Validation » d'Andrew Tetlaw, 2007, en-tête de licence inclus), 288 lignes, `Validator`/`Validation` (`Class.create`). Jamais activée : `new Validation(...)` n'apparaît nulle part hors du fichier lui-même (grep sur tout le dépôt). Les classes CSS `validate-email`/`validate-number`/etc. existent bien dans 14 templates, mais ce sont des crochets décoratifs morts — rien ne les scanne puisque personne n'instancie jamais `Validation` sur un formulaire. Seule trace d'activité passée : le commentaire d'`engine/methods.js` documentant le fix `appearElement` du 09/08 (une seule ligne migrée à l'époque, sur un fichier par ailleurs jamais câblé).
+
+Supprimé, retiré des deux listes de chargement (`main.js:113`, `main_bag.js:69`). `smoke.spec.ts` revérifié vert.
+
 ## Perf — cache-busting cassé, et l'instabilité socket sous WSL2
 
 **Cache-busting.** `main_bag.js` faisait `?v=<Date.now()>` sur les ~90 fichiers JS/CSS à **chaque** chargement — pas un souci de dev, un souci de prod : tout utilisateur réel retéléchargeait tout, à chaque visite, pour toujours, sans jamais toucher le cache IndexedDB de `bag.js`. Fixé (commit `f4f090a`) : `appfunc/asset_versions.php` construit un manifeste `{chemin: mtime}` en scannant `javascript/`+`css/` récursivement (aucune liste dupliquée à synchroniser avec `require_trame`), injecté via `window.FILE_VERSIONS` avant `main_bag.js`. Chaque fichier n'est reversionné que si son mtime a changé.

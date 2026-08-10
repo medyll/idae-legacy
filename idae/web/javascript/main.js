@@ -110,7 +110,6 @@ var require_trame = {
 	require_librairie  : [
 		'javascript/librairie/observers.js',
 		'javascript/librairie/appGui.js',
-		'javascript/librairie/validation.js',
 		'javascript/librairie/autoToggle.js',
 		'javascript/librairie/resize.js',
 		'javascript/librairie/myddeNotifier.js',
