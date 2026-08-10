@@ -491,6 +491,71 @@ Caveat pré-existant relevé par la revue Codex, non corrigé : le Node construi
 
 ---
 
+## Rechute — `localhost` cassé aussi dans le navigateur, et le retry qui l'a amplifié (2026-08-10)
+
+Le correctif du 9 août ne couvrait que Playwright (`BASE_URL` normalisé). L'usage humain, lui, est resté sur `http://localhost:8080` — donc le même trou noir, en permanence. Symptôme rapporté : « la migration est un échec », boot cassé, UI qui gèle, reconnexions socket en boucle.
+
+Mesuré (2026-08-10, machine de dev Windows + Docker Desktop + WSL2 `networkingMode=mirrored`) :
+
+| Cible | Résultat |
+|---|---|
+| `curl --ipv6 http://localhost:3005/health` | **000 après 21,05 s** |
+| `curl --ipv4 http://localhost:3005/health` | **200 en 3 ms** |
+| `Resolve-DnsName localhost` | **AAAA `::1` en premier**, puis A `127.0.0.1` |
+| `tactac.idae.preprod.lan` | **A seul** (127.0.0.1) → 8080 : 302, 3005 : 200 en 7 ms |
+
+Le serveur est hors de cause : handshake engine.io identique sur `localhost` et sur `127.0.0.1` dès lors qu'on force IPv4 (`curl --ipv4`, deux `sid` valides). Ce n'est ni CORS, ni le cookie, ni l'origine — uniquement la famille d'adresse.
+
+Précision utile pour lire les logs : dans la stack client, `WebSocket is closed before the connection is established` est la **conséquence**, pas la cause. L'ordre réel est `Polling.onData → Socket.onError → Socket.onClose → freezeTransport → WS.doClose` : le polling reçoit un paquet d'erreur engine.io, la socket se ferme, et la sonde WebSocket en cours est tuée au passage. Le paquet d'erreur lui-même n'a pas été lu — si le problème réapparaît une fois l'hôte corrigé, c'est là qu'il faut creuser.
+
+### L'amplificateur, dans le correctif du 9 août lui-même
+
+`get_data_hook_reconnect()` s'abonnait à `['reconnect', 'connect']`. socket.io v2 émet **les deux** pour une seule reconnexion : chaque cycle ré-émettait donc tout le in-flight **en double**. Sur un transport qui bat de l'aile, une churn tolérable devient une tempête : par cycle, `json_scheme` (306 Ko) + `json_scheme_field` (53 Ko) ×2, dix cycles en dix secondes, Apache à court de workers, puis `[PHP-BRIDGE] Timeout after 30000ms`. Le remède amplifiait la cause.
+
+Corrigé : écoute de `'reconnect'` seul (socket.io tamponne les emits faits avant connexion et les vide au `connect`, donc `'connect'` n'était pas nécessaire au premier boot non plus), plus un compteur d'époque garantissant un renvoi par entrée et par reconnexion.
+
+À noter : le timeout `phpBridge` de 30 s (8 août, `83ef31c`) n'a rien cassé — il a rendu visible un hang jusque-là muet. Le message d'erreur est nouveau, pas le défaut.
+
+### Tentative infra abandonnée
+
+`docker-compose.yml` publie désormais `0.0.0.0` **et** `[::]` sur 8080/3005. Après `--force-recreate`, `docker port` annonce bien `[::]:3005`, et pourtant `curl --ipv6` timeoute encore à 21 s — et `Get-NetTCPConnection` ne trouve **aucun** listener hôte sur ces ports, en v4 comme en v6. Le relais WSL2 en mode miroité ne forwarde pas `::1`. Les lignes `[::]` sont conservées (correctes sur un hôte Linux) mais **inertes ici** ; les commentaires du fichier le disent explicitement pour que personne ne les prenne pour le correctif.
+
+Piste non poursuivie : `hostAddressLoopback` dans `.wslconfig` — exige `wsl --shutdown`, portée machine entière, résultat incertain. Mauvais rapport bénéfice/risque face à une solution qui marche déjà.
+
+### Règle retenue
+
+**Ne jamais naviguer sur `localhost`.** Utiliser `127.0.0.1:8080` ou un nom du fichier `hosts` (`tactac.idae.preprod.lan`, `maw.idae.preprod.lan`, tous deux présents dans `idae/config/lan-hosts.json` et couverts par la regex CORS `.lan` du serveur). Les noms `hosts` sont immunisés : ce fichier est IPv4 par construction — d'où le fait que le bug n'existait pas à l'époque où l'app se naviguait sur `*.lan`.
+
+Non corrigeable côté app : l'hôte socket vient de `document.domain`, ce qui est juste. Le réécrire sans réécrire la page scinderait le jar de cookies (`localhost` ≠ `127.0.0.1`), `PHPSESSID` ne suivrait pas, et `json_ssid` signalerait un désaccord à chaque boot — une boucle de login à la place d'une boucle de socket.
+
+Anomalie relevée, non corrigée (fichier système, hors périmètre) : le `hosts` Windows contient une ligne malformée `127.0.0.1 maw.idae.preprod.lan::1 localhost` — un `::1 localhost` collé sans retour à la ligne. Windows ignore les entrées `localhost` de ce fichier, donc ce n'est probablement pas causal, mais l'intention derrière mérite d'être élucidée.
+
+### Validé au runtime (2026-08-10, boot sur `127.0.0.1:8080`)
+
+```
+[SOCKET] Connecting to: http://127.0.0.1:3005
+[SOCKET] ✓ Connected successfully: nPGX1ff9vItpUax9AAAM
+ ok scheme / log ok / json_ssid
+```
+
+Aucun `[get_data] socket reconnected - re-emitting`, aucune erreur WebSocket, `schemeLoad()` résout.
+
+| | Avant | Après |
+|---|---|---|
+| Connexions socket par boot | ~10, une par seconde | 2 |
+| `json_scheme` par boot | ~20 | 1 |
+| Reconnexions | en boucle | 0 |
+
+**Adresses retenues : `http://127.0.0.1:8080` (défaut, y compris pour Playwright) ou un nom du fichier `hosts` (`tactac.idae.preprod.lan`, `maw.idae.preprod.lan`). `localhost` est abandonné** — il ne fonctionne plus depuis le passage à WSL2 et ne sera pas remis en service.
+
+### Reste ouvert
+
+- **Deux connexions serveur pour un seul `✓ Connected` client.** Constant sur tous les boots du log, anciens compris. Sans rapport avec la tempête, mais inexpliqué : quelque chose ouvre une seconde socket.
+- **`json_data_table` timeout à 30 s sur `agent_note` / `agent_tuile`.** Observé dans le log initial (17:34:05) puis à 18:19:22, 18:19:55, 18:20:17 — ces trois derniers **hors tempête**, avec seulement deux connexions actives. Ce n'est donc pas une conséquence de la saturation Apache : requête réellement lente ou bloquée. Meilleur candidat pour la plainte « interface peu réactive, voire freeze » : le desktop charge `agent_table`, `agent_tuile` et `agent_note` en parallèle au boot, et une tuile pendue à 30 s donne une UI qui paraît morte. Corrélation, pas preuve — à instruire séparément.
+- La plainte « beaucoup de choses ne fonctionnent pas » n'est toujours pas qualifiée, faute de cas précis.
+
+---
+
 ## Fichiers critiques
 
 - `idae/web/javascript/main_bag.js` — graphe de chargement, groupe `require_hell`

@@ -82,6 +82,9 @@ var GET_DATA_ACK_TIMEOUT = 45000;
 // In-flight retryable requests, re-emitted when the socket reconnects.
 var get_data_inflight = [];
 var get_data_reconnect_hooked = false;
+// Bumped once per re-established connection, so an entry can refuse to be
+// re-sent twice for the same one.
+var get_data_reconnect_epoch = 0;
 
 function get_data_hook_reconnect() {
 	if ( get_data_reconnect_hooked || typeof socket !== 'object' || !socket ) return;
@@ -89,13 +92,25 @@ function get_data_hook_reconnect() {
 	// A reconnect gets a new sid; anything the server acks after that answers
 	// the dead connection and never reaches us. Re-emitting on the new one is
 	// the only way those promises ever settle.
-	['reconnect', 'connect'].forEach (function (evt) {
-		socket.on (evt, function () {
-			if ( !get_data_inflight.length ) return;
-			console.warn ('[get_data] socket reconnected - re-emitting', get_data_inflight.length, 'in-flight request(s)');
-			get_data_inflight.slice ().forEach (function (entry) {
-				entry.resend ();
-			});
+	// Only 'reconnect'. socket.io v2 fires BOTH 'reconnect' and 'connect' for a
+	// single re-established connection, so listening to the pair re-sent every
+	// in-flight request twice per cycle. On a flapping transport that turned a
+	// recoverable hiccup into a storm: each cycle re-issued json_scheme (306 KB)
+	// and json_scheme_field (53 KB), Apache ran out of workers, and the Node
+	// bridge started reporting its 30s timeout — a self-inflicted outage.
+	//
+	// 'connect' is not needed for the first connection either: socket.io buffers
+	// emits made before the socket is up and flushes them on connect.
+	socket.on ('reconnect', function () {
+		get_data_reconnect_epoch++;
+		if ( !get_data_inflight.length ) return;
+		console.warn ('[get_data] socket reconnected - re-emitting', get_data_inflight.length, 'in-flight request(s)');
+		get_data_inflight.slice ().forEach (function (entry) {
+			// Belt and braces: one resend per entry per reconnection, whatever
+			// the transport decides to emit.
+			if ( entry.epoch === get_data_reconnect_epoch ) return;
+			entry.epoch = get_data_reconnect_epoch;
+			entry.resend ();
 		});
 	});
 }
@@ -196,7 +211,7 @@ var get_data = function (file, file_vars, options) {
 		get_data_hook_reconnect ();
 
 		if ( retryable ) {
-			entry = { file: file, resend: send };
+			entry = { file: file, resend: send, epoch: get_data_reconnect_epoch };
 			get_data_inflight.push (entry);
 		}
 

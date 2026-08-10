@@ -23,6 +23,36 @@ Helper scripts (PowerShell):
 
 MongoDB is expected on the host at `host.docker.internal:27017`. Configure credentials via environment variables `MDB_USER`, `MDB_PASSWORD`, `MDB_PREFIX` or edit `idae/web/conf.lan.inc.php` for local LAN/dev.
 
+### Never browse the app on `localhost` (Windows + WSL2)
+
+Use **`http://127.0.0.1:8080`** — or a hosts-file name such as
+`http://tactac.idae.preprod.lan:8080` / `http://maw.idae.preprod.lan:8080`.
+Never `http://localhost:8080`. This applies to the browser, to Playwright, and
+to any manual `curl`.
+
+Why: Windows resolves `localhost` to `::1` before `127.0.0.1`, and since the
+move to WSL2 nothing answers there. Measured 2026-08-10:
+`curl --ipv6 http://localhost:3005/health` → **21.05s then code 000**;
+`--ipv4` → **200 in 3ms**. The browser hides this for plain HTTP (Happy
+Eyeballs falls back in ~250ms), but not for socket.io: the connection dies,
+reconnects with a new sid every second, and the server answers each in-flight
+ack to a connection that no longer exists.
+
+`*.lan` names are immune because the Windows hosts file is IPv4-only by
+construction — which is why this never showed up back when the app was browsed
+on `idaenext.idae.lan` and appeared the day someone typed `localhost`.
+
+Not fixable from the app: the socket.io host is derived from `document.domain`,
+which is correct. Rewriting the socket host without rewriting the page would
+split the cookie jar (`localhost` and `127.0.0.1` are different hosts),
+`PHPSESSID` would not follow, and `json_ssid` would report a mismatch on every
+boot — a login loop instead of a socket loop.
+
+`docker-compose.yml` publishes both `0.0.0.0` and `[::]` for ports 8080/3005.
+The `[::]` half is **inert under Docker Desktop + WSL2 mirrored networking**
+(`docker port` reports it, the host has no listener, `curl --ipv6` still times
+out). It is kept because it is correct on a Linux host. It is not the fix here.
+
 ## Running Tests
 
 After the stack is running:
