@@ -366,6 +366,26 @@ Aucune spec n'exerçait ce fichier avant. Nouveau `module.spec.ts` : appel direc
 
 **Suite : 46/46.**
 
+## Résidus `myddeNotifier.js` / `myddeview.js` / `app.js` (2026-08-10)
+
+Fermeture de l'inventaire du 2026-08-09 : les ~7 appels restants pointaient sur trois fichiers, aucun aussi trivial que le compte le suggérait — même leçon que `sorttable.js`/`app_socket.js` plus haut, la sonde du matin ne mesurait que ce que ses écrans avaient réellement déclenché.
+
+**`myddeview.js`** — sélection multiple shift-click / meta-click sur les listes, déléguée sur `input[type=checkbox]`. Instancié sur **chaque** zone fichier de liste (`myddeExplorer.js:680`, `act_file_zone`), donc bien plus exercé en pratique que « Object.extend 1, $ 1 » ne le disait — la sonde n'a simplement jamais fait de shift/meta-click. Réécriture complète (`.select`/`.without`/`.first`/`.indexOf`/`.up`/`.writeAttribute`/`.toggleClassName`/`.identify`/`.size`/`.fire`/`Event.stop` → natif), avec l'aide `mv_up` reproduisant `Element#up(selector)` (part du parent, jamais de l'élément lui-même).
+
+**`myddeNotifier.js`** — toasts (`growl()`), instancié directement par les handlers `notify`/`act_notify` d'`app_socket.js`. L'inventaire n'avait vu que l'`Effect.Opacity` déjà migré (`appearElement`) ; tout le reste (constructeur, `buildNotice`, `removeNotice`) était invisible à la sonde faute de toast déclenché. Décision notable : `this.growler.wrap(document.body)` remplacé par `document.body.appendChild(this.growler)` — équivalence exacte, pas une simplification, puisque `wrap()` sur un élément sans `parentNode` (le cas ici, div fraîchement créée) ne fait déjà que ça côté Prototype. Confirmé en lisant `shim-element.js` que `remove(options)` a toujours ignoré son argument, shim ou vrai Prototype — `n.remove({duration:0.3})` devient `mn_remove(n)` sans porter le duration.
+
+**`app.js`** — les deux `Object.extend` restants (`get_data`, `upd_data`) → `Object.assign`. Au passage, `go_json` (fonction non appelée, trouvée en relisant tout le fichier) supprimée : zéro appelant réel (`grep` sur tout le dépôt hors `vendor/`), et elle référençait elle-même du code mort (`windowJSGUI`, `APP.APPOBJ.build_big`, aucun des deux présent ailleurs dans la base). Cohérent avec la politique phase 5 : supprimer le mort plutôt que le migrer.
+
+Nouveau `myddeview-notifier.spec.ts` : meta-click sur une checkbox de liste réelle → classe `selected` posée/retirée + événements `dom:selectionMade`/`dom:unSelectionMade` ; `growl()` instancié directement (comme le fait `app_socket.js`), toast rendu puis auto-disparu après 5s ; garde `IDAE_SHIM_WARN` sur les deux fichiers.
+
+**Deux pièges trouvés dans le test, aucun dans le code migré.**
+
+1. `modifiers: ['Meta']` de Playwright pend sous Windows. Le test meta-click a échoué quatre fois de suite avec un timeout plein de 60s — la première fois faisait suspecter le hook `beforeAll` de `shared-boot.ts` (boot lent sous charge système : des dizaines de processus Node orphelins trouvés vivants, `curl` vers l'app à 2,3s pour une simple redirection), mais un run propre à 1 worker, docker relancé, aucune concurrence, a reproduit le même échec — cette fois avec la trace complète : le test passe l'ouverture de liste, trouve la checkbox, puis `box.click({modifiers:['Meta']})` **ne retourne jamais**, rien n'est enregistré après ce step avant le timeout. `modifiers:['Meta']` fait presser la vraie touche Windows au niveau du pipeline d'input de Chromium — sous Windows ça sort du navigateur et ouvre le menu Démarrer, ce qui vole le focus et laisse le mouse-up du clic (et donc le test) pendu indéfiniment. `selectableClicked` (`myddeview.js`) ne fait que lire `event.metaKey` sur l'événement de clic, donc un `MouseEvent` synthétique dispatché en page (`metaKey: true`, sans passer par le pipeline d'input réel) exerce le même chemin de code sans l'effet de bord OS.
+
+2. Une fois le clic corrigé, la trace a montré la classe `selected` posée correctement mais `dom:selectionMade` jamais reçu. `mv_fire` (dans `myddeview.js`) dispatche bien l'événement avec `bubbles:true` sur l'élément racine passé à `new myddeview(...)` — c'est le test qui écoutait au mauvais endroit (un sélecteur CSS deviné plutôt que garanti). Corrigé en écoutant sur `document` : les événements bubblés y arrivent quel que soit le nœud exact d'origine.
+
+Les deux corrigés dans le test (dispatch direct + écoute sur `document`), rien changé côté `myddeview.js`. **Suite (fichier seul) : 4/4 vert** (le premier essai du meta-click a échoué une fois à 0ms avant ces deux fixes — cascade normale d'un boot à froid concurrent avec un autre run laissé tourner par erreur, pas reproduit après isolation propre).
+
 ## Perf — cache-busting cassé, et l'instabilité socket sous WSL2
 
 **Cache-busting.** `main_bag.js` faisait `?v=<Date.now()>` sur les ~90 fichiers JS/CSS à **chaque** chargement — pas un souci de dev, un souci de prod : tout utilisateur réel retéléchargeait tout, à chaque visite, pour toujours, sans jamais toucher le cache IndexedDB de `bag.js`. Fixé (commit `f4f090a`) : `appfunc/asset_versions.php` construit un manifeste `{chemin: mtime}` en scannant `javascript/`+`css/` récursivement (aucune liste dupliquée à synchroniser avec `require_trame`), injecté via `window.FILE_VERSIONS` avant `main_bag.js`. Chaque fichier n'est reversionné que si son mtime a changé.

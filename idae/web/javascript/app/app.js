@@ -101,7 +101,7 @@ function get_data_hook_reconnect() {
 }
 
 var get_data = function (file, file_vars, options) {
-	var options = Object.extend ({}, options || {});
+	var options = Object.assign ({}, options || {});
 
 	if ( options.stream_to ) file_vars.stream_to = options.stream_to;
 	var ajaxOption = {},
@@ -207,7 +207,7 @@ var get_data = function (file, file_vars, options) {
 var upd_data = function (file_vars, options) {
 	return new RSVP.Promise (function (resolve, reject) {
 		var ajaxOption = {},
-		    options    = Object.extend (ajaxOption, options || {}),
+		    options    = Object.assign (ajaxOption, options || {}),
 		    data_vars  = {
 			    DOCUMENTDOMAIN : DOCUMENTDOMAIN,
 			    vars           : file_vars,
@@ -224,16 +224,8 @@ var upd_data = function (file_vars, options) {
 	})
 };
 
-var go_json = function (table, options) {
-	this.options = Object.extend ({}, options || {});
-	// JSGUI onglet
-	red = windowJSGUI.add ({
-		title   : table,
-		taskBar : $ ('taskBar')
-	})
-	//
-	var zone = APP.APPOBJ.build_big (red);
-	//
-	new myddeExplorer ($ (zone.element));
-}
+// go_json() removed 2026-08-10 (BE_PLAN.md phase 5): zero callers anywhere
+// in the repo, confirmed by grep. It also referenced `windowJSGUI` and
+// `APP.APPOBJ.build_big`, neither of which exists anywhere else in this
+// codebase — dead code calling into more dead code.
 
