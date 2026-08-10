@@ -516,6 +516,22 @@ Autre branche laissée verbatim : sans `onlyClass`, `this.allChild` vient de `ch
 
 Nouveau `tablegui.spec.ts` : fixture construite (l'écran planning mensuel réel exige ses propres données), vérifie le partage de hauteur (parent 300 px / `numRow: 3` → 100 px par cellule) et que la grille, partie d'`opacity: 0`, est bien révélée par `appearElement`. Garde `IDAE_SHIM_WARN`. **2/2 vert au premier essai** — et premier fichier validé **sans redémarrage Docker**, cf. la note de méthode ci-dessous.
 
+## Migration d'`app/app_menu.js` + suppression d'`autoLoad.js` et `sortdiv.js` (2026-08-11)
+
+Trois fichiers d'un coup, la file par taille ayant donné deux morts consécutifs.
+
+**`librairie/autoLoad.js` (25 occurrences) — supprimé.** Absent des *deux* listes de chargement, jamais instancié (`new autoLoad(` n'existe nulle part), aucune référence depuis un autre JS. Le seul hit hors du fichier est un nom de classe CSS (`class="autoLoad-recordcount"` sur un `<tr>` de `mail_liste_tbody.php`) — markup inerte sans la classe JS pour le lire.
+
+**`librairie/sortdiv.js` (24 occurrences) — supprimé.** Cas légèrement différent : bien chargé par les deux loaders, donc parti au navigateur à chaque boot, mais `new sortDiv(` n'apparaît nulle part. Retiré des deux listes (`main.js:118`, `main_bag.js:74`).
+
+**`app/app_menu.js` (23 occurrences) — migré.** Celui-là est tout sauf mort : chargé par `main_bag.js:57`, **il s'auto-instancie** en dernière ligne de fichier (`new app_menu()`) et pose un délégué global sur `[data-menu]`. Load-bearing sur chaque liste — l'input de recherche de `myddeExplorer` reçoit précisément `data-menu` via `act_expl_search_input`, et son menu de portée à deux options est le nœud frère que ce fichier révèle.
+
+Quatrième réutilisation du portage `clonePosition` (après `app_insertionQ.js`, `myddeDatalist.js`, `app_conge.js`), plus un portage de `getDimensions`/`getHeight`/`getWidth` : la version Prototype mesure `clientWidth`/`clientHeight` en forçant temporairement l'élément visible s'il est en `display:none` — ce qui compte ici, les menus sont mesurés *avant* d'être affichés.
+
+**Fuite préexistante portée verbatim, commentée** : `onDataMenu` ajoute `onClickBtn` avec un `.bind()` neuf à chaque clic sur `[data-menu]`, et le `removeEventListener` correspondant dans `onClickBtn` re-`bind()` encore — un autre objet fonction, donc il ne retire jamais rien. Ces écouteurs s'accumulent depuis toujours pour la durée de vie de la page.
+
+Nouveau `app-menu.spec.ts` : vérifie l'auto-instanciation (`#div_app_menu` enfant de `body`, classe posée), puis qu'un clic sur un `[data-menu]` révèle et positionne son frère (`display`, `position:absolute`, `left`/`top` posés par `clonePosition`, classe `hide_on_click` ajoutée pour qu'`observers.js` puisse le fermer). Garde `IDAE_SHIM_WARN`. **3/3 vert au premier essai**, plus `smoke`/`explorer-shell` revérifiés propres — soit **7/7** au total, ce qui couvre aussi les deux suppressions.
+
 ## Note de méthode — redémarrer Docker entre deux fichiers est inutile (2026-08-10)
 
 Pendant une bonne partie de cette session j'ai relancé `docker restart idae-socket idae-legacy` après chaque fichier migré, avant de lancer la suite. Inutile, vérifié :

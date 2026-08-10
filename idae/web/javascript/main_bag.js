@@ -71,7 +71,6 @@ var require_trame = {
 		'javascript/librairie/myddeNotifier.js',
 		'javascript/librairie/cropper.js',
 		'javascript/librairie/resizeGui.js',
-		'javascript/librairie/sortdiv.js',
 		'javascript/librairie/tableGui.js',
 		'javascript/librairie/textarea.js',
 		'javascript/librairie/mask.js',
