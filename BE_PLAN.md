@@ -450,6 +450,16 @@ Deux pièges trouvés dans le test, aucun dans le code migré :
 
 Nouveau `observers.spec.ts` : clic réel sur une checkbox de liste (bugchk + `tr.selected`), fixture construite pour `.autoNext`/`.hide_on_click`. Garde `IDAE_SHIM_WARN`. **3/3 vert**, plus `smoke`/`myddeview-notifier` revérifiés propres (5/5).
 
+## Migration d'`app/app_calendrier.js` (2026-08-10)
+
+Suivant par taille (`resizeGui.js`/37 exclu — `Draggable`, décidé hors scope le 09/08). 35 occurrences, `Class.create` — nav du widget calendrier (mois précédent/suivant, sélecteurs mois/année), plus un mode optionnel « calendrier-popup pour un input » (`data-calendar_target`). Auto-instancié par `app_insertionQ.js:561` sur tout nœud `[data-app_calendrier]`. Réel : écran `app/app_calendrier/app_calendrier_echeance`, ouvert par la tuile bureau `app_gui_calendar` (`act_chrome_gui`).
+
+`$(this.element).on('click', selector, handler)` — vraie délégation cette fois (3 arguments avec sélecteur, scopée à `this.element`), contrairement aux formes à 2 arguments trouvées dans `myddeAttach.js`/`myddeupload.js`/`observers.js`.
+
+Branche laissée inatteignable, comme d'habitude documentée plutôt que retirée : `$$(this.element.readAttribute('data-calendar_target')).invoke('setValue', ...)`. `data-calendar_target` contient un id brut d'élément (posé côté serveur depuis `$_POST['calendar_target']`, `app_calendrier.php:16`), jamais un sélecteur CSS — le traiter comme tel via `$$`/`querySelectorAll` ne matche jamais rien, et aucune méthode `setValue` n'existe nulle part ailleurs dans l'app de toute façon (seule occurrence : la copie vendorée de vrai Prototype dans `flotr/`, sans rapport).
+
+Nouveau `app-calendrier.spec.ts` : ouvre le vrai écran via `openChrome`, vérifie que les deux zones `.cf_module` (`data-nav_zone`/`data-nav_cal`) reçoivent le même `scope`/`value` généré par `identify()`, puis clique `.previous_month` en conditions réelles (aller-retour serveur) et vérifie que le titre du mois change effectivement. Garde `IDAE_SHIM_WARN`. **2/2 vert au premier essai**, `smoke` revérifié propre.
+
 ## Perf — cache-busting cassé, et l'instabilité socket sous WSL2
 
 **Cache-busting.** `main_bag.js` faisait `?v=<Date.now()>` sur les ~90 fichiers JS/CSS à **chaque** chargement — pas un souci de dev, un souci de prod : tout utilisateur réel retéléchargeait tout, à chaque visite, pour toujours, sans jamais toucher le cache IndexedDB de `bag.js`. Fixé (commit `f4f090a`) : `appfunc/asset_versions.php` construit un manifeste `{chemin: mtime}` en scannant `javascript/`+`css/` récursivement (aucune liste dupliquée à synchroniser avec `require_trame`), injecté via `window.FILE_VERSIONS` avant `main_bag.js`. Chaque fichier n'est reversionné que si son mtime a changé.
