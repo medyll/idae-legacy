@@ -532,6 +532,20 @@ Quatrième réutilisation du portage `clonePosition` (après `app_insertionQ.js`
 
 Nouveau `app-menu.spec.ts` : vérifie l'auto-instanciation (`#div_app_menu` enfant de `body`, classe posée), puis qu'un clic sur un `[data-menu]` révèle et positionne son frère (`display`, `position:absolute`, `left`/`top` posés par `clonePosition`, classe `hide_on_click` ajoutée pour qu'`observers.js` puisse le fermer). Garde `IDAE_SHIM_WARN`. **3/3 vert au premier essai**, plus `smoke`/`explorer-shell` revérifiés propres — soit **7/7** au total, ce qui couvre aussi les deux suppressions.
 
+## Migration de `librairie/textarea.js` (2026-08-11)
+
+22 occurrences. Trois choses dans ce fichier, trois traitements différents.
+
+**`ResizingTextArea` — supprimé.** Classe définie ici, instanciée nulle part dans le dépôt.
+
+**`resizeInput` — migré.** Input auto-dimensionné, bien vivant : `app_insertionQ.js:419` et `myddeDatalist.js:179`.
+
+**`nl2br` — gardé exprès, et exprès *non* dédupliqué.** Piège trouvé en vérifiant avant de supprimer : `app_php.js:11` définit un global du même nom avec une implémentation **différente** (il remplace le saut de ligne par `<br />` ; celui d'ici conserve le saut de ligne et insère `<br>` devant, en sautant les occurrences précédées de `>`). `main_bag.js` charge `app_php.js` en ligne 27 et ce fichier en ligne 75 — donc **c'est cette version-ci qui gagne**, et c'est elle que l'app exécute réellement, y compris pour `app_socket.js:672`. Supprimer le fichier en bloc aurait silencieusement changé le rendu de chaque mise à jour live-data. Bon rappel : « fichier dont il ne reste qu'une classe morte » ne veut pas dire « fichier supprimable » tant qu'on n'a pas regardé ses globals.
+
+Quirk préexistant porté verbatim : le `<span>` de mesure est mesuré **avant** d'être ajouté au document, donc la première mesure vaut toujours 0 (un élément détaché n'a pas de `clientWidth`). La largeur initiale est donc `0px`, rattrapée par le `minWidth: 80px` de la ligne suivante ; les mesures suivantes, au `keydown`, sont correctes.
+
+Nouveau `textarea.spec.ts` : épingle les deux comportements qui échoueraient en silence — quel `nl2br` gagne réellement, et le fait que le span de mesure soit bien attaché puis re-mesuré à la frappe. Garde `IDAE_SHIM_WARN`. **3/3 vert au premier essai**, plus `datalist` (consommateur réel de `resizeInput`) et `smoke` revérifiés propres — **7/7**.
+
 ## Note de méthode — redémarrer Docker entre deux fichiers est inutile (2026-08-10)
 
 Pendant une bonne partie de cette session j'ai relancé `docker restart idae-socket idae-legacy` après chaque fichier migré, avant de lancer la suite. Inutile, vérifié :
