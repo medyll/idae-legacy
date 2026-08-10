@@ -386,6 +386,18 @@ Nouveau `myddeview-notifier.spec.ts` : meta-click sur une checkbox de liste rée
 
 Les deux corrigés dans le test (dispatch direct + écoute sur `document`), rien changé côté `myddeview.js`. **Suite (fichier seul) : 4/4 vert** (le premier essai du meta-click a échoué une fois à 0ms avant ces deux fixes — cascade normale d'un boot à froid concurrent avec un autre run laissé tourner par erreur, pas reproduit après isolation propre).
 
+## Migration d'`app/app_chat.js` (2026-08-10)
+
+Reprise après correction : la section « shim-effects » plus haut avait déjà fermé les `Effect.*`/`Draggable` de tout le dépôt le 09/08 — ce qui restait shimmé dans `appGui.js`/`myddeAttach.js`/`myddeupload.js`/`tableGui.js`/`validation.js` est le reste de leur surface (`Class.create`, `Object.extend`, `$`/`$$`, `.each`, `.observe`, `.up()`…), jamais l'animation. Mesure élargie par comptage statique (hors `vendor/`) pour retrouver le vrai plus gros fichier non touché : `app_chat.js`, 74 occurrences, 442 lignes de fonctions globales (pas de `Class.create`).
+
+Chargé sans condition par `main_bag.js` (`require_app`) sur **chaque** boot — donc son code de premier niveau (`socket_app_chat = io(...)`, les cinq `$('body').on('click', …)` délégués) tourne déjà à chaque test de la suite, que la fonctionnalité chat soit visible ou non. Vérifié à la relecture : `app/app_chat/app_chat_panel.php` — le seul appelant réel d'`appchat_init`/`appchat_panel_toggle`, et la seule source du markup `.app_chat_button`/`.appchat_connected`/`.appchat_disconnected` — n'est référencé nulle part ailleurs dans le dépôt (`grep` sur `app_chat_panel`/`app_chat_button`, hors `vendor/`). Pas supprimé pour autant : le fichier reste chargé et sa connexion socket + ses délégations sont réelles, seule la branche panneau est aujourd'hui inatteignable — même catégorie que la branche `evalScripts:true` jamais empruntée d'`engine/module.js`, portée fidèlement plutôt que retirée.
+
+Helpers `ac_*` : `ac_el`, `ac_qsa`, `ac_up` (part du parent, jamais de soi — même contrat que `mv_up`), `ac_delegate`, `ac_toQueryString` (remplace `$H(obj).toQueryString()` pour des objets plats, aucun besoin de sérialisation imbriquée ici), `ac_show`/`ac_hide`/`ac_remove`.
+
+Bug préexistant trouvé et **laissé tel quel**, commenté dans le code : `chat_user_remove` référence `chat_tracker_timer` (sans le préfixe `appchat_`), jamais déclaré nulle part — `ReferenceError` garanti à chaque appel, sous le shim comme en natif. Pas un bug de migration, ne pas « réparer » ce qui n'a jamais marché.
+
+Nouveau `app-chat.spec.ts` : construit le markup réel d'`app_chat_panel.php` en fixture détachée (même approche que le test de repli `closeModule` de `module.spec.ts`) pour exercer `appchat_panel_toggle`/`appchat_agent_state_retrieve` — chemin sinon inatteignable via un vrai écran. Garde `IDAE_SHIM_WARN`. **3/3 vert.**
+
 ## Perf — cache-busting cassé, et l'instabilité socket sous WSL2
 
 **Cache-busting.** `main_bag.js` faisait `?v=<Date.now()>` sur les ~90 fichiers JS/CSS à **chaque** chargement — pas un souci de dev, un souci de prod : tout utilisateur réel retéléchargeait tout, à chaque visite, pour toujours, sans jamais toucher le cache IndexedDB de `bag.js`. Fixé (commit `f4f090a`) : `appfunc/asset_versions.php` construit un manifeste `{chemin: mtime}` en scannant `javascript/`+`css/` récursivement (aucune liste dupliquée à synchroniser avec `require_trame`), injecté via `window.FILE_VERSIONS` avant `main_bag.js`. Chaque fichier n'est reversionné que si son mtime a changé.
