@@ -563,6 +563,16 @@ Quirk porté verbatim dans `openDoc` : le `{document.body.appendChild(down_doc)}
 
 Nouveau `app-functions.spec.ts` : vérifie que les 9 globals vivants existent **et que les 7 supprimés ont bien disparu**, puis épingle les deux qui calculent réellement contre le DOM (`chkDispZone` ramène un nœud hors-écran dans le viewport ; `save_setting_autoNext` poste bien le `display` du **frère suivant**, après son debounce de 500 ms) plus `clean_string`. Garde `IDAE_SHIM_WARN`. **5/5 vert au premier essai**, plus `smoke`/`forms` revérifiés propres — **9/9**.
 
+## Migration de `librairie/appGui.js` (2026-08-11)
+
+16 occurrences, `Class.create` — zones d'application à onglets du bureau + barre des tâches. Un seul appelant, mais central : `app_gui_main.php:151` fait `window.JSGUI = new appGui($('mainApp'))`, donc une instance existe à **chaque boot** (si le constructeur levait, `smoke.spec.ts` tomberait immédiatement). `moveElementTo`, en tête de fichier, avait déjà été migré le 09/08 (`496f371`, ex-`Effect.Move`) et n'est pas retouché.
+
+Portages notables : `String#gsub(' ', '_')` (motif chaîne → remplace toutes les occurrences) en `split/join` ; `Element#siblings()` en « enfants du parent moins soi » ; `cleanWhitespace()` ; et `.insert({before: node})` en `insertBefore`. `.remove()` passe par `parentNode.removeChild` — le piège habituel, `Element.prototype.remove` étant remplacé par la version Prototype dans le shim.
+
+**Bug préexistant préservé, commenté dans `activate()`** : `delta = eval(parent.offsetLeft) - …`. Ce `parent` n'est pas `daParent` mais **`window.parent`** — une fenêtre de premier niveau n'a pas d'`offsetLeft`, donc c'est `undefined - nombre` → `NaN`. `moveElementTo` écrit ensuite `"NaNpx"`, que le CSS rejette : la branche non-`fitScreen` du mode « slide » n'a donc jamais déplacé quoi que ce soit. Une ligne au-dessus, la branche `fitScreen` utilise correctement `daParent.offsetLeft` et fonctionne.
+
+Nouveau `appgui.spec.ts` : vérifie que l'instance `window.JSGUI` du bureau existe, est bien liée à `#mainApp` et que son `cleanWhitespace()` a bien retiré les nœuds texte vides ; puis qu'`add()` construit réellement le wrapper `.inArea`, la zone interne (`frm` + titre slugifié) et le bouton de barre des tâches (`ong` + titre), correctement parentés et marqués `active`. Garde `IDAE_SHIM_WARN`. **3/3 vert au premier essai**, plus `smoke` et `window-gui` revérifiés propres — **8/8**.
+
 ## Note de méthode — redémarrer Docker entre deux fichiers est inutile (2026-08-10)
 
 Pendant une bonne partie de cette session j'ai relancé `docker restart idae-socket idae-legacy` après chaque fichier migré, avant de lancer la suite. Inutile, vérifié :
