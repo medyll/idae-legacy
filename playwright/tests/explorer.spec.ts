@@ -78,3 +78,31 @@ test('desktop panel: caret collapses and expands the section', async () => {
 
   guard.assertClean();
 });
+
+test('desktop panel: app_tree native implementation does not call compatibility shims', async () => {
+  const page = getPage();
+  const treeWarnings: string[] = [];
+
+  page.on('console', (message) => {
+    if (message.type() !== 'warning' || !message.text().includes('[idae-shim]')) return;
+    const directCaller = message.text().split('\n').find((line) =>
+      line.includes('javascript/') && !line.includes('vendor/idae-be-shim/'),
+    );
+    if (directCaller?.includes('app/app_tree.js')) treeWarnings.push(message.text());
+  });
+
+  await page.evaluate(() => {
+    (window as any).IDAE_SHIM_WARN = 1;
+    (window as any).__idaeShimInstallWarn();
+  });
+
+  const panel = page.locator('#desktop [auto_tree_main]').first();
+  const caret = panel.locator('.auto_tree_caret').first();
+  await expect(caret).toBeVisible({ timeout: 30_000 });
+  await caret.click();
+  // Click it back to its original state so this test doesn't leave the
+  // desktop's history panel toggled for whichever test runs next.
+  await caret.click();
+
+  expect(treeWarnings).toEqual([]);
+});

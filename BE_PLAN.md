@@ -346,6 +346,16 @@ Nouveau `autotoggle.spec.ts` : aucune spec n'exerçait le comportement réel ava
 
 ---
 
+## Migration d'`app/app_tree.js` (2026-08-10)
+
+40 appels dans l'inventaire. Le comportement accordéon derrière `[auto_tree]` (structure posée par `app_insertionQ.js`) et `[main_auto_tree]`. Natif désormais.
+
+Rien de nouveau côté pièges — les mêmes que d'habitude (`.up(selector)`, `.on()` à double signature délégué/direct, `.next()`/`.previous()`/`.down()` sans argument). `explorer.spec.ts`'s test « caret collapses and expands the section » exerçait déjà `clicked()` fonctionnellement avant cette migration ; ajout d'une garde `IDAE_SHIM_WARN` dédiée dans ce même fichier plutôt qu'un spec séparé, avec un clic aller-retour pour ne pas laisser le panneau d'historique du bureau dans un état différent pour le test suivant.
+
+Suite complète verte sans échec répété cette fois (2 flaky de timing de boot, différents à chaque run, tous verts au retry) — pas besoin de l'A/B complet qu'a demandé `autoToggle.js`.
+
+**Suite : 43/43.**
+
 ## Perf — cache-busting cassé, et l'instabilité socket sous WSL2
 
 **Cache-busting.** `main_bag.js` faisait `?v=<Date.now()>` sur les ~90 fichiers JS/CSS à **chaque** chargement — pas un souci de dev, un souci de prod : tout utilisateur réel retéléchargeait tout, à chaque visite, pour toujours, sans jamais toucher le cache IndexedDB de `bag.js`. Fixé (commit `f4f090a`) : `appfunc/asset_versions.php` construit un manifeste `{chemin: mtime}` en scannant `javascript/`+`css/` récursivement (aucune liste dupliquée à synchroniser avec `require_trame`), injecté via `window.FILE_VERSIONS` avant `main_bag.js`. Chaque fichier n'est reversionné que si son mtime a changé.
