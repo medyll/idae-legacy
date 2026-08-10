@@ -356,6 +356,16 @@ Suite complète verte sans échec répété cette fois (2 flaky de timing de boo
 
 **Suite : 43/43.**
 
+## Migration d'`engine/module.js` (2026-08-10)
+
+17 appels dans l'inventaire — le dernier vrai fichier de la liste, le reste (~7 appels) étant dispersé sur `myddeNotifier.js`/`myddeview.js`/`app.js`. `reloadModule`/`reloadScope`/`closeModule`/`newValueModule`, appelés depuis les handlers `receive_cmd` d'`app_socket.js` (déjà natif) pour rafraîchir ou fermer chaque nœud portant un `mdl`/`scope` donné. Natif désormais.
+
+Même contrat `Ajax.Updater` à deux couches (`stripScripts` toujours, `eval` différé si `evalScripts:true`) que dans `app_socket.js`/`engine.js` — les deux chemins de repli de ce fichier passent `evalScripts:true`, même s'ils ne sont jamais atteints en pratique (`typeof socket == 'object'` est toujours vrai une fois `app_socket.js` chargé). Portés fidèlement quand même, pas supprimés — ce n'est pas un appelant confirmé zéro comme `picPicker`, juste une branche qui ne s'exécute jamais dans ce déploiement précis.
+
+Aucune spec n'exerçait ce fichier avant. Nouveau `module.spec.ts` : appel direct de `reloadModule('app/app_gui/app_gui_calendar', '*')` sur un vrai nœud `[mdl]` du bureau, vérifié qu'il retrouve le bon nœud et rappelle `socketModule` sur lui-même (pas un autre) ; et `closeModule` sur un nœud sans `.close`, vérifié qu'il bascule vers la suppression plutôt que de planter.
+
+**Suite : 46/46.**
+
 ## Perf — cache-busting cassé, et l'instabilité socket sous WSL2
 
 **Cache-busting.** `main_bag.js` faisait `?v=<Date.now()>` sur les ~90 fichiers JS/CSS à **chaque** chargement — pas un souci de dev, un souci de prod : tout utilisateur réel retéléchargeait tout, à chaque visite, pour toujours, sans jamais toucher le cache IndexedDB de `bag.js`. Fixé (commit `f4f090a`) : `appfunc/asset_versions.php` construit un manifeste `{chemin: mtime}` en scannant `javascript/`+`css/` récursivement (aucune liste dupliquée à synchroniser avec `require_trame`), injecté via `window.FILE_VERSIONS` avant `main_bag.js`. Chaque fichier n'est reversionné que si son mtime a changé.
