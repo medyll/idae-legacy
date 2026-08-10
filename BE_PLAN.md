@@ -486,6 +486,14 @@ Nouveau `myddeselection.spec.ts` : classe instanciée directement sur une fixtur
 
 Nouveau `app-conge.spec.ts` : fixture construite (le vrai tableau de congés demanderait des données de test que la suite ne porte pas), vérifie l'opacité pendant le drag, le fond `#FC3` posé au `dragover` puis retiré au `dragleave`, l'écriture de `datedebut` au drop, le repositionnement `left`/`top` sur le slot avec largeur inchangée (`setWidth:false`), et le retour à `opacity:1` au `dragend`. Garde `IDAE_SHIM_WARN`. Une assertion fausse de ma part au premier essai (`#FC3` écrit `252, 51, 3` au lieu de `rgb(255, 204, 51)` — `#FC3` s'étend en `#FFCC33`), corrigée. **2/2 vert**, plus `smoke`/`app-planning` revérifiés propres (4/4).
 
+## Suppression de `librairie/lightview.js` (2026-08-10)
+
+30 occurrences — mort, et heureusement. Bibliothèque tierce vendorée (Lightview 2.0.0_rc5, Nick Stakenburg, 2008), 25 Ko, visionneuse d'images modale bâtie sur Prototype/Scriptaculous. **Zéro référence** dans tout le dépôt : absente des deux listes de chargement, d'aucun PHP/Latte, aucun CSS, et le dossier `images/lightview/` qu'elle attend n'existe même pas.
+
+Point de licence noté au passage : elle est distribuée sous **Creative Commons BY-ND** (« No Derivative Works »). L'avoir migrée en natif — c'est-à-dire réécrire ses internes — aurait constitué une œuvre dérivée, donc une violation de licence. La supprimer n'en est pas une. Si un fichier tiers sous BY-ND réapparaît plus tard dans la file de migration et qu'il est *vivant*, il faudra soit le remplacer par autre chose, soit le laisser sur le shim — pas le réécrire.
+
+Supprimée. `smoke.spec.ts` revérifié vert (formalité : le fichier n'était chargé nulle part, sa suppression ne pouvait rien casser).
+
 ## Perf — cache-busting cassé, et l'instabilité socket sous WSL2
 
 **Cache-busting.** `main_bag.js` faisait `?v=<Date.now()>` sur les ~90 fichiers JS/CSS à **chaque** chargement — pas un souci de dev, un souci de prod : tout utilisateur réel retéléchargeait tout, à chaque visite, pour toujours, sans jamais toucher le cache IndexedDB de `bag.js`. Fixé (commit `f4f090a`) : `appfunc/asset_versions.php` construit un manifeste `{chemin: mtime}` en scannant `javascript/`+`css/` récursivement (aucune liste dupliquée à synchroniser avec `require_trame`), injecté via `window.FILE_VERSIONS` avant `main_bag.js`. Chaque fichier n'est reversionné que si son mtime a changé.
