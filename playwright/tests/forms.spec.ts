@@ -2,17 +2,23 @@
  * The « Modifier » tab of a record — `mdl/app/app/app_update.php`.
  *
  * Its `<form class="Form">` carries `onsubmit="ajaxFormValidation(this);return
- * false;"`. Submitting runs the whole Prototype form stack in one go
- * (engine/engine.js:263-311):
- *   - `form.readAttribute('auto_close')` → `$(form).makeLoading()`
- *     (Element#readAttribute/insert/identify — methods.js:323),
- *   - `Form.serialize($(form))` builds the POST body,
- *   - `new Ajax.Updater($('div_form_validation'), url, …)` posts it,
- *   - onComplete `$(form).hide().fire('dom:close')` (auto_close forms).
+ * false;"`. Submitting runs `engine/engine.js`'s form stack end to end:
+ *   - `form.getAttribute('auto_close')` → `form.makeLoading()` (native,
+ *     engine/methods.js),
+ *   - `engine_formSerialize(form)` builds the POST body (file-local, mirrors
+ *     Prototype's Form.serialize — always excludes submit buttons, unlike
+ *     FormData, which has no notion of "which button" outside a submit
+ *     event and would include every one's value),
+ *   - `engine_ajaxUpdater(...)` posts it — native fetch, still stripping
+ *     `<script>` before the innerHTML assignment and deferred-eval'ing the
+ *     original response when `options.evalScripts` is set, same contract
+ *     app_socket.js's sk_update needed (see that file's BE_PLAN.md entry) —
+ *     this form's response can itself carry one,
+ *   - onComplete hides the form and fires `dom:close` (auto_close forms).
  *
- * Every one of those calls is on the shim's contract list, so this spec is the
- * form-side counterpart of prototype-surface.spec.ts: it fails the moment
- * `$F`/`Form.serialize`/`Ajax.Updater`/`Element#fire` drifts.
+ * `$F()` (still shim-provided; that surface hasn't migrated) reads the live
+ * DOM regardless of which side built it, so this spec doubles as proof the
+ * native rewrite renders a form indistinguishable from the shim's.
  */
 import { test, expect } from './fixtures/test-base';
 import { TABLE, TABLE_VALUE } from './fixtures/auth';
@@ -85,4 +91,32 @@ test('forms: submitting posts the serialized form and auto-closes it', async () 
   await expect(form).toBeHidden({ timeout: 30_000 });
 
   guard.assertClean();
+});
+
+test('forms: engine.js\'s form/navigation stack does not call compatibility shims', async () => {
+  const page = getPage();
+  const engineWarnings: string[] = [];
+
+  page.on('console', (message) => {
+    if (message.type() !== 'warning' || !message.text().includes('[idae-shim]')) return;
+    const directCaller = message.text().split('\n').find((line) =>
+      line.includes('javascript/') && !line.includes('vendor/idae-be-shim/'),
+    );
+    if (directCaller?.includes('engine/engine.js')) engineWarnings.push(message.text());
+  });
+
+  await page.evaluate(() => {
+    (window as any).IDAE_SHIM_WARN = 1;
+    (window as any).__idaeShimInstallWarn();
+  });
+
+  // act_chrome_gui (opening the tab) and ajaxFormValidation/Real (submitting
+  // it) are engine.js's two busiest paths — this exercises both.
+  const win = await openUpdate(page);
+  const form = win.locator('form.Form');
+  await expect(form).toBeVisible({ timeout: 30_000 });
+  await form.locator('input.valid_button[type=submit]').click();
+  await expect(form).toBeHidden({ timeout: 30_000 });
+
+  expect(engineWarnings).toEqual([]);
 });

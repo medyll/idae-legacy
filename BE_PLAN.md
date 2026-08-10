@@ -316,6 +316,22 @@ Nouveau `afterajaxcall.spec.ts` : `mdl/app/app/app_fiche.php:147` rend un vrai b
 
 **Suite : 39/39.**
 
+## Migration d'`engine/engine.js` (2026-08-10)
+
+68 appels dans l'inventaire — mais c'est le fichier le plus **critique** de la Phase 5, pas juste le plus appelé : `act_chrome_gui`/`ajaxMdl`/`ajaxInMdl` sont les primitives de navigation de l'app — quasiment chaque fenêtre ouverte dans toute la suite passe par l'une d'elles. Une suite verte est ici un signal particulièrement fort, puisque ce fichier est déjà exercé en continu par les 39 tests existants sans qu'aucun n'ait été écrit pour lui spécifiquement.
+
+**Bug corrigé en écrivant la migration, pas en la testant** : `ajaxMdl`'s option `modalOn` — `$(options.modalOn).makeModal().modal().setStyle({zIndex:0})` — la valeur finale de la chaîne (et donc `dmp`/`ajaxOption.parent`) est le **div modal**, pas `modalOn` lui-même. `makeModal()` (natif, `engine/methods.js`) renvoie `modalOn` inchangé ; `.modal()` est l'accesseur qu'il attache, renvoyant le div overlay qu'il vient de créer. Ma première passe assignait `dmp = modalOn.makeModal()` — donc `modalOn` lui-même, pas le modal. Zéro appelant réel avec `modalOn` dans tout le dépôt (vérifié), donc inatteignable en pratique, mais corrigé quand même : c'est le genre d'erreur qu'une relecture attentive attrape, contrairement aux pièges `bindAsEventListener`/`<script>` des fichiers précédents qui ne se voient qu'à l'exécution.
+
+**Deux ajax natifs file-local, mêmes contrats que ceux du shim, pas simplifiés.** `engine_ajaxRequest` (utilisé par `ajaxValidation`) rend le texte brut à `onComplete`, qui `eval()` lui-même, immédiatement — pas de `.defer()` ici, contrairement à `Element#update`. `engine_ajaxUpdater` (utilisé par `ajaxFormValidationReal`) a un contrat en deux couches distinctes, comme `shim-ajax.js`'s `Ajax.Updater` : le texte est TOUJOURS débarrassé de ses `<script>` avant d'être assigné en `innerHTML`, et SÉPARÉMENT, seulement si `options.evalScripts === true` est explicitement passé (ce qui EST le cas ici), le texte ORIGINAL est évalué en différé (~10 ms) — même leçon que `app_socket.js`, pour la même raison : un fragment de formulaire renvoyé par le serveur peut porter son propre `<script>` de suite.
+
+`Form.serialize` reproduit à la main (`engine_formSerialize`) plutôt que remplacé par `FormData` : Prototype exclut **toujours** les boutons submit, quelle que soit l'option — `FormData`, elle, n'a aucune notion de « quel bouton a déclenché la soumission » hors d'un vrai événement submit, et inclurait la valeur de chaque bouton submit présent. Divergence réelle, pas cosmétique.
+
+La même logique `mdlDiv`/`eval` que dans `afterAjaxCall.js`, mais **pas un no-op cette fois** : ici `file` est un vrai chemin `mdl` avec des `/` (ex. `"app/app/app_fiche"`). Comme `String#replace` avec un motif chaîne (pas regex) ne remplace jamais que la PREMIÈRE occurrence, `onlyFile` devient tout ce qui suit le premier `/`, pas littéralement le dernier segment du chemin. Gardé identique.
+
+Nouveau test dans `forms.spec.ts` (garde anti-shim sur le double chemin `act_chrome_gui`/`ajaxFormValidation`, déjà exercé fonctionnellement par les deux tests existants du fichier) plutôt qu'un fichier séparé — ce spec couvrait déjà en détail la soumission réelle (corps POST, auto-close) avant même cette migration ; son en-tête, obsolète, a été réécrit pour décrire l'implémentation native plutôt que l'ancienne mécanique shimée.
+
+**Suite : 40/40** (1 flaky lié au timing de boot, vert au retry — dégradation d'environnement déjà documentée, pas une régression).
+
 ---
 
 ## Perf — cache-busting cassé, et l'instabilité socket sous WSL2
