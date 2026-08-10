@@ -494,6 +494,18 @@ Point de licence noté au passage : elle est distribuée sous **Creative Commons
 
 Supprimée. `smoke.spec.ts` revérifié vert (formalité : le fichier n'était chargé nulle part, sa suppression ne pouvait rien casser).
 
+## Migration d'`app/app_quickfind.js` (2026-08-10)
+
+28 occurrences, `Class.create` — filtre client sur une liste : la saisie masque tout nœud `tag` dont le texte ne contient pas la requête. Instancié par `app_insertionQ.js:244` sur tout `[data-quickFind]`. Réel : 6 écrans (`app_dispatch_inner`, `app_fiche_maxi_liste`, `app_scheme_field_type`, `app_scheme_has_field`, `app_user_pref_scheme`, `appsite_scheme_values`).
+
+À ne pas confondre avec la fonction globale `quickFind(value, where, tag, spy)` d'`engine/engine.js`, appelée en `onkeyup` inline par des templates plus anciens (`document_client_liste.php`, `mdlDocument.php`, `app_droit_liste.php`, `search_item_check.php`) — même idée, code sans rapport, pas touché ici.
+
+`Element.hide.defer(node)` / `Element.show.defer(node)` : `Function#defer` de Prototype = `setTimeout(..., 10)` avec les arguments transmis, et `Element.hide` est la forme statique générique prenant le nœud en 1er argument. Porté en `setTimeout(function(){ node.style.display = ... }, 10)` — le report de 10 ms est conservé, il est observable (le test l'attend explicitement).
+
+**Bug préexistant porté verbatim, commenté dans le code** : le chemin `spy` est cassé. `data-quickFind-spy` fournit un id d'élément (`"uyt"` sur `app_scheme_field_type.php` et `app_scheme_has_field.php`) — aucun élément ne porte cet id dans tout le dépôt. `get_count()` insère donc son markup `spy_element` **après** l'input, puis va le chercher **dans** l'input via `querySelector` — or un `<input>` est un élément vide, `querySelector` y renvoie toujours `null`. `this.options.spy.update(...)` lève un `TypeError`. Taper dans ces deux champs de recherche plante déjà aujourd'hui, exactement pareil sous le shim.
+
+Nouveau `app-quickfind.spec.ts` : fixture construite (chaque écran réel exige ses propres données de scheme/dispatch), vérifie l'insertion de l'icône de recherche après l'input, le filtrage effectif — dont un match à travers un `<b>` imbriqué, ce qui prouve la comparaison après `stripTags` — et la restauration de toutes les lignes à la vidange du champ. Garde `IDAE_SHIM_WARN`. **2/2 vert au premier essai**.
+
 ## Perf — cache-busting cassé, et l'instabilité socket sous WSL2
 
 **Cache-busting.** `main_bag.js` faisait `?v=<Date.now()>` sur les ~90 fichiers JS/CSS à **chaque** chargement — pas un souci de dev, un souci de prod : tout utilisateur réel retéléchargeait tout, à chaque visite, pour toujours, sans jamais toucher le cache IndexedDB de `bag.js`. Fixé (commit `f4f090a`) : `appfunc/asset_versions.php` construit un manifeste `{chemin: mtime}` en scannant `javascript/`+`css/` récursivement (aucune liste dupliquée à synchroniser avec `require_trame`), injecté via `window.FILE_VERSIONS` avant `main_bag.js`. Chaque fichier n'est reversionné que si son mtime a changé.
