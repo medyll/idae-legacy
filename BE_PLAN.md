@@ -284,6 +284,24 @@ Diagnostic : suite passée de 32/32 à 22/32 (10 échecs, dont `datatable: list 
 
 **Suite : 34/34** (32 + les 2 nouveaux tests de `socket.spec.ts`).
 
+## Migration de `librairie/sorttable.js` (2026-08-10)
+
+199 appels dans l'inventaire — le deuxième fichier le plus appelé. `sortableTable`, les en-têtes de tableau cliquables pour trier (`table.act_sort`, instancié par le watcher d'`app_insertionQ.js`). Natif désormais, garde `IDAE_SHIM_WARN` verte.
+
+**Découverte en cours de route : le tri au clic est structurellement invisible sur l'écran principal de liste.** `app_datatable.js:639` masque volontairement son propre `<thead>` (`this.thead.hidden = true`) — l'en-tête visible réel que l'utilisateur voit et clique vient d'une zone flottante séparée, avec sa propre logique, sans rapport avec ce fichier. `sortableTable` s'instancie bel et bien sur chaque liste (attribut `isSortable` posé, aucune erreur), mais son `<thead>` n'est jamais visible ni cliquable sur ce chemin — la fonctionnalité existe, fonctionne, et n'est simplement jamais atteinte par un utilisateur réel sur les écrans que ce dépôt de test peut ouvrir. Les templates qui rendent VRAIMENT ce tri visible (`app_scheme_grille.php`, `skelbuilder_liste_*.php`, `document_liste.php`) sont des écrans admin/dev hors de portée facile du compte de test utilisé par cette suite.
+
+Deux fichiers de test en conséquence : un test de construction sur l'écran réel (liste client, prouve zéro appel shim et zéro erreur), et trois tests fonctionnels contre une table synthétique construite à la volée (`new sortableTable(table)` sur un `<table>` créé et injecté par le test) — seule façon d'exercer le clic réel et la réorganisation des lignes sans dépendre d'un écran admin difficile à atteindre.
+
+**Bug trouvé en écrivant les tests, pas en lisant le code : `bindAsEventListener` inverse l'ordre des arguments par rapport à `.bind()`.** `fn.bindAsEventListener(context, node)` produit un listener appelé `fn(event, node)` — l'événement réel en premier, les arguments liés après. `fn.bind(context, node)` produit l'inverse : `fn(node, event)`. J'avais traduit les deux `.bindAsEventListener(this, node)` du fichier par de simples `.bind(this, node)`, ce qui inversait silencieusement `event`/`node` dans `isClicked` et `setSizeTD` — `event.preventDefault` appelé sur un `<td>`, `node.classList.contains` appelé sur un `Event`. Deux `PAGEERROR` distincts (`reading 'contains'`, `reading 'offsetWidth'`) à l'exécution, zéro signal à la lecture du code migré (les deux fonctions ont la même arité, rien ne « a l'air faux »). Corrigé en câblant l'ordre explicitement (`function (event) { this.isClicked(event, node); }`) plutôt qu'en comptant sur l'ordre implicite d'un `.bind()`.
+
+**Piège de données de test, pas de code** : `activeSort()` décide ascendant/descendant en comparant le contenu de la première ligne avant/après tri — si la ligne déjà en première position porte par coïncidence la valeur minimale, un tri ascendant a l'air d'un no-op et se fait inverser en descendant. Propriété réelle de l'algorithme (même heuristique sous Prototype), pas un bug de migration — corrigé en choisissant des données de test où la première ligne originale n'est pas déjà celle qui aurait la valeur minimale après tri.
+
+Un défaut latent trouvé et durci plutôt que reproduit : `setSizeTD` déréférençait `node.previousElementSibling` sans le vérifier — plantait de façon identique sous Prototype (`$(node).previous()` sans sibling renvoie `undefined`, `.setStyle()` sur `undefined` lève la même erreur), donc pas une régression, mais un vrai risque révélé par le callback de redimensionnement tiers (`detect-element-resize.js`) qui peut se déclencher après suppression du nœud. Gardé désormais.
+
+Aucune extraction/eval de `<script>` requise ici, contrairement à `app_socket.js` : tout le HTML construit ou déplacé dans ce fichier est généré côté client (en-têtes, réordonnancement de lignes), rien n'est un fragment récupéré du serveur.
+
+**Suite : 37/37.**
+
 ---
 
 ## Perf — cache-busting cassé, et l'instabilité socket sous WSL2
