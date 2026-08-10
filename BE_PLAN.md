@@ -506,6 +506,26 @@ Supprimée. `smoke.spec.ts` revérifié vert (formalité : le fichier n'était c
 
 Nouveau `app-quickfind.spec.ts` : fixture construite (chaque écran réel exige ses propres données de scheme/dispatch), vérifie l'insertion de l'icône de recherche après l'input, le filtrage effectif — dont un match à travers un `<b>` imbriqué, ce qui prouve la comparaison après `stripTags` — et la restauration de toutes les lignes à la vidange du champ. Garde `IDAE_SHIM_WARN`. **2/2 vert au premier essai**.
 
+## Migration de `librairie/tableGui.js` (2026-08-10)
+
+26 occurrences, `Class.create` — dimensionne les cellules d'une grille en parts égales du parent, puis les fait apparaître. Un seul appelant vivant : `app_planning_mens.php:164` (`new tableGui($('tablePlanningMensuel'), {numRow: N, onlyClass: 'caseMois'})`) ; l'autre site (`mdlCalendrierListYear.php:45`) est commenté. Les `Effect.Appear` de ce fichier avaient déjà été migrés le 09/08 (`496f371`) — ne restait que le reste de la surface shim.
+
+**Divergence préexistante trouvée, préservée et documentée** : `document.getElementsByClassName(cls, container)`. Prototype 1.6 honorait ce second argument et scopait la recherche au conteneur ; le shim ne patche que `Element.prototype`, jamais `Document`, donc cet appel tombe sur la méthode **native**, qui ignore le second argument et balaie tout le document. La divergence est arrivée avec le swap Phase 3/4, pas avec cette migration. Conservée telle quelle : l'unique appelant vivant n'a qu'une grille de ce type à l'écran, donc scopé et document-wide renvoient les mêmes nœuds. À garder en tête si un second planning mensuel apparaît un jour dans la même page.
+
+Autre branche laissée verbatim : sans `onlyClass`, `this.allChild` vient de `childNodes` — qui inclut les nœuds texte, dépourvus de `.style`, donc la boucle `build()` planterait sur le moindre espace entre balises. Aucun appelant vivant n'emprunte ce chemin (le seul est commenté). Et l'écouteur `'Resize'` (R majuscule) est un nom d'événement custom que rien n'émet dans l'app : listener jamais déclenché, porté tel quel.
+
+Nouveau `tablegui.spec.ts` : fixture construite (l'écran planning mensuel réel exige ses propres données), vérifie le partage de hauteur (parent 300 px / `numRow: 3` → 100 px par cellule) et que la grille, partie d'`opacity: 0`, est bien révélée par `appearElement`. Garde `IDAE_SHIM_WARN`. **2/2 vert au premier essai** — et premier fichier validé **sans redémarrage Docker**, cf. la note de méthode ci-dessous.
+
+## Note de méthode — redémarrer Docker entre deux fichiers est inutile (2026-08-10)
+
+Pendant une bonne partie de cette session j'ai relancé `docker restart idae-socket idae-legacy` après chaque fichier migré, avant de lancer la suite. Inutile, vérifié :
+
+- `docker-compose.yml:21` monte `./idae:/var/www/html/idae` en bind mount → une édition côté hôte est visible dans le conteneur immédiatement, sans rebuild ni restart.
+- `build_asset_version_manifest` (`appfunc/asset_versions.php:28`) recalcule le manifeste depuis `getMTime()` **à chaque requête** — donc chaque chargement de page produit un nouveau `?v=`, ce qui contourne le cache IndexedDB de `bag.js`.
+- Playwright ouvre de toute façon un contexte navigateur neuf par run : IndexedDB vide, aucun cache d'assets à invalider.
+
+La confusion venait du « protocole de volatilité d'environnement » plus haut : celui-là concerne les workers Playwright pendus et la stack WSL2 dégradée (symptôme : échecs répétés dans le hook `beforeAll`), pas la prise en compte des fichiers modifiés. Le restart reste le bon réflexe **quand la suite se met à échouer au boot**, jamais comme étape systématique. ~40 s gagnées par fichier.
+
 ## Perf — cache-busting cassé, et l'instabilité socket sous WSL2
 
 **Cache-busting.** `main_bag.js` faisait `?v=<Date.now()>` sur les ~90 fichiers JS/CSS à **chaque** chargement — pas un souci de dev, un souci de prod : tout utilisateur réel retéléchargeait tout, à chaque visite, pour toujours, sans jamais toucher le cache IndexedDB de `bag.js`. Fixé (commit `f4f090a`) : `appfunc/asset_versions.php` construit un manifeste `{chemin: mtime}` en scannant `javascript/`+`css/` récursivement (aucune liste dupliquée à synchroniser avec `require_trame`), injecté via `window.FILE_VERSIONS` avant `main_bag.js`. Chaque fichier n'est reversionné que si son mtime a changé.
