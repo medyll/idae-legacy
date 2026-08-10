@@ -302,6 +302,20 @@ Aucune extraction/eval de `<script>` requise ici, contrairement à `app_socket.j
 
 **Suite : 37/37.**
 
+## Migration d'`engine/afterAjaxCall.js` (2026-08-10)
+
+196 appels dans l'inventaire — troisième fichier le plus appelé. Appelé sur chaque fragment chargé en AJAX (`app_socket.js`'s `socketModule`, `app_datatable.js`) pour câbler les gestionnaires de clic basés sur classe (`cancelClose`/`cancelClean`/`cancelRemove`/`cancelHide`/`cancelButton`/`cancelToggle`/`cancelFade`) que porte un formulaire ou fragment rendu côté serveur. Natif désormais.
+
+Le seul point non trivial : `Event.element(event)`/`Form.Element#activate()` du shim, reproduits fidèlement (`aac_eventElement`, `aac_activate` — focus puis `select()` sauf si `type=hidden`, dans un `try/catch`). `unToggleContent`/`fadeElement` restent des appels à l'API native de l'app (`engine/methods.js`, déjà migré), pas au shim.
+
+**Logique `mdlDiv`/`eval` préservée telle quelle, pas simplifiée.** Le fichier enveloppe l'id du nœud dans un littéral de tableau (`'["' + div.id + '"]'`), remplace le premier `/` par `'","'`, puis `eval()` le résultat et prend le dernier élément. Le 3ᵉ argument `'gi'` de `.replace()` n'a jamais rien fait (natif ou shimmé) — `String#replace` ne lit des flags que sur un motif `RegExp`, jamais sur une chaîne. Pour les ids réellement reçus ici (générés par `uniqid()`, jamais de `/`), ce mécanisme est un no-op complet : `frm` finit toujours par être `$(div)` lui-même, relu par son propre id. Gardé identique plutôt que « nettoyé », par principe de cette phase : ne pas changer un comportement qu'on n'a pas été chargé de corriger, même absurde.
+
+Suite complète bruyante ce soir (7,8 à 9,1 min, 1-2 tests flaky à chaque run, jamais les mêmes) — signe de dégradation d'environnement déjà documentée dans ce fichier, pas une régression : une passe ciblée sur `forms.spec.ts`/`window-gui.spec.ts`/`insertionq.spec.ts` (les specs qui exercitent réellement les chemins `cancelClose`/`cancelFade`) tourne 9/9 propre en 3,9 min sans le moindre retry.
+
+Nouveau `afterajaxcall.spec.ts` : `mdl/app/app/app_fiche.php:147` rend un vrai bouton `.cancelClose` (« Fermer ») sur chaque fiche — vérifié qu'il déclenche `dom:close` sur son parent après le délai de 350 ms, plus la garde anti-shim habituelle. Sur stack redémarrée : **39/39, zéro flaky, 6,6 min.**
+
+**Suite : 39/39.**
+
 ---
 
 ## Perf — cache-busting cassé, et l'instabilité socket sous WSL2
