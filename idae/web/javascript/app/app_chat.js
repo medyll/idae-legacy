@@ -360,10 +360,13 @@ appchat_user_add = function (vars) {
 chat_user_remove = function (vars) {
     var id = vars.id;
     if (!ac_el('socket_appchat_log')) return;
-    // Pre-existing bug, carried forward unchanged: `chat_tracker_timer` (no
-    // `appchat_` prefix) is never declared anywhere in this file — only
-    // `appchat_tracker_timer` is. This throws a ReferenceError whenever this
-    // line is reached, same as it always has under the shim.
+    // `chat_tracker_timer` (no `appchat_` prefix — distinct from this
+    // file's own `appchat_tracker_timer` above) is a global declared by
+    // app_keepon.js, which main_bag.js loads before this file. Not a typo:
+    // app_keepon.js defines its own chat_user_add/update/remove against
+    // that same array, and this file's chat_user_remove overwrites theirs
+    // (both files assign the bare global, load order decides which wins) —
+    // sharing the tracker array is what makes that override safe.
     if (chat_tracker_timer[id]) clearTimeout(chat_tracker_timer[id]);
     var node = ac_el(id);
     if (node) {

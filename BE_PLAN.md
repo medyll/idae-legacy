@@ -394,7 +394,7 @@ Chargé sans condition par `main_bag.js` (`require_app`) sur **chaque** boot —
 
 Helpers `ac_*` : `ac_el`, `ac_qsa`, `ac_up` (part du parent, jamais de soi — même contrat que `mv_up`), `ac_delegate`, `ac_toQueryString` (remplace `$H(obj).toQueryString()` pour des objets plats, aucun besoin de sérialisation imbriquée ici), `ac_show`/`ac_hide`/`ac_remove`.
 
-Bug préexistant trouvé et **laissé tel quel**, commenté dans le code : `chat_user_remove` référence `chat_tracker_timer` (sans le préfixe `appchat_`), jamais déclaré nulle part — `ReferenceError` garanti à chaque appel, sous le shim comme en natif. Pas un bug de migration, ne pas « réparer » ce qui n'a jamais marché.
+**Correction (2026-08-10, plus tard) :** `chat_user_remove` référence `chat_tracker_timer` (sans le préfixe `appchat_`) — pas un bug. C'est un global déclaré par `app_keepon.js`, chargé avant ce fichier dans `main_bag.js` ; ce dernier définit ses propres `chat_user_add`/`update`/`remove` sur le même tableau, et la version de ce fichier écrase la sienne au chargement (les deux fichiers assignent le global nu, l'ordre de chargement décide qui gagne) — partager le tableau de trackers est ce qui rend cet écrasement sûr. Trouvé en migrant `app_keepon.js` juste après ; commentaire corrigé dans le code.
 
 Nouveau `app-chat.spec.ts` : construit le markup réel d'`app_chat_panel.php` en fixture détachée (même approche que le test de repli `closeModule` de `module.spec.ts`) pour exercer `appchat_panel_toggle`/`appchat_agent_state_retrieve` — chemin sinon inatteignable via un vrai écran. Garde `IDAE_SHIM_WARN`. **3/3 vert.**
 
@@ -427,6 +427,16 @@ Nouveau `myddeattach.spec.ts` : construit un élément + formulaire en fixture, 
 Prochain candidat par taille après `myddeAttach.js` (46 occurrences). Même famille que `picPicker.js`/`myui/`/`growler.js`/`myddeSlide.js`/`app_bootstrap_init_old.js`/`go_json` : **zéro appelant réel**, confirmé par grep sur tout le dépôt hors `vendor/`. La classe `myddeUpload` n'est instanciée nulle part. Les deux seuls autres hits pour « myddeUpload/myddeupload » : les deux entrées de chargement (`main.js`, `main_bag.js`) et un `id="myddeUpload<?=$time?>"` dans `app_img_upload.php` — une coïncidence de nommage, cet écran instancie en réalité `myddeAttach`, pas cette classe.
 
 Migration commencée par erreur (fichier entièrement réécrit en natif) avant de vérifier les appelants — reprise dans le bon ordre pour les fichiers suivants : vérifier zéro-appelant *avant* de migrer, pas après. Fichier supprimé, retiré des deux listes de chargement (`main.js:124`, `main_bag.js:79`). `smoke.spec.ts` revérifié vert après suppression.
+
+## Migration d'`app/app_keepon.js` (2026-08-10)
+
+Suivant par taille après `myddeAttach.js` (45 occurrences), `myddeupload.js` s'étant révélé mort (voir ci-dessus — appelants vérifiés *avant* migration cette fois). Canal socket de présence/« glue », chargé sans condition, réel : `#socket_keep_on_status` est rendu par `app_gui_main.php` (le bureau lui-même), donc présent à chaque boot.
+
+Découverte en le lisant : `chat_user_add`/`chat_user_update`/`chat_user_remove` sont définis **ici aussi**, en plus d'`app_chat.js` — les deux fichiers assignent le même global nu, `app_chat.js` chargeant après écrase la version de ce fichier. Ce qui a permis de corriger une erreur de doc de la session précédente : le commentaire sur `chat_user_remove` dans `app_chat.js` affirmait que `chat_tracker_timer` n'était « déclaré nulle part » (donc `ReferenceError` garanti) — faux. C'est un `var` global déclaré ici (`app_keepon.js`, chargé avant), partagé entre les deux fichiers exprès. Commentaire corrigé dans le code et dans l'entrée BE_PLAN correspondante plus haut.
+
+**Vrai bug préexistant trouvé, celui-ci confirmé** : `keepon_connect_agent`/`keepon_disconnect_agent`, appelés par les délégués `.keepon_connected`/`.keepon_disconnected`, ne sont définis **nulle part** dans tout le dépôt (grep). Cliquer ces boutons plante avec `ReferenceError`, aujourd'hui comme avant la migration — laissé tel quel, commenté. Leur markup (`app_keepon_panel.php`) n'est référencé par aucun template, comme `app_chat_panel.php` — même catégorie d'UI inatteignable.
+
+Helpers `kp_*` habituels. Nouveau `app-keepon.spec.ts` : exerce `kp_show`/`kp_hide`/`kp_update` sur le vrai `#socket_keep_on_status` du bureau, et le délégué `glue_reserve` (fixture construite, `socket_keep_on.emit` intercepté pour vérifier `RESERVEDID`/`IDAGENT`). Garde `IDAE_SHIM_WARN`. **3/3 vert**, plus `smoke`/`app-chat` revérifiés propres (4/4).
 
 ## Perf — cache-busting cassé, et l'instabilité socket sous WSL2
 
