@@ -56,48 +56,77 @@
 	</form>
 </div>
 <script>
+	/*
+	 * Modified: 2026-08-11 — migrated off the PrototypeJS compatibility shims
+	 * ($, $$, .on, .up, .each, .readAttribute, .writeAttribute,
+	 * .add/removeClassName) to native DOM, with file-local `dpu_` helpers.
+	 *
+	 * Every .on() here is two-argument with no selector, so none of them was
+	 * ever delegation — the shim fell through to Event.observe. Plain listeners
+	 * keep `this` on the element, which the contenteditable handler reads.
+	 */
+	function dpu_el(ref) {
+		return typeof ref === 'string' ? document.getElementById(ref) : ref;
+	}
+
+	/** Prototype's Element#up: nearest ancestor matching `selector`. */
+	function dpu_up(node, selector) {
+		var parent = node ? node.parentNode : null;
+		while (parent && parent.nodeType === 1) {
+			if (parent.matches(selector)) return parent;
+			parent = parent.parentNode;
+		}
+		return null;
+	}
+
 	var timer_prest
-	$ ('form<?=$table.$table_value?>').on ('keyup', function () {
+	dpu_el ('form<?=$table.$table_value?>').addEventListener ('keyup', function () {
 		if ( timer_prest ) clearTimeout (timer_prest);
 		timer_prest = setTimeout (function () {
 			var totDevis                   = 0;
-			a                              = $ ('quantite<?=$uniqkey?>').value.replace (' ', '', 'gi');
-			b                              = $ ('prix<?=$uniqkey?>').value.replace (' ', '', 'gi');
+			a                              = dpu_el ('quantite<?=$uniqkey?>').value.replace (' ', '', 'gi');
+			b                              = dpu_el ('prix<?=$uniqkey?>').value.replace (' ', '', 'gi');
 			tot                            = (eval (a) || 0) * (eval (b) || 0 )
-			$ ('total<?=$uniqkey?>').value = tot;
-			$ ('total<?=$uniqkey?>').writeAttribute ({ 'value' : tot })
+			dpu_el ('total<?=$uniqkey?>').value = tot;
+			// writeAttribute({value: tot}) — the attribute, not the property;
+			// the line above already set the property.
+			dpu_el ('total<?=$uniqkey?>').setAttribute ('value', tot)
 
-			$$ ('[total][iddevis=<?=$iddevis?>]').each (function (node) {
+			// The iddevis value is numeric, so [iddevis=123] is invalid CSS —
+			// an attribute value must be an identifier or a quoted string, and
+			// identifiers cannot start with a digit. The shim's $$ retried with
+			// quotes added; native querySelectorAll throws. Quoted at source.
+			document.querySelectorAll ('[total][iddevis="<?=$iddevis?>"]').forEach (function (node) {
 				//	console.log(node,node.value)
 				totDevis += eval (node.value) || 0;
 				//	console.log(totDevis,node,node.value)
-			}.bind (this))
+			})
 
 			ajaxValidation ('app_update', 'mdl/app/', 'table=devis&table_value=<?=$iddevis?>&vars[prixDevis]=' + totDevis)
-		}.bind (this), 1000)
+		}, 1000)
 
 	});
-	$ ('content_edit_prest<?=$table_value?>').on ('click', function () {
-		$ ('content_edit_prest<?=$table_value?>').removeClassName ('cursor');
-		$ ('content_edit_prest<?=$table_value?>').up ('[draggable]').setAttribute ('draggable', 'false');
+	dpu_el ('content_edit_prest<?=$table_value?>').addEventListener ('click', function () {
+		dpu_el ('content_edit_prest<?=$table_value?>').classList.remove ('cursor');
+		dpu_up (dpu_el ('content_edit_prest<?=$table_value?>'), '[draggable]').setAttribute ('draggable', 'false');
 		;
-		if ( !this.readAttribute ('contenteditable') ) $ ('content_edit_prest<?=$table_value?>').setAttribute ('contenteditable', 'true')
+		if ( !this.getAttribute ('contenteditable') ) dpu_el ('content_edit_prest<?=$table_value?>').setAttribute ('contenteditable', 'true')
 	})
-	$ ('content_edit_prest<?=$table_value?>').on ('blur', function () {
-		$ ('content_edit_prest<?=$table_value?>').addClassName ('cursor');
-		var desc = $ ('content_edit_prest<?=$table_value?>').innerHTML;
+	dpu_el ('content_edit_prest<?=$table_value?>').addEventListener ('blur', function () {
+		dpu_el ('content_edit_prest<?=$table_value?>').classList.add ('cursor');
+		var desc = dpu_el ('content_edit_prest<?=$table_value?>').innerHTML;
 		// desc = desc.escapeHTML();
-		$ ('description_<?=$table.$table_value?>').value = desc
+		dpu_el ('description_<?=$table.$table_value?>').value = desc
 		ajaxValidation ('app_update', 'mdl/app/', 'table=<?=$table?>&table_value=<?=$table_value?>&vars[descriptionDevis_prestation]=' + desc)
-		$ ('content_edit_prest<?=$table_value?>').removeAttribute ('contenteditable');
-		$ ('content_edit_prest<?=$table_value?>').up ('[draggable]').setAttribute ('draggable', 'true');
+		dpu_el ('content_edit_prest<?=$table_value?>').removeAttribute ('contenteditable');
+		dpu_up (dpu_el ('content_edit_prest<?=$table_value?>'), '[draggable]').setAttribute ('draggable', 'true');
 		;
 	})
-	$ ('form<?= $table . $table_value ?>').on ('click', function (event) {
+	dpu_el ('form<?= $table . $table_value ?>').addEventListener ('click', function (event) {
 		console.log (event);
 
 	})
-	$ ('form<?= $table . $table_value ?>').on ('blur', function (event) {
+	dpu_el ('form<?= $table . $table_value ?>').addEventListener ('blur', function (event) {
 		console.log (event);
 	})
 </script>

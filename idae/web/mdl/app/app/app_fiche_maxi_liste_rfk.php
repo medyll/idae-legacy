@@ -41,19 +41,53 @@
 	</div>
 </div>
 <script>
-	$ ('<?=$zouzou?>').on ('click', '[data-table][data-table_value][data-link]', function (event, node) {
-		var table       = node.readAttribute ('data-table');
-		var table_value = node.readAttribute ('data-table_value');
-		$ ('<?=$zou?>').show ();
-		$ ('for_<?=$zou?>').loadModule ('app/app/app_fiche_preview', 'table=' + table + '&table_value=' + table_value);
+	/*
+	 * Modified: 2026-08-11 — migrated off the PrototypeJS compatibility shims
+	 * ($, .on, .readAttribute, .show) to native DOM, with file-local `rfk_`
+	 * helpers. loadModule is not a shim call: engine/methods.js installs it on
+	 * HTMLElement.prototype.
+	 */
+	function rfk_el(ref) {
+		return typeof ref === 'string' ? document.getElementById(ref) : ref;
+	}
+
+	function rfk_show(node) { if (node) node.style.display = ''; return node; }
+
+	/**
+	 * Prototype's Element#on. With a selector it delegates, calling the handler
+	 * as (event, matchedElement); without one it is a plain listener.
+	 */
+	function rfk_on(root, eventName, selectorOrHandler, maybeHandler) {
+		if (!root) return;
+		if (maybeHandler === undefined) {
+			root.addEventListener(eventName, selectorOrHandler);
+			return;
+		}
+		var selector = selectorOrHandler, handler = maybeHandler;
+		root.addEventListener(eventName, function (event) {
+			var target = event.target;
+			while (target && target !== root) {
+				if (target.nodeType === 1 && target.matches(selector)) {
+					return handler(event, target);
+				}
+				target = target.parentNode;
+			}
+		}, false);
+	}
+
+	rfk_on (rfk_el ('<?=$zouzou?>'), 'click', '[data-table][data-table_value][data-link]', function (event, node) {
+		var table       = node.getAttribute ('data-table');
+		var table_value = node.getAttribute ('data-table_value');
+		rfk_show (rfk_el ('<?=$zou?>'));
+		rfk_el ('for_<?=$zou?>').loadModule ('app/app/app_fiche_preview', 'table=' + table + '&table_value=' + table_value);
 	});
 	//
-	$ ('<?=$zouzou?>').on ('click', '[data-link][data-table][data-vars]', function (event, node) {
-		if ( node.readAttribute ('data-table_value') ) return;
-		var table = node.readAttribute ('data-table');
-		var vars  = node.readAttribute ('data-vars');
-		$ ('<?=$zou?>').show ();
-		$ ('for_<?=$zou?>').loadModule ('app/app_liste/app_liste', 'table=' + table + '&' + vars);
+	rfk_on (rfk_el ('<?=$zouzou?>'), 'click', '[data-link][data-table][data-vars]', function (event, node) {
+		if ( node.getAttribute ('data-table_value') ) return;
+		var table = node.getAttribute ('data-table');
+		var vars  = node.getAttribute ('data-vars');
+		rfk_show (rfk_el ('<?=$zou?>'));
+		rfk_el ('for_<?=$zou?>').loadModule ('app/app_liste/app_liste', 'table=' + table + '&' + vars);
 		// act_chrome_gui('app/app_liste/app_liste', 'table=' + table + '&' + vars);
 		// alert('dre')
 	})
