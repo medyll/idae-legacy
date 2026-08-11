@@ -649,6 +649,35 @@ Ce point vaut d'être retenu : cette spec est le témoin positif de tout l'édif
 
 **3. Le backend se dégrade sous une longue série.** Mesuré pendant le run : `json_scheme.php` passe de ~0,4 s à 4,5 s puis 8 s, jusqu'au blocage complet (timeout, `000`) constaté une fois — c'est le cas légitime de `docker restart`, signalé par la sonde `global-setup.ts`. Tous les échecs restants de ce run ont cette signature : `0 ms` (le hook `beforeAll` n'aboutit pas, le corps du test ne s'exécute jamais) ou `1.0m` (timeout de boot), et **tous repassent au réessai**. Aucun n'est imputable au code migré.
 
+## Correction — `vendor/prototype/` et `vendor/scriptaculous/` n'ont jamais été supprimés (2026-08-11)
+
+La Phase 3 affirme les avoir supprimés « comme poids mort une fois le shim en place ». `CLAUDE.md` reprenait l'affirmation et interdisait de les réintroduire. **Les deux dossiers sont toujours là** : `javascript/vendor/prototype/` (204 Ko) et `javascript/vendor/scriptaculous/` (160 Ko, 8 fichiers).
+
+Ils ne sont en revanche réellement plus chargés, vérifié : `index.php` ne tire que `main_bag.js`, qui ne référence ni l'un ni l'autre. Le seul fichier qui les référence encore est `javascript/main.js` — une configuration RequireJS de l'ancien chargeur, elle-même chargée par personne. Donc du poids mort dans le dépôt, pas du code expédié au navigateur : sans effet sur les utilisateurs, mais trompeur pour quiconque reprend le sujet.
+
+Pas supprimés dans cette passe (la session est déjà longue et ça mérite sa propre vérification, notamment sur `main.js`). Documentation corrigée dans `CLAUDE.md`. À noter : `javascript/flotr/` embarque sa propre copie de Prototype 1.6 — elle appartient à flotr, ne pas y toucher.
+
+## Quels `shim-*.js` sont supprimables ? Mesure statique, et un demi-tour (2026-08-11)
+
+La mesure runtime ayant échoué (section plus haut), reprise par la voie statique — celle qui avait déjà permis de supprimer `shim-effects`. Résultat : **aucun des six shims restants n'est supprimable en l'état**, et la tentative sur le plus prometteur a failli casser six écrans.
+
+**`shim-draggable` — non.** Deux appelants réels : `cropper.js` (`Class.create(Draggable, …)`, `Draggables.register`) et `resizeGui.js` (`new Draggable`). Ce sont exactement les deux fichiers écartés du périmètre le 09/08. Tant qu'ils ne sont pas traités, il reste.
+
+**`shim-ajax` — non, et c'est instructif.** La mesure de surface disait « supprimable » : plus aucun `new Ajax.*` nulle part hors `vendor/` et `flotr/`, et son unique référence — le bloc `Ajax.Responders` d'`initApp.js` — ne peut par construction jamais se déclencher sans une requête `Ajax.Request` pour la produire. Bloc mort, fichier apparemment libre.
+
+Suppression faite… puis annulée, en deux temps :
+
+1. `prototype-surface.spec.ts` a immédiatement signalé `PeriodicalExecuter` manquant. Ce fichier n'exporte pas que `Ajax` : aussi `PeriodicalExecuter` (zéro appelant, celui-là), **`Form` et `Field`**. Bon rappel de l'utilité de ce contrat de surface : il attrape ce qu'un fichier fournissait *en plus* de ce qu'annonce son nom.
+2. Vérification de `Form` — et là, l'arrêt net. Les **gabarits** en dépendent à 52 endroits : 31 `Form.serialize`, 13 `$(f).serialize()`, 8 `Form.serializeElements`. Tous dans des attributs `onclick` inline (`produit_tarif_gamme_update.php`, `produit_tarif_gamme_update_all.php`, `app_document_tag.php`, `document_liste.php`…) — précisément la catégorie qu'aucune sonde runtime ne voit tant qu'on ne clique pas.
+
+Tout a été remis en état : fichier, entrée de chargement, contrat de surface.
+
+**Bug préexistant trouvé au passage, non corrigé** : `Form.serializeElements` n'existe **pas** comme méthode statique dans le shim — seule une variante d'élément est posée via `Element.addMethods`. Les 8 appels `Form.serializeElements($(…).select('.selectable'))` des écrans `produit_tarif_gamme_*` lèvent donc `Form.serializeElements is not a function` **aujourd'hui**. Régression du swap Phase 3/4 (le vrai Prototype fournissait cette statique), jamais détectée parce que ces écrans ne sont pas couverts. Correctif : ~5 lignes dans `shim-ajax.js`. Laissé de côté volontairement — je ne voulais pas mêler une correction fonctionnelle à une opération de suppression annulée.
+
+**Ce qu'il reste à faire pour libérer `shim-ajax`** : découper le fichier en gardant `Form` (52 appels de gabarits) et en jetant `Ajax`/`PeriodicalExecuter`/`Form.request` (zéro appelant) — soit ~400 lignes mortes sur 600. Opération sûre mais chirurgicale, à faire à tête reposée avec les écrans `produit_tarif_gamme_*` et `document_liste` réellement ouverts pour valider.
+
+**Corollaire, et c'est le vrai enseignement** : `shim-core`, `shim-class`, `shim-element`, `shim-enumerable` et `shim-event` sont tenus par les gabarits, pas par le JS applicatif. Le JS est migré ; ce sont les ~719 `$()` et consorts en PHP/Latte qui maintiennent toute la couche en vie. **La suite de la migration n'est pas un problème JavaScript, c'est un chantier de gabarits** — et il n'a jamais été chiffré.
+
 ## Note de méthode — redémarrer Docker entre deux fichiers est inutile (2026-08-10)
 
 Pendant une bonne partie de cette session j'ai relancé `docker restart idae-socket idae-legacy` après chaque fichier migré, avant de lancer la suite. Inutile, vérifié :
