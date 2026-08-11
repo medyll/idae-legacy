@@ -46,13 +46,39 @@
 	</div>
 </div>
 <script>
-	$('espace_rfk_pour_<?=$table?>').on('click','[data-link]',function(event,node){
+	/*
+	 * Modified: 2026-08-11 — migrated off the PrototypeJS compatibility shims
+	 * ($, .on, .readAttribute) to native DOM.
+	 */
+	/**
+	 * Prototype's Element#on. With a selector it delegates, calling the handler
+	 * as (event, matchedElement); without one it is a plain listener.
+	 */
+	function cel_on(root, eventName, selectorOrHandler, maybeHandler) {
+		if (!root) return;
+		if (maybeHandler === undefined) {
+			root.addEventListener(eventName, selectorOrHandler);
+			return;
+		}
+		var selector = selectorOrHandler, handler = maybeHandler;
+		root.addEventListener(eventName, function (event) {
+			var target = event.target;
+			while (target && target !== root) {
+				if (target.nodeType === 1 && target.matches(selector)) {
+					return handler(event, target);
+				}
+				target = target.parentNode;
+			}
+		}, false);
+	}
+
+	cel_on(document.getElementById('espace_rfk_pour_<?=$table?>'),'click','[data-link]',function(event,node){
 
 
 
-		var table =node.readAttribute('data-table');
-		var table_value =node.readAttribute('data-table_value');
-		var vars =node.readAttribute('data-vars');
+		var table =node.getAttribute('data-table');
+		var table_value =node.getAttribute('data-table_value');
+		var vars =node.getAttribute('data-vars');
 
 		act_chrome_gui('app/app_liste/app_liste_gui','table='+table+'&table_value='+table_value+'&'+vars)
 

@@ -173,6 +173,19 @@ function idae_fire(node, eventName, memo) {
 	return event;
 }
 
+/**
+ * Prototype's Element#toggle: flip between hidden and shown. Reads the
+ * *computed* display, not the inline one — several of this helper's callers
+ * start hidden through a style attribute, and once toggled once the inline
+ * value is empty, which node.style.display would misreport as visible.
+ */
+function idae_toggle(node) {
+	if (!node) return node;
+	var hidden = window.getComputedStyle(node).display === 'none';
+	node.style.display = hidden ? '' : 'none';
+	return node;
+}
+
 (function (global) {
 
 	/* ------------------------------------------------------------------ *

@@ -23,7 +23,7 @@
 ?>
 <div class="applink applinkblock flex_v" style="overflow:hidden;height:100%;">
 	<div class="flex_main ">
-		<div class="applink applinkbig applinkblock" onclick="$(this).next().toggle();" >
+		<div class="applink applinkbig applinkblock" onclick="idae_toggle(this.nextElementSibling);" >
 			<a  >
 				<i class="fa fa-angle-double-down"></i><?= idioma('Ajouter élément(s) ')  ?>
 			</a>
@@ -49,7 +49,7 @@
 		</div>
 	</div>
 	<div class="relative" style="min-height:200px;overflow: auto">
-		<div class="applinkbig applink applinkbig" onclick="$(this).next().toggle();" >
+		<div class="applinkbig applink applinkbig" onclick="idae_toggle(this.nextElementSibling);" >
 			<a><i class="fa fa-sort"></i> <?= idioma('Ordonner'); ?></a>
 		</div>
 		<div  data-table="newsletter_block"  class="  padding margin" style="position:relative;" id="<?= $formSearch ?>" sort_zone_drag="true">

@@ -63,7 +63,7 @@
 					</div>
 					<div style="width:100%">
 						<div style="padding-right:6em;z-index:10;" class=" retrait   alignright">
-							<a onclick="$(this).up('[main_auto_tree]').toggleClassName('please_show')"><i class="fa fa-fw fa-eye"></i> <?= idioma('Détails') ?></a>
+							<a onclick="this.closest('[main_auto_tree]').classList.toggle('please_show')"><i class="fa fa-fw fa-eye"></i> <?= idioma('Détails') ?></a>
 						</div>
 						<div class="flex_h flex_wrap margin flex_margin flex_border">
 							<?php while ($arr_tmp = $rs_tmp->getNext()):

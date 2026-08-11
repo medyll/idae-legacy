@@ -78,9 +78,35 @@ $arrstyle = ['app_gui_color'=>'Interface','app_gui_color_gui'=>'Fenetres'];
 	}
 </style>
 <script>
-	$('color_gui_ch').on('click','[data-color]',function(event,node){
-		var color = node.readAttribute('data-color');
-		code = node.up('[code]').readAttribute('code');
+	/*
+	 * Modified: 2026-08-11 — migrated off the PrototypeJS compatibility shims
+	 * ($, .on, .readAttribute, .up) to native DOM.
+	 */
+	/**
+	 * Prototype's Element#on. With a selector it delegates, calling the handler
+	 * as (event, matchedElement); without one it is a plain listener.
+	 */
+	function upc_on(root, eventName, selectorOrHandler, maybeHandler) {
+		if (!root) return;
+		if (maybeHandler === undefined) {
+			root.addEventListener(eventName, selectorOrHandler);
+			return;
+		}
+		var selector = selectorOrHandler, handler = maybeHandler;
+		root.addEventListener(eventName, function (event) {
+			var target = event.target;
+			while (target && target !== root) {
+				if (target.nodeType === 1 && target.matches(selector)) {
+					return handler(event, target);
+				}
+				target = target.parentNode;
+			}
+		}, false);
+	}
+
+	upc_on(document.getElementById('color_gui_ch'),'click','[data-color]',function(event,node){
+		var color = node.getAttribute('data-color');
+		code = node.closest('[code]').getAttribute('code');
 		save_settings(code,color);
 		setTimeout(function(){reloadModule('app/app_user_pref/app_user_pref_css','*')},1250)
 	})

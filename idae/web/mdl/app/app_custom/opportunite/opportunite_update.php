@@ -102,7 +102,7 @@
 										<?= idioma("Probabilité") ?>
 									</td>
 									<td colspan="3">
-										<input class="inline" style="width:250px;" type="range" max="4" value="<?= $ARR['rangOpportunite'] ?>" name="vars[rangOpportunite]" onchange="$(this).next().value=value">
+										<input class="inline" style="width:250px;" type="range" max="4" value="<?= $ARR['rangOpportunite'] ?>" name="vars[rangOpportunite]" onchange="this.nextElementSibling.value=this.value">
 										<output class="inline"></output>
 									</td>
 								</tr>
