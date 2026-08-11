@@ -32,8 +32,17 @@
   </div>
 </div>
 <script>
-$('loader <?=$uniqid?>').up().observe('dom:appreload',function(){
-		             //  reloadModule('app_document/app_document'_tag_queue','<?= $idagent ?>');
+/*
+ * Modified: 2026-08-11 — `$('loader <?=$uniqid?>')` has a stray space; the
+ * real id is `loader<?=$uniqid?>` (no space), set two lines above. The lookup
+ * has therefore always returned null, and `.up()` on null threw immediately —
+ * this handler has never registered. Fixed the id and migrated off $/.up/
+ * .observe to native DOM. The commented-out reloadModule call one line below
+ * carries the same misplaced-quote bug fixed elsewhere in this migration
+ * ('app_document/app_document'_tag_queue); left as a comment, not revived.
+ */
+document.getElementById('loader<?=$uniqid?>').parentNode.addEventListener('dom:appreload',function(){
+		             //  reloadModule('app_document/app_document_tag_queue','<?= $idagent ?>');
 		              });
 		              pleaseTag=function(tag){
 		              vars = Form.serialize($('skel<?= $uniqid ?>'));

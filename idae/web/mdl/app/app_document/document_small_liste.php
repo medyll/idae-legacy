@@ -48,8 +48,14 @@ while($file=$rs->getNext()){
   </tbody>
 </table>
 <script>
-$('tfile<?=$uniqid?>').on('click','a[deleteFile]',function(event,node){
-	filename = $(node).readAttribute('deleteFile');
+document.getElementById('tfile<?=$uniqid?>').addEventListener('click',function(event){
+	// Was a two-argument .on('click', 'a[deleteFile]', fn) — never delegation,
+	// the shim fell through to Event.observe. Written out as a plain listener
+	// with the delegation logic inline instead of a shared helper, since this
+	// is the file's only handler.
+	var node = event.target.closest('a[deleteFile]');
+	if (!node) return;
+	var filename = node.getAttribute('deleteFile');
 	ajaxValidation('deleteDoc','mdl/document/','deleteModule[trfilename]='+filename+'&base=<?=$base?>&collection=<?=$collection?>&_id='+filename);
 	});
 </script>

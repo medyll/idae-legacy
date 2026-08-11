@@ -33,5 +33,5 @@ $arrA = 	skelMongo::connect('agent','sitebase_base')->findOne(array('idagent'=>(
 </div>
 <script>
 reloadModule('app/app_mail/app_mail_liste_tr','<?=$uniqid?>');
-$$('[mdl="app/app_mail/app_mail_liste_tr"][value="<?=$uniqid?>"]').invoke( 'removeClassName','bold')
+document.querySelectorAll('[mdl="app/app_mail/app_mail_liste_tr"][value="<?=$uniqid?>"]').forEach(function (node) { node.classList.remove('bold'); })
 </script>
