@@ -65,17 +65,51 @@
 	</div>
 </div>
 <script>
-	$('main_<?=$uniqid?>').on('click','[app_button]', function (event,node) {
-		if(node.readAttribute('data-vars')){
-			var vars = node.readAttribute('data-vars');
+	/*
+	 * Modified: 2026-08-11 — migrated off the PrototypeJS compatibility shims
+	 * ($, .on, .observe, .readAttribute, .show) to native DOM, with file-local
+	 * `asd_` helpers. Form.serialize stays; loadModule is not a shim call.
+	 */
+	function asd_el(ref) {
+		return typeof ref === 'string' ? document.getElementById(ref) : ref;
+	}
+
+	function asd_show(node) { if (node) node.style.display = ''; return node; }
+
+	/**
+	 * Prototype's Element#on. With a selector it delegates, calling the handler
+	 * as (event, matchedElement); without one it is a plain listener.
+	 */
+	function asd_on(root, eventName, selectorOrHandler, maybeHandler) {
+		if (!root) return;
+		if (maybeHandler === undefined) {
+			root.addEventListener(eventName, selectorOrHandler);
+			return;
+		}
+		var selector = selectorOrHandler, handler = maybeHandler;
+		root.addEventListener(eventName, function (event) {
+			var target = event.target;
+			while (target && target !== root) {
+				if (target.nodeType === 1 && target.matches(selector)) {
+					return handler(event, target);
+				}
+				target = target.parentNode;
+			}
+		}, false);
+	}
+
+	asd_on(asd_el('main_<?=$uniqid?>'), 'click', '[app_button]', function (event, node) {
+		if (node.getAttribute('data-vars')) {
+			var vars = node.getAttribute('data-vars');
 			reloadScope('<?=$app_stat_scope?>','*',vars)
 		}
 	})
 
-	$('date_<?=$uniqid?>').observe('dom:act_click', function (event) {
-		var varsDate = Form.serialize($('date_<?=$uniqid?>'));
-		$('chart_<?=$uniqid?>').loadModule('app/app_stat/app_stat_dispatch_inner', 'table=<?=$table?>&' + varsDate).show();
-	}.bind(this));
+	asd_el('date_<?=$uniqid?>').addEventListener('dom:act_click', function (event) {
+		var varsDate = Form.serialize(asd_el('date_<?=$uniqid?>'));
+		// loadModule returns the element, which is what let Prototype chain .show().
+		asd_show(asd_el('chart_<?=$uniqid?>').loadModule('app/app_stat/app_stat_dispatch_inner', 'table=<?=$table?>&' + varsDate));
+	});
 
-	$('chart_<?=$uniqid?>').loadModule('app/app_stat/app_stat_dispatch_inner', 'app_stat_scope=<?=$app_stat_scope?>&table=<?=$table?>&' + Form.serialize($('date_<?=$uniqid?>'))).show();
+	asd_show(asd_el('chart_<?=$uniqid?>').loadModule('app/app_stat/app_stat_dispatch_inner', 'app_stat_scope=<?=$app_stat_scope?>&table=<?=$table?>&' + Form.serialize(asd_el('date_<?=$uniqid?>'))));
 </script> 
