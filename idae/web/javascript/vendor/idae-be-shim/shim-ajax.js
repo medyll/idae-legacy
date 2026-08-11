@@ -407,9 +407,26 @@
         serialize: function (form, options) {
             form = $(form);
             if (!form) return '';
+            return Form.serializeElements(Form.getElements(form), options);
+        },
+
+        /**
+         * Restored 2026-08-11. Prototype has always provided this static —
+         * serialize an arbitrary *collection* of fields rather than a whole
+         * form — but the shim only ever installed an element-level
+         * `serializeElements` (which just returns getElements, see the
+         * Element.addMethods block below). The eight template call sites of
+         * the shape `Form.serializeElements($(x).select('.selectable'))`, on
+         * the produit_tarif_gamme update screens, have therefore thrown
+         * "Form.serializeElements is not a function" ever since the Phase 3/4
+         * swap. Confirmed missing at runtime, not just by reading.
+         *
+         * The body is the loop that used to live inline in Form.serialize,
+         * lifted out unchanged, so both paths stay identical by construction.
+         */
+        serializeElements: function (elements, options) {
             options = Object.extend({ submit: true }, options || {});
-            var elements = Form.getElements(form);
-            var data = elements.inject([], function (results, element) {
+            var data = $A(elements).inject([], function (results, element) {
                 if (!element.disabled && element.name) {
                     var key = element.name, value;
                     if (element.tagName.toLowerCase() === 'select' && element.multiple) {
@@ -547,6 +564,30 @@
     // Form methods as form-element methods. Element.addMethods methodizes:
     // these receive the element as their first argument.
     Element.addMethods({
+        /**
+         * Restored 2026-08-11 alongside the static above, and broken since the
+         * same swap. Prototype puts `serialize` on forms; thirteen template
+         * call sites use it — `$(this).serialize()` inside `onsubmit`,
+         * `$('che_form').serialize()` on the migration-check screens. This
+         * block installed `serializeElements`, `getInputs`, `disable`… but
+         * never `serialize`, so all thirteen threw "serialize is not a
+         * function". They live in inline `onclick`/`onsubmit` attributes,
+         * which is why no runtime probe of the JS ever caught it.
+         */
+        serialize: function (element, options) {
+            // Prototype installs Form#serialize and Field#serialize as two
+            // separate typed method sets. This shim's addMethods is untyped —
+            // it lands on every element — so dispatch on the tag to keep both
+            // meanings: a whole form serializes its fields, a single field
+            // serializes just itself. Without the branch, `input.serialize()`
+            // would return '' (getElements finds nothing inside an input)
+            // where Prototype returns "name=value".
+            element = $(element);
+            if (element.tagName && element.tagName.toLowerCase() === 'form') {
+                return Form.serialize(element, options);
+            }
+            return Form.Element.serialize(element);
+        },
         serializeElements: function (element) {
             return Form.getElements(element);
         },
