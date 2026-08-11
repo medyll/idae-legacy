@@ -55,5 +55,5 @@
 	</form>
 </div>
 <script>
-	$('formacco<?=$table_value?>').on('dom:act_change',function(){ajaxFormValidation($('formacco<?=$table_value?>'))})
+	document.getElementById('formacco<?=$table_value?>').on('dom:act_change',function(){ajaxFormValidation(document.getElementById('formacco<?=$table_value?>'))})
 </script>

@@ -86,8 +86,8 @@
 </form>
 <div id="pref_preview" class="aligncenter ededed" style="overflow:auto"></div>
 <script>
-	new myddeAttach($('drag_system'), {form: 'form_system', autoSubmit: true, preview_zone: 'pref_preview'});
-	new myddeAttach($('drag_perso'), {form: 'form_perso', autoSubmit: true, preview_zone: 'pref_preview'});
+	new myddeAttach(document.getElementById('drag_system'), {form: 'form_system', autoSubmit: true, preview_zone: 'pref_preview'});
+	new myddeAttach(document.getElementById('drag_perso'), {form: 'form_perso', autoSubmit: true, preview_zone: 'pref_preview'});
 </script>
 <style>
 	#pref_preview img {

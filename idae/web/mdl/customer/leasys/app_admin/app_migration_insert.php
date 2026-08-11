@@ -25,7 +25,7 @@
 		</table>
 		<div class="padding"><progress value="0" id="auto_check_job"></progress></div>
 		<div class="buttonZone">
-			<input type="button" class="validButton" value="Rechercher" onclick="$('frame_xmlte_ch_ins').loadModule('app/app_admin/app_migration_insert',$('che_form_in').serialize()+'&run=1')"  >
+			<input type="button" class="validButton" value="Rechercher" onclick="document.getElementById('frame_xmlte_ch_ins').loadModule('app/app_admin/app_migration_insert',document.getElementById('che_form_in').serialize()+'&run=1')"  >
 			<input type="button" value="Fermer" class="cancelClose" >
 		</div>
 		<div style="width:100%;max-height:350px;border:none;overflow:auto;" id="frame_xmlte_ch_ins" scrolling="auto"></div>

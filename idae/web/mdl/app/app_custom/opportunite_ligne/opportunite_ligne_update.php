@@ -41,7 +41,7 @@
 	</form >
 </div >
 <script>
-	$('lg1').cloneCopy($('lg2'),{spy:'lg1'})
+	document.getElementById('lg1').cloneCopy(document.getElementById('lg2'),{spy:'lg1'})
 </script>
 <?php if (!empty($ARR['idclient'])) {
 	$add_table = 'client';

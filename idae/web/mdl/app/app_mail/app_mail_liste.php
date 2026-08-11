@@ -21,7 +21,7 @@
 	</div>
 </div>
 <script>
-	new BuildTbl($('zone_mailer_liste'), {
+	new BuildTbl(document.getElementById('zone_mailer_liste'), {
 		table_name: 'email',
 		url_data  : 'table=email&vars[idagent]=<?=$_SESSION['idagent']?>',
 		nbRows    : 500

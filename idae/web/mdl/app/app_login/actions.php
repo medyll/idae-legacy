@@ -52,7 +52,7 @@
 					localStorage.setItem ('PHPSESSID', '<?=$phpsessid?>');
 
 					socket.emit ('grantIn', { DOCUMENTDOMAIN : '<?=DOCUMENTDOMAIN?>', IDAGENT :<?=$arrAgent["id$type"]?>, SESSID :<?=$arrAgent["id$type"]?>, PHPSESSID : '<?=$phpsessid?>' }, function (data) {
-						$ ('inBody').loadModule ('app/app_gui/app_gui_main', { onComplete : hide_login () });
+						document.getElementById('inBody').loadModule ('app/app_gui/app_gui_main', { onComplete : hide_login () });
 					})
 				</script>
 				<?php

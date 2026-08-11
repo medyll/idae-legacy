@@ -46,7 +46,7 @@ $vars = array('iddevis'=>$iddevis,'md5Devis'=>$arrDevis['md5Devis']);
 skelMdl::reloadModule('devis/devis_preview_inner',$iddevis,$vars); 
 ?>
 <script>
-if($('gen_pdf_<?=$iddevis?>')){
-	$('gen_pdf_<?=$iddevis?>').unToggleContent();
+if(document.getElementById('gen_pdf_<?=$iddevis?>')){
+	document.getElementById('gen_pdf_<?=$iddevis?>').unToggleContent();
 	}
 </script>

@@ -47,7 +47,7 @@
 							}
 
 							?>
-							<a class="autoToggle" onclick="$('inner_col_f').loadModule('app/app_scheme/app_scheme_has_field_update','idappscheme=<?= $arr['idappscheme'] ?>');">
+							<a class="autoToggle" onclick="document.getElementById('inner_col_f').loadModule('app/app_scheme/app_scheme_has_field_update','idappscheme=<?= $arr['idappscheme'] ?>');">
 								<?= $arr['nomAppscheme'] ?>
 							</a>
 						<?php } ?></div>

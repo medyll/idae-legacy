@@ -99,6 +99,6 @@
 	reloadTarif = function (id) {
 		reloadModule('app/app_custom/devis/devis_create_cabine', '*', 'idproduit=<?=$idproduit?>&idproduit_tarif=' + id)
 	}
-	//reloadTarif($('idproduit_tarif').value);
-	monitor_enf($('nbreEnfantDevis').value);
+	//reloadTarif(document.getElementById('idproduit_tarif').value);
+	monitor_enf(document.getElementById('nbreEnfantDevis').value);
 </script>

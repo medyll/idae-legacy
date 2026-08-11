@@ -74,5 +74,5 @@ endwhile;
   </div>
 </div>
 <script> 
-$('onlive_slider_<?=$ONLINE_KEY?>').scrollTop = 10000
+document.getElementById('onlive_slider_<?=$ONLINE_KEY?>').scrollTop = 10000
 </script>

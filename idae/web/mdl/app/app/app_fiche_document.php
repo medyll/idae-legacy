@@ -155,7 +155,7 @@
 									}
 								</style>
 								<script>
-									new myddeAttach ($ ('fiche_table_<?=$table?>_<?=$table_value?>'), { form : 'form_upload_<?= $table ?>', autoSubmit : true });
+									new myddeAttach (document.getElementById('fiche_table_<?=$table?>_<?=$table_value?>'), { form : 'form_upload_<?= $table ?>', autoSubmit : true });
 								</script>
 							</div>
 						<?php endif; ?>

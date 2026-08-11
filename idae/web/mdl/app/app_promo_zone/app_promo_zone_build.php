@@ -38,12 +38,12 @@
 	</div>
 </div>
 <script>
-	new myddeExplorer ($ ('explorer<?=$uniqid?>'));
+	new myddeExplorer (document.getElementById('explorer<?=$uniqid?>'));
 
-	$ ('<?=$dropzone?>').on ('click', '[data-table][data-table_value]', function (event, node) {
+	document.getElementById('<?=$dropzone?>').on ('click', '[data-table][data-table_value]', function (event, node) {
 		var table       = node.readAttribute ('data-table');
 		var table_value = node.readAttribute ('data-table_value');
-		$ ('<?=$dragzone?>').loadModule ('app/app/app_update', 'table=' + table + '&table_value=' + table_value);
+		document.getElementById('<?=$dragzone?>').loadModule ('app/app/app_update', 'table=' + table + '&table_value=' + table_value);
 	})
 </script>
 <style>

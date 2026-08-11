@@ -37,7 +37,7 @@
 						</tr>
 					</table>
 					<div class="padding">
-						<input type="button" class="validButton" value="Mise en production" onclick="$('frame_xmlte').loadModule('business/<?= BUSINESS ?>/app/app_admin/app_build_pre_prod','run=1')">
+						<input type="button" class="validButton" value="Mise en production" onclick="document.getElementById('frame_xmlte').loadModule('business/<?= BUSINESS ?>/app/app_admin/app_build_pre_prod','run=1')">
 					</div>
 					<div class="padding flex_main" style="overflow:auto">
 						<progress value="0" id="auto_prod_job"></progress>
