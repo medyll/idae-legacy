@@ -587,6 +587,35 @@ Deux points à noter :
 
 Nouveau `app-contextual.spec.ts` : vérifie la construction de `#app_contextual_menu` au boot (enfant de `body`, classe, `data-cache`, masqué) ; puis qu'un clic droit marque le nœud (`right_clicked`), appelle `socketModule` avec le bon module et les bonnes vars, affiche et positionne le menu — et qu'un clic extérieur le referme et démarque. Un test dédié vérifie aussi que `Resizeable` et `Cookie` ont bien disparu du global. Garde `IDAE_SHIM_WARN`. **4/4 vert au premier essai**, plus `smoke` — **5/5**.
 
+## Migration d'`app/app_live_data.js`, suppression de `niceForm.js`, et une vraie régression attrapée (2026-08-11)
+
+**`librairie/niceForm.js` (9 occurrences) — supprimé.** Le JS n'est chargé par aucun loader — seule la feuille de style homonyme (`niceForm/niceForm.css`) l'est, d'où le faux positif au grep — et la classe n'est instanciée nulle part.
+
+**`app/app_datatable.js` (10 occurrences) — rien à faire.** Vérifié ligne par ligne : les 10 « occurrences » sont toutes dans des blocs commentés ou sont des affectations `.memo` sur de vrais `CustomEvent` natifs. Le fichier était déjà 100 % natif depuis sa migration en début de Phase 5. Le comptage statique par grep surestime, c'est attendu.
+
+**`app/app_live_data.js` (9 occurrences) — migré.** Mises à jour live pilotées par socket : rafraîchissement throttlé des champs modifiés côté serveur, plus le re-parentage tache/congé sur les plannings. Chargé sans condition ; ses `act_*` sont les cibles du `receive_cmd` d'`app_socket.js`.
+
+### La régression : `querySelectorAll` natif est plus strict que le shim
+
+Le nouveau spec a immédiatement échoué sur :
+
+```
+SyntaxError: '[data-table=probe][data-table_value=5] [data-field_name=nomProbe]'
+is not a valid selector
+```
+
+Une valeur d'attribut **non quotée commençant par un chiffre** est du CSS invalide. Le moteur de sélecteurs de Prototype l'acceptait, et le shim reproduisait cette tolérance : `__idaeQSA` (`shim-core.js`) tente `querySelectorAll`, rattrape le `SyntaxError`, re-quote les valeurs d'attribut et réessaie. Mon `ld_qsa` appelait `querySelectorAll` nu.
+
+Ce n'est pas un cas limite : **`table_value` est une clé primaire entière partout dans Idae**. Tout `act_upd_data` sur un enregistrement réel serait parti en exception — c'est-à-dire toutes les mises à jour live, en silence côté utilisateur.
+
+Le même piège dormait dans **deux fichiers déjà commités** : `app_chat.js` (9 sites `[data-appid=<sid>]`) et `app_keepon.js` (1 site) — les `APPID` sont des ids de session PHP, qui commencent très souvent par un chiffre. Leurs specs ne l'avaient pas attrapé parce qu'elles utilisent des ids de sonde alphabétiques. Les trois helpers (`ld_qsa`, `ac_qsa`, `kp_qsa`) portent maintenant le même repli tolérant que le shim, commenté. Balayage des 15 autres fichiers migrés : aucun autre n'interpole dans un sélecteur d'attribut non quoté.
+
+**Leçon à retenir pour la suite** : dès qu'un helper `*_qsa` reçoit un sélecteur construit par concaténation, il lui faut le repli tolérant. Le shim masquait cette différence partout, et une spec avec des données « propres » (ids alphabétiques) ne la révèle pas.
+
+Nouveau `app-live-data.spec.ts` : rafraîchissement de champ + `dom:data_reload` (avec `table_value` **numérique**, précisément le cas qui plantait), non-traitement d'une table non souscrite, suppression par `act_close_mdl`, et disparition du global `niceForm`. Garde `IDAE_SHIM_WARN`. **12/12** avec `app-chat`, `app-keepon` et `smoke` revérifiés après le back-fix.
+
+Note d'environnement : la sonde `global-setup.ts` a signalé Apache/phpBridge coincé en cours de route (`did not answer within 10s`) — c'est le cas où le redémarrage des conteneurs est légitime, contrairement au restart systématique abandonné plus bas.
+
 ## Note de méthode — redémarrer Docker entre deux fichiers est inutile (2026-08-10)
 
 Pendant une bonne partie de cette session j'ai relancé `docker restart idae-socket idae-legacy` après chaque fichier migré, avant de lancer la suite. Inutile, vérifié :

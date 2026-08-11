@@ -17,8 +17,27 @@ function ac_el(ref) {
 	return typeof ref === 'string' ? document.getElementById(ref) : ref;
 }
 
+/**
+ * Tolerant querySelectorAll, matching what `$$` did through the shim
+ * (`__idaeQSA`, shim-core.js). This file builds `[data-appid=<sid>]`
+ * selectors from PHP session ids, which routinely start with a digit —
+ * unquoted attribute values are invalid CSS there and native
+ * querySelectorAll throws. Retry once with the values quoted.
+ */
 function ac_qsa(selector, root) {
-	return Array.prototype.slice.call((root || document).querySelectorAll(selector));
+	root = root || document;
+	var found;
+	try {
+		found = root.querySelectorAll(selector);
+	} catch (e) {
+		var quoted = String(selector).replace(
+			/\[([a-zA-Z_][\w-]*)=([^'"\]\s][^\]\s]*)\]/g,
+			'[$1="$2"]'
+		);
+		if (quoted === selector) throw e;
+		found = root.querySelectorAll(quoted);
+	}
+	return Array.prototype.slice.call(found);
 }
 
 /** Prototype's Element#up(selector): starts at the parent, never at self. */
