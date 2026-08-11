@@ -35,13 +35,13 @@
 
 
 		<div id = "men<?= $uniquid ?>" class = "inline">
-			<a onclick = "ajaxMdl('production/produittarifgamme/produit_tarif_gamme_update_multi','<?= idioma('Actions multiples') . ' ' . idioma('Supprimer prix') ?>',Form.serializeElements($('<?= $body ?>').select('.selectable') )+'&F_action=suppr&idproduit=<?= $idproduit ?>');"><img src = "<?= ICONPATH ?>trash16.png"/>
+			<a onclick = "ajaxMdl('production/produittarifgamme/produit_tarif_gamme_update_multi','<?= idioma('Actions multiples') . ' ' . idioma('Supprimer prix') ?>',Form.serializeElements(ptga_el('<?= $body ?>').querySelectorAll('.selectable'))+'&F_action=suppr&idproduit=<?= $idproduit ?>');"><img src = "<?= ICONPATH ?>trash16.png"/>
 				<?= idioma('Supprimer prix') ?>
 			</a>
-			<a onclick = "ajaxMdl('production/produittarifgamme/produit_tarif_gamme_update_multi','<?= idioma('Actions multiples') . ' ' . idioma('Supprimer dates') ?>',Form.serializeElements($('<?= $body ?>').select('.selectable') )+'&F_action=supprdates&idproduit=<?= $idproduit ?>');"><img src = "<?= ICONPATH ?>trash16.png"/>
+			<a onclick = "ajaxMdl('production/produittarifgamme/produit_tarif_gamme_update_multi','<?= idioma('Actions multiples') . ' ' . idioma('Supprimer dates') ?>',Form.serializeElements(ptga_el('<?= $body ?>').querySelectorAll('.selectable'))+'&F_action=supprdates&idproduit=<?= $idproduit ?>');"><img src = "<?= ICONPATH ?>trash16.png"/>
 				<?= idioma('Supprimer dates') ?>
 			</a>
-			<a onclick = "ajaxMdl('production/produittarifgamme/produit_tarif_gamme_update_multi','<?= idioma('Actions multiples') . ' ' . idioma('Modifier prix') ?>',Form.serializeElements($('<?= $body ?>').select('.selectable') )+'&F_action=edit&idproduit=<?= $idproduit ?>');"><img src = "<?= ICONPATH ?>edit16.png"/>
+			<a onclick = "ajaxMdl('production/produittarifgamme/produit_tarif_gamme_update_multi','<?= idioma('Actions multiples') . ' ' . idioma('Modifier prix') ?>',Form.serializeElements(ptga_el('<?= $body ?>').querySelectorAll('.selectable'))+'&F_action=edit&idproduit=<?= $idproduit ?>');"><img src = "<?= ICONPATH ?>edit16.png"/>
 				<?= idioma('Modifier prix') ?>
 			</a>
 			<a onclick = "ajaxValidation('repairProduitTarif','mdl/production/produittarif/','scope=idproduit&idproduit=<?= $idproduit ?>');"><img src = "<?= ICONPATH ?>repair16.png"/>&nbsp;Ré-indexer</a>
@@ -147,26 +147,87 @@
 	</div>
 </div>
 <script>
-	$('<?=$body?>').on('click', 'input[type="checkbox"].avoid', function (event, node) {
-		value = node.checked;
-		monitor = $(node).up('td').next().select('input[name="prixPromoProduit_tarif_gamme"]').first();
+	/*
+	 * Modified: 2026-08-11 — migrated off the PrototypeJS compatibility shims
+	 * ($, .on, .up, .next, .select, .first, .show, .hide, .readAttribute) to
+	 * native DOM, with file-local `ptga_` helpers.
+	 *
+	 * Form.serializeElements is deliberately kept — shim-form.js is the shim
+	 * that stays — but note it did not exist as a static until 2026-08-11, so
+	 * the change handler below was throwing "Form.serializeElements is not a
+	 * function" on every edit. See form-serialize.spec.ts.
+	 */
+	function ptga_el(ref) {
+		return typeof ref === 'string' ? document.getElementById(ref) : ref;
+	}
+
+	function ptga_show(node) { if (node) node.style.display = ''; return node; }
+	function ptga_hide(node) { if (node) node.style.display = 'none'; return node; }
+
+	/** Prototype's Element#up: nearest ancestor matching `selector`. */
+	function ptga_up(node, selector) {
+		var parent = node ? node.parentNode : null;
+		while (parent && parent.nodeType === 1) {
+			if (parent.matches(selector)) return parent;
+			parent = parent.parentNode;
+		}
+		return null;
+	}
+
+	/**
+	 * Prototype's Element#on. With a selector it delegates, calling the handler
+	 * as (event, matchedElement); without one it is a plain listener.
+	 */
+	function ptga_on(root, eventName, selectorOrHandler, maybeHandler) {
+		if (!root) return;
+		if (maybeHandler === undefined) {
+			root.addEventListener(eventName, selectorOrHandler);
+			return;
+		}
+		var selector = selectorOrHandler, handler = maybeHandler;
+		root.addEventListener(eventName, function (event) {
+			var target = event.target;
+			while (target && target !== root) {
+				if (target.nodeType === 1 && target.matches(selector)) {
+					return handler(event, target);
+				}
+				target = target.parentNode;
+			}
+		}, false);
+	}
+
+	ptga_on(ptga_el('<?=$body?>'), 'click', 'input[type="checkbox"].avoid', function (event, node) {
+		var value = node.checked;
+		// `.up('td').next()` — next() with no argument is the next sibling
+		// *element*, which is nextElementSibling.
+		var cell = ptga_up(node, 'td');
+		var monitor = cell && cell.nextElementSibling
+			? cell.nextElementSibling.querySelector('input[name="prixPromoProduit_tarif_gamme"]')
+			: null;
 		if (value == true) {
-			$(monitor).show()
+			ptga_show(monitor)
 		} else {
-			$(monitor).hide();
+			ptga_hide(monitor);
 		}
 	})
-	$('<?=$body?>').on('click', 'input[type="checkbox"]:not(.avoid)', function (event, node) {
-		value = node.checked;
+	ptga_on(ptga_el('<?=$body?>'), 'click', 'input[type="checkbox"]:not(.avoid)', function (event, node) {
+		var value = node.checked;
+		// The else branch read `$(men<?=$uniquid?>)` — a bare identifier, not a
+		// quoted id. It only ever resolved because browsers expose an element's
+		// id as a window property; any minifier or a `use strict` module scope
+		// would have turned it into a ReferenceError. Both branches now go
+		// through the id string, as the show branch already did.
+		var menu = ptga_el('men<?=$uniquid?>');
 		if (value == true) {
-			$('men<?=$uniquid?>').show()
+			ptga_show(menu)
 		} else {
-			$(men<?=$uniquid?>).hide();
+			ptga_hide(menu);
 		}
 	})
-	$('<?=$body?>').on('change', 'input[type="text"]', function (event, node) {
-		value = node.value;
-		vars = Form.serializeElements($(node).up('tr').select('.' + node.readAttribute('grp')));
+	ptga_on(ptga_el('<?=$body?>'), 'change', 'input[type="text"]', function (event, node) {
+		var value = node.value;
+		var row = ptga_up(node, 'tr');
+		var vars = Form.serializeElements(row.querySelectorAll('.' + node.getAttribute('grp')));
 		ajaxValidation('updateProduitTarifGamme', 'mdl/production/produittarifgamme/', vars + '&scope=idproduit&idproduit=<?=$idproduit?>');
 	})
 </script>
