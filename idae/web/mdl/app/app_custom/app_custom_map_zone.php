@@ -30,6 +30,21 @@
 
 	$input_default_value = (empty($ARR["adresse$Table"])) ? $ARR[$field_name_table] : $ARR["adresse$Table"] . ' ' . $ARR["adresse2$Table"] . ' ' . $ARR["ville$Table"];
 ?>
+<script>
+	/*
+	 * Modified: 2026-08-11 — migrated off the PrototypeJS `$` shim to native
+	 * DOM, with a file-local `cmz_` helper.
+	 *
+	 * The searchMapZone button passed `$(z<uniqid>)` — a bare identifier rather than a
+	 * quoted id. It resolved only because browsers expose an element's id as a
+	 * window property; under a minifier or a strict module scope it is a
+	 * ReferenceError. Now goes through the id string like everything else.
+	 */
+	function cmz_el(ref) {
+		return typeof ref === 'string' ? document.getElementById(ref) : ref;
+	}
+</script>
+
 <style>
 	<?='#'.$map_canvasid?>
 	{
@@ -77,7 +92,7 @@
 								<button type="button"
 								        class="validButton"
 								        value="Situer"
-								        onclick="searchMapZone($(z<?= $uniqid ?>).value)">
+								        onclick="searchMapZone(cmz_el('z<?= $uniqid ?>').value)">
 									<i class="fa fa-map-marker"></i> <?= idioma('Situer') ?></button>
 							</td>
 						</tr>
@@ -123,7 +138,7 @@
 			center           : new google.maps.LatLng (<?=$ARR[$lat_field]?>, <?=$ARR[$lng_field]?>),
 			mapTypeId        : google.maps.MapTypeId.ROADMAP
 		}
-		var map        = new google.maps.Map ($ ("<?=$map_canvasid?>"), mapOptions);
+		var map        = new google.maps.Map (cmz_el("<?=$map_canvasid?>"), mapOptions);
 		var marker     = new google.maps.Marker ({
 			position : originlat,
 			map      : map
@@ -172,11 +187,11 @@
 
 						var loc                                 = results[0].geometry.location;
 						placeMarker (loc);
-						$ ('<?=$lat_field?><?=$uniqid?>').value = loc.lat ();
-						$ ('<?=$lng_field?><?=$uniqid?>').value = loc.lng ();
+						cmz_el('<?=$lat_field?><?=$uniqid?>').value = loc.lat ();
+						cmz_el('<?=$lng_field?><?=$uniqid?>').value = loc.lng ();
 
-						$ ('gps<?=$Table?>_lat').value = loc.lat ();
-						$ ('gps<?=$Table?>_lng').value = loc.lng ();
+						cmz_el('gps<?=$Table?>_lat').value = loc.lat ();
+						cmz_el('gps<?=$Table?>_lng').value = loc.lng ();
 
 					}
 					else {
@@ -286,7 +301,7 @@
 	};
 
 	(function () {
-		if ( $ ('script_map') ) {
+		if ( cmz_el('script_map') ) {
 			initMapZone ();
 			return;
 		}

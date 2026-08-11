@@ -47,15 +47,26 @@
 	<br>
 </div>
 <script>
-	$ ('<?=$uniqkey?>').on ('click', function () {
-		$ ('<?=$uniqkey?>').removeClassName ('cursor');
-		if ( !this.readAttribute ('contenteditable') ) $ ('<?=$uniqkey?>').setAttribute ('contenteditable', 'true')
+	/*
+	 * Modified: 2026-08-11 — migrated off the PrototypeJS compatibility shims
+	 * ($, .on, .readAttribute, .add/removeClassName) to native DOM, with a
+	 * file-local `dsu_` helper. Both .on() calls are two-argument with no
+	 * selector, so they were never delegation — the shim fell through to
+	 * Event.observe. Plain listeners keep `this` on the element.
+	 */
+	function dsu_el(ref) {
+		return typeof ref === 'string' ? document.getElementById(ref) : ref;
+	}
+
+	dsu_el ('<?=$uniqkey?>').addEventListener ('click', function () {
+		dsu_el ('<?=$uniqkey?>').classList.remove ('cursor');
+		if ( !this.getAttribute ('contenteditable') ) dsu_el ('<?=$uniqkey?>').setAttribute ('contenteditable', 'true')
 	})
-	$ ('<?=$uniqkey?>').on ('blur', function () {
-		$ ('<?=$uniqkey?>').addClassName ('cursor');
-		$ ('input_<?=$uniqkey?>').value = $ ('<?=$uniqkey?>').innerHTML;
-		ajaxFormValidation ($ ('form<?=$field. $table . $table_value ?>'));
+	dsu_el ('<?=$uniqkey?>').addEventListener ('blur', function () {
+		dsu_el ('<?=$uniqkey?>').classList.add ('cursor');
+		dsu_el ('input_<?=$uniqkey?>').value = dsu_el ('<?=$uniqkey?>').innerHTML;
+		ajaxFormValidation (dsu_el ('form<?=$field. $table . $table_value ?>'));
 		//ajaxValidation('app_update', 'mdl/app/', 'table=<?=$table?>&table_value=<?=$table_value?>&vars[<?=$field.$Table?>]=' + $('<?=$uniqkey?>').innerHTML)
-		$ ('<?=$uniqkey?>').removeAttribute ('contenteditable');
+		dsu_el ('<?=$uniqkey?>').removeAttribute ('contenteditable');
 	})
 </script>

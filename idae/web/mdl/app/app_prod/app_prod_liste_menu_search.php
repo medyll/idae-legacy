@@ -71,48 +71,117 @@
 	</div>
 </div>
 <script>
+	/*
+	 * Modified: 2026-08-11 — migrated off the PrototypeJS compatibility shims
+	 * ($, .on, .observe, .up, .next, .previousSiblings, .select, .first, .each,
+	 * .readAttribute) to native DOM, with file-local `pms2_` helpers.
+	 *
+	 * Form.serialize / Form.serializeElements stay: shim-form.js is the shim
+	 * that keeps living. loadModule is not a shim call either — engine/methods.js
+	 * installs it on HTMLElement.prototype.
+	 */
+	function pms2_el(ref) {
+		return typeof ref === 'string' ? document.getElementById(ref) : ref;
+	}
+
+	/** Prototype's Element#up: nearest ancestor matching `selector`. */
+	function pms2_up(node, selector) {
+		var parent = node ? node.parentNode : null;
+		while (parent && parent.nodeType === 1) {
+			if (parent.matches(selector)) return parent;
+			parent = parent.parentNode;
+		}
+		return null;
+	}
+
+	/**
+	 * Prototype's Element#next(selector): scans forward through the following
+	 * siblings and returns the first that matches, not merely the immediate
+	 * one. nextElementSibling alone would stop at the first non-matching node
+	 * and end the while-loop below early.
+	 */
+	function pms2_next(node, selector) {
+		var sib = node ? node.nextElementSibling : null;
+		while (sib) {
+			if (sib.matches(selector)) return sib;
+			sib = sib.nextElementSibling;
+		}
+		return null;
+	}
+
+	/** Prototype's Element#previousSiblings: all of them, nearest first. */
+	function pms2_previousSiblings(node) {
+		var out = [], sib = node ? node.previousElementSibling : null;
+		while (sib) { out.push(sib); sib = sib.previousElementSibling; }
+		return out;
+	}
+
+	/**
+	 * Prototype's Element#on. With a selector it delegates, calling the handler
+	 * as (event, matchedElement); without one it is a plain listener.
+	 */
+	function pms2_on(root, eventName, selectorOrHandler, maybeHandler) {
+		if (!root) return;
+		if (maybeHandler === undefined) {
+			root.addEventListener(eventName, selectorOrHandler);
+			return;
+		}
+		var selector = selectorOrHandler, handler = maybeHandler;
+		root.addEventListener(eventName, function (event) {
+			var target = event.target;
+			while (target && target !== root) {
+				if (target.nodeType === 1 && target.matches(selector)) {
+					return handler(event, target);
+				}
+				target = target.parentNode;
+			}
+		}, false);
+	}
+
 	do_reload = function (node) {
 
 		var vars      = 'n=p';
-		var ac_elem   = $ (node).up ('.cellsearch');
+		var ac_elem   = pms2_up (node, '.cellsearch');
 		var next_elem = ac_elem;
 		vars          = '&' + Form.serialize (ac_elem);
-		vars += '&' + Form.serializeElements ($ ('<?=$formSearch?>').select ('.act_int'));
+		vars += '&' + Form.serializeElements (pms2_el ('<?=$formSearch?>').querySelectorAll ('.act_int'));
 
-		ac_elem.previousSiblings ().each (function (danode) {
+		pms2_previousSiblings (ac_elem).forEach (function (danode) {
 			if ( Form.serialize (danode) != '' )vars += '&' + Form.serialize (danode);
 
-		}.bind (this))
+		})
 
-		if ( !$ (next_elem).next ('.cellsearch') ) {
-			vars = Form.serialize ($ ('<?=$formSearch?>'));
+		if ( !pms2_next (next_elem, '.cellsearch') ) {
+			vars = Form.serialize (pms2_el ('<?=$formSearch?>'));
 
 		} else {
-			while ($ (next_elem).next ('.cellsearch')) {
-				wrkon     = $ (next_elem).next ('.cellsearch');
-				mdl       = $ (wrkon).select ('[mdl]').first ().readAttribute ('mdl');
-				vars_item = $ (wrkon).select ('[mdl]').first ().readAttribute ('table');
+			var wrkon, mdl, vars_item, table_from;
+			while (pms2_next (next_elem, '.cellsearch')) {
+				wrkon     = pms2_next (next_elem, '.cellsearch');
+				mdl       = wrkon.querySelector ('[mdl]').getAttribute ('mdl');
+				vars_item = wrkon.querySelector ('[mdl]').getAttribute ('table');
 
-				console.log ($ (next_elem).next ('.cellsearch'))
+				console.log (pms2_next (next_elem, '.cellsearch'))
 
-				if ( next_elem.select ('[table]').first () ) {
-					table_from = next_elem.select ('[table]').first ().readAttribute ('table');
+				if ( next_elem.querySelector ('[table]') ) {
+					table_from = next_elem.querySelector ('[table]').getAttribute ('table');
 				}
-				next_elem = $ (next_elem).next ('.cellsearch');
-				$ (wrkon).select ('[mdl]').first ().loadModule (mdl, 'table_from=' + table_from + '&table_main=<?=$table?>&table=' + vars_item + '&' + vars);
+				next_elem = pms2_next (next_elem, '.cellsearch');
+				wrkon.querySelector ('[mdl]').loadModule (mdl, 'table_from=' + table_from + '&table_main=<?=$table?>&table=' + vars_item + '&' + vars);
 
 			}
 		}
-		// $('<?=$formSearch?>').fire('dom:act_change')
+		// pms2_fire(pms2_el('<?=$formSearch?>'), 'dom:act_change')
 	}
 
-	if ( $ ('<?= $formSearch ?>') != null ) {
-		$ ('<?= $formSearch ?>').on ('change', 'select', function (event, node) {
+	if ( pms2_el ('<?= $formSearch ?>') != null ) {
+		pms2_on (pms2_el ('<?= $formSearch ?>'), 'change', 'select', function (event, node) {
 			do_reload (node);
 
 		})
-		$ ('<?= $formSearch ?>').observe ('dom:act_change', function (event) {
-			//eventElement = Event.element;
+		// Two arguments, no selector: never delegation — the shim fell through
+		// to Event.observe.
+		pms2_el ('<?= $formSearch ?>').addEventListener ('dom:act_change', function (event) {
 			do_reload (event.target);
 
 		})

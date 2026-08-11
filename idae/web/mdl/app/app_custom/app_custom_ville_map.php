@@ -26,6 +26,21 @@
 		$zoom             = 2;
 	}
 ?>
+<script>
+	/*
+	 * Modified: 2026-08-11 — migrated off the PrototypeJS `$` shim to native
+	 * DOM, with a file-local `cvm_` helper.
+	 *
+	 * The searchMap button passed `$(z<uniqid>)` — a bare identifier rather than a
+	 * quoted id. It resolved only because browsers expose an element's id as a
+	 * window property; under a minifier or a strict module scope it is a
+	 * ReferenceError. Now goes through the id string like everything else.
+	 */
+	function cvm_el(ref) {
+		return typeof ref === 'string' ? document.getElementById(ref) : ref;
+	}
+</script>
+
 <style>
 	#map_canvas {
 		display : block !important;
@@ -70,7 +85,7 @@
 						<button type="button"
 						        class="validButton"
 						        value="Situer"
-						        onclick="searchMap($(z<?= $uniqid ?>).value)">
+						        onclick="searchMap(cvm_el('z<?= $uniqid ?>').value)">
 							<i class="fa fa-map-marker"></i> <?= idioma('Situer') ?></button>
 					</td>
 				</tr>
@@ -128,7 +143,7 @@
 			center    : new google.maps.LatLng (<?=$arrV[$lat_field]?>, <?=$arrV[$lng_field]?>),
 			mapTypeId : google.maps.MapTypeId.ROADMAP
 		}
-		var map        = new google.maps.Map ($ ("map_canvas"), mapOptions);
+		var map        = new google.maps.Map (cvm_el("map_canvas"), mapOptions);
 		var marker     = new google.maps.Marker ({
 			position : originlat,
 			map      : map
@@ -138,11 +153,11 @@
 		//
 		google.maps.event.addListener (map, 'click', function (event) {
 
-			$ ('<?=$lat_field?><?=$uniqid?>').value = event.latLng.lat ();
-			$ ('<?=$lng_field?><?=$uniqid?>').value = event.latLng.lng ();
+			cvm_el('<?=$lat_field?><?=$uniqid?>').value = event.latLng.lat ();
+			cvm_el('<?=$lng_field?><?=$uniqid?>').value = event.latLng.lng ();
 
-			$ ('gps<?=$Table?>_lat').value = event.latLng.lat ();
-			$ ('gps<?=$Table?>_lng').value = event.latLng.lng ();
+			cvm_el('gps<?=$Table?>_lat').value = event.latLng.lat ();
+			cvm_el('gps<?=$Table?>_lng').value = event.latLng.lng ();
 
 
 
@@ -168,11 +183,11 @@
 
 						var loc                                 = results[0].geometry.location;
 						placeMarker (loc)
-						$ ('<?=$lat_field?><?=$uniqid?>').value = loc.lat ();
-						$ ('<?=$lng_field?><?=$uniqid?>').value = loc.lng ();
+						cvm_el('<?=$lat_field?><?=$uniqid?>').value = loc.lat ();
+						cvm_el('<?=$lng_field?><?=$uniqid?>').value = loc.lng ();
 
-						$ ('gps<?=$Table?>_lat').value = loc.lat ();
-						$ ('gps<?=$Table?>_lng').value = loc.lng ();
+						cvm_el('gps<?=$Table?>_lat').value = loc.lat ();
+						cvm_el('gps<?=$Table?>_lng').value = loc.lng ();
 
 					}
 					else {
@@ -183,7 +198,7 @@
 		};
 	}
 	loadScriptMap = function () {
-		if ( $ ('script_map') ) {
+		if ( cvm_el('script_map') ) {
 			initializeMap ();
 			initializeSearch ();
 			return;

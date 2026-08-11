@@ -56,7 +56,19 @@
 	endforeach;*/
 	// vardump_async($arr_more_fk,true);
 ?>
-<form id="form<?= $uniqid ?>" onclick="gain_searchbutton(this,event)" onfocus="gain_search_summary(this,event)" onkeyup="$('main_search_<?= $table ?>').loadModule('app/app_search/app_search_summary',$(this).serialize());"
+<script>
+	/*
+	 * Modified: 2026-08-11 — migrated off the PrototypeJS `$` shim to native
+	 * DOM, with a file-local `axs_` helper. The two `$(node)` wrappers around
+	 * an element were no-ops: the shim patches HTMLElement.prototype, so the
+	 * wrapper returned the same node.
+	 */
+	function axs_el(ref) {
+		return typeof ref === 'string' ? document.getElementById(ref) : ref;
+	}
+</script>
+
+<form id="form<?= $uniqid ?>" onclick="gain_searchbutton(this,event)" onfocus="gain_search_summary(this,event)" onkeyup="axs_el('main_search_<?= $table ?>').loadModule('app/app_search/app_search_summary',$(this).serialize());"
       onsubmit="return false;"
       style="height: 100%;overflow:hidden;">
 	<?php foreach ($vars as $key => $input): ?>
@@ -70,7 +82,7 @@
 		<div id="main_search_<?= $table ?>"></div>
 		<div class="relative  zone_button   padding aligncenter" style="margin: 0 0.5rem;">
 			<div class=" ">
-				<input type="reset" value="annuler" class="no_border_input" style="display:none;border:none;background-color: transparent;" onclick="$(this).hide()">
+				<input type="reset" value="annuler" class="no_border_input" style="display:none;border:none;background-color: transparent;" onclick="this.style.display='none'">
 				<button class="padding" type="submit" value="Ok">rechercher <i class="fa fa-search"></i></button>
 			</div>
 		</div>
@@ -141,9 +153,9 @@
 <script>
 	gain_searchbutton = function (form, event) {
 		if ( form.querySelector ('.zone_button') ) {
-			var button_zone = $ (form.querySelector ('.zone_button'));
+			var button_zone = form.querySelector ('.zone_button');
 			if ( event.target.match ('input[type=text]') || event.target.match ('input[type=radio]') ) {
-				var input_zone = $ (event.target);
+				var input_zone = event.target;
 				if ( input_zone.up ('.searchMdl') ) {
 					if ( !input_zone.up ('.searchMdl').next () || !input_zone.next ().hasClassName ('zone_button') ) {
 						var input_insert_after = input_zone.up ('.searchMdl');
@@ -156,11 +168,11 @@
 			}
 		}
 		if ( event.target.match ('input[type=text]') ) {
-			// gain_search_summary($(event.target));
+			// gain_search_summary(event.target);
 		}
 	}
 	gain_search_summary = function (input) {
-		//$('main_search_<?= $table ?>').clonePosition(input);
+		//axs_el('main_search_<?= $table ?>').clonePosition(input);
 	}
 </script>
 
