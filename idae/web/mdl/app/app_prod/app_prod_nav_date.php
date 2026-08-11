@@ -34,7 +34,7 @@
 							$codedate = $valf['codeAppscheme_field'] . $Table;
 							?>
 							<a class="autoToggle ellipsis"
-							   onclick="$('type_date_<?= $uniqid ?>').update('<?= $nomdate . ' ' . $table ?>');$($('form<?= $uniqid ?>').querySelector('#<?= $deb ?>')).setAttribute('name','vars_date[<?= $codedate ?>]'+'[$gte]');$($('form<?= $uniqid ?>').querySelector('#<?= $fin ?>')).setAttribute('name','vars_date[<?= $codedate ?>]'+'[$lte]')">
+							   onclick="nd_el('type_date_<?= $uniqid ?>').innerHTML = '<?= $nomdate . ' ' . $table ?>';nd_el('form<?= $uniqid ?>').querySelector('#<?= $deb ?>').setAttribute('name','vars_date[<?= $codedate ?>]'+'[$gte]');nd_el('form<?= $uniqid ?>').querySelector('#<?= $fin ?>').setAttribute('name','vars_date[<?= $codedate ?>]'+'[$lte]')">
 								<i class="fa fa-<?= $valf['iconAppscheme_field'] ?>"></i> <?= ucfirst(idioma($nomdate)) . ' ' . $table; ?></a>                                <?php } ?>
 					</div>
 				</div>
@@ -79,26 +79,78 @@
 	</div>
 </div>
 <script>
-	$('body').on('dom:act_click', '#select_periode<?=$uniqid?>', function (event) {
+	/*
+	 * Modified: 2026-08-11 — migrated off the PrototypeJS compatibility shims
+	 * ($, .on, .select, .first, .update, .add/removeClassName) to native DOM,
+	 * with file-local `nd_` helpers. Form.serialize is deliberately kept: it is
+	 * the one shim API that stays (shim-form.js), covered by
+	 * playwright/tests/form-serialize.spec.ts.
+	 */
+	function nd_el(ref) {
+		return typeof ref === 'string' ? document.getElementById(ref) : ref;
+	}
 
-		$('form<?= $uniqid ?>').select('#refresh_nav').first().removeClassName('bounce');
-		$('form<?= $uniqid ?>').select('#refresh_nav').first().removeClassName('animated');
+	/**
+	 * Prototype's Element#on. With a selector it delegates, calling the handler
+	 * as (event, matchedElement); without one it is a plain listener — a
+	 * two-argument .on() was never delegation, the shim fell through to
+	 * Event.observe.
+	 */
+	function nd_on(root, eventName, selectorOrHandler, maybeHandler) {
+		if (!root) return;
+		if (maybeHandler === undefined) {
+			root.addEventListener(eventName, selectorOrHandler);
+			return;
+		}
+		var selector = selectorOrHandler, handler = maybeHandler;
+		root.addEventListener(eventName, function (event) {
+			var target = event.target;
+			while (target && target !== root) {
+				if (target.nodeType === 1 && target.matches(selector)) {
+					return handler(event, target);
+				}
+				target = target.parentNode;
+			}
+		}, false);
+	}
 
-		$('type_periode_<?=$uniqid?>').update(event.memo.value);
-		$($('form<?=$uniqid?>').querySelector('#<?=$deb?>')).value = event.memo.dateDebut
-		$($('form<?=$uniqid?>').querySelector('#<?=$fin?>')).value = event.memo.dateFin
+	/**
+	 * `#refresh_nav` / `#refresh_nav_btn` are literal ids, not keyed off
+	 * $uniqid, so several instances of this module share them. Every lookup
+	 * below is scoped to this instance's form — which is what
+	 * `$(form).select('#x').first()` did, and why replacing it with a bare
+	 * document.getElementById would silently drive another instance's button.
+	 */
+	function nd_in(scopeId, selector) {
+		var scope = nd_el(scopeId);
+		return scope ? scope.querySelector(selector) : null;
+	}
 
-		$('form<?= $uniqid ?>').select('#refresh_nav_btn').first().setAttribute('vars', Form.serialize($('form<?=$uniqid?>')))
-		$('form<?= $uniqid ?>').select('#refresh_nav').first().addClassName('animated bounce');
+	nd_on(document.body, 'dom:act_click', '#select_periode<?=$uniqid?>', function (event) {
+
+		var nav = nd_in('form<?= $uniqid ?>', '#refresh_nav');
+		nav.classList.remove('bounce');
+		nav.classList.remove('animated');
+
+		nd_el('type_periode_<?=$uniqid?>').innerHTML = event.memo.value;
+		nd_in('form<?=$uniqid?>', '#<?=$deb?>').value = event.memo.dateDebut
+		nd_in('form<?=$uniqid?>', '#<?=$fin?>').value = event.memo.dateFin
+
+		nd_in('form<?= $uniqid ?>', '#refresh_nav_btn').setAttribute('vars', Form.serialize(nd_el('form<?=$uniqid?>')))
+		// Prototype's addClassName appended the raw string, which the browser
+		// then read as two class tokens; classList.add takes them separately.
+		nav.classList.add('animated', 'bounce');
 	})
-	$('form<?= $uniqid ?>').on('dom:act_change', function () {
+	nd_on(nd_el('form<?= $uniqid ?>'), 'dom:act_change', function () {
 
-		$('form<?= $uniqid ?>').select('#refresh_nav').first().removeClassName('bounce');
-		$('form<?= $uniqid ?>').select('#refresh_nav').first().removeClassName('animated');
+		var nav = nd_in('form<?= $uniqid ?>', '#refresh_nav');
+		nav.classList.remove('bounce');
+		nav.classList.remove('animated');
 
-		if ($($('form<?=$uniqid?>').querySelector('#<?=$fin?>')).value == '') $($('form<?=$uniqid?>').querySelector('#<?=$fin?>')).value = $($('form<?=$uniqid?>').querySelector('#<?=$deb?>')).value;
-		$('form<?= $uniqid ?>').select('#refresh_nav_btn').first().setAttribute('vars', Form.serialize($('form<?=$uniqid?>')));
+		var fin = nd_in('form<?=$uniqid?>', '#<?=$fin?>');
+		if (fin.value == '') fin.value = nd_in('form<?=$uniqid?>', '#<?=$deb?>').value;
+		nd_in('form<?= $uniqid ?>', '#refresh_nav_btn').setAttribute('vars', Form.serialize(nd_el('form<?=$uniqid?>')));
 
-		$('form<?= $uniqid ?>').select('#refresh_nav').first().addClassName('animated bounce');
+		nav.classList.add('animated', 'bounce');
 	})
 </script>
