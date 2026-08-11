@@ -21,7 +21,7 @@
 	$arrProduit = $APP_PR->query_one(array('idproduit' => (int)$idproduit));
 ?>
 <div class="titre_entete">
-	<button onclick="$('div_produit_liste_devis').toggleContent();return false;"><?= idioma('Annuler') ?></button>
+	<button onclick="dcm_el('div_produit_liste_devis').toggleContent();return false;"><?= idioma('Annuler') ?></button>
 	<?= $idproduit ?>
 	&nbsp;|&nbsp;
 	<?= $arrProduit['nomProduit'] ?>
@@ -106,23 +106,52 @@
 </div>
 <div id="devis_spy"></div>
 <script>
+	/*
+	 * Modified: 2026-08-11 — migrated off the PrototypeJS compatibility shims
+	 * ($, new Element, .update, .show, .hide) to native DOM, with file-local
+	 * `dcm_` helpers. toggleContent is not a shim call: engine/methods.js puts
+	 * it on HTMLElement.prototype.
+	 */
+	function dcm_el(ref) {
+		return typeof ref === 'string' ? document.getElementById(ref) : ref;
+	}
+
+	function dcm_show(node) { if (node) node.style.display = ''; return node; }
+	function dcm_hide(node) { if (node) node.style.display = 'none'; return node; }
+
+	/**
+	 * Prototype's `new Element(tag, attributes)`. `className` and `style` are
+	 * attribute *aliases* there, not properties, so they are written through
+	 * setAttribute like the rest — 'className' mapping to the class attribute.
+	 */
+	function dcm_create(tag, attributes) {
+		var node = document.createElement(tag);
+		for (var name in attributes) {
+			if (!Object.prototype.hasOwnProperty.call(attributes, name)) continue;
+			node.setAttribute(name === 'className' ? 'class' : name, attributes[name]);
+		}
+		return node;
+	}
+
 	monitor_enf = function (val) {
-		$('elem_enf').update("");
+		var zone = dcm_el('elem_enf');
+		zone.innerHTML = "";
 		if (val > 0) {
-			enf = new Element('input', {type: 'checkbox', value: '1', name: 'partageCabineDevis', 'checked': 'checked'});
-			ccenf = new Element('span', {className: 'margin inline borderl', 'style': 'vertical-align:middle;'});
-			ccenf.update('&nbsp;Chambre partagée&nbsp;')
-			$('elem_enf').appendChild(enf)
-			$('elem_enf').show().appendChild(ccenf)
+			var enf = dcm_create('input', {type: 'checkbox', value: '1', name: 'partageCabineDevis', 'checked': 'checked'});
+			var ccenf = dcm_create('span', {className: 'margin inline borderl', 'style': 'vertical-align:middle;'});
+			ccenf.innerHTML = '&nbsp;Chambre partagée&nbsp;'
+			zone.appendChild(enf)
+			dcm_show(zone).appendChild(ccenf)
 		} else {
-			$('elem_enf').hide().update()
+			// `.hide().update()` — update with no argument empties the node.
+			dcm_hide(zone).innerHTML = ''
 		}
 	}
 	reloadTarif = function (id) {
 		reloadModule('app/app_custom/devis/devis_create_cabine', '*', 'idproduit=<?=$idproduit?>&idproduit_tarif=' + id)
 	}
-	//reloadTarif($('idproduit_tarif').value);
-	monitor_enf($('nbreEnfantDevis').value);
+	//reloadTarif(dcm_el('idproduit_tarif').value);
+	monitor_enf(dcm_el('nbreEnfantDevis').value);
 </script>
 <style>
 	.demi {

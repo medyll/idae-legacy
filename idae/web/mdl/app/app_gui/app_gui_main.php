@@ -23,22 +23,73 @@
 	$app_cache_mode_on  = ($app_cache_mode == 'on') ? 'none' : '';
 	$app_cache_mode_off = ($app_cache_mode == 'on') ? '' : 'none';
 ?>
+<script>
+	/*
+	 * Modified: 2026-08-11 — migrated off the PrototypeJS compatibility shims
+	 * ($, .on, .show, .hide, .toggle) to native DOM, with file-local `gm_`
+	 * helpers. unToggleContent is not a shim call: engine/methods.js installs
+	 * it on HTMLElement.prototype. $(this).serialize() in the search form stays
+	 * — shim-form.js is the shim that keeps living.
+	 *
+	 * Defined in its own block near the top of the file because the onclick
+	 * attributes below are parsed before the main script at the bottom; the
+	 * handlers only run on click, but keeping the definition first avoids
+	 * depending on that.
+	 */
+	function gm_el(ref) {
+		return typeof ref === 'string' ? document.getElementById(ref) : ref;
+	}
+
+	function gm_show(node) { if (node) node.style.display = ''; return node; }
+	function gm_hide(node) { if (node) node.style.display = 'none'; return node; }
+
+	/** Reads the *computed* display: these panes start hidden via a style attribute. */
+	function gm_toggle(node) {
+		if (!node) return node;
+		var hidden = window.getComputedStyle(node).display === 'none';
+		node.style.display = hidden ? '' : 'none';
+		return node;
+	}
+
+	/**
+	 * Prototype's Element#on. With a selector it delegates, calling the handler
+	 * as (event, matchedElement); without one it is a plain listener.
+	 */
+	function gm_on(root, eventName, selectorOrHandler, maybeHandler) {
+		if (!root) return;
+		if (maybeHandler === undefined) {
+			root.addEventListener(eventName, selectorOrHandler);
+			return;
+		}
+		var selector = selectorOrHandler, handler = maybeHandler;
+		root.addEventListener(eventName, function (event) {
+			var target = event.target;
+			while (target && target !== root) {
+				if (target.nodeType === 1 && target.matches(selector)) {
+					return handler(event, target);
+				}
+				target = target.parentNode;
+			}
+		}, false);
+	}
+</script>
+
 <div class="flex_v" id="div_app_gui_main">
 	<div class="taskBar  flex_h flex_align_middle gradb" style="position:relative;z-index:0;">
 		<div class="applink toggler toggler_visible" none>
-			<a style="display:<?= $dsp_menu_hide ?>" class="autoToggle" onclick="$('gui_menu').hide();save_settings('gui_menu_visible','none')"><i class="fa fa-caret-left"></i></a>
-			<a style="display:<?= $dsp_menu_show ?>" class="autoToggle" onclick="$('gui_menu').show();save_settings('gui_menu_visible','')"><i class="fa fa-caret-right"></i></a>
+			<a style="display:<?= $dsp_menu_hide ?>" class="autoToggle" onclick="gm_hide(gm_el('gui_menu'));save_settings('gui_menu_visible','none')"><i class="fa fa-caret-left"></i></a>
+			<a style="display:<?= $dsp_menu_show ?>" class="autoToggle" onclick="gm_show(gm_el('gui_menu'));save_settings('gui_menu_visible','')"><i class="fa fa-caret-right"></i></a>
 		</div>
 		<div class="applink toggler toggler_visible">
-			<a data-setting="gui_menu_visible" data-setting-value="none" data-setting-mode="display" data-setting-method="click" data-setting-apply="true" class="autoToggle" onclick="$('gui_menu').hide();" style="display:none;"><i
+			<a data-setting="gui_menu_visible" data-setting-value="none" data-setting-mode="display" data-setting-method="click" data-setting-apply="true" class="autoToggle" onclick="gm_hide(gm_el('gui_menu'));" style="display:none;"><i
 					class="fa fa-caret-left"></i>
 			</a>
-			<a data-setting="gui_menu_visible" data-setting-value="auto" data-setting-mode="display" data-setting-method="click" data-setting-apply="true" class="autoToggle" onclick="$('gui_menu').show();" style="display:none;"><i
+			<a data-setting="gui_menu_visible" data-setting-value="auto" data-setting-mode="display" data-setting-method="click" data-setting-apply="true" class="autoToggle" onclick="gm_show(gm_el('gui_menu'));" style="display:none;"><i
 					class="fa fa-caret-right"></i>
 			</a>
 		</div>
 		<div class="applink">
-			<a onclick="$('gui_pane').toggle()"><i class="ms-Icon ms-Icon--waffle"></i></a>
+			<a onclick="gm_toggle(gm_el('gui_pane'))"><i class="ms-Icon ms-Icon--waffle"></i></a>
 		</div>
 		<div id="taskBar" class="flex_main hide_gui_pane" style="width:100%;"></div>
 		<div class="applink" data-count_trigger="hide" style="position:relative;">
@@ -86,7 +137,7 @@
 		<!--<div id="gui_menu" data-setting="gui_menu_visible" data-setting-default-value="none" data-setting-mode="display" data-setting-apply="true" class="gradb frmCol1 flex_v" style="display:none">-->
 		<div id="gui_menu" class="gradb frmCol1 flex_v" style="display:none">
 			<div class="padding ededed borderb aligncenter">
-				<form onsubmit="main_item_search_gui.load_data($(this).serialize());$('for_patolon_bis').show();return false;">
+				<form onsubmit="main_item_search_gui.load_data($(this).serialize());gm_show(gm_el('for_patolon_bis'));return false;">
 					<button type="submit" style="position:absolute;right: 0.5em; z-index: 10;border: none;background-color: transparent;">
 						<i class="fa fa-search"></i></button>
 					<input placeholder="Recherche" name="search" style="position: relative;margin-right:0px;z-index:1;width:100%;line-height:2" value="" type="text" class=""/>
@@ -98,7 +149,7 @@
 			</div>
 		</div>
 		<div id="for_patolon_bis" class="flex_v frmCol1 blanc shadowbox " style="display:none;">
-			<div class="padding applink applinkblock alignright" onclick="$('for_patolon_bis').unToggleContent();">
+			<div class="padding applink applinkblock alignright" onclick="gm_el('for_patolon_bis').unToggleContent();">
 				<a><i class="fa fa-times"></i><?= idioma('fermer') ?></a>
 			</div>
 			<div class="flex_main" id="patolaon_bis" style="overflow:auto;"></div>
@@ -107,7 +158,7 @@
 			</script>
 		</div>
 		<div class="flex_v flex_main" style="height:auto;width:100%;">
-			<div class="relative flex_main" onclick="$('gui_pane').hide()" style="width:100%;height:100%;z-index:0;overflow:hidden">
+			<div class="relative flex_main" onclick="gm_hide(gm_el('gui_pane'))" style="width:100%;height:100%;z-index:0;overflow:hidden">
 				<div class="relative" act_defer mdl="app/app_gui/app_gui_desktop" id="desktop" style="width:100%;height:100%;z-index:0;overflow:hidden"></div>
 				<div class="absolute" id="mainApp" style="top:0;height:100%;display:none;width:100%;overflow:hidden;z-index:1;"></div>
 			</div>
@@ -142,16 +193,16 @@
 				}
 			</style>
 			<script>
-				// new myddeAttach($('upload_app_gui_main'), {form: 'form_upload_app_gui_main',show_hide:true, priority:false, autoSubmit: true});
+				// new myddeAttach(gm_el('upload_app_gui_main'), {form: 'form_upload_app_gui_main',show_hide:true, priority:false, autoSubmit: true});
 			</script>
 		<?php endif; ?>
 	</div>
 <?php } ?>
 <script>
-	window.JSGUI = new appGui ($ ('mainApp'));
+	window.JSGUI = new appGui (gm_el ('mainApp'));
 	localStorage.setItem ('cache_mode', 'off');
-	$ ('body').on ('click', '.hide_gui_pane', function (event, node) {
-		$ ('gui_pane').hide ();
+	gm_on (document.body, 'click', '.hide_gui_pane', function (event, node) {
+		gm_hide (gm_el ('gui_pane'));
 	})
 	/*setTimeout(function () {
 	 load_table_in_zone('table=agent_tuile&sortBy=codeAgent_tuile&vars[idagent]=<?=$_SESSION['idagent']?>', 'zone_agent_tuile');
