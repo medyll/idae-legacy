@@ -573,6 +573,20 @@ Portages notables : `String#gsub(' ', '_')` (motif chaîne → remplace toutes l
 
 Nouveau `appgui.spec.ts` : vérifie que l'instance `window.JSGUI` du bureau existe, est bien liée à `#mainApp` et que son `cleanWhitespace()` a bien retiré les nœuds texte vides ; puis qu'`add()` construit réellement le wrapper `.inArea`, la zone interne (`frm` + titre slugifié) et le bouton de barre des tâches (`ong` + titre), correctement parentés et marqués `active`. Garde `IDAE_SHIM_WARN`. **3/3 vert au premier essai**, plus `smoke` et `window-gui` revérifiés propres — **8/8**.
 
+## Migration d'`app/app_contextual.js` + suppression de `resize.js` et `cookie.js` (2026-08-11)
+
+**`librairie/resize.js` (15 occurrences) — supprimé.** Bibliothèque tierce (Thomas Fakes 2005, dérivée de script.aculo.us — licence MIT cette fois, pas de problème d'œuvre dérivée comme pour `lightview.js`), une seule classe `Resizeable`. Ses deux seules instanciations sont **commentées** (`app_insertionQ.js:333`, `app_planning_tache.php:90`). Chargée à chaque boot pour rien. Retirée des deux listes.
+
+**`librairie/cookie.js` (12 occurrences) — supprimé.** Jamais chargé : absent des deux loaders, qui utilisent d'autres bibliothèques de cookies (`vendor/js.cookie.js` et `jsoncookie.js` — attention au faux positif, `Cookies` au pluriel ≠ ce `Cookie`). Zéro usage de `Cookie.*` dans tout le dépôt.
+
+**`app/app_contextual.js` (11 occurrences) — migré.** Menu contextuel au clic droit, chargé par `main_bag.js:56` et **auto-instancié** en dernière ligne (`new app_context()`), délégué sur `[data-contextual]`.
+
+Deux points à noter :
+- **Enveloppé dans une IIFE**, contrairement à l'original. Ses helpers seraient sinon entrés en collision au scope global avec ceux d'`app_chat.js`, autre fichier global de la même page (préfixe `ac_` déjà pris) — d'où le préfixe `ctx_` et l'IIFE.
+- **Pas la fuite d'`app_menu.js`** : cette classe stocke son handler une bonne fois dans `this._clickHandler`, donc `addEventListener`/`removeEventListener` reçoivent le même objet fonction et l'écouteur est réellement retiré. Contraste utile avec `app_menu.js`, qui re-`bind()` des deux côtés et n'enlève jamais rien.
+
+Nouveau `app-contextual.spec.ts` : vérifie la construction de `#app_contextual_menu` au boot (enfant de `body`, classe, `data-cache`, masqué) ; puis qu'un clic droit marque le nœud (`right_clicked`), appelle `socketModule` avec le bon module et les bonnes vars, affiche et positionne le menu — et qu'un clic extérieur le referme et démarque. Un test dédié vérifie aussi que `Resizeable` et `Cookie` ont bien disparu du global. Garde `IDAE_SHIM_WARN`. **4/4 vert au premier essai**, plus `smoke` — **5/5**.
+
 ## Note de méthode — redémarrer Docker entre deux fichiers est inutile (2026-08-10)
 
 Pendant une bonne partie de cette session j'ai relancé `docker restart idae-socket idae-legacy` après chaque fichier migré, avant de lancer la suite. Inutile, vérifié :

@@ -111,7 +111,6 @@ var require_trame = {
 		'javascript/librairie/observers.js',
 		'javascript/librairie/appGui.js',
 		'javascript/librairie/autoToggle.js',
-		'javascript/librairie/resize.js',
 		'javascript/librairie/myddeNotifier.js',
 		'javascript/librairie/cropper.js',
 		'javascript/librairie/resizeGui.js',
