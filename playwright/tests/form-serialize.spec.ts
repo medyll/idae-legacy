@@ -47,7 +47,7 @@ async function serializeProbe(page: any) {
         // which is the whole reason the static exists separately.
         subset: w.Form.serializeElements($f.select('input[name=a], input[name=b]')),
         // A single field keeps Prototype's Field#serialize meaning, not the
-        // form one — the shim's addMethods is untyped, so shim-ajax.js
+        // form one — the shim's addMethods is untyped, so shim-form.js
         // dispatches on tagName to preserve both.
         fieldSerialize: w.$(f.querySelector('input[name=b]')).serialize(),
       };

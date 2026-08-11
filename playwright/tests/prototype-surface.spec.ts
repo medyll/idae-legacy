@@ -27,9 +27,20 @@ const GLOBAL_FUNCTIONS = ['$', '$$', '$A', '$H', '$w', '$F', '$R'];
 // app still depends on, not a museum of what Prototype once offered — an
 // API this file asserted forever after its last caller was gone would have
 // blocked deleting the shim that provided it.
-const GLOBAL_OBJECTS = ['Prototype', 'Ajax', 'Event', 'Element', 'Position', 'Insertion', 'Try'];
+//
+// 'Ajax' dropped 2026-08-11 for the same reason, when shim-ajax.js became
+// shim-form.js: no `new Ajax.*` survives outside vendor/ and flotr/'s own
+// bundled Prototype 1.6, and the last reference — the Ajax.Responders pair in
+// engine/initApp.js — was unreachable code, since Responders only fire for
+// requests created through Ajax.Request/Ajax.Updater. 'Form' takes its place
+// here: that half of the old shim stays, held alive by 52 inline
+// onclick/onsubmit attributes in the PHP templates.
+const GLOBAL_OBJECTS = ['Prototype', 'Form', 'Event', 'Element', 'Position', 'Insertion', 'Try'];
 
-const CONSTRUCTORS = ['Class', 'Template', 'Hash', 'ObjectRange', 'PeriodicalExecuter', 'Draggable', 'Draggables'];
+// 'PeriodicalExecuter' dropped 2026-08-11 with the Ajax namespace it shipped
+// alongside. It never had a caller anywhere in the app — asserting it kept a
+// class alive that nothing had ever constructed.
+const CONSTRUCTORS = ['Class', 'Template', 'Hash', 'ObjectRange', 'Draggable', 'Draggables'];
 
 /**
  * Methods the app calls on an element, ordered by call count.
@@ -66,9 +77,12 @@ const NUMBER_METHODS = ['toPaddedString', 'times', 'succ'];
 const NAMESPACED = [
   ['Class', 'create'],
   ['Object', 'extend'],
-  ['Ajax', 'Request'],
-  ['Ajax', 'Updater'],
-  ['Ajax', 'Responders'],
+  // Form.serialize / Form.serializeElements replace the three Ajax.* entries
+  // that sat here until 2026-08-11. They are the two the templates actually
+  // call, and both were missing at runtime for months without this spec
+  // noticing — see form-serialize.spec.ts for the behavioural coverage.
+  ['Form', 'serialize'],
+  ['Form', 'serializeElements'],
   ['Event', 'observe'],
   ['Event', 'stop'],
   ['Event', 'element'],

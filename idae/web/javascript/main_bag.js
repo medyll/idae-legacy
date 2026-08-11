@@ -17,7 +17,7 @@ var require_trame = {
 		'javascript/vendor/idae-be-shim/shim-enumerable.js',
 		'javascript/vendor/idae-be-shim/shim-element.js',
 		'javascript/vendor/idae-be-shim/shim-event.js',
-		'javascript/vendor/idae-be-shim/shim-ajax.js',
+		'javascript/vendor/idae-be-shim/shim-form.js',
 		'javascript/vendor/idae-be-shim/shim-draggable.js',
 	],
 	require_insertionQ : ['javascript/app/app.js',/*'javascript/app/app_mutateobserve.js',*/'javascript/vendor/insertionQ.js', 'javascript/app/app_insertionQ.js'],

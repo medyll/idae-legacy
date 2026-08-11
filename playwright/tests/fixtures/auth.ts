@@ -7,7 +7,6 @@
  * before `waitForAppReady()` resolves.
  */
 import type { Page } from '@playwright/test';
-import { installShimPreview } from './shim-preview';
 
 /**
  * 127.0.0.1, not "localhost": on Windows "localhost" resolves to ::1 first,
@@ -73,11 +72,14 @@ export async function waitForAppReady(page: Page, timeout = 20_000): Promise<voi
 
 /** Navigates to the app root, logs in if needed, and waits for the boot to finish. */
 export async function openApp(page: Page): Promise<void> {
-  // SHIM_PREVIEW=1 swaps Prototype/Scriptaculous for the idae-be bundle +
-  // shims at the network layer (see fixtures/shim-preview.ts).
-  if (process.env.SHIM_PREVIEW === '1') {
-    await installShimPreview(page);
-  }
+  // A SHIM_PREVIEW=1 branch used to sit here, fulfilling requests for
+  // prototype-1.7.3.js with the idae-be bundle + shims so the suite could be
+  // run against the Phase 4 swap before main_bag.js committed to it. Removed
+  // 2026-08-11: main_bag.js has loaded the shims directly since Phase 4, so
+  // the preview had nothing left to preview, and it had rotted anyway — it
+  // still listed the long-deleted shim-effects.js, never listed
+  // shim-draggable.js, and intercepted a prototype-1.7.3.js that no longer
+  // exists in the repo.
   await page.goto(BASE + '/', { waitUntil: 'domcontentloaded' });
 
   // Either the stored session already holds and the desktop appears, or the
