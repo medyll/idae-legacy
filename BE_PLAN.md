@@ -616,6 +616,25 @@ Nouveau `app-live-data.spec.ts` : rafraîchissement de champ + `dom:data_reload`
 
 Note d'environnement : la sonde `global-setup.ts` a signalé Apache/phpBridge coincé en cours de route (`did not answer within 10s`) — c'est le cas où le redémarrage des conteneurs est légitime, contrairement au restart systématique abandonné plus bas.
 
+## Échec instructif — l'inventaire runtime global n'est pas mesurable avec `IDAE_SHIM_WARN` (2026-08-11)
+
+Objectif : après le ratissage de la file par taille, mesurer **ce qui appelle encore réellement les shims**, pour savoir quels `shim-*.js` sont supprimables. Quatre tentatives, aucune exploitable. Rien de commité côté code : les specs expérimentales et le rapport produit ont été supprimés plutôt que livrés. Ce qu'on en retient vaut le détour, parce que ça invalide l'approche et pas seulement l'implémentation.
+
+**Ce qui a été essayé, et pourquoi ça casse.**
+
+1. Armer `IDAE_SHIM_WARN` via `addInitScript` (donc *avant* le chargement des shims, pour couvrir le boot) + collecte par `page.on('console')`. Chaque appel shimé lève une `Error` pour capturer une pile, et chaque message traverse CDP un par un. **13+ minutes sans produire de rapport**, deux fois.
+2. Agrégation *dans la page* (override de `console.warn`, que `shimWarn` résout à l'appel) au lieu de CDP, boot non instrumenté. Terminé en 26 s — mais rapport **tout à zéro**.
+3. Ce zéro était faux. Un **témoin positif** ajouté au run (appeler délibérément `hasClassName`/`$$`/`Array#include` après l'armement) a lui aussi compté 0 : la mesure ne fonctionnait pas, et sans ce témoin j'aurais publié « plus aucun appel shim sur liste et calendrier », ce qui était faux.
+4. Le même témoin monté en spec autonome, avec collecte CDP non bornée, a fait **tomber Node en OOM à 4 Go** (`FATAL ERROR: Ineffective mark-compacts near heap limit`) en 134 s, puis, une fois borné, a cassé le tracing Playwright (`Cannot read properties of undefined (reading 'traceName')`).
+
+**Le diagnostic.** L'instrument fire — abondamment, c'est l'OOM qui le prouve. Mais une fois armé sur un bureau vivant, le flot est **continu** : les timers de fond, les handlers socket (`app_keepon`, `app_chat`), les observers `insertionQ` continuent d'appeler des méthodes shimées indéfiniment. `installWarnWraps` enveloppe aussi `Function.prototype` (donc chaque `.bind()`), `Array.prototype` et `String.prototype`. Armer, c'est donc dégrader la page de plusieurs ordres de grandeur en permanence, pas prendre une mesure ponctuelle.
+
+**Conséquence rassurante pour tout le travail précédent** : les gardes par fichier ne sont *pas* vides. Elles filtrent par fichier appelant et n'affirment que « mon fichier n'est pas dans le flot » ; elles survivent uniquement parce que leur fenêtre d'observation fait ~300–500 ms. C'est aussi pour ça qu'un inventaire global serait de toute façon noyé sous le bruit de fond.
+
+**Ce qu'il faudrait pour y arriver** (non fait) : un compteur bien moins cher — incrémenter `family.name` dans un objet **sans** capturer de pile (le `throw`/`e.stack` est le coût dominant), et n'échantillonner la pile que sur les N premiers appels de chaque clé. Sans attribution par fichier, ça ne dit pas *qui* appelle ; avec échantillonnage, ça le dit à coût borné. À reprendre si la suppression des `shim-*.js` redevient prioritaire.
+
+**Statut de la question d'origine, honnêtement** : toujours ouverte. On ne sait pas quels `shim-*.js` sont supprimables. Ce qu'on sait : les 15 fichiers migrés cette session ont chacun leur garde verte, et `shim-effects` a bien été supprimé le 09/08 par la voie statique (grep + vérification des appelants), qui reste la méthode praticable.
+
 ## Note de méthode — redémarrer Docker entre deux fichiers est inutile (2026-08-10)
 
 Pendant une bonne partie de cette session j'ai relancé `docker restart idae-socket idae-legacy` après chaque fichier migré, avant de lancer la suite. Inutile, vérifié :
