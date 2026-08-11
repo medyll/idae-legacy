@@ -37,7 +37,7 @@
 
 	//
 ?>
-<div onclick="Event.stop(event);return false;" ondblclick="<?= fonctionsJs::app_fiche($table, $table_value) ?>" class="blanc alignleft" main_auto_tree data-contextual="table=<?= $table ?>&table_value=<?= $table_value ?>" data-table="<?= $table ?>"
+<div onclick="event.preventDefault();event.stopPropagation();return false;" ondblclick="<?= fonctionsJs::app_fiche($table, $table_value) ?>" class="blanc alignleft" main_auto_tree data-contextual="table=<?= $table ?>&table_value=<?= $table_value ?>" data-table="<?= $table ?>"
      data-table_value="<?= $table_value ?>" style="height:100%;overflow:hidden;">
 	<div class="flex_h flex_main     cursor relative alignleft">
 		<div class="aligncenter padding flex_v  " style="height:100%;width:46px;">

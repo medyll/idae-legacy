@@ -59,7 +59,7 @@
 </style>
 <script>
 	addUtilisateurAgent_note = function () {
-		$('div_choix_user<?=$time?>').show();
-		$('div_choix_user<?=$time?>').loadModule('app/app_search/search_item_check', 'table=agent')
+		document.getElementById('div_choix_user<?=$time?>').style.display='';
+		document.getElementById('div_choix_user<?=$time?>').loadModule('app/app_search/search_item_check', 'table=agent')
 	}
 </script>

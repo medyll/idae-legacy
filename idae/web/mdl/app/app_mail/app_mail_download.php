@@ -148,6 +148,6 @@ foreach($list as $num=>$msg):
 endforeach;
 ?>  
 <script>
-$('count_mail').update('<?=$count_mail?>')
+document.getElementById('count_mail').innerHTML='<?=$count_mail?>'
 reloadModule("app/app_mail/app_mail_liste","*");
 </script>

@@ -43,7 +43,7 @@
 			<?= idioma('liste') ?> <?= $APP->nomAppscheme ?>
 		</div>
 		<div class="  flex_h flex_margin flex_align_top">
-			<div onclick="this.next().toggle();" class="toggler toggler_visible">
+			<div onclick="idae_toggle(this.nextElementSibling);" class="toggler toggler_visible">
 				<a class="autoToggle"><i class="fa fa-check textgrisfonce"></i></a>
 				<a class="autoToggle" style="display: none;"><i class="fa fa-check-square"></i></a>
 			</div>

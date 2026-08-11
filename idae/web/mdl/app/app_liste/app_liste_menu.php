@@ -137,7 +137,7 @@
 			</div>
 		</div>
 		<div class="borderl flex_h flex_margin flex_align_top">
-			<div onclick="this.next().toggle();" class="toggler toggler_visible">
+			<div onclick="idae_toggle(this.nextElementSibling);" class="toggler toggler_visible">
 				<a class="autoToggle"><i class="fa fa-check textgrisfonce"></i></a>
 				<a class="autoToggle" style="display: none;"><i class="fa fa-check-square"></i></a>
 			</div>
@@ -232,7 +232,7 @@
 				<input class="noborder" placeholder="Rechercher" expl_search_button="expl_search_button" style="width:120px;" type="text">
 			</div>
 			<div class="ellipsis">
-				<a class="flex_h flex_align_middle" onclick="$('search_more_<?= $table ?>').toggleContent();"><i class="fa fa-search-plus textvert"></i> plus ..</a>
+				<a class="flex_h flex_align_middle" onclick="document.getElementById('search_more_<?= $table ?>').toggleContent();"><i class="fa fa-search-plus textvert"></i> plus ..</a>
 			</div>
 		</div>
 		<div><?= skelMdl::cf_module('app/app_scheme/app_scheme_menu_icon', $_POST) ?></div>
@@ -240,7 +240,7 @@
 	<div class="flex_h" id="search_more_<?= $table ?>" style="display:none;">
 		<div class="flex_main" style="z-index:500;" data-cache="true" act_defer mdl="app/app_prod/app_prod_liste_menu_search" vars="<?= http_build_query($_POST) ?>"></div>
 		<div class="border4 ededed aligncenter">
-			<a onclick="$('search_more_<?= $table ?>').unToggleContent();"><i class="fa fa-times textrouge"></i></a>
+			<a onclick="document.getElementById('search_more_<?= $table ?>').unToggleContent();"><i class="fa fa-times textrouge"></i></a>
 		</div>
 	</div>
 </div>

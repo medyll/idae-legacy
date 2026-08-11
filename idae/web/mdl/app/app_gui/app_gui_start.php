@@ -44,7 +44,7 @@
 							<div class="padding color_fond_noir  alignright  flex_h  ">
 								<?= skelMdl::cf_module('app/app_gui/app_gui_tile_user', ['code' => 'app_search', 'moduleTag' => 'div', 'css' => 'color_fond_noir padding', 'text' => 'étendre']) ?>
 								<div></div>
-								<a class="flex_main padding color_fond_noir" onclick="$('main_item_search_zone').unToggleContent();">
+								<a class="flex_main padding color_fond_noir" onclick="document.getElementById('main_item_search_zone').unToggleContent();">
 									<i class="fa fa-times textrouge"></i><?= idioma('fermer') ?></a>
 							</div>
 							<div class="blanc flex_main flex_h flex_wrap flex_align_top" style="overflow:hidden;">

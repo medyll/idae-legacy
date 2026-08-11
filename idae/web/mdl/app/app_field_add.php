@@ -67,7 +67,7 @@
 			</tr>
 		</table>
 		<script>
-			$('loaded_<?= $add_field ?>').fire('dom:act_click')
+			idae_fire(document.getElementById('loaded_<?= $add_field ?>'),'dom:act_click')
 		</script>
 		<?php
 	endif;
