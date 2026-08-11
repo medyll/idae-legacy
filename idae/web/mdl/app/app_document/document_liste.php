@@ -24,11 +24,11 @@ $rs         = $fs->find($vars)->sort(array('uploadDate'=>-1));
           </a> </div>
       </div>
       <div class="cell">
-        <div class="barre_entete applink disinput" > <a onClick="ajaxMdl('app_document/app_document_update_multi','<?=idioma('Supprimer')?>',Form.serialize($('tfile<?=$uniqid?>'))+'&F_action=suppr');">
+        <div class="barre_entete applink disinput" > <a onClick="ajaxMdl('app_document/app_document_update_multi','<?=idioma('Supprimer')?>',Form.serialize(dl_el('tfile<?=$uniqid?>'))+'&F_action=suppr');">
           <i class="fa fa-times"></i>
           &nbsp;
           <?=idioma('supprimer')?>
-          </a> <a onClick="ajaxMdl('app_document/app_document_update_multi','<?=idioma('Rapprocher')?>',Form.serialize($('tfile<?=$uniqid?>'))+'&F_action=setmetadata');"> &nbsp;
+          </a> <a onClick="ajaxMdl('app_document/app_document_update_multi','<?=idioma('Rapprocher')?>',Form.serialize(dl_el('tfile<?=$uniqid?>'))+'&F_action=setmetadata');"> &nbsp;
           <?=idioma('rapprocher')?>
           </a> <a>
           <i class="fa fa-exchange"></i>
@@ -82,37 +82,85 @@ $rs         = $fs->find($vars)->sort(array('uploadDate'=>-1));
 
 
 <script>
+/*
+ * Modified: 2026-08-11 — migrated off the PrototypeJS compatibility shims
+ * ($, .on, .select, .readAttribute, .invoke, .fire) to native DOM, with
+ * file-local `dl_` helpers. Form.serialize is deliberately kept: it is the
+ * one shim API that stays (shim-form.js).
+ */
+function dl_el(ref) {
+    return typeof ref === 'string' ? document.getElementById(ref) : ref;
+}
+
+/** Prototype's Element#select, as a real Array. */
+function dl_select(ref, selector) {
+    var node = dl_el(ref);
+    if (!node) return [];
+    return Array.prototype.slice.call(node.querySelectorAll(selector));
+}
+
+/** Prototype's Element#fire: a bubbling, cancelable CustomEvent carrying `memo`. */
+function dl_fire(node, eventName, memo) {
+    if (!node) return null;
+    var event = new CustomEvent(eventName, {bubbles: true, cancelable: true});
+    event.memo = memo || {};
+    node.dispatchEvent(event);
+    return event;
+}
+
+/**
+ * Prototype's Element#on. With a selector it delegates, calling the handler
+ * as (event, matchedElement); without one it is a plain listener.
+ */
+function dl_on(root, eventName, selectorOrHandler, maybeHandler) {
+    if (!root) return;
+    if (maybeHandler === undefined) {
+        root.addEventListener(eventName, selectorOrHandler);
+        return;
+    }
+    var selector = selectorOrHandler, handler = maybeHandler;
+    root.addEventListener(eventName, function (event) {
+        var target = event.target;
+        while (target && target !== root) {
+            if (target.nodeType === 1 && target.matches(selector)) {
+                return handler(event, target);
+            }
+            target = target.parentNode;
+        }
+    }, false);
+}
+
 multiDoc =function(event,node){
-    filename    = $(node).readAttribute('deleteFile'); 
-    base        = $(node).readAttribute('base'); 
-    collection  = $(node).readAttribute('collection'); 
+    filename    = node.getAttribute('deleteFile');
+    base        = node.getAttribute('base');
+    collection  = node.getAttribute('collection');
     ajaxMdl('app_document/app_document_delete','','base='+base+'&collection='+collection+'&_id='+filename)
     } ;
-$('tfile<?=$uniqid?>').on('click','a[deleteFile]',function(event,node){
-    filename    = $(node).readAttribute('deleteFile'); 
-    base        = $(node).readAttribute('base'); 
-    collection  = $(node).readAttribute('collection'); 
+dl_on(dl_el('tfile<?=$uniqid?>'),'click','a[deleteFile]',function(event,node){
+    filename    = node.getAttribute('deleteFile');
+    base        = node.getAttribute('base');
+    collection  = node.getAttribute('collection');
     ajaxMdl('app_document/app_document_delete','','base='+base+'&collection='+collection+'&_id='+filename)
-    });  
-$('tfile<?=$uniqid?>').on('click','[mdl=trfilename]',function(event,node){  
-   
-    uid    = $(node).readAttribute('value'); 
-    base        = $(node).readAttribute('base'); 
-    collection  = $(node).readAttribute('collection');   
-    //   $('act_file_viewer').loadModule('app_document/app_document'_detail','base='+base+'&collection='+collection+'&uid='+uid);
-   
-}.bind(this))
-</script> 
-<script> 
+    });
+dl_on(dl_el('tfile<?=$uniqid?>'),'click','[mdl=trfilename]',function(event,node){
+
+    uid    = node.getAttribute('value');
+    base        = node.getAttribute('base');
+    collection  = node.getAttribute('collection');
+    //   dl_el('act_file_viewer').loadModule('app_document/app_document'_detail','base='+base+'&collection='+collection+'&uid='+uid);
+
+})
+</script>
+<script>
 
 pleaseTag=function(tag){
-    vars = Form.serialize($('tfile<?=$uniqid?>'));
+    vars = Form.serialize(dl_el('tfile<?=$uniqid?>'));
     // ajaxValidation('tagDocument','mdl/document/','<?=http_build_query($_POST)?>&'+vars+'&tag='+tag);
     }
 inverseTag=function(){
-    unch    =   $('tfile<?=$uniqid?>').select('[type=checkbox]:not([bugchk])');
-    ch  =   $('tfile<?=$uniqid?>').select('[type=checkbox][bugchk]');
-    unch.invoke('fire','dom:click');
-    ch.invoke('fire','dom:click');
+    unch    =   dl_select('tfile<?=$uniqid?>', '[type=checkbox]:not([bugchk])');
+    ch  =   dl_select('tfile<?=$uniqid?>', '[type=checkbox][bugchk]');
+    unch.forEach(function (node) { dl_fire(node, 'dom:click'); });
+    ch.forEach(function (node) { dl_fire(node, 'dom:click'); });
     }
 </script> 

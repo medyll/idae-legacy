@@ -48,35 +48,113 @@
 	</form>
 </div>
 <script>
-	$('<?=$formSearch?>').on('change', 'input', function (event, node) {
+	/*
+	 * Modified: 2026-08-11 — migrated off the PrototypeJS compatibility shims
+	 * ($, .on, .up, .next, .previousSiblings, .select, .first, .each,
+	 * .readAttribute, .fire) to native DOM, with file-local `pms_` helpers.
+	 *
+	 * Form.serialize / Form.serializeElements are deliberately kept: shim-form.js
+	 * is the shim that stays. serializeElements in particular did not exist as a
+	 * static until 2026-08-11, so the line using it below had been throwing --
+	 * see form-serialize.spec.ts. loadModule() is not a shim call either;
+	 * engine/methods.js installs it on HTMLElement.prototype.
+	 */
+	function pms_el(ref) {
+		return typeof ref === 'string' ? document.getElementById(ref) : ref;
+	}
 
+	/** Prototype's Element#up: nearest ancestor matching `selector`. */
+	function pms_up(node, selector) {
+		var parent = node ? node.parentNode : null;
+		while (parent && parent.nodeType === 1) {
+			if (parent.matches(selector)) return parent;
+			parent = parent.parentNode;
+		}
+		return null;
+	}
+
+	/**
+	 * Prototype's Element#next(selector): scans forward through the following
+	 * siblings and returns the first that matches, not merely the immediate
+	 * one. nextElementSibling alone would stop at the first non-matching node
+	 * and end the while-loop below early.
+	 */
+	function pms_next(node, selector) {
+		var sib = node ? node.nextElementSibling : null;
+		while (sib) {
+			if (sib.matches(selector)) return sib;
+			sib = sib.nextElementSibling;
+		}
+		return null;
+	}
+
+	/** Prototype's Element#previousSiblings: all of them, nearest first. */
+	function pms_previousSiblings(node) {
+		var out = [], sib = node ? node.previousElementSibling : null;
+		while (sib) { out.push(sib); sib = sib.previousElementSibling; }
+		return out;
+	}
+
+	/** Prototype's Element#fire: a bubbling, cancelable CustomEvent carrying `memo`. */
+	function pms_fire(node, eventName, memo) {
+		if (!node) return null;
+		var event = new CustomEvent(eventName, {bubbles: true, cancelable: true});
+		event.memo = memo || {};
+		node.dispatchEvent(event);
+		return event;
+	}
+
+	/**
+	 * Prototype's Element#on. With a selector it delegates, calling the handler
+	 * as (event, matchedElement); without one it is a plain listener.
+	 */
+	function pms_on(root, eventName, selectorOrHandler, maybeHandler) {
+		if (!root) return;
+		if (maybeHandler === undefined) {
+			root.addEventListener(eventName, selectorOrHandler);
+			return;
+		}
+		var selector = selectorOrHandler, handler = maybeHandler;
+		root.addEventListener(eventName, function (event) {
+			var target = event.target;
+			while (target && target !== root) {
+				if (target.nodeType === 1 && target.matches(selector)) {
+					return handler(event, target);
+				}
+				target = target.parentNode;
+			}
+		}, false);
+	}
+
+	pms_on(pms_el('<?=$formSearch?>'), 'change', 'input', function (event, node) {
 
 		var vars = 'n=p';
-		var ac_elem = $(node).up('.cellsearch');
+		var ac_elem = pms_up(node, '.cellsearch');
 		var next_elem = ac_elem;
 		vars = '&' + Form.serialize(ac_elem);
-		vars += '&' + Form.serializeElements($('<?=$formSearch?>').select('.act_int'));
+		vars += '&' + Form.serializeElements(pms_el('<?=$formSearch?>').querySelectorAll('.act_int'));
 
-		ac_elem.previousSiblings().each(function (danode) {
+		pms_previousSiblings(ac_elem).forEach(function (danode) {
 			if (Form.serialize(danode) != '')vars += '&' + Form.serialize(danode);
 
-		}.bind(this))
+		})
 
 
-		if (!$(next_elem).next('.cellsearch')) {
-			vars = Form.serialize($('<?=$formSearch?>'));
+		if (!pms_next(next_elem, '.cellsearch')) {
+			vars = Form.serialize(pms_el('<?=$formSearch?>'));
 			alert('red')
 
 		} else {
-			while ($(next_elem).next('.cellsearch')) {
-				wrkon = $(next_elem).next('.cellsearch');
-				mdl = $(wrkon).select('[mdl]').first().readAttribute('mdl');
-				vars_item = $(wrkon).select('[mdl]').first().readAttribute('item');
+			var wrkon, mdl, vars_item;
+			while (pms_next(next_elem, '.cellsearch')) {
+				wrkon = pms_next(next_elem, '.cellsearch');
+				mdl = wrkon.querySelector('[mdl]').getAttribute('mdl');
+				vars_item = wrkon.querySelector('[mdl]').getAttribute('item');
 
-				next_elem = $(next_elem).next('.cellsearch');
-				$(wrkon).select('[mdl]').first().loadModule(mdl, 'item=' + vars_item + vars);
+				next_elem = pms_next(next_elem, '.cellsearch');
+				wrkon.querySelector('[mdl]').loadModule(mdl, 'item=' + vars_item + vars);
 			}
 		}
-		$('<?=$formSearch?>').fire('dom:act_change')
+		pms_fire(pms_el('<?=$formSearch?>'), 'dom:act_change')
 	})
 </script>
