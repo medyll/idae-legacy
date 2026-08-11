@@ -16,7 +16,7 @@ if(empty($_POST['BIG_SCREEN'])){
 	?>
 <div id="dev<?=$uniqid?>"  ></div>
 	<script>
-		 $('dev<?=$uniqid?>').fire('dom:close')
+		 dv_fire(dv_el('dev<?=$uniqid?>'), 'dom:close')
 		 ajaxInMdl('<?=$path_to_devis?>devis_create','nouveau_devis','BIG_SCREEN=1&<?=http_build_query($_POST)?>',{onglet:'Nouveau devis'});
 	</script>
 	<?php
@@ -46,7 +46,7 @@ if(empty($_POST['BIG_SCREEN'])){
 			<div style="overflow:auto;width:100%;z-index:2000;height:150px;display:none" id="div_devis_app_select" class="blanc absolute applink applinkblock toggler boxshadow"></div>
 			<div class="flex_v flex_main" style="overflow:auto;">
 				<div>
-					<form id="devis_form" name="devis_form" onsubmit="$('div_devis_create_wait').show().loadModule('<?=$path_to_devis?>devis_create_wait',$(this).serialize());return false" action="">
+					<form id="devis_form" name="devis_form" onsubmit="dv_show(dv_el('div_devis_create_wait')).loadModule('<?=$path_to_devis?>devis_create_wait',$(this).serialize());return false" action="">
 						<input type="hidden" name="vars[idclient]" id="tmp_idclient">
 						<input type="hidden" name="vars[iddevis_type]" value="2">
 						<input type="hidden" name="vars[idagent]" value="<?= $_SESSION['idagent'] ?>">
@@ -68,46 +68,100 @@ if(empty($_POST['BIG_SCREEN'])){
 	</div>
 </div>
 <script>
+	/*
+	 * Modified: 2026-08-11 — migrated off the PrototypeJS compatibility shims
+	 * ($, .observe, .on, .fire, .show, .readAttribute, Event.stop) to native
+	 * DOM, with file-local `dv_` helpers.
+	 *
+	 * loadModule / unToggleContent are NOT shim calls and stay: engine/methods.js
+	 * installs both on HTMLElement.prototype. $(this).serialize() in the form
+	 * onsubmit stays too — shim-form.js is the shim that keeps living.
+	 */
+	function dv_el(ref) {
+		return typeof ref === 'string' ? document.getElementById(ref) : ref;
+	}
+
+	/** Returns the node so `dv_show(x).loadModule(...)` keeps Prototype's chaining. */
+	function dv_show(node) { if (node) node.style.display = ''; return node; }
+
+	/** Prototype's Element#fire: a bubbling, cancelable CustomEvent carrying `memo`. */
+	function dv_fire(node, eventName, memo) {
+		if (!node) return null;
+		var event = new CustomEvent(eventName, {bubbles: true, cancelable: true});
+		event.memo = memo || {};
+		node.dispatchEvent(event);
+		return event;
+	}
+
+	/** Prototype's Event.stop: cancel the default and stop the bubble. */
+	function dv_stop(event) {
+		if (!event) return;
+		event.preventDefault();
+		event.stopPropagation();
+	}
+
+	/**
+	 * Prototype's Element#on. With a selector it delegates, calling the handler
+	 * as (event, matchedElement); without one it is a plain listener.
+	 */
+	function dv_on(root, eventName, selectorOrHandler, maybeHandler) {
+		if (!root) return;
+		if (maybeHandler === undefined) {
+			root.addEventListener(eventName, selectorOrHandler);
+			return;
+		}
+		var selector = selectorOrHandler, handler = maybeHandler;
+		root.addEventListener(eventName, function (event) {
+			var target = event.target;
+			while (target && target !== root) {
+				if (target.nodeType === 1 && target.matches(selector)) {
+					return handler(event, target);
+				}
+				target = target.parentNode;
+			}
+		}, false);
+	}
+
 	<?php
 	if(!empty($_POST['idclient']) || !empty($_POST['idproduit']) ){?>
-	$('div_produit_liste_devis').unToggleContent();
-	$('div_devis_create_make').loadModule('<?=$path_to_devis?>devis_create_make', '<?=http_build_query($_POST)?>');
+	dv_el('div_produit_liste_devis').unToggleContent();
+	dv_el('div_devis_create_make').loadModule('<?=$path_to_devis?>devis_create_make', '<?=http_build_query($_POST)?>');
 	<?php }?>
 
-	$('devis_create_zone').observe('dom:act_change', function (event) {
-		idproduit = event.memo.id
-		$('div_produit_liste_devis').unToggleContent();
-		$('div_devis_create_make').loadModule('<?=$path_to_devis?>devis_create_make', 'idproduit=' + idproduit)
-		Event.stop(event)
+	dv_el('devis_create_zone').addEventListener('dom:act_change', function (event) {
+		var idproduit = event.memo.id
+		dv_el('div_produit_liste_devis').unToggleContent();
+		dv_el('div_devis_create_make').loadModule('<?=$path_to_devis?>devis_create_make', 'idproduit=' + idproduit)
+		dv_stop(event)
 		reloadModule('<?=$path_to_devis?>devis_create_wizard', 'wizard_<?=$uniqid?>', 'idproduit=' + idproduit)
-	}.bind(this))
+	})
 
-	/*$('div_devis_search').observe('dom:act_change', function (event) {
-		var form = Event.element(event);
+	/*dv_el('div_devis_search').addEventListener('dom:act_change', function (event) {
+		var form = event.target;
 		vars = form.serialize();
 
-		$('div_devis_app_select').show().loadModule('app/app_liste/app_liste', 'table=produit&' + vars)
+		dv_show(dv_el('div_devis_app_select')).loadModule('app/app_liste/app_liste', 'table=produit&' + vars)
 
-	}.bind(this))*/
+	})*/
 
-	  $('cho_cli<?=$uniqid?>').observe('dom:act_change', function (event) {
-		idclient = event.memo.id;
-		$('tmp_idclient').value = idclient;
+	  dv_el('cho_cli<?=$uniqid?>').addEventListener('dom:act_change', function (event) {
+		var idclient = event.memo.id;
+		dv_el('tmp_idclient').value = idclient;
 		reloadModule('<?=$path_to_devis?>devis_create_wizard', 'wizard_<?=$uniqid?>', 'idclient=' + idclient);
 
-	}.bind(this))
+	})
 
-	$('div_produit_liste_devis').on('click','tr', function (event,node) {
+	dv_on(dv_el('div_produit_liste_devis'), 'click', 'tr', function (event, node) {
 		console.log('click')
-		idproduit = $(node).readAttribute('data-table_value');
-		$('div_devis_create_produit').show().loadModule('<?=$path_to_devis?>devis_create_produit', 'idproduit=' + idproduit)
+		var idproduit = node.getAttribute('data-table_value');
+		dv_show(dv_el('div_devis_create_produit')).loadModule('<?=$path_to_devis?>devis_create_produit', 'idproduit=' + idproduit)
 
-	}.bind(this))
+	})
 
-	/* $('div_devis_app_select').observe('dom:act_click', function (event) {
+	/* dv_el('div_devis_app_select').addEventListener('dom:act_click', function (event) {
 		idproduit = event.memo.id;
-		$('div_produit_liste_devis').unToggleContent();
-		$('div_devis_create_make').loadModule('<?=$path_to_devis?>devis_create_make', 'idproduit=' + idproduit)
-		Event.stop(event)
-	}.bind(this))*/
+		dv_el('div_produit_liste_devis').unToggleContent();
+		dv_el('div_devis_create_make').loadModule('<?=$path_to_devis?>devis_create_make', 'idproduit=' + idproduit)
+		dv_stop(event)
+	})*/
 </script>

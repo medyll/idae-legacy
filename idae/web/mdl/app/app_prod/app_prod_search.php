@@ -33,7 +33,7 @@
 				<div class="flex_h" style="height:100%;overflow: hidden;">
 					<div class="frmCol1 ededed">
 						<div class="padding ededed borderb aligncenter">
-							<form onsubmit="load_table_in_zone($(this).serialize(),'<?=$patolon_bismuth?>');$('<?=$patolon_bismuth?>').show();return false;">
+							<form onsubmit="load_table_in_zone($(this).serialize(),'<?=$patolon_bismuth?>');aps_show(aps_el('<?=$patolon_bismuth?>'));return false;">
 								<input type="hidden" name="table" value="<?=$table?>">
 								<button type="submit" style="position:absolute;right: 0.5em; z-index: 10;border: none;background-color: transparent;"><i class="fa fa-search"></i></button>
 								<input placeholder="Recherche" name="search"
@@ -63,30 +63,84 @@
 	</div>
 </div>
 <script>
-	load_table_in_zone('table=agent_tuile&vars[codeAgent_tuile]=<?=$table?>','<?=$patolon_bismuth?>');
-	$('<?=$patolon_bismuth?>').show();
+	/*
+	 * Modified: 2026-08-11 — migrated off the PrototypeJS compatibility shims
+	 * to native DOM, with file-local `aps_` helpers.
+	 *
+	 * loadModule is not a shim call: engine/methods.js puts it on
+	 * HTMLElement.prototype.
+	 */
+	function aps_el(ref) {
+		return typeof ref === 'string' ? document.getElementById(ref) : ref;
+	}
 
-	$('<?=$for_patolon_bismuth?>').on('click','[data-table][data-table_value]',function(event,node){
-		var table =node.readAttribute('data-table');
-		var table_value =node.readAttribute('data-table_value');
-		$('forward_zone').loadModule('app/app/app_fiche_forward','table='+table+'&table_value='+table_value);
-		// $('forward_zone_entete').loadModule('app/app/app_fiche_maxi_entete','table='+table+'&table_value='+table_value);
+	function aps_show(node) { if (node) node.style.display = ''; return node; }
+
+	/** Prototype's Element#select, as a real Array. */
+	function aps_select(ref, selector) {
+		var node = aps_el(ref);
+		if (!node) return [];
+		return Array.prototype.slice.call(node.querySelectorAll(selector));
+	}
+
+	/** Prototype's Element#up: nearest ancestor matching `selector`. */
+	function aps_up(node, selector) {
+		var parent = node ? node.parentNode : null;
+		while (parent && parent.nodeType === 1) {
+			if (parent.matches(selector)) return parent;
+			parent = parent.parentNode;
+		}
+		return null;
+	}
+
+	/**
+	 * Prototype's Element#on. With a selector it delegates, calling the handler
+	 * as (event, matchedElement); without one it is a plain listener.
+	 */
+	function aps_on(root, eventName, selectorOrHandler, maybeHandler) {
+		if (!root) return;
+		if (maybeHandler === undefined) {
+			root.addEventListener(eventName, selectorOrHandler);
+			return;
+		}
+		var selector = selectorOrHandler, handler = maybeHandler;
+		root.addEventListener(eventName, function (event) {
+			var target = event.target;
+			while (target && target !== root) {
+				if (target.nodeType === 1 && target.matches(selector)) {
+					return handler(event, target);
+				}
+				target = target.parentNode;
+			}
+		}, false);
+	}
+
+	load_table_in_zone('table=agent_tuile&vars[codeAgent_tuile]=<?=$table?>','<?=$patolon_bismuth?>');
+	aps_show(aps_el('<?=$patolon_bismuth?>'));
+
+	aps_on(aps_el('<?=$for_patolon_bismuth?>'),'click','[data-table][data-table_value]',function(event,node){
+		var table =node.getAttribute('data-table');
+		var table_value =node.getAttribute('data-table_value');
+		aps_el('forward_zone').loadModule('app/app/app_fiche_forward','table='+table+'&table_value='+table_value);
+		// aps_el('forward_zone_entete').loadModule('app/app/app_fiche_maxi_entete','table='+table+'&table_value='+table_value);
 	})
-	$('<?=$dad_foradzone?>').on('click','[data-link][data-table][data-table_value]',function(event,node){
-		var table =node.readAttribute('data-table');
-		var table_value =node.readAttribute('data-table_value');
-		nav_forward($(node),'app/app/app_fiche_forward','table='+table+'&table_value='+table_value);
+	aps_on(aps_el('<?=$dad_foradzone?>'),'click','[data-link][data-table][data-table_value]',function(event,node){
+		var table =node.getAttribute('data-table');
+		var table_value =node.getAttribute('data-table_value');
+		nav_forward(node,'app/app/app_fiche_forward','table='+table+'&table_value='+table_value);
 	})
-	$('<?=$dad_foradzone?>').on('click','[data-link][data-table][data-vars]',function(event,node){
-		var table =node.readAttribute('data-table');
-		var vars =node.readAttribute('data-vars');
-		nav_forward($(node),'app/app/app_fiche_forward_liste','table='+table+'&'+vars);
+	aps_on(aps_el('<?=$dad_foradzone?>'),'click','[data-link][data-table][data-vars]',function(event,node){
+		var table =node.getAttribute('data-table');
+		var vars =node.getAttribute('data-vars');
+		nav_forward(node,'app/app/app_fiche_forward_liste','table='+table+'&'+vars);
 	})
 </script>
 <script>
 	nav_forward = function(node,mdl,vars){
-		// var daid = $(node).identify();
-		var daid = node.up('.forwarder').next();
-		$(daid).loadModule(mdl,vars);
+		// var daid = node.id;
+		// `.next()` with no argument is the next sibling *element*.
+		var forwarder = aps_up(node, '.forwarder');
+		var daid = forwarder ? forwarder.nextElementSibling : null;
+		if (daid) daid.loadModule(mdl,vars);
 	}
 </script>

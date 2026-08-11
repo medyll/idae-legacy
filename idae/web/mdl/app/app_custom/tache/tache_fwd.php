@@ -71,31 +71,56 @@
 	</form>
 </div>
 <script>
-	$('cal_<?=$time?>').observe('dom:act_click', function (event) {
+	/*
+	 * Modified: 2026-08-11 — migrated off the PrototypeJS compatibility shims
+	 * ($, .observe, .on, .up, .select, .first) to native DOM, with file-local
+	 * `tf_` helpers.
+	 *
+	 * Insertion.Top is deliberately left: it is passed through to ajaxMdl /
+	 * ajaxInMdl as an option value, so replacing it means changing those
+	 * consumers too — out of scope for this file.
+	 */
+	function tf_el(ref) {
+		return typeof ref === 'string' ? document.getElementById(ref) : ref;
+	}
+
+	/** Prototype's Element#up: nearest ancestor matching `selector`. */
+	function tf_up(node, selector) {
+		var parent = node ? node.parentNode : null;
+		while (parent && parent.nodeType === 1) {
+			if (parent.matches(selector)) return parent;
+			parent = parent.parentNode;
+		}
+		return null;
+	}
+
+	tf_el('cal_<?=$time?>').addEventListener('dom:act_click', function (event) {
 		moveTache(event.memo.value)
 	})
 	moveTache = function (date) {
-		$('movespy').value = date;
+		tf_el('movespy').value = date;
 	}
 </script>
 <script>
-	$('tache_maker_first').on('dom:act_change', function (e) {
+	// Two arguments, no selector: never delegation — the shim fell through to
+	// Event.observe, so this is a plain listener.
+	tf_el('tache_maker_first').addEventListener('dom:act_change', function (e) {
 		reloadModule('app/app_field_add', '456', 'run=1&add_field=contact&module_value=456&field[]=contact&vars[id' + e.memo.table + ']=' + e.memo.id)
 	})
-	$('dateDebutTache<?=$rand?>').observe('focus', function () {
-		$('dateDebutTache<?=$rand?>').up('form').dateFinTache.value = $('dateDebutTache<?=$rand?>').value
-	}.bind(this))
-	$('dateDebutTache<?=$rand?>').observe('blur', function () {
-		$('dateDebutTache<?=$rand?>').up('form').dateFinTache.value = $('dateDebutTache<?=$rand?>').value
-	}.bind(this))
+	tf_el('dateDebutTache<?=$rand?>').addEventListener('focus', function () {
+		tf_up(tf_el('dateDebutTache<?=$rand?>'), 'form').dateFinTache.value = tf_el('dateDebutTache<?=$rand?>').value
+	})
+	tf_el('dateDebutTache<?=$rand?>').addEventListener('blur', function () {
+		tf_up(tf_el('dateDebutTache<?=$rand?>'), 'form').dateFinTache.value = tf_el('dateDebutTache<?=$rand?>').value
+	})
 </script>
 <script>
 	addContact = function () {
-		idsociete = $('formCreateTache<?=$time?>').select('[name=societe_idsociete]').first().value
+		var idsociete = tf_el('formCreateTache<?=$time?>').querySelector('[name=societe_idsociete]').value
 		ajaxMdl('societehaspersonne/mdlSocieteHasPersonneCreate', '<?=idioma('Ajouter un contact')?>', 'valueModule=<?=$time?>&reloaded=true&societe_idsociete=' + idsociete, {value: idsociete, insertion: Insertion.Top});
 	}
 	launchContact = function () {
-		idsociete = $('formCreateTache<?=$time?>').select('[name=societe_idsociete]').first().value
+		var idsociete = tf_el('formCreateTache<?=$time?>').querySelector('[name=societe_idsociete]').value
 		ajaxInMdl('societehaspersonne/mdlSocieteHasPersonneAdd', 'add_taskOnPersonne<?=$time?>', 'valueModule=<?=$time?>&reloaded=true&societe_idsociete=' + idsociete, {value: idsociete, insertion: Insertion.Top});
 	}
 </script>

@@ -42,7 +42,7 @@ $sign 		= 	'<br><br><br>Cordialement,<br>'.$arrA['prenomAgent'].' '.$arrA['nomAg
              <?=$selectA?>
           </div>
           <div class="cell aligncenter " style="width:130px;">
-            <button  style="width:120px;" type="submit" class="cursor" onclick="ajaxFormValidation($('form<?=$uniqid?>'));"  >
+            <button  style="width:120px;" type="submit" class="cursor" onclick="ajaxFormValidation(mls_el('form<?=$uniqid?>'));"  >
             <li class="fa fa-envelope"></li>
             Envoyer</button>
           </div>
@@ -105,45 +105,76 @@ $sign 		= 	'<br><br><br>Cordialement,<br>'.$arrA['prenomAgent'].' '.$arrA['nomAg
   <input type="hidden" name="reloadModule[app/app_mail/app_mail_compose_attach]" value="<?=$mail_tmp?>" />
 </form>
 <script>
+	/*
+	 * Modified: 2026-08-11 — migrated off the PrototypeJS compatibility shims
+	 * ($, .on, .observe, .readAttribute) to native DOM, with file-local `mls_`
+	 * helpers. (`ms_` is already taken by librairie/myddeSelection.js, which is
+	 * loaded on every page — reusing it here would redefine its helpers.)
+	 */
+	function mls_el(ref) {
+		return typeof ref === 'string' ? document.getElementById(ref) : ref;
+	}
 
-	$('attach<?=$uniqid?>').on('click','a[filename]',function(event,node){
-		filename = $(node).readAttribute('filename');
+	/**
+	 * Prototype's Element#on. With a selector it delegates, calling the handler
+	 * as (event, matchedElement); without one it is a plain listener.
+	 */
+	function mls_on(root, eventName, selectorOrHandler, maybeHandler) {
+		if (!root) return;
+		if (maybeHandler === undefined) {
+			root.addEventListener(eventName, selectorOrHandler);
+			return;
+		}
+		var selector = selectorOrHandler, handler = maybeHandler;
+		root.addEventListener(eventName, function (event) {
+			var target = event.target;
+			while (target && target !== root) {
+				if (target.nodeType === 1 && target.matches(selector)) {
+					return handler(event, target);
+				}
+				target = target.parentNode;
+			}
+		}, false);
+	}
+
+	mls_on(mls_el('attach<?=$uniqid?>'),'click','a[filename]',function(event,node){
+		filename = node.getAttribute('filename');
 		ajaxValidation('deleteAttach','mdl/mail/','scope=mail_tmp&mail_tmp=<?=$mail_tmp?>&idagent=<?=$_SESSION['idagent']?>&filename='+filename);
 		});
-	$('attach<?=$uniqid?>').on('click','a[deleteFichier]',function(event,node){
-		filename = $(node).readAttribute('deleteFichier');
+	mls_on(mls_el('attach<?=$uniqid?>'),'click','a[deleteFichier]',function(event,node){
+		filename = node.getAttribute('deleteFichier');
 		ajaxValidation('deleteFichier','mdl/mail/','scope=mail_tmp&mail_tmp=<?=$mail_tmp?>&idagent=<?=$_SESSION['idagent']?>&filename='+filename);
 		});
-	$('contact<?=$uniqid?>').on('click','a[email]',function(event,node){
-		email = $(node).readAttribute('email');
+	mls_on(mls_el('contact<?=$uniqid?>'),'click','a[email]',function(event,node){
+		email = node.getAttribute('email');
 		ajaxValidation('deleteContact','mdl/mail/','scope=mail_tmp&mail_tmp=<?=$mail_tmp?>&idagent=<?=$_SESSION['idagent']?>&email='+email+'&reloadModule[app/app_mail/app_mail_compose_contact]=<?=$mail_tmp?>');
 		});
-	$('contact_cc<?=$uniqid?>').on('click','a[email]',function(event,node){
-		email = $(node).readAttribute('email');
+	mls_on(mls_el('contact_cc<?=$uniqid?>'),'click','a[email]',function(event,node){
+		email = node.getAttribute('email');
 		ajaxValidation('deleteContactCC','mdl/mail/','scope=mail_tmp&mail_tmp=<?=$mail_tmp?>&idagent=<?=$_SESSION['idagent']?>&email='+email+'&reloadModule[app/app_mail/app_mail_compose_contact_cc]=<?=$mail_tmp?>');
 		});
 </script> 
 <script>
-var input_contact 		= $(document.body.querySelector('[datalist_input_name=emailInfo]'));
-var input_contact_cc 	= $(document.body.querySelector('[datalist_input_name=emailInfoCC]'));
+var input_contact 		= document.body.querySelector('[datalist_input_name=emailInfo]');
+var input_contact_cc 	= document.body.querySelector('[datalist_input_name=emailInfoCC]');
 	// Add contact
-$(input_contact).observe('dom:act_change',function(event){
+input_contact.addEventListener('dom:act_change',function(event){
     var email	=	event.memo.value;
 	var meta	=	event.memo.meta || 'meta[nom]='+email+'&meta[email]='+email;
     ajaxValidation('addContact','mdl/mail/','mail_tmp=<?=$mail_tmp?>&email='+email+'&reloadModule[app/app_mail/app_mail_compose_contact]=<?=$mail_tmp?>&'+meta);
-	$(input_contact).value = '';
-}.bind(this))
+	input_contact.value = '';
+})
 	// addcontact CC
-$(input_contact_cc).observe('dom:act_change',function(event){
+input_contact_cc.addEventListener('dom:act_change',function(event){
 	var email	=	event.memo.value;
 	var meta	=	event.memo.meta || 'meta[nom]='+email+'&meta[email]='+email;
 	ajaxValidation('addContactCC','mdl/mail/','mail_tmp=<?=$mail_tmp?>&email='+email+'&reloadModule[app/app_mail/app_mail_compose_contact]=<?=$mail_tmp?>&'+meta);
 	input_contact_cc.value = '';
-}.bind(this))
+})
 
 
 	
 // mce_area("textarea#texteMail<?=$time?>");
 //
-new myddeAttach($('drag<?=$uniqid?>'),{form:'formdrag<?=$uniqid?>',autoSubmit:true}); 
+new myddeAttach(mls_el('drag<?=$uniqid?>'),{form:'formdrag<?=$uniqid?>',autoSubmit:true}); 
 </script> 
