@@ -28,8 +28,15 @@
 			<script>
 				console.log("close <?=$table.' '.$table_value?>");
 				if(document.body.querySelector('[scope=<?=$id?>]')){
-			 	$$('[scope=<?=$id?>][value=<?=$table_value?>]').invoke('fire','dom:close');
-				$$('[scope=<?=$id?>][value=<?=$table_value?>]').invoke('remove');
+			 	// Modified: 2026-08-11 — migrated off $$/.invoke to native DOM. The
+				// selector is quoted: <?=$id?> and <?=$table_value?> are ids/values,
+				// and a value starting with a digit makes an unquoted attribute
+				// selector invalid CSS — native querySelectorAll throws where the
+				// shim's $$ retried with quotes added.
+				document.querySelectorAll('[scope="<?=$id?>"][value="<?=$table_value?>"]').forEach(function (node) {
+					idae_fire(node, 'dom:close');
+					if (node.parentNode) node.parentNode.removeChild(node);
+				});
 				}
 			</script>
 			<?php
@@ -82,7 +89,7 @@
 			$value = ($_POST['vars']['value'] == '*') ? 'val_' . $time : $_POST['vars']['value'];
 			?>
 			<script>
-				if ($$ ('[mdl="<?=$_POST['loadModule']?>"]').size () == 0) {
+				if (document.querySelectorAll('[mdl="<?=$_POST['loadModule']?>"]').length == 0) {
 					ajaxMdl ('<?=$_POST['loadModule']?>', ' <?=$value?>', '<?=http_build_query($_POST['vars'])?>', {value: '<?=$_POST['vars']['value']?>'})
 				}
 			</script>

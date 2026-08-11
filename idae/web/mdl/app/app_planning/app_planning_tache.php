@@ -34,7 +34,7 @@
 	$icone = (empty($arrtache['iconTache_type'])) ? $arrtache['codeTache_type'] : '<i class="fa fa-' . $arrtache['iconTache_type'] . '"></i>';
 	$titre_tache = (empty($arrtache['nomClient'].$arrtache['nomProspect']))? $arrtache['nomTache'] : $arrtache['nomClient'].$arrtache['nomProspect']  ;
 ?>
-<div data-table="tache" data-table_value="<?=$idtache?>" data-contextual="table=<?= $table ?>&table_value=<?= $table_value ?>" ondblclick="Event.stop(event);<?= fonctionsJs::app_update('tache', $idtache) ?>" resizeable="true" class="flex_h flex flex_align_middle" id="<?= $tache_id ?>"
+<div data-table="tache" data-table_value="<?=$idtache?>" data-contextual="table=<?= $table ?>&table_value=<?= $table_value ?>" ondblclick="event.preventDefault();event.stopPropagation();<?= fonctionsJs::app_update('tache', $idtache) ?>" resizeable="true" class="flex_h flex flex_align_middle" id="<?= $tache_id ?>"
      title="<?= $arrtache['objetTache'] ?>">
 	<div class=""><?=$APP->draw_field(['field_name_raw'=>'icon','table'=>'tache_type','field_value'=>$arrtache['iconTache_type']])?></div>
 	<div class="flex_main ellipsis" title="<?= $arrtache['nomTache'] ?>">
@@ -87,20 +87,21 @@
 		return ret;
 	}
 
-	/*new Resizeable($('<?=$tache_id?>'),{
-	 top: 0,
-	 left: 0,
-	 right: 0,
-	 parent: $('<?=$tache_id?>').up(),
-	 resize: function(el) {
-
-	 height = eval($('<?=$tache_id?>').getHeight()) / 20 ;
-	 height = Math.round(height) * 20;
-
-
-	 $('<?=$tache_id?>').setStyle({'height':height+'px'});
-
-	 ajaxValidation('app_update','mdl/app/','table=tache&table_value=<?=$idtache?>&vars[heureFinTache]='+(height/20))
-	 }
-	 });*/
+	/*
+	 * Modified: 2026-08-11 — this block has been a dead comment since before
+	 * the idae-be migration (`new Resizeable` was never called). Left
+	 * commented, not ported: nothing depends on it, and the migration's job is
+	 * to move live call sites off the shims, not resurrect dormant ones.
+	 * new Resizeable(document.getElementById('<?=$tache_id?>'),{
+	 *  top: 0,
+	 *  left: 0,
+	 *  right: 0,
+	 *  parent: document.getElementById('<?=$tache_id?>').parentNode,
+	 *  resize: function(el) {
+	 *   height = Math.round(el.offsetHeight / 20) * 20;
+	 *   el.style.height = height + 'px';
+	 *   ajaxValidation('app_update','mdl/app/','table=tache&table_value=<?=$idtache?>&vars[heureFinTache]='+(height/20))
+	 *  }
+	 * });
+	 */
 </script>

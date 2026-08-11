@@ -37,8 +37,8 @@
 ?>
 <div class = "autoNext avoid" ><?= idioma('Suggestions') ?></div >
 <div class="retrait">
-<div class = "padding alignright" id = "uniqu_cw"   style = "display:none" ><a onclick = "$('div_create_devis_wizard').update()" ><i class="fa fa-times"></i>Annuler</a ></div >
-<div onclick = "$('uniqu_cw').show();$('div_produit_liste_devis').toggleContent();load_table_in_zone(Form.serialize(this),'table_produit_devis_make');" >
+<div class = "padding alignright" id = "uniqu_cw"   style = "display:none" ><a onclick = "document.getElementById('div_create_devis_wizard').innerHTML=''" ><i class="fa fa-times"></i>Annuler</a ></div >
+<div onclick = "document.getElementById('uniqu_cw').style.display='';document.getElementById('div_produit_liste_devis').toggleContent();load_table_in_zone(Form.serialize(this),'table_produit_devis_make');" >
 	<input type="hidden" name="table" value="produit">
 	<div class = "padding applink applinkblock" >
 		<label class = "nolabel" >

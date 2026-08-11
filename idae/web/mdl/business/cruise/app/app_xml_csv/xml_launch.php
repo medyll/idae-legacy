@@ -22,7 +22,7 @@
 			</tr>
 		</table>
 		<div class="buttonZone">
-			<input type="button" class="validButton" value="Lancer" onclick="$('frame_xmlt').show().loadModule('<?=$PATH?>xml_thread','fourn=<?= $_POST['fourn'] ?>');">
+			<input type="button" class="validButton" value="Lancer" onclick="document.getElementById('frame_xmlt').style.display='';document.getElementById('frame_xmlt').loadModule('<?=$PATH?>xml_thread','fourn=<?= $_POST['fourn'] ?>');">
 			<input type="reset" value="Fermer" class="cancelClose">
 		</div>
 	</form>
