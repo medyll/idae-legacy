@@ -688,6 +688,10 @@ Pendant une bonne partie de cette session j'ai relancé `docker restart idae-soc
 
 La confusion venait du « protocole de volatilité d'environnement » plus haut : celui-là concerne les workers Playwright pendus et la stack WSL2 dégradée (symptôme : échecs répétés dans le hook `beforeAll`), pas la prise en compte des fichiers modifiés. Le restart reste le bon réflexe **quand la suite se met à échouer au boot**, jamais comme étape systématique. ~40 s gagnées par fichier.
 
+**Précision ajoutée le 11/08, après avoir failli mal appliquer ma propre règle.** Le backend se dégrade progressivement sous une longue série de tests — `json_scheme.php` mesuré à 0,39 s à froid, puis 4,5 s, 5,2 s, jusqu'au blocage complet. Passé ~3-4 s par requête, `smoke` ne peut plus passer : le boot enchaîne trop d'appels pour tenir dans son budget de 60 s, et il échoue **de façon déterministe, pas aléatoire** — trois tentatives d'affilée, toutes en « timeout pendant la mise en place de la page ». Après `docker restart`, le même test passe en 15 s.
+
+Donc la règle complète : ne pas redémarrer entre deux fichiers (inutile, le montage est direct et le manifeste recalculé à chaque requête), **mais redémarrer entre deux longues séries**. Et surtout : trois échecs identiques d'affilée sur un test qui passait ne veulent pas dire « régression » — mesurer la latence du backend avant de conclure quoi que ce soit.
+
 ## Perf — cache-busting cassé, et l'instabilité socket sous WSL2
 
 **Cache-busting.** `main_bag.js` faisait `?v=<Date.now()>` sur les ~90 fichiers JS/CSS à **chaque** chargement — pas un souci de dev, un souci de prod : tout utilisateur réel retéléchargeait tout, à chaque visite, pour toujours, sans jamais toucher le cache IndexedDB de `bag.js`. Fixé (commit `f4f090a`) : `appfunc/asset_versions.php` construit un manifeste `{chemin: mtime}` en scannant `javascript/`+`css/` récursivement (aucune liste dupliquée à synchroniser avec `require_trame`), injecté via `window.FILE_VERSIONS` avant `main_bag.js`. Chaque fichier n'est reversionné que si son mtime a changé.
