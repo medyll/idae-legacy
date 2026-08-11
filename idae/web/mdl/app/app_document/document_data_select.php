@@ -49,8 +49,16 @@
 	</div>
 </div>
 <script>
+	/*
+	 * Modified: 2026-08-11 — migrated off the PrototypeJS `$` shim, and fixed a
+	 * syntax error that made this block unparseable: the module path read
+	 * 'app_document/app_document'_data_select_more — a string literal followed
+	 * by an identifier. amore() was therefore never defined and every caller
+	 * threw ReferenceError. Same misplaced quote as document_liste_drop.php and
+	 * document_liste_spy.php; predates the idae-be migration.
+	 */
 	amore = function (vars) {
-		//$('moredst').toggleContent();
-		$ ('moredst').loadModule ('app_document/app_document'_data_select_more', vars);
+		//document.getElementById('moredst').toggleContent();
+		document.getElementById('moredst').loadModule ('app_document/app_document_data_select_more', vars);
 	}
 </script>
