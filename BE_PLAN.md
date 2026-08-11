@@ -635,6 +635,20 @@ Objectif : après le ratissage de la file par taille, mesurer **ce qui appelle e
 
 **Statut de la question d'origine, honnêtement** : toujours ouverte. On ne sait pas quels `shim-*.js` sont supprimables. Ce qu'on sait : les 15 fichiers migrés cette session ont chacun leur garde verte, et `shim-effects` a bien été supprimé le 09/08 par la voie statique (grep + vérification des appelants), qui reste la méthode praticable.
 
+## Suite complète — `shim-warn.spec.ts` était le bouchon, et deux fragilités de test (2026-08-11)
+
+Première tentative de faire tourner la suite **entière** de la session (99 tests). Elle a mis au jour trois choses, dont une vraie correction.
+
+**1. `shim-warn.spec.ts` bloquait la suite.** Cette spec préexistante armait `IDAE_SHIM_WARN` via `addInitScript` — donc *avant* le chargement des shims — et collectait toutes les alertes d'un boot à froid dans un tableau non borné. C'est exactement la configuration qui, dans les essais d'inventaire ci-dessus, a fait tomber Node en OOM à 4 Go en 134 s. Ici elle immobilisait la suite **17 min et plus** sur ce seul fichier, ce qui explique qu'aucun run complet n'aboutissait.
+
+Borner le collecteur n'a pas suffi : un boot instrumenté dépasse à lui seul le budget de 60 s quand il s'exécute en séquence (41 s en isolation, échec à 1 min en suite). Réécrite pour **armer après le boot** et déclencher un seul appel délibéré (`document.body.hasClassName(...)`) : **226 ms**, et elle prouve exactement la même chose.
+
+Ce point vaut d'être retenu : cette spec est le témoin positif de tout l'édifice. Les gardes « n'appelle plus les shims » de chaque fichier affirment `toEqual([])`, ce qui passe aussi bien si l'instrument n'enregistre rien. C'est elle qui les rend probantes — d'où le message d'échec explicite qu'elle porte désormais.
+
+**2. `snapshots: list view` photographie une donnée volatile.** Échec constaté, puis vert au réessai. Inspection de l'image de différence : tout est identique au pixel près sauf **un compteur de lignes, « 5 » au lieu de « 8 »**, en bas à gauche. C'est le nombre d'enregistrements en base — que `crud.spec.ts` fait varier en créant puis supprimant une fiche. Aucune régression visuelle. La capture masque déjà la zone de données (bloc magenta) mais pas ce compteur ; à masquer aussi si le faux positif devient gênant.
+
+**3. Le backend se dégrade sous une longue série.** Mesuré pendant le run : `json_scheme.php` passe de ~0,4 s à 4,5 s puis 8 s, jusqu'au blocage complet (timeout, `000`) constaté une fois — c'est le cas légitime de `docker restart`, signalé par la sonde `global-setup.ts`. Tous les échecs restants de ce run ont cette signature : `0 ms` (le hook `beforeAll` n'aboutit pas, le corps du test ne s'exécute jamais) ou `1.0m` (timeout de boot), et **tous repassent au réessai**. Aucun n'est imputable au code migré.
+
 ## Note de méthode — redémarrer Docker entre deux fichiers est inutile (2026-08-10)
 
 Pendant une bonne partie de cette session j'ai relancé `docker restart idae-socket idae-legacy` après chaque fichier migré, avant de lancer la suite. Inutile, vérifié :
