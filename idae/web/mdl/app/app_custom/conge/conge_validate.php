@@ -65,20 +65,36 @@
 	<?= idioma('Valider congé') ?>
 </div>
 <script>
+	/*
+	 * Modified: 2026-08-11 — migrated off the PrototypeJS compatibility shims
+	 * ($, .select, .first) to native DOM, with file-local `cgv_` helpers.
+	 */
+	function cgv_one(node, selector) {
+		return node ? node.querySelector(selector) : null;
+	}
+
 	getDuree = function (node) { // father
-		date_deb = node.select('#dateDebut').first();
-		date_fin = node.select('#dateFin').first();
+		var date_deb = cgv_one(node, '#dateDebut');
+		var date_fin = cgv_one(node, '#dateFin');
+		if (!date_deb || !date_fin) return;
 
-		val = 0;
-		dd = getDate($(date_deb).value);
-		df = getDate($(date_fin).value);
+		var val = 0;
+		var dd = getDate(date_deb.value);
+		var df = getDate(date_fin.value);
 
-		a = eval(dayDiff($(date_deb).value, $(date_fin).value));
+		var a = Number(dayDiff(date_deb.value, date_fin.value));
 
-		if (node.select('#heureDebut') && node.select('#heureFin')) {
+		// Was `if (node.select('#heureDebut') && node.select('#heureFin'))`.
+		// Element#select returns an Array, so both operands were truthy even
+		// when empty and the guard never guarded anything — the `.first().value`
+		// two lines down then threw on a form without those fields. Now an
+		// actual presence check.
+		var heureDebut = cgv_one(node, '#heureDebut');
+		var heureFin = cgv_one(node, '#heureFin');
+		if (heureDebut && heureFin) {
 
-			h = node.select('#heureDebut').first().value;
-			f = node.select('#heureFin').first().value;
+			var h = heureDebut.value;
+			var f = heureFin.value;
 			if (h == 'PM') {
 				val = -0.5
 			}
@@ -98,16 +114,18 @@
 			}
 
 		}
-		if (node.select('#duree')) {
-			node.select('#duree').first().value = eval(a) + eval(val);
+		// Same broken-guard shape as above.
+		var duree = cgv_one(node, '#duree');
+		if (duree) {
+			duree.value = a + val;
 		}
 
 	}
 	getDate = function (strDate) {
-		day = strDate.substring(0, 2);
-		month = strDate.substring(3, 5);
-		year = strDate.substring(6, 10);
-		d = new Date();
+		var day = strDate.substring(0, 2);
+		var month = strDate.substring(3, 5);
+		var year = strDate.substring(6, 10);
+		var d = new Date();
 		d.setDate(day);
 		d.setMonth(month - 1);
 		d.setFullYear(year);

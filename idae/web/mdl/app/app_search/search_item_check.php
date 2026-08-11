@@ -58,7 +58,7 @@
 			<div class="aligncenter padding borderr cursor" data-menu="data-menu"><i class="fa fa-<?= $APP->iconAppscheme ?> textgris"></i></div>
 			<div class="contextmenu" style="position:absolute;display:none;" act_defer mdl="app/app_search/app_search_item_change" vars="from=check&target=<?= $target ?>&<?= http_build_query($_POST); ?>"></div>
 			<div class="flex_main">
-				<input class="noborder ededed" type="text" placeholder="<?= $table ?>" onkeyup="quickFind(this.value,'in_<?= $target ?>','.flex_main');$('in_<?= $target ?>').show()">
+				<input class="noborder ededed" type="text" placeholder="<?= $table ?>" onkeyup="quickFind(this.value,'in_<?= $target ?>','.flex_main');sic_show(sic_el('in_<?= $target ?>'))">
 			</div>
 		</div>
 		<div class="boxshadow ededed border4">
@@ -89,20 +89,42 @@
 	</div>
 </div>
 <script>
-	$('in_<?= $target ?>').observe('click', function () {
-		arr = $$('#<?= $target ?> [type=checkbox]').collect(function (s) {
-			if (!s.checked) return false;
-			red = s.readAttribute('data-name');
-			$('in_return_<?= $target ?>').appendChild(s.up());
-			return red;
+	/*
+	 * Modified: 2026-08-11 — migrated off the PrototypeJS compatibility shims
+	 * ($, $$, .observe, .collect, .up, .readAttribute) to native DOM, with
+	 * file-local `sic_` helpers.
+	 */
+	function sic_el(ref) {
+		return typeof ref === 'string' ? document.getElementById(ref) : ref;
+	}
+
+	function sic_show(node) { if (node) node.style.display = ''; return node; }
+
+	function sic_qsa(selector) {
+		return Array.prototype.slice.call(document.querySelectorAll(selector));
+	}
+
+	/**
+	 * Moves every checked checkbox's parent element into `destId`.
+	 *
+	 * Was a `.collect()` whose return value (`arr`) was assigned to an implicit
+	 * global and never read — the real work was the appendChild side effect, so
+	 * this is a forEach. `s.up()` with no argument is Prototype's parent
+	 * element, i.e. parentNode.
+	 */
+	function sic_moveChecked(destId) {
+		var dest = sic_el(destId);
+		if (!dest) return;
+		sic_qsa('#<?= $target ?> [type=checkbox]').forEach(function (s) {
+			if (!s.checked) return;
+			if (s.parentNode) dest.appendChild(s.parentNode);
 		});
+	}
+
+	sic_el('in_<?= $target ?>').addEventListener('click', function () {
+		sic_moveChecked('in_return_<?= $target ?>');
 	})
-	$('in_return_<?= $target ?>').observe('click', function () {
-		arr = $$('#<?= $target ?> [type=checkbox]').collect(function (s) {
-			if (!s.checked) return false;
-			red = s.readAttribute('data-name');
-			$('in_<?= $target ?>').appendChild(s.up());
-			return red;
-		});
+	sic_el('in_return_<?= $target ?>').addEventListener('click', function () {
+		sic_moveChecked('in_<?= $target ?>');
 	})
 </script>

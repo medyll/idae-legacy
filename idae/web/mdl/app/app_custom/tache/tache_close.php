@@ -59,23 +59,48 @@
 
 
 <script>
-	$('tache_maker_first').on('dom:act_change', function (e) {
+	/*
+	 * Modified: 2026-08-11 — migrated off the PrototypeJS compatibility shims
+	 * ($, .observe, .on, .up, .select, .first) to native DOM, with file-local
+	 * `tcl_` helpers.
+	 *
+	 * Insertion.Top is deliberately left below: it is passed straight through
+	 * to ajaxMdl / ajaxInMdl as an option value, so replacing it means changing
+	 * those consumers too — out of scope for this file.
+	 */
+	function tcl_el(ref) {
+		return typeof ref === 'string' ? document.getElementById(ref) : ref;
+	}
+
+	/** Prototype's Element#up: nearest ancestor matching `selector`. */
+	function tcl_up(node, selector) {
+		var parent = node ? node.parentNode : null;
+		while (parent && parent.nodeType === 1) {
+			if (parent.matches(selector)) return parent;
+			parent = parent.parentNode;
+		}
+		return null;
+	}
+
+	// Two arguments, no selector: never delegation — the shim fell through to
+	// Event.observe, so this is a plain listener.
+	tcl_el('tache_maker_first').addEventListener('dom:act_change', function (e) {
 		reloadModule('app/app_field_add', '456', 'run=1&add_field=contact&module_value=456&field[]=contact&vars[id' + e.memo.table + ']=' + e.memo.id)
 	})
-	$('dateDebutTache<?=$rand?>').observe('focus', function () {
-		$('dateDebutTache<?=$rand?>').up('form').dateFinTache.value = $('dateDebutTache<?=$rand?>').value
-	}.bind(this))
-	$('dateDebutTache<?=$rand?>').observe('blur', function () {
-		$('dateDebutTache<?=$rand?>').up('form').dateFinTache.value = $('dateDebutTache<?=$rand?>').value
-	}.bind(this))
+	tcl_el('dateDebutTache<?=$rand?>').addEventListener('focus', function () {
+		tcl_up(tcl_el('dateDebutTache<?=$rand?>'), 'form').dateFinTache.value = tcl_el('dateDebutTache<?=$rand?>').value
+	})
+	tcl_el('dateDebutTache<?=$rand?>').addEventListener('blur', function () {
+		tcl_up(tcl_el('dateDebutTache<?=$rand?>'), 'form').dateFinTache.value = tcl_el('dateDebutTache<?=$rand?>').value
+	})
 </script>
 <script>
 	addContact = function () {
-		idsociete = $('formCreateTache<?=$time?>').select('[name=societe_idsociete]').first().value
+		var idsociete = tcl_el('formCreateTache<?=$time?>').querySelector('[name=societe_idsociete]').value
 		ajaxMdl('societehaspersonne/mdlSocieteHasPersonneCreate', '<?=idioma('Ajouter un contact')?>', 'valueModule=<?=$time?>&reloaded=true&societe_idsociete=' + idsociete, {value: idsociete, insertion: Insertion.Top});
 	}
 	launchContact = function () {
-		idsociete = $('formCreateTache<?=$time?>').select('[name=societe_idsociete]').first().value
+		var idsociete = tcl_el('formCreateTache<?=$time?>').querySelector('[name=societe_idsociete]').value
 		ajaxInMdl('societehaspersonne/mdlSocieteHasPersonneAdd', 'add_taskOnPersonne<?=$time?>', 'valueModule=<?=$time?>&reloaded=true&societe_idsociete=' + idsociete, {value: idsociete, insertion: Insertion.Top});
 	}
 </script>
