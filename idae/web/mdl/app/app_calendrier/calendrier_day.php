@@ -89,7 +89,7 @@
 								}
 								?>
 								<td style="white-space:nowrap" data-droptache="rebound" dropvalue="<?= $date_fr ?>" class="<?= $class ?> aligncenter" title="<?= $theday . ' ' . $date_fr ?>" value="<?= http_build_query(['sd' => $sd]) ?>">
-									<a class="autoToggle <?= $active ?> <?=$ct_css?>" onclick="$(this).fire('dom:act_click',{value:'<?= $date_fr ?>',value_us:'<?= $date_us ?>'});">
+									<a class="autoToggle <?= $active ?> <?=$ct_css?>" onclick="idae_fire(this,'dom:act_click',{value:'<?= $date_fr ?>',value_us:'<?= $date_us ?>'});">
 										<?= $val ?>
 									</a>
 								</td>

@@ -156,6 +156,23 @@ function highlightElement(node, options) {
 	return node;
 }
 
+/**
+ * Prototype's Element#fire: a bubbling, cancelable CustomEvent carrying
+ * `memo`. Added 2026-08-11 as the shared replacement for the ~15 template
+ * call sites of the shape `onclick="$(this).fire('dom:act_click', {...})"` --
+ * one file-local helper per template would have meant fifteen copies of the
+ * same four lines. Named `idae_fire` rather than `fireEvent`: that name is
+ * already a method on canvasjs.min.js's own internal object, unrelated but
+ * close enough to be confusing as a second global.
+ */
+function idae_fire(node, eventName, memo) {
+	if (!node) return null;
+	var event = new CustomEvent(eventName, {bubbles: true, cancelable: true});
+	event.memo = memo || {};
+	node.dispatchEvent(event);
+	return event;
+}
+
 (function (global) {
 
 	/* ------------------------------------------------------------------ *

@@ -41,6 +41,6 @@ $out[] = array('startTime'=>$startTime,'endTime'=>$endTime,'label'=>$label) ;
 ?>
 <div class="applink applinkblock toggler">
 <?php foreach($out as $inlink): ?>
-<a class="autoToggle" onClick="$(this).fire('dom:datechoosen',{dateDebut:'<?=$inlink['startTime']?>',dateFin:'<?=$inlink['endTime']?>',value:'<?=$inlink['label']?>'})"><?=$inlink['label']?></a>
+<a class="autoToggle" onClick="idae_fire(this,'dom:datechoosen',{dateDebut:'<?=$inlink['startTime']?>',dateFin:'<?=$inlink['endTime']?>',value:'<?=$inlink['label']?>'})"><?=$inlink['label']?></a>
 <?php endforeach; ?> 
 </div>
