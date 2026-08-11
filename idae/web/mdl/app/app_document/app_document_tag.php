@@ -45,7 +45,7 @@ document.getElementById('loader<?=$uniqid?>').parentNode.addEventListener('dom:a
 		             //  reloadModule('app_document/app_document_tag_queue','<?= $idagent ?>');
 		              });
 		              pleaseTag=function(tag){
-		              vars = Form.serialize($('skel<?= $uniqid ?>'));
+		              vars = Form.serialize(document.getElementById('skel<?= $uniqid ?>'));
 		              ajaxValidation('tagDocument','mdl/document/','<?= http_build_query($_POST) ?>&'+vars+'&tag='+tag);
 		              }
 		</script>

@@ -66,7 +66,7 @@
 			<div id="in_<?= $target ?>" class="margin padding applink">
 				<div class="flex_v">
 					<div class="alignright borderb">
-						<a onclick="this.up().up().up().hide()"><i class="fa fa-times textrouge"></i></a>
+						<a onclick="this.parentNode.parentNode.parentNode.style.display='none'"><i class="fa fa-times textrouge"></i></a>
 					</div>
 					<div style="overflow-y:auto;overflow-x:hidden;max-height:250px;">
 						<?php

@@ -82,11 +82,15 @@ $moisSuiv = mktime(12,0,0,$moisEnCours+1,$jourEnCours,$anneeEnCours);
  
 
  
+/*
+ * Modified: 2026-08-11 — migrated off the PrototypeJS `$` shim. `input`
+ * arrives here both as an id and as an element, which is what $() absorbed.
+ */
 fillInput = function(input,vars){
 	<?php if(!empty($_POST['function'])){ ?> 
 		<?=$_POST['function']?>(vars) 
 	<?php }else{ ?>
-	$(input).value = vars;
+	(typeof input === 'string' ? document.getElementById(input) : input).value = vars;
 	<?php }?> 
 	return false;
 }
