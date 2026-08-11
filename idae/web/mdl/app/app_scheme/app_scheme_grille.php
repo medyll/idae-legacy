@@ -74,29 +74,36 @@
 		</div>
 	</div>
 	<script>
+		/*
+		 * Modified: 2026-08-11 — migrated off the PrototypeJS compatibility
+		 * shims ($, .on, Event.element, .up, .readAttribute, .select, .collect,
+		 * Object.toQueryString) to native DOM. Event.element(event) is
+		 * event.target; two-argument .on() with no selector was never
+		 * delegation, the shim fell through to Event.observe.
+		 */
 		register_fk = function (event) {
-			var elem = Event.element (event);
-			var tr   = elem.up ('tr');
+			var elem = event.target;
+			var tr   = elem.closest ('tr');
 			vars     = Form.serialize (tr);
-			uid      = tr.readAttribute ('uid')
+			uid      = tr.getAttribute ('uid')
 			setTimeout (function () {
 				ajaxValidation ('updFK', 'mdl/app/app_scheme/', '_id=<?=$arr['_id']?>&' + vars + '&uid=' + uid)
 			}.bind (this), 100)
 
 		}
-		$ ('oio').on ('change', function (event) {
+		document.getElementById ('oio').addEventListener ('change', function (event) {
 			register_fk (event)
 		})
-		$ ('oio').on ('dom:datechoosen', function (event) {
+		document.getElementById ('oio').addEventListener ('dom:datechoosen', function (event) {
 			register_fk (event)
 		})
-		$ ('oio').on ('dom:act_sort', function (event) {
+		document.getElementById ('oio').addEventListener ('dom:act_sort', function (event) {
 
 			var pair = {};
-			$ ('oio').select ('[data-sort_element]').collect (function (node, index) {
-				pair['ordreFK[' + index + ']'] = node.readAttribute ('uid');
-			}.bind (this));
-			vars     = Object.toQueryString (pair);
+			Array.prototype.slice.call (document.getElementById ('oio').querySelectorAll ('[data-sort_element]')).forEach (function (node, index) {
+				pair['ordreFK[' + index + ']'] = node.getAttribute ('uid');
+			});
+			vars     = new URLSearchParams (pair).toString ();
 			url      = vars + '&table=<?=$table?>';
 			setTimeout (function () {
 				ajaxValidation ('reorderFK', 'mdl/app/app_scheme/', '_id=<?=$arr['_id']?>&' + url)

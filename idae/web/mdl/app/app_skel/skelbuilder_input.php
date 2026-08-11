@@ -74,16 +74,20 @@ $arr = $APP->plug('sitebase_app','appscheme')->findOne(array('_id' => $_POST['_i
 	<script>
 		register = function (event) {
 			elem = Event.element(event)
-			vars = Form.serialize(elem.up('tr'));
+			// Was elem.up('tr') — Prototype's Element#up: nearest ancestor
+			// matching the selector.
+			vars = Form.serialize(elem.closest('tr'));
 			setTimeout(function () {
 				ajaxValidation('updInput', 'mdl/app/app_skel/', '_id=<?=$arr['_id']?>&' + vars)
 			}.bind(this), 1250)
 
 		}
-		$('oio').on('change', function (event) {
+		// Two-argument .on() with no selector was never delegation — the shim
+		// fell through to Event.observe.
+		document.getElementById('oio').addEventListener('change', function (event) {
 			register(event)
 		})
-		$('oio').on('dom:datechoosen', function (event) {
+		document.getElementById('oio').addEventListener('dom:datechoosen', function (event) {
 			register(event)
 		})
 

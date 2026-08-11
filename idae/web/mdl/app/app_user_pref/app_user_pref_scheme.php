@@ -103,7 +103,7 @@
 	save_setting_mdl_search = function (node, key) {
 
 		setTimeout(function () {
-			dsp = $(node).checked;
+			dsp = node.checked;
 			ajaxValidation('set_settings', 'mdl/app/', 'key=' + key + '&value=' + dsp);
 			setTimeout(function () {
 				reloadScope('<?=$code?>', '*');

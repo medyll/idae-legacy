@@ -37,9 +37,11 @@
 	<?php
 } ?>
 <script>
-	$('fa_icon_choose').observe('dom:act_change', function (event, node) {
-		$('fa_for_fa').className = 'fa fa-' + event.memo.code
-		$('icon_ch_<?= $table  ?>').value = event.memo.code
+	// The second parameter (`node`) was never populated — Prototype's
+	// observe() only ever passes the event.
+	document.getElementById('fa_icon_choose').addEventListener('dom:act_change', function (event) {
+		document.getElementById('fa_for_fa').className = 'fa fa-' + event.memo.code
+		document.getElementById('icon_ch_<?= $table  ?>').value = event.memo.code
 	})
 </script>
 

@@ -41,7 +41,7 @@
 			</div>
 		<?php } ?>
 		<div class="titre_entete">
-			<button onclick="$('div_devis_create_wait').hide()">Retour</button>
+			<button onclick="document.getElementById('div_devis_create_wait').style.display='none'">Retour</button>
 		</div>
 		<?php
 		return;

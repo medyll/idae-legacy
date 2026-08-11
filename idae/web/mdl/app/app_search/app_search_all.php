@@ -38,7 +38,7 @@
 		<div class = "cell aligncenter borderl"
 		     style = "width: 30px;">
 			<div class = "titre_entete avoid">
-				<a onclick = "$('param_se').toggle();">
+				<a onclick = "idae_toggle(document.getElementById('param_se'));">
 					<i class = "fa fa-cog"></i>
 				</a>
 			</div>
@@ -143,7 +143,7 @@
 	save_setting_mdl_search = function (node, key) {
 
 		setTimeout(function () {
-			dsp = $(node).checked;
+			dsp = node.checked;
 			ajaxValidation('set_settings', 'mdl/app/', 'key=' + key + '&value=' + dsp);
 		}.bind(this), 500)
 	}

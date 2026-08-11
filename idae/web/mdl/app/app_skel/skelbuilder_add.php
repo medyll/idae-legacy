@@ -21,7 +21,7 @@ $arr = $APP->plug('sitebase_skelbuilder','skel_builder')->findOne(array('_id'=>$
       <table>
         <tr>
           <td><label >Nom du champ</label></td>
-          <td ><input type="text" name="vars[nomInput]" class="required inputLarge" value=""  onkeyup="$('inputer').value= $(this).value.gsub('-','')+'<?=ucfirst($arr['colForm'])?>';"></td> 
+          <td ><input type="text" name="vars[nomInput]" class="required inputLarge" value=""  onkeyup="document.getElementById('inputer').value= this.value.split('-').join('')+'<?=ucfirst($arr['colForm'])?>';"></td> 
         </tr>  
         <tr>
           <td><label >Nom du champ</label></td>
