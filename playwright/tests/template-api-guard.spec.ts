@@ -81,6 +81,14 @@ const METHODS = [
   'bindAsEventListener', 'curry', 'delay', 'defer', 'methodize', 'argumentNames',
   // Number
   'toColorPart', 'toPaddedString',
+  // Scriptaculous element effects. Included even though shim-effects.js is
+  // gone, precisely *because* it is gone: these names must now come up missing
+  // if a template still calls one. Leaving them out is what let three
+  // Effect.Appear/Highlight calls (ed8b761) and three `.fade()` calls survive
+  // the shim's deletion unnoticed.
+  'fade', 'appear', 'blindUp', 'blindDown', 'slideUp', 'slideDown', 'pulsate',
+  'highlight', 'morph', 'shake', 'puff', 'grow', 'shrink', 'switchOff',
+  'dropOut', 'squish', 'fold',
 ];
 
 function walk(dir: string, out: string[] = []): string[] {

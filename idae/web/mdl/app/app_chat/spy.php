@@ -31,11 +31,17 @@ $pattern = '/(?:(?<=\>)|(?<=\/\>))(\s+)(?=\<\/?)/';
 $final = preg_replace($pattern,"", $final ); 
 ?><?=trim($final)?>
 <script>
-if(!$('p_<?=$value['time']?>')){ 
-	$('onlive_holder_<?=$ONLINE_KEY?>').insert({top:$('temp_<?=$value['time']?>').innerHTML});  
-	$('temp_<?=$value['time']?>').update();
-	$('temp_2_<?=$value['time']?>').id = 'p_<?=$value['time']?>' ;
-	$('onlive_slider_<?=$ONLINE_KEY?>').scrollTop = 10000
+/*
+ * Modified: 2026-08-11 — migrated off the PrototypeJS compatibility shims
+ * ($, .insert, .update) to native DOM. insert({top: html}) prepends inside the
+ * node, i.e. insertAdjacentHTML('afterbegin'); update() with no argument
+ * empties it.
+ */
+if(!document.getElementById('p_<?=$value['time']?>')){ 
+	document.getElementById('onlive_holder_<?=$ONLINE_KEY?>').insertAdjacentHTML('afterbegin', document.getElementById('temp_<?=$value['time']?>').innerHTML);  
+	document.getElementById('temp_<?=$value['time']?>').innerHTML = '';
+	document.getElementById('temp_2_<?=$value['time']?>').id = 'p_<?=$value['time']?>' ;
+	document.getElementById('onlive_slider_<?=$ONLINE_KEY?>').scrollTop = 10000
 	}
 </script>
 <?php
@@ -43,5 +49,5 @@ endforeach;
 ?>
 </div>
 <script> 
-$('onlive_slider_<?=$ONLINE_KEY?>').scrollTop = 10000
+document.getElementById('onlive_slider_<?=$ONLINE_KEY?>').scrollTop = 10000
 </script>

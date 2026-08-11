@@ -12,26 +12,37 @@
 	$rsG = $APPSC_FIELD_GROUP->find()->sort(['group_ordre' => 1]);
 	$rsT = $APPSC_FIELD_TYPE->find()->sort(['type_ordre' => 1]);
 ?>
+<script>
+	/*
+	 * Modified: 2026-08-11 — migrated off the PrototypeJS `$` shim to native
+	 * DOM, with a file-local `asf_` helper. toggleContent and loadModule are
+	 * not shim calls: engine/methods.js installs both on HTMLElement.prototype.
+	 */
+	function asf_el(ref) {
+		return typeof ref === 'string' ? document.getElementById(ref) : ref;
+	}
+</script>
+
 <div class="flex_v blanc"  style="overflow:hidden;">
 	<div class="flex_h" style="height:100%;overflow: hidden">
 		<div class="frmCol1">
 			<div class="applink applinkblock flex_h borderb toggler">
-				<a class="flex_main autoToggle aligncenter active borderr"  onclick="$('app_home_field').toggleContent()"><i class="fa fa-home"></i><br>re</a>
-				<a class="flex_main autoToggle aligncenter borderr" onclick="$('app_type_field').toggleContent()"><?=idioma('Types')?></a>
-				<a class="flex_main autoToggle aligncenter" onclick="$('app_group_field').toggleContent()"><?=idioma('Groupes')?></a>
+				<a class="flex_main autoToggle aligncenter active borderr"  onclick="asf_el('app_home_field').toggleContent()"><i class="fa fa-home"></i><br>re</a>
+				<a class="flex_main autoToggle aligncenter borderr" onclick="asf_el('app_type_field').toggleContent()"><?=idioma('Types')?></a>
+				<a class="flex_main autoToggle aligncenter" onclick="asf_el('app_group_field').toggleContent()"><?=idioma('Groupes')?></a>
 			</div>
 			<div>
 				<div class="applink applinkblock applinkbig toggler" id="app_home_field" >
-					<a class="autoToggle active" onclick="$('appscheme_field_zone').loadModule('app/app_liste/app_liste','table=appscheme_field&sortBy=nomAppscheme_field')"><?=idioma('Voir tout')?></a>
-					<a class="autoToggle" onclick="$('appscheme_field_zone').loadModule('app/app_liste/app_liste','table=appscheme_field&groupBy=appscheme_field_type')"><?=idioma('Par type')?></a>
-					<a class="autoToggle" onclick="$('appscheme_field_zone').loadModule('app/app_liste/app_liste','table=appscheme_field&groupBy=appscheme_field_group')"><?=idioma('Par groupe')?></a>
+					<a class="autoToggle active" onclick="asf_el('appscheme_field_zone').loadModule('app/app_liste/app_liste','table=appscheme_field&sortBy=nomAppscheme_field')"><?=idioma('Voir tout')?></a>
+					<a class="autoToggle" onclick="asf_el('appscheme_field_zone').loadModule('app/app_liste/app_liste','table=appscheme_field&groupBy=appscheme_field_type')"><?=idioma('Par type')?></a>
+					<a class="autoToggle" onclick="asf_el('appscheme_field_zone').loadModule('app/app_liste/app_liste','table=appscheme_field&groupBy=appscheme_field_group')"><?=idioma('Par groupe')?></a>
 				</div>
 				<div class="applink applinkblock" id="app_group_field" style="display:none;">
 					<div class="titre_entete"><?= idioma('Groupes') ?></div>
 					<div class="applinkbig">
 					<?php while ($arrg = $rsG->getNext()) {
 						?>
-							<a class="autoToggle" onclick="$('appscheme_field_zone').loadModule('app/app_liste/app_liste','table=appscheme_field&vars[idappscheme_field_group]=<?=$arrg['idappscheme_field_group']?>')"><?= ucfirst($arrg['nomAppscheme_field_group']) ?></a>
+							<a class="autoToggle" onclick="asf_el('appscheme_field_zone').loadModule('app/app_liste/app_liste','table=appscheme_field&vars[idappscheme_field_group]=<?=$arrg['idappscheme_field_group']?>')"><?= ucfirst($arrg['nomAppscheme_field_group']) ?></a>
 
 					<?php }
 						$rsG->reset();?></div>

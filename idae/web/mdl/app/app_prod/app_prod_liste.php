@@ -51,6 +51,28 @@ $time=time();
 	$APP->set_hist($_SESSION['idagent'], ['uid'=>$uid]+$vars_hist);
 
 ?>
+<script>
+	/*
+	 * Modified: 2026-08-11 — migrated off the PrototypeJS compatibility shims
+	 * ($, .update, .show, .fade) to native DOM, with file-local `apr_` helpers.
+	 *
+	 * `$(this).fade()` on the page-validate button was not merely shimmed, it
+	 * was already broken: shim-effects.js was deleted on 2026-08-09 once the
+	 * last *JavaScript* caller of Effect.* had migrated, and this template call
+	 * site was missed — the same blind spot as the Effect.Appear/Highlight
+	 * calls fixed in ed8b761. It has thrown "fade is not a function" since.
+	 * Now fadeElement(), the native replacement in engine/methods.js.
+	 *
+	 * `apr_el('output').value` is kept below: <output> exposes .value, and
+	 * update() wrote through innerHTML, which is what sets it.
+	 */
+	function apr_el(ref) {
+		return typeof ref === 'string' ? document.getElementById(ref) : ref;
+	}
+
+	function apr_show(node) { if (node) node.style.display = ''; return node; }
+</script>
+
 <div id="app_<?= $uniqid ?>"
      style="overflow:hidden;position: relative;height:100%;">
 	<div
@@ -75,7 +97,7 @@ $time=time();
 				<input type="text"
 				       class="inputTiny avoid noborder alignright"
 				       value="<?= $nbRows ?>"
-				       onchange="reloadScope('scope_prod_liste','<?= $uniqid ?>','nbRows='+$(this).value)"> /page
+				       onchange="reloadScope('scope_prod_liste','<?= $uniqid ?>','nbRows='+this.value)"> /page
 			</div>
 			<?php if ($nbPage > 1) { ?>
 				<div class="cell applink">
@@ -85,9 +107,9 @@ $time=time();
 						<output style="vertical-align: middle;" for="range" id="output"><?= $page ?></output>
 						<input style="vertical-align: middle;" type="range" id="range" name="range" min="0"
 						       max="<?= $nbPage ?>" value="<?= $page ?>"
-						       onchange="$('output').update(this.value);$('vaildpg').show();">
+						       onchange="apr_el('output').innerHTML=this.value;apr_show(apr_el('vaildpg'));">
 						<a id="vaildpg" style="display:none;"
-						   onclick="reloadScope('scope_prod_liste','<?= $uniqid ?>','page='+$('output').value);$(this).fade();">
+						   onclick="reloadScope('scope_prod_liste','<?= $uniqid ?>','page='+apr_el('output').value);fadeElement(this);">
 							<li class="fa fa-sign-out"></li>
 						</a>
 					</div>
