@@ -35,7 +35,7 @@ if (empty($arrV['latitudeVille']) || empty($arrV['longitudeVille'])) {
             center: new google.maps.LatLng(<?=$arrV['latitudeVille']?>, <?=$arrV['longitudeVille']?>),
             mapTypeId: google.maps.MapTypeId.ROADMAP
         }
-        var map = new google.maps.Map($("<?=$map_canvas?>"), mapOptions);
+        var map = new google.maps.Map(document.getElementById("<?=$map_canvas?>"), mapOptions);
         var marker = new google.maps.Marker({
             position: originlat,
             map: map
@@ -50,7 +50,8 @@ if (empty($arrV['latitudeVille']) || empty($arrV['longitudeVille'])) {
         }.bind(this));
 
         placeMarker = function (location) {
-            markers.each(function (node, index) {
+            // Was markers.each(...) — Prototype's Enumerable on a plain Array.
+            markers.forEach(function (node, index) {
                 markers[index].setMap(null);
             })
             marker = new google.maps.Marker({
@@ -78,7 +79,7 @@ if (empty($arrV['latitudeVille']) || empty($arrV['longitudeVille'])) {
         };
     }
     loadScriptMap = function () {
-        if ($('script_map')) {
+        if (document.getElementById('script_map')) {
             initializeMap();
             return;
         }

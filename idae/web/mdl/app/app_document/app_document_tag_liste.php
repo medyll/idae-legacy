@@ -100,10 +100,40 @@ skelMongo::connect('ged_tag','sitebase_ged')->update(array('ged'=>$KEY),array('$
 </style>
 <script>
 //
-$('loader<?=$uniqid?>').on('click','a[tag]',function(event,node){
-	tag 		= $(node).readAttribute('tag');
-	base 		= $(node).readAttribute('base');
-	collection 	= $(node).readAttribute('collection');
+/*
+ * Modified: 2026-08-11 — migrated off the PrototypeJS compatibility shims
+ * ($, .on, .readAttribute) to native DOM, with a file-local `adt_` helper.
+ */
+function adt_el(ref) {
+	return typeof ref === 'string' ? document.getElementById(ref) : ref;
+}
+
+/**
+ * Prototype's Element#on. With a selector it delegates, calling the handler
+ * as (event, matchedElement); without one it is a plain listener.
+ */
+function adt_on(root, eventName, selectorOrHandler, maybeHandler) {
+	if (!root) return;
+	if (maybeHandler === undefined) {
+		root.addEventListener(eventName, selectorOrHandler);
+		return;
+	}
+	var selector = selectorOrHandler, handler = maybeHandler;
+	root.addEventListener(eventName, function (event) {
+		var target = event.target;
+		while (target && target !== root) {
+			if (target.nodeType === 1 && target.matches(selector)) {
+				return handler(event, target);
+			}
+			target = target.parentNode;
+		}
+	}, false);
+}
+
+adt_on(adt_el('loader<?=$uniqid?>'),'click','a[tag]',function(event,node){
+	tag 		= node.getAttribute('tag');
+	base 		= node.getAttribute('base');
+	collection 	= node.getAttribute('collection');
 	reloadScope('document','<?=$idagent?>','tag='+tag+'&base='+base+'&collection='+collection); 
 	});
 </script> 

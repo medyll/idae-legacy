@@ -43,7 +43,7 @@
 								$nomdate = $valf['nomAppscheme_field'];
 								?>
 								<a class="autoToggle"
-								   onclick="$('type_date_<?= $uniqid ?>').update('<?= $nomdate ?>');$(this.up('.parent_form').querySelector('#deb')).setAttribute('name','vars_date[<?= $valdate ?>]'+'[$gte]');$(this.up('.parent_form').querySelector('#fin')).setAttribute('name','vars_date[<?= $valdate ?>]'+'[$lte]')">
+								   onclick="pmd_el('type_date_<?= $uniqid ?>').innerHTML='<?= $nomdate ?>';pmd_up(this,'.parent_form').querySelector('#deb').setAttribute('name','vars_date[<?= $valdate ?>]'+'[$gte]');pmd_up(this,'.parent_form').querySelector('#fin').setAttribute('name','vars_date[<?= $valdate ?>]'+'[$lte]')">
 									<i class="fa fa-<?= $valf['iconAppscheme_field'] ?>"></i> <?= ucfirst(idioma($valf['nomAppscheme_field'])) . ' ' . $table; ?></a>                                <?php } ?>
 						</div>                        <?php } ?>
 				</div>
@@ -66,9 +66,27 @@
 	</div>
 </div>
 <script>
-	$ ('oi<?=$uniqid?>').observe ('dom:act_click', function (event) {
-		$ ('type_periode_<?=$uniqid?>').update (event.memo.value);
-		$ ($ ('form<?=$uniqid?>').querySelector ('#deb')).value = event.memo.dateDebut
-		$ ($ ('form<?=$uniqid?>').querySelector ('#fin')).value = event.memo.dateFin
+	/*
+	 * Modified: 2026-08-11 — migrated off the PrototypeJS compatibility shims
+	 * ($, .observe, .up, .update) to native DOM, with file-local `pmd_` helpers.
+	 */
+	function pmd_el(ref) {
+		return typeof ref === 'string' ? document.getElementById(ref) : ref;
+	}
+
+	/** Prototype's Element#up: nearest ancestor matching `selector`. */
+	function pmd_up(node, selector) {
+		var parent = node ? node.parentNode : null;
+		while (parent && parent.nodeType === 1) {
+			if (parent.matches(selector)) return parent;
+			parent = parent.parentNode;
+		}
+		return null;
+	}
+
+	pmd_el ('oi<?=$uniqid?>').addEventListener ('dom:act_click', function (event) {
+		pmd_el ('type_periode_<?=$uniqid?>').innerHTML = event.memo.value;
+		pmd_el ('form<?=$uniqid?>').querySelector ('#deb').value = event.memo.dateDebut
+		pmd_el ('form<?=$uniqid?>').querySelector ('#fin').value = event.memo.dateFin
 	})
 </script>

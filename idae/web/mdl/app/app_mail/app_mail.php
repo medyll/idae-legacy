@@ -15,8 +15,8 @@
 ?>
 <div class="flex_v blanc" style="height: 100%;">
 	<div class="padding ededed applink">
-		<form onchange="$('liste_mail_<?= $uniqid ?>').loadModule('app/app_mail/app_mail_liste','idagent='+this.idagent.value+'&uniqid=<?= $uniqid ?>',{value:this.idagent.value})">
-			<a onclick="$('liste_mail_<?= $uniqid ?>').socketModule('app/app_mail/app_mail_liste','uniqid=<?= $uniqid ?>'); ">Recharger</a>
+		<form onchange="document.getElementById('liste_mail_<?= $uniqid ?>').loadModule('app/app_mail/app_mail_liste','idagent='+this.idagent.value+'&uniqid=<?= $uniqid ?>',{value:this.idagent.value})">
+			<a onclick="document.getElementById('liste_mail_<?= $uniqid ?>').socketModule('app/app_mail/app_mail_liste','uniqid=<?= $uniqid ?>'); ">Recharger</a>
 			<a onclick="runModule('mdl/dyn/dyn_mail_check','vars[idagent]=<?= $_SESSION['idagent'] ?>'); ">check</a>
 			<label>Profil</label>
 			<?= $selectA ?>
