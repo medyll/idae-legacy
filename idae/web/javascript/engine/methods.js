@@ -101,6 +101,61 @@ function appearElement(node, options) {
 	return node;
 }
 
+/**
+ * Scriptaculous' Effect.Highlight — the "yellow fade" cue.
+ *
+ * Added 2026-08-11, and unlike fadeElement/appearElement above it is not
+ * paying off a migration: it is fixing a break. shim-effects.js was deleted on
+ * 2026-08-09 once the last *JavaScript* caller of Effect.* was migrated, but
+ * three call sites live in PHP templates, inside inline script blocks that no
+ * JS-level grep covers — `new Effect.Highlight(node)` twice in postAction.php
+ * and `new Effect.Appear(...)` in mdlCalendrierListYear.php. All three have
+ * thrown "Effect is not defined" since that deletion. Same failure mode as the
+ * Form.serializeElements regression: the templates are the blind spot.
+ *
+ * Scriptaculous' contract, kept: flash `startcolor` (#ffff99), animate to
+ * `endcolor` (the element's own computed background) over `duration` seconds,
+ * then restore whatever backgroundColor the element had inline so the effect
+ * leaves no trace — including the empty string, which is what lets a CSS rule
+ * or :hover take the colour back over.
+ *
+ * A transition is used rather than a frame loop because the callers do not
+ * need intermediate values; postAction.php's two both delete the node 500ms
+ * in, so only the opening flash is ever seen.
+ */
+function highlightElement(node, options) {
+	if (!node) return node;
+	options = options || {};
+	var duration = (options.duration || 1.0) * 1000;
+	var startcolor = options.startcolor || '#ffff99';
+	var computed = window.getComputedStyle(node);
+	// Prototype resolved endcolor to the element's own background. A
+	// transparent one would animate to nothing visible, so fall back to white,
+	// which is what Scriptaculous' own default did.
+	var endcolor = options.endcolor || computed.backgroundColor;
+	if (!endcolor || endcolor === 'transparent' || endcolor === 'rgba(0, 0, 0, 0)') {
+		endcolor = '#ffffff';
+	}
+	var previousColor = node.style.backgroundColor;
+	var previousTransition = node.style.transition;
+
+	node.style.transition = '';
+	node.style.backgroundColor = startcolor;
+	// Commit the start colour before arming the transition, or both values
+	// collapse into one frame and no flash is ever painted — same reason as
+	// the forced layout in appearElement.
+	void node.offsetHeight;
+	node.style.transition = 'background-color ' + duration + 'ms ease-out';
+	node.style.backgroundColor = endcolor;
+
+	setTimeout(function () {
+		node.style.transition = previousTransition;
+		node.style.backgroundColor = previousColor;
+		if (options.afterFinish) options.afterFinish({element: node});
+	}, duration);
+	return node;
+}
+
 (function (global) {
 
 	/* ------------------------------------------------------------------ *

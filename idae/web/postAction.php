@@ -4,6 +4,9 @@
  *
  * Date: 07/07/14
  * Modified: 2026-03-15 — removed extract($_POST), removed display_errors, English comments
+ * Modified: 2026-08-11 — Effect.Highlight -> highlightElement (engine/methods.js);
+ *                        the Scriptaculous shim was deleted on 2026-08-09 and the
+ *                        two calls below had been throwing "Effect is not defined"
  */
 	include_once($_SERVER['CONF_INC']);
 
@@ -115,7 +118,7 @@ foreach($_POST['deleteModule'] as $key=>$val)  {
 		?>
 		$$('[mdl="<?=stripslashes($key)?>"]').each(function (node) {
 			if (node.getAttribute('value') == '<?=$val?>' || '<?=$val?>' == '*') {
-				new Effect.Highlight(node);
+				highlightElement(node);
 				setTimeout(function () {
 					try {
 						$(node).close()
@@ -141,7 +144,7 @@ foreach($_POST['deleteModule'] as $key=>$val)  {
 				?>
 		$$('[mdl="<?=stripslashes($keykey)?>"]').each(function (node) {
 			if (node.getAttribute('value') == '<?=$realval?>' || '<?=$realval?>' == '*') {
-				new Effect.Highlight(node);
+				highlightElement(node);
 				setTimeout(function () {
 					try {
 						$(node).close()

@@ -1,4 +1,9 @@
 <?php
+/**
+ * Modified: 2026-08-11 — Effect.Appear -> appearElement (engine/methods.js);
+ *                        the Scriptaculous shim was deleted on 2026-08-09 and
+ *                        this call had been throwing "Effect is not defined"
+ */
 if(file_exists('../conf.inc.php')) include_once('../conf.inc.php');
 if(file_exists('../../conf.inc.php')) include_once('../../conf.inc.php'); 
 $sd = $_POST['sd'];
@@ -41,7 +46,7 @@ $i++;
 </style>
 <script>
  $('dynlistYear').cleanWhitespace()
- new Effect.Appear($('dynlistYear'))
+ appearElement($('dynlistYear'))
 // new tableGui($('dynlistYear'),{numRow: 3, numCol: 3   })
 closeFrmListYear=function(file,div,links){
 	ajaxInMdl('file','div','link');

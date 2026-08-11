@@ -89,7 +89,13 @@
 		if (!event.dataTransfer.getData('dragid')) return;
 		this.dnd_successful = true;
 	//	if ($$('[dragged]').size() != 0) {
-			tmpdiv = Element.clone($$('[dragged]').first(), true);
+			// Was `Element.clone(node, true)`. Prototype has no Element.clone --
+			// not in 1.7.3, not in the shim -- so this line has thrown
+			// "Element.clone is not a function" for as long as it has existed,
+			// killing the drop handler before anything below it ran. Predates
+			// the idae-be migration; found 2026-08-11 by template-api-guard.spec.ts.
+			// cloneNode(true) is the deep copy it was reaching for.
+			tmpdiv = $$('[dragged]').first().cloneNode(true);
 			tmpdiv.removeAttribute('dragged');
 			$$('[dragged]').invoke('remove');
 			$('django').insert({before: tmpdiv});

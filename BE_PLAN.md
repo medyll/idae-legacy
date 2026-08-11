@@ -708,6 +708,66 @@ Une fois les gabarits réellement fonctionnels, le découpage annoncé a pu se f
 
 **Ce qui reste vrai** : `shim-form.js` n'est pas supprimable. Ses 52 appels de gabarits le tiennent.
 
+## L'angle mort des gabarits, troisième occurrence — `Effect.*` (2026-08-11)
+
+Le découpage de `shim-ajax` réglé, j'ai voulu chiffrer le « chantier de gabarits » annoncé plus bas. Le comptage a d'abord fait remonter autre chose.
+
+### Mesure
+
+Surface Prototype recherchée dans `*.php` / `*.latte` / `*.tpl` (hors `flotr/`) :
+
+| | | | | | |
+|---|---|---|---|---|---|
+| `$(` **694** | `.select()` 90 | `.readAttribute()` 88 | `.first()` 70 | `.show()` 44 | `.bind()` 44 |
+| `.up()` 43 | `$$(` 41 | `.serialize()` 38 | `.observe()` 31 | `.fire()` 26 | `.invoke()` 21 |
+| `.hide()` 21 | `.each()` 20 | `Event.` 19 | `.update()` 18 | `.next()` 18 | `.size()` 10 |
+| `.setStyle()` 10 | `Insertion.` 8 | `$A(` 5 | **`Effect.` 4** | `Position.` 1 | `Element.` 1 |
+
+Hors `flotr/`, `vendor/` et `adodb/` — ces deux derniers sont des bibliothèques PHP serveur sans JS inline, et les inclure noie le signal (1 449 occurrences de `Builder` à elles seules). Des faux positifs subsistent, `.select(` et `.first(` attrapant aussi du PHP applicatif. L'ordre de grandeur est bon et confirme le chiffre de ~719 `$()` cité plus bas.
+
+### Ce que `Effect. 4` voulait dire
+
+`shim-effects.js` a été supprimé le 09/08 « une fois chaque appelant réel migré ». Chaque appelant **JavaScript**. Trois appels vivent dans des blocs `<script>` de gabarits :
+
+- `postAction.php:118` et `:144` — `new Effect.Highlight(node)`
+- `mdl/app/app_calendrier/mdlCalendrierListYear.php:44` — `new Effect.Appear($('dynlistYear'))`
+
+(un quatrième, `page_body.latte:306`, est en commentaire.)
+
+Ils lèvent `Effect is not defined` depuis le 09/08.
+
+**Et `prototype-surface.spec.ts` a activement validé la suppression** : `Effect` en a été retiré avec la note « ce contrat décrit ce dont l'app dépend, pas un musée de ce que Prototype offrait ». Le raisonnement est juste ; l'inventaire sur lequel il s'appuyait ne regardait que le JS. J'ai écrit cette note moi-même deux jours plus tôt.
+
+### Correctif
+
+`appearElement` existait déjà dans `engine/methods.js` — substitution directe. `highlightElement` ajouté à côté, même contrat Scriptaculous : flash `#ffff99`, transition vers le fond calculé, puis restauration du `backgroundColor` inline d'origine — y compris la chaîne vide, ce qui laisse une règle CSS ou un `:hover` reprendre la main. Transition CSS plutôt que boucle de frames : les deux appels de `postAction.php` suppriment le nœud 500 ms plus tard, seul le flash initial est jamais vu.
+
+### La garde : `template-api-guard.spec.ts`
+
+Corriger les trois appels ne vaut rien si le quatrième passe pareil. Le trou d'outillage se bouche par un test qui **dérive** sa liste au lieu de la coder en dur :
+
+1. côté Node, parcours de `idae/web/**/*.{php,latte,tpl}` (hors `flotr/`, `vendor/`, `adodb/`), commentaires de ligne retirés — sinon le `//new Effect.ScrollTo` de `page_body.latte` maintiendrait une API morte en vie ;
+2. extraction des `Namespace.membre` et des `.methode(` appartenant au vocabulaire Prototype (ensemble fermé : matcher tous les `.foo(` d'un fichier PHP noierait le signal) ;
+3. côté navigateur, chaque nom est cherché sur `$(element)`, `Array/String/Function/Number.prototype` — il passe si **au moins un** hôte le fournit. Le scan ne sait pas à quel receveur appartient un `.foo(` dans un gabarit, et n'a pas besoin de le savoir : il ne doit écarter que « personne ne le fournit ». Une collision avec un nom de méthode PHP est donc inoffensive.
+
+Supprimer un shim dont un gabarit dépend fait maintenant échouer ce test, sans que personne ait eu à penser à le mettre à jour. 20 s.
+
+**Premier run, première prise** — `Element.clone`, dans le gestionnaire de drop de `mdl/app/app_newsletter/app_newsletter_item_liste.php:92` :
+
+```js
+tmpdiv = Element.clone($$('[dragged]').first(), true);
+```
+
+`Element.clone` n'existe pas. Ni dans le shim, **ni dans PrototypeJS 1.7.3** — la méthode n'a jamais fait partie de l'API. Cette ligne lève `Element.clone is not a function` depuis qu'elle a été écrite, tuant le gestionnaire avant tout ce qui suit. Antérieur à la migration, sans rapport avec elle. Remplacé par `cloneNode(true)`, la copie profonde visée.
+
+C'est le meilleur argument possible pour la garde : elle a trouvé, à sa première exécution, un bug que personne ne cherchait.
+
+### Le vrai enseignement, corrigé
+
+Trois fois de suite — `Form.serializeElements`, `Form#serialize`, `Effect.*` — le même schéma : une API retirée ou jamais posée, zéro appelant JS, des appelants dans des attributs `onclick`/`onsubmit` inline, et une détection uniquement au clic d'un utilisateur. **Aucun de nos outils ne regardait les gabarits** : ni le grep de migration, ni `IDAE_SHIM_WARN` (qui n'instrumente que ce qui est appelé pendant la navigation de test), ni `prototype-surface.spec.ts` (liste écrite à la main depuis un inventaire JS).
+
+Ce n'était pas une série de trois étourderies, c'était un trou d'outillage — désormais bouché par `template-api-guard.spec.ts`. Toute suppression de shim était un pari jusqu'ici ; elle est maintenant vérifiable.
+
 **Corollaire, et c'est le vrai enseignement** : `shim-core`, `shim-class`, `shim-element`, `shim-enumerable` et `shim-event` sont tenus par les gabarits, pas par le JS applicatif. Le JS est migré ; ce sont les ~719 `$()` et consorts en PHP/Latte qui maintiennent toute la couche en vie. **La suite de la migration n'est pas un problème JavaScript, c'est un chantier de gabarits** — et il n'a jamais été chiffré.
 
 ## Note de méthode — redémarrer Docker entre deux fichiers est inutile (2026-08-10)
