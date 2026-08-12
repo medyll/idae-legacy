@@ -161,7 +161,15 @@ test('template API guard: every Prototype symbol the templates call exists at ru
   const page = getPage();
   const found = scanTemplates();
 
-  expect(found.methods.size, 'template scan found nothing — the walk is broken').toBeGreaterThan(10);
+  // Was > 10, as a floor meant only to catch "the walk found nothing, i.e.
+  // it's broken" — not a target to defend. It read 10-11 before the
+  // 2026-08-12 shim-element/-event/-class residual cleanup (readAttribute,
+  // .up(), .next(), Event.element, new Template — all real template call
+  // sites, all migrated to native DOM that day) legitimately dropped the
+  // template vocabulary's distinct-name count to 9. Lowered to keep testing
+  // "did the walk run at all", not "how many Prototype names are still
+  // in use" — the latter is expected to keep shrinking as Phase 5 continues.
+  expect(found.methods.size, 'template scan found nothing — the walk is broken').toBeGreaterThan(5);
 
   const missing = await page.evaluate(
     ([namespaced, methods]) => {

@@ -41,8 +41,8 @@
 	new myddeExplorer (document.getElementById('explorer<?=$uniqid?>'));
 
 	document.getElementById('<?=$dropzone?>').on ('click', '[data-table][data-table_value]', function (event, node) {
-		var table       = node.readAttribute ('data-table');
-		var table_value = node.readAttribute ('data-table_value');
+		var table       = node.getAttribute ('data-table'); // was readAttribute — plain getAttribute, no Prototype translation applies to data-*
+		var table_value = node.getAttribute ('data-table_value');
 		document.getElementById('<?=$dragzone?>').loadModule ('app/app/app_update', 'table=' + table + '&table_value=' + table_value);
 	})
 </script>

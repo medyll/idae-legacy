@@ -16,9 +16,15 @@
 	}).then(function(res){
 		res = eval(res)[0];
 		console.log(res)
-		var prod_fiche_tpl = new Template($('tolototo').innerHTML);
-		out = prod_fiche_tpl.evaluate(res);
-		tolototo.update(out);
+		// Was new Template(...).evaluate(res) + tolototo.update(out) — the
+		// last Class.create/Template caller and a shim-element .update() call.
+		// The div's own markup carries #{field} placeholders (see the PHP
+		// foreach below); a flat regex substitution is equivalent here since
+		// none of the keys use Template's dotted/bracket path syntax.
+		var apf_tolototo = document.getElementById('tolototo');
+		apf_tolototo.innerHTML = apf_tolototo.innerHTML.replace(/#\{([^}]*)\}/g, function (match, key) {
+			return res[key] == null ? '' : String(res[key]);
+		});
 	})
 </script>
 <div style = "width: 900px;"

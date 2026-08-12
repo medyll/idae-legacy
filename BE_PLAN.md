@@ -801,6 +801,63 @@ socket avait déjà poussé (« Notification »). Corrigé en visant le dernier.
 voir avec les shims ; le spec était faux depuis le début et ne le montrait que
 quand une notification arrivait avant lui.
 
+## `shim-class` et `shim-event` vidés de leurs derniers appelants (2026-08-12)
+
+Suite du même audit : les deux shims les plus légers n'avaient plus qu'un et
+deux sites de gabarits respectivement.
+
+**`shim-class`** — `app_prod_fiche.php` faisait `new Template(...).evaluate(res)`
+puis `tolototo.update(out)` (identifiant nu + `.update()` de `shim-element`). Le
+gabarit interpole `#{champ}` dans le HTML existant du conteneur ; ses clés sont
+plates, sans la syntaxe pointée/crochets de `Template`. Remplacé par un
+`replace(/#\{([^}]*)\}/g, …)` direct sur `innerHTML`, plus `.innerHTML =`. Un
+seul site, donc pas de helper file-local séparé.
+
+**`shim-event`** — deux sites : `app_calendrier_echeance.php` appelait
+`.observe('dom:act_click', …)` alors que tous les autres producteurs/consommateurs
+de ce même événement custom dans le code (`app_calendrier.js`,
+`myddeDatalist.js`, `app_conge.php`, `app_planning.php`, `app_stat_dispatch.php`…)
+utilisent déjà `addEventListener` + `event.memo` — celui-ci était le seul
+survivant sous l'ancienne API. Et `skelbuilder_input.php` faisait
+`Event.element(event)`, qui n'est rien d'autre que `event.target`.
+
+**Bonus au passage, shim-element** : l'audit avait raté deux choses en les
+classant "native" à tort.
+- `app_explorer_search.php` : `.up('.searchMdl')` (ancêtre le plus proche,
+  hors self) et `.next()` (frère suivant, sans sélecteur) sur 4 sites, plus
+  `.hasClassName()` ×2 et `.insert({after: …})`. `.up()` devient
+  `parentElement.closest(...)` — `closest()` inclut self, Prototype non, d'où le
+  scope sur `parentElement`. `.next()` devient `nextElementSibling`.
+  `.insert({after})` devient `insertAdjacentElement('afterend', …)`, qui déplace
+  aussi un nœud déjà attaché comme le faisait Prototype.
+- `.readAttribute('data-table'/'data-table_value')` dans
+  `app_promo_zone_build.php` et `app_scheme_has_field.php` : ni dans la table de
+  traduction de lecture de Prototype ni dans les attributs booléens, donc
+  `getAttribute` pur.
+- `app_component.html` : `.up('#auto_expl_preview_zone')` cherchait un ancêtre
+  par id fixe — remplacé par un accès direct `getElementById(...)`. `.hide()`
+  devient `style.display = 'none'`.
+- Trois faux positifs corrigés dans l'inventaire lui-même : `myddeDatalist.js`
+  et `myddeSelection.js` n'appelaient déjà que `window.scrollTo`/`global.scrollTo`
+  natifs — l'audit du jour précédent comptait ces occurrences sans vérifier
+  qu'il s'agissait bien de l'API globale et non de la méthode d'élément.
+
+**`shim-element` et `shim-form` restent** : mesurés à nouveau après ce ménage,
+0 appel de `shim-class`/`shim-event` dans les gabarits ; `shim-element` en garde
+19 (surtout des méthodes `Array#/String#` homonymes natives, réparties sur peu
+de fichiers) ; `shim-form` en garde ~47, le vrai chantier.
+
+**Effet de bord attendu sur le filet** : `template-api-guard.spec.ts` a un
+garde-fou interne — `found.methods.size > N` — pour détecter si son propre
+parcours de fichiers est cassé (zéro résultat = bug du test, pas du code). Le
+nettoyage a fait passer le compte de noms Prototype distincts trouvés dans les
+gabarits de 10 à 9, sous le seuil de 10 posé quand ce garde-fou a été écrit.
+Le seuil n'est pas une cible à défendre, seulement un « le parcours a bien
+tourné » ; abaissé à 5 et documenté comme tel — le compte réel continuera de
+baisser au fil de la Phase 5.
+
+Toute la suite (106 tests) verte après ce commit.
+
 ## L'angle mort des gabarits, troisième occurrence — `Effect.*` (2026-08-11)
 
 Le découpage de `shim-ajax` réglé, j'ai voulu chiffrer le « chantier de gabarits » annoncé plus bas. Le comptage a d'abord fait remonter autre chose.

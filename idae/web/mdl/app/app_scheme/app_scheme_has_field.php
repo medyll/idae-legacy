@@ -43,8 +43,8 @@
 </div>
 <script>
 	document.getElementById('zone_has_field_menu').on ('click', '[data-table][data-table_value]', function (event, node) {
-		var table       = node.readAttribute ('data-table');
-		var table_value = node.readAttribute ('data-table_value');
+		var table       = node.getAttribute ('data-table'); // was readAttribute — plain getAttribute, no Prototype translation applies to data-*
+		var table_value = node.getAttribute ('data-table_value');
 		document.getElementById('inner_col_f').loadModule ('app/app_scheme/app_scheme_has_field_update', 'table=' + table + '&idappscheme=' + table_value);
 	})
 </script>

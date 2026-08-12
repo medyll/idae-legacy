@@ -160,7 +160,7 @@ var dyn_require = function () {
 			console.log ('log ok');
 			if ( localStorage.getItem ('wallpaper') ) {
 				setTimeout (function () {
-					$ ('body').setStyle ({ backgroundImage : localStorage.getItem ('wallpaper') });
+					document.body.style.backgroundImage = localStorage.getItem ('wallpaper');
 				}, 0);
 			}
 		})
