@@ -160,9 +160,13 @@
 			return;
 			if ( !this.element ) return;
 			clearTimeout (this.resizeTimer);
-			$ (this.firstRow).select ('.sortheader').each (function (node) {
-				if ( node.getWidth != node.up ().offsetWidth && node.up ().offsetWidth != 0 ) {
-					node.setStyle ({ 'width' : node.up ().offsetWidth + 'px' });
+			// Unreachable: the `return;` four lines up bails before any of this.
+			// Migrated off the shims anyway rather than left as the file's last
+			// Prototype reference, so shim-core has no caller here at all.
+			Array.prototype.slice.call (this.firstRow.querySelectorAll ('.sortheader')).forEach (function (node) {
+				var parent = node.parentNode;
+				if ( node.getWidth != parent.offsetWidth && parent.offsetWidth != 0 ) {
+					node.style.width = parent.offsetWidth + 'px';
 				}
 			})
 			this.resizeTimer = setTimeout (function () {

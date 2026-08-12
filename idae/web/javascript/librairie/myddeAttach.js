@@ -304,7 +304,12 @@
 	        }.bind(this);
 	        this.xhrArr[index].onloadend = function(event) {
 	            content = this.xhrArr[index].responseText;
-	            content.evalScripts.bind(content).defer();
+	            // Was `content.evalScripts.bind(content).defer()` — String#evalScripts
+            // plus Function#defer, both from shim-enumerable. engine_evalScripts
+            // (engine/engine.js) is the native port already used by app_keepon,
+            // app_live_data and app_menu, and setTimeout(.., 10) is exactly what
+            // defer() did.
+            setTimeout(function () { engine_evalScripts(content); }, 10);
 		        console.log('onloaend for index ',index,act_chrome_gui);
 	        }.bind(this);
 	        this.xhrArr[index].upload.onprogress = function(event) {
