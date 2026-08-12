@@ -1,22 +1,22 @@
 /**
- * The image cropper's drag contract.
+ * The image cropper's behaviour contract.
  *
- * librairie/cropper.js builds its selection-area mover as
- * `CropDraggable = Class.create(Draggable, {...})`, overriding `initialize`
- * and `draw` and calling `this.currentDelta()` / binding `this.initDrag`
- * inside its own initialize. Those are Scriptaculous Draggable methods.
+ * This is the safety net for migrating librairie/cropper.js off the Prototype
+ * shims. That file is 1362 lines and is now the sole remaining JavaScript
+ * caller of shim-class, shim-element and shim-draggable, so it has to be
+ * covered before it is touched, not after.
  *
- * Between the Phase 3/4 swap and 2026-08-11 the shim's Draggable was a
- * simplified stand-in with neither method, so `new CropDraggable(...)` threw
- * "this.currentDelta is not a function" — on cropper.js line 151, reached
- * from Cropper.Img's own setup before its setParams(). The whole cropper
- * ("Retailler cette image" on the image-upload screen) was dead, and nothing
- * noticed because no test constructed one.
+ * It also guards the bug that motivated the first version of this spec:
+ * `CropDraggable = Class.create(Draggable, {...})` calls `this.currentDelta()`
+ * and binds `this.initDrag` inside its own initialize. Between the Phase 3/4
+ * swap and 2026-08-11 the shim's Draggable had neither, so `new Cropper.Img`
+ * threw before its setParams() and the whole cropper was dead. Verified: the
+ * construction assertion below fails against that shim with exactly the
+ * production error.
  *
- * This spec constructs a real Cropper.Img over a real loaded image and then
- * drives an actual pointer drag across the selection, asserting the selection
- * moves. Construction alone would have passed against a Draggable whose
- * drag pump never fires.
+ * Assertions are on observable geometry and on the onEndCrop payload rather
+ * than on internals, so a native rewrite that keeps the behaviour passes and
+ * one that quietly changes it does not.
  */
 import { test, expect } from './fixtures/test-base';
 import { sharedPage } from './fixtures/shared-boot';
@@ -28,16 +28,20 @@ const PNG_8x8 =
   'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAICAYAAADED76LAAAAG0lEQVR42mNk' +
   'YPhfz0AEYBxVSF+FAAoMAGDvBPtwZgD4AAAAAElFTkSuQmCC';
 
-test('cropper: builds over an image and its selection responds to a drag', async () => {
-  const page = getPage();
-
-  const built = await page.evaluate(async (src) => {
+/**
+ * Builds a Cropper.Img over a real loaded image inside a laid-out host.
+ * Off-screen but not display:none — Cropper reads offsets, and a hidden image
+ * would give it a 0x0 canvas and nothing to select.
+ */
+async function buildCropper(page: any, src: string) {
+  return page.evaluate(async (imgSrc: string) => {
     const w = window as any;
+
+    const prev = document.getElementById('pw_cropper_host');
+    if (prev && prev.parentNode) prev.parentNode.removeChild(prev);
 
     const host = document.createElement('div');
     host.id = 'pw_cropper_host';
-    // Off-screen but laid out: Cropper reads offsets, so display:none would
-    // give it a 0x0 image and nothing to select.
     host.style.cssText = 'position:absolute;left:-9999px;top:0;width:400px;height:400px;';
     document.body.appendChild(host);
 
@@ -49,61 +53,143 @@ test('cropper: builds over an image and its selection responds to a drag', async
     await new Promise<void>((resolve) => {
       img.onload = () => resolve();
       img.onerror = () => resolve();
-      img.src = src;
+      img.src = imgSrc;
     });
 
+    w.__pwCropCalls = [];
     try {
-      const crop = new w.Cropper.Img('pw_cropper_img', {
-        onEndCrop: function () {},
+      w.__pwCrop = new w.Cropper.Img('pw_cropper_img', {
         displayOnInit: true,
         onloadCoords: { x1: 10, y1: 10, x2: 110, y2: 90 },
+        onEndCrop: function (coords: any, dims: any) {
+          w.__pwCropCalls.push({ coords: coords, dims: dims });
+        },
       });
-      return { constructed: true, hasSelArea: !!crop.selArea, error: null as string | null };
+      return { error: null as string | null };
     } catch (e: any) {
-      return { constructed: false, hasSelArea: false, error: e.message as string };
+      return { error: e.message as string };
     }
-  }, PNG_8x8);
+  }, src);
+}
 
-  expect(built.error, 'Cropper.Img threw during construction').toBeNull();
-  expect(built.constructed).toBe(true);
-  expect(built.hasSelArea, 'Cropper built no selection area').toBe(true);
-
-  // Drive a real drag through the document-level pump: mousedown on the
-  // selection, two mousemoves (the first arms startDrag, the second moves),
-  // then mouseup. Synthetic MouseEvents rather than page.mouse — the host is
-  // parked off-screen where a real pointer cannot reach it.
-  const moved = await page.evaluate(() => {
-    const w = window as any;
-    const sel = document.querySelector('#pw_cropper_host .imgCrop_selArea') as HTMLElement | null;
-    if (!sel) return { ok: false, reason: 'no selArea in DOM' };
-
-    const before = sel.style.left;
-    const fire = (type: string, x: number, y: number, target: EventTarget) =>
+/** Synthetic MouseEvents: the host is parked off-screen, out of pointer reach. */
+const DRIVE = `
+  (sel, steps) => {
+    const fire = (type, x, y, target) =>
       target.dispatchEvent(new MouseEvent(type, {
-        bubbles: true, cancelable: true, button: 0, clientX: x, clientY: y,
-      }));
+        bubbles: true, cancelable: true, button: 0, clientX: x, clientY: y }));
+    fire('mousedown', steps[0][0], steps[0][1], sel);
+    for (let i = 1; i < steps.length; i++) fire('mousemove', steps[i][0], steps[i][1], document);
+    const last = steps[steps.length - 1];
+    fire('mouseup', last[0], last[1], document);
+  }`;
 
-    fire('mousedown', 50, 50, sel);
-    fire('mousemove', 70, 60, document);
-    fire('mousemove', 90, 75, document);
-    fire('mouseup', 90, 75, document);
+test('cropper: builds, honours onloadCoords, and reports them on end', async () => {
+  const page = getPage();
 
+  const built = await buildCropper(page, PNG_8x8);
+  expect(built.error, 'Cropper.Img threw during construction').toBeNull();
+
+  const state = await page.evaluate(() => {
+    const w = window as any;
+    const crop = w.__pwCrop;
+    const sel = document.querySelector('#pw_cropper_host .imgCrop_selArea') as HTMLElement;
     return {
-      ok: true,
-      reason: '',
-      before,
-      after: sel.style.left,
-      dragPumpRan: w.Draggables.activeDraggable === null,
+      hasSelArea: !!sel,
+      areaCoords: crop.areaCoords,
+      calcW: crop.calcW(),
+      calcH: crop.calcH(),
     };
   });
 
-  expect(moved.ok, moved.reason).toBe(true);
-  // The pump must have released the draggable on mouseup — if activeDraggable
-  // were still set, the drag never completed its lifecycle.
-  expect(moved.dragPumpRan, 'Draggables did not deactivate on mouseup').toBe(true);
+  expect(state.hasSelArea, 'no selection area was built').toBe(true);
+  // onloadCoords must survive setParams and land in areaCoords unchanged.
+  expect(state.areaCoords).toMatchObject({ x1: 10, y1: 10, x2: 110, y2: 90 });
+  expect(state.calcW).toBe(100);
+  expect(state.calcH).toBe(80);
+});
 
-  await page.evaluate(() => {
+test('cropper: dragging the selection moves it and fires onEndCrop', async () => {
+  const page = getPage();
+  const built = await buildCropper(page, PNG_8x8);
+  expect(built.error).toBeNull();
+
+  const r = await page.evaluate(([drive]: [string]) => {
+    const w = window as any;
+    const sel = document.querySelector('#pw_cropper_host .imgCrop_selArea') as HTMLElement;
+    const before = { x1: w.__pwCrop.areaCoords.x1, y1: w.__pwCrop.areaCoords.y1 };
+
+    // eslint-disable-next-line no-eval
+    (0, eval)(drive)(sel, [[50, 50], [70, 62], [92, 78]]);
+
+    return {
+      before,
+      after: { x1: w.__pwCrop.areaCoords.x1, y1: w.__pwCrop.areaCoords.y1 },
+      endCalls: w.__pwCropCalls.length,
+      lastDims: w.__pwCropCalls.length ? w.__pwCropCalls[w.__pwCropCalls.length - 1].dims : null,
+      pumpReleased: w.Draggables.activeDraggable === null,
+    };
+  }, [DRIVE]);
+
+  // The drag must actually move the selection, not merely run without error —
+  // a Draggable whose pump never fires would leave these equal.
+  expect(r.after.x1, 'selection did not move horizontally').not.toBe(r.before.x1);
+  expect(r.after.y1, 'selection did not move vertically').not.toBe(r.before.y1);
+
+  // Moving must not resize: the drag translates the box.
+  expect(r.lastDims, 'onEndCrop never fired').not.toBeNull();
+  expect(r.lastDims.width).toBe(100);
+  expect(r.lastDims.height).toBe(80);
+
+  expect(r.pumpReleased, 'Draggables did not deactivate on mouseup').toBe(true);
+});
+
+test('cropper: dragging the SE handle resizes rather than moves', async () => {
+  const page = getPage();
+  const built = await buildCropper(page, PNG_8x8);
+  expect(built.error).toBeNull();
+
+  const r = await page.evaluate(([drive]: [string]) => {
+    const w = window as any;
+    const handle = document.querySelector('#pw_cropper_host .imgCrop_handleSE') as HTMLElement;
+    if (!handle) return { missing: true } as any;
+
+    const before = Object.assign({}, w.__pwCrop.areaCoords);
+    // eslint-disable-next-line no-eval
+    (0, eval)(drive)(handle, [[110, 90], [130, 110], [150, 130]]);
+
+    return {
+      missing: false,
+      before,
+      after: Object.assign({}, w.__pwCrop.areaCoords),
+      dims: { w: w.__pwCrop.calcW(), h: w.__pwCrop.calcH() },
+    };
+  }, [DRIVE]);
+
+  expect(r.missing, 'no SE handle in the DOM').toBe(false);
+  // The anchored corner stays put; the dragged one moves.
+  expect(r.after.x1).toBe(r.before.x1);
+  expect(r.after.y1).toBe(r.before.y1);
+  expect(r.after.x2, 'SE handle did not widen the selection').toBeGreaterThan(r.before.x2);
+  expect(r.dims.w).toBeGreaterThan(100);
+});
+
+test('cropper: remove() tears the UI back out of the DOM', async () => {
+  const page = getPage();
+  const built = await buildCropper(page, PNG_8x8);
+  expect(built.error).toBeNull();
+
+  const r = await page.evaluate(() => {
+    const w = window as any;
+    const hadUI = !!document.querySelector('#pw_cropper_host .imgCrop_selArea');
+    w.__pwCrop.remove();
+    const stillThere = !!document.querySelector('#pw_cropper_host .imgCrop_selArea');
+
     const host = document.getElementById('pw_cropper_host');
     if (host && host.parentNode) host.parentNode.removeChild(host);
+    return { hadUI, stillThere };
   });
+
+  expect(r.hadUI).toBe(true);
+  expect(r.stillThere, 'remove() left the cropper UI in the DOM').toBe(false);
 });
