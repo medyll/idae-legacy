@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', function() {
 	// code
 
 })
-window.document.observe('dom:loaded', function () {
+window.document.addEventListener('DOMContentLoaded', function () {
 
 })
 

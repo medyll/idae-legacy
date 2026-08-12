@@ -283,14 +283,22 @@
 
 	        this.xhrArr[index].onload = function() {
 	            this.Progress[index].value = this.Progress[index].innerHTML = 100;
-	            this.Progress[index].fade({
+	            // Same dead-since-2026-08-09 `.fade()` as below. fadeElement
+	            // takes the same options object, afterFinish included.
+	            fadeElement(this.Progress[index], {
 	                afterFinish : function() {
-	                    this.Progress[index].remove();
+	                    var p = this.Progress[index];
+	                    if (p && p.parentNode) p.parentNode.removeChild(p);
 	                }.bind(this)
 	            });
 		        if(index == eval(this.total-1)){
 			        this.dropped = false;
-			        if(this.options.show_hide){$(this.element).fade();}
+			        // Was `$(this.element).fade()`. shim-effects.js was deleted on
+			        // 2026-08-09 once the last *known* Effect caller migrated; this
+			        // one was missed, so the upload panel has thrown "fade is not a
+			        // function" on every completed upload with show_hide set since.
+			        // fadeElement is the native replacement in engine/methods.js.
+			        if(this.options.show_hide){fadeElement(this.element);}
 		        }
 		        console.log('onload for index ',index,act_chrome_gui);
 	        }.bind(this);

@@ -79,7 +79,8 @@ schemeLoad = function () {
 
 			window.APP.APPSCHEMES = [];
 			res = JSON.parse(res);
-			$A(res).forEach(function (node) {
+			// $A() on an already-real Array from JSON.parse was a no-op.
+			res.forEach(function (node) {
 				table = node.codeAppscheme;
 				// if (!window.APP.APPSCHEMES) window.APP.APPSCHEMES = {};
 				if (!window.APP.APPSCHEMES[table]) {
