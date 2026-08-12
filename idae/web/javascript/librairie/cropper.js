@@ -137,8 +137,8 @@
  * of these file-local `cr_` helpers, matching the per-file-prefix pattern the
  * rest of the phase 5 migration used (BE_PLAN.md).
  *
- * Draggable / Draggables are deliberately still the shim's: CropDraggable
- * subclasses Draggable, so freeing that one is a separate step.
+ * Draggable / Draggables were the last shim dependency here; they now live
+ * in this file too (below), and shim-draggable.js is deleted.
  * ---------------------------------------------------------------------- */
 
 function cr_noop() {}
@@ -261,11 +261,181 @@ function cr_class(parent, methods) {
 	return Klass;
 }
 
+/* ---------------------------------------------------------------------- *
+ * Draggable / Draggables — Modified: 2026-08-11                            *
+ *                                                                          *
+ * Moved here from vendor/idae-be-shim/shim-draggable.js, which this file was
+ * the last caller of, and which is now deleted. Scriptaculous' lifecycle, not
+ * a convenient subset: CropDraggable below overrides `initialize` and `draw`
+ * and calls `this.currentDelta()` / binds `this.initDrag` from inside its own
+ * initialize, so those have to exist with those exact names.
+ *
+ *   mousedown on handle -> initDrag
+ *     -> records where inside the element the pointer grabbed it, then
+ *        cr_Draggables.activate(this)
+ *   document mousemove   -> cr_Draggables.updateDrag
+ *     -> first move calls startDrag, then updateDrag -> this.draw(pointer)
+ *   document mouseup     -> cr_Draggables.endDrag -> finishDrag
+ *
+ * `draw` is the override point: the base moves the element, CropDraggable
+ * forwards to the Cropper's own drawMethod instead and never touches it.
+ * ---------------------------------------------------------------------- */
+
+var cr_Draggables = {
+	drags: [],
+	activeDraggable: null,
+	_pumpInstalled: false,
+	_lastPointer: null,
+
+	register: function (draggable) {
+		if (this.drags.indexOf(draggable) !== -1) return;
+		this.drags.push(draggable);
+		this._installPump();
+	},
+	unregister: function (draggable) {
+		this.drags = this.drags.filter(function (d) { return d !== draggable; });
+	},
+
+	/**
+	 * One pair of document listeners for every draggable, installed on first
+	 * register. Per-instance listeners would leak: nothing calls destroy() on
+	 * a CropDraggable when its Cropper is torn down.
+	 */
+	_installPump: function () {
+		if (this._pumpInstalled) return;
+		this._pumpInstalled = true;
+		var self = this;
+		document.addEventListener('mousemove', function (e) { self.updateDrag(e); }, false);
+		document.addEventListener('mouseup', function (e) { self.endDrag(e); }, false);
+	},
+
+	activate: function (draggable) { this.activeDraggable = draggable; },
+	deactivate: function () { this.activeDraggable = null; },
+
+	updateDrag: function (event) {
+		var draggable = this.activeDraggable;
+		if (!draggable) return;
+		var pointer = [cr_pointerX(event), cr_pointerY(event)];
+		// Same-position mousemove events are common; skip them so a click
+		// without movement never counts as a drag.
+		if (this._lastPointer &&
+			this._lastPointer[0] === pointer[0] && this._lastPointer[1] === pointer[1]) return;
+		this._lastPointer = pointer;
+
+		if (!draggable.dragging) draggable.startDrag(event);
+		draggable.updateDrag(event, pointer);
+	},
+
+	endDrag: function (event) {
+		var draggable = this.activeDraggable;
+		this._lastPointer = null;
+		if (!draggable) return;
+		this.deactivate();
+		if (!draggable.dragging) return;
+		draggable.finishDrag(event, true);
+	}
+};
+
+var cr_Draggable = function (element) {
+	this.initialize(element, arguments[1]);
+};
+
+cr_extend(cr_Draggable.prototype, {
+	/** Subclasses override this wholesale — CropDraggable does. */
+	initialize: function (element, options) {
+		this.options = cr_extend({ handle: false, revert: false, zindex: 1000 }, options || {});
+		this.element = cr_el(element);
+		this.handle = this.options.handle ? cr_el(this.options.handle) : this.element;
+		this.delta = this.currentDelta();
+		this.dragging = false;
+
+		this.eventMouseDown = this.initDrag.bind(this);
+		cr_on(this.handle, 'mousedown', this.eventMouseDown);
+		cr_Draggables.register(this);
+	},
+
+	/**
+	 * [left, top] as numbers, from the *computed* style.
+	 *
+	 * Prototype read this through Element.getStyle, which resolves the
+	 * cascade. Reading this.element.style instead only sees inline values and
+	 * returns 0 for anything a stylesheet positioned — which silently shifts
+	 * every draw() by the stylesheet's offset, since draw() subtracts this
+	 * from the cumulative offset.
+	 */
+	currentDelta: function () {
+		if (!this.element) return [0, 0];
+		var computed = window.getComputedStyle(this.element);
+		return [
+			parseInt(computed.left || '0', 10) || 0,
+			parseInt(computed.top || '0', 10) || 0
+		];
+	},
+
+	initDrag: function (event) {
+		if (event.button !== 0) return;
+
+		// Never start a drag from a form control: the user is interacting with
+		// it, not moving its container.
+		var src = cr_target(event);
+		var tag = src && src.tagName ? src.tagName.toUpperCase() : '';
+		if (tag === 'INPUT' || tag === 'SELECT' || tag === 'OPTION' ||
+			tag === 'BUTTON' || tag === 'TEXTAREA') return;
+
+		var pointer = [cr_pointerX(event), cr_pointerY(event)];
+		var pos = cr_cumulativeOffset(this.element);
+		this.offset = [pointer[0] - pos[0], pointer[1] - pos[1]];
+
+		cr_Draggables.activate(this);
+		cr_stop(event);
+	},
+
+	startDrag: function (event) {
+		this.dragging = true;
+		this.delta = this.currentDelta();
+		if (this.options && this.options.zindex) {
+			// Computed, not inline — same reason as currentDelta above.
+			this.originalZ = parseInt(window.getComputedStyle(this.element).zIndex || '0', 10);
+			this.element.style.zIndex = this.options.zindex;
+		}
+	},
+
+	updateDrag: function (event, pointer) {
+		this.draw(pointer);
+		cr_stop(event);
+	},
+
+	draw: function (point) {
+		var pos = cr_cumulativeOffset(this.element);
+		var d = this.currentDelta();
+		pos[0] -= d[0];
+		pos[1] -= d[1];
+		this.element.style.left = (point[0] - pos[0] - this.offset[0]) + 'px';
+		this.element.style.top = (point[1] - pos[1] - this.offset[1]) + 'px';
+	},
+
+	finishDrag: function (event, success) {
+		this.dragging = false;
+		if (this.options && this.options.zindex && this.originalZ !== undefined) {
+			this.element.style.zIndex = this.originalZ;
+		}
+		if (this.options && this.options.revert) {
+			this.element.style.left = this.delta[0] + 'px';
+			this.element.style.top = this.delta[1] + 'px';
+		}
+	},
+
+	destroy: function () {
+		if (this.eventMouseDown) cr_off(this.handle, 'mousedown', this.eventMouseDown);
+		cr_Draggables.unregister(this);
+	}
+});
+
 /**
  * Extend the Draggable class to allow us to pass the rendering
  * down to the Cropper object.
  */
-var CropDraggable = cr_class(Draggable, {
+var CropDraggable = cr_class(cr_Draggable, {
 	
 	initialize: function(element) {
 		this.options = cr_extend(
@@ -288,7 +458,7 @@ var CropDraggable = cr_class(Draggable, {
 		this.eventMouseDown = this.initDrag.bind(this);
 		cr_on(this.handle, "mousedown", this.eventMouseDown);
 
-		Draggables.register(this);
+		cr_Draggables.register(this);
 	},
 	
 	/**

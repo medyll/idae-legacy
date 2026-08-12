@@ -2,9 +2,12 @@
  * The image cropper's behaviour contract.
  *
  * This is the safety net for migrating librairie/cropper.js off the Prototype
- * shims. That file is 1362 lines and is now the sole remaining JavaScript
- * caller of shim-class, shim-element and shim-draggable, so it has to be
- * covered before it is touched, not after.
+ * shims — 1362 lines that were the last JavaScript calling them, and the sole
+ * caller keeping shim-class, shim-element and shim-draggable alive. Covered
+ * before it was touched, not after.
+ *
+ * Draggable/Draggables now live inside cropper.js (as cr_Draggable /
+ * cr_Draggables) and shim-draggable.js is deleted.
  *
  * It also guards the bug that motivated the first version of this spec:
  * `CropDraggable = Class.create(Draggable, {...})` calls `this.currentDelta()`
@@ -127,7 +130,10 @@ test('cropper: dragging the selection moves it and fires onEndCrop', async () =>
       after: { x1: w.__pwCrop.areaCoords.x1, y1: w.__pwCrop.areaCoords.y1 },
       endCalls: w.__pwCropCalls.length,
       lastDims: w.__pwCropCalls.length ? w.__pwCropCalls[w.__pwCropCalls.length - 1].dims : null,
-      pumpReleased: w.Draggables.activeDraggable === null,
+      // cr_Draggables, not Draggables: shim-draggable.js is deleted and the
+      // pump now lives inside cropper.js as a file-local var (still a window
+      // property, since cropper.js has no IIFE).
+      pumpReleased: w.cr_Draggables.activeDraggable === null,
     };
   }, [DRIVE]);
 

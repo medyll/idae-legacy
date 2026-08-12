@@ -267,4 +267,14 @@
     if (global.console && global.console.info) {
         console.info('[idae-shim] form loaded');
     }
+
+    // Last shim file in main_bag.js's require_hell: if the warn flag was set
+    // before load, arm it now. Moved here 2026-08-11 from shim-draggable.js,
+    // which used to be last and has been deleted — cropper.js was its only
+    // caller and now carries its own Draggable. Without this the flag would
+    // silently never arm and shim-warn.spec.ts would pass for the wrong
+    // reason.
+    if (global.IDAE_SHIM_WARN && global.__idaeShimInstallWarn) {
+        global.__idaeShimInstallWarn();
+    }
 })(window);

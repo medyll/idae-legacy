@@ -40,7 +40,12 @@ const GLOBAL_OBJECTS = ['Prototype', 'Form', 'Event', 'Element', 'Position', 'In
 // 'PeriodicalExecuter' dropped 2026-08-11 with the Ajax namespace it shipped
 // alongside. It never had a caller anywhere in the app — asserting it kept a
 // class alive that nothing had ever constructed.
-const CONSTRUCTORS = ['Class', 'Template', 'Hash', 'ObjectRange', 'Draggable', 'Draggables'];
+// 'Draggable' / 'Draggables' dropped 2026-08-11, when shim-draggable.js was
+// deleted. librairie/cropper.js was its only caller — CropDraggable subclasses
+// Draggable — and now carries its own copy, so nothing global provides these
+// any more. Asserting them here would have blocked the deletion for the sake
+// of a class no shim owns.
+const CONSTRUCTORS = ['Class', 'Template', 'Hash', 'ObjectRange'];
 
 /**
  * Methods the app calls on an element, ordered by call count.
