@@ -168,7 +168,7 @@
 		//loadPolygons ();
 
 		placeMarker = function (location) {
-			markers.each (function (node, index) {
+			markers.forEach (function (node, index) {
 				markers[index].setMap (null);
 			})
 			marker = new google.maps.Marker ({

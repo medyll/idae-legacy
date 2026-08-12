@@ -3,7 +3,10 @@
  * Event.observe/stopObserving/stop/element/pointer, delegation via
  * Element#on(selector...), Element#fire through CustomEvent, dom:loaded.
  *
- * Depends on: shim-core.js, shim-enumerable.js, shim-element.js
+ * Depends on: shim-core.js, shim-element.js
+ * (shim-enumerable was deleted 2026-08-12; the one thing this file used from
+ * it — Function#defer, line ~195 — was already written as a guarded
+ * `fn.defer ? fn.defer() : fn()`, so it now takes the immediate branch.)
  *
  * @package idae-be-shim
  * @date 2026-08-06

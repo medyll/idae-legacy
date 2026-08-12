@@ -3,16 +3,64 @@
  * Element.prototype methods, Element.extend/addMethods, Insertion.*,
  * Position.*.
  *
- * Depends on: shim-core.js, shim-class.js, shim-enumerable.js
+ * Depends on: shim-core.js, shim-class.js
  * Optional (loaded later): shim-event.js (observe/fire)
  *
  * @package idae-be-shim
  * @date 2026-08-06
+ * Modified: 2026-08-12 — dropped the shim-enumerable dependency (String#
+ * stripScripts / evalScripts / camelize / blank / include, Function#defer,
+ * Array#each / without / include, and the Enumerable mixin on
+ * Element.ClassNames). shim-enumerable had no application callers left and
+ * has been deleted; every borrowed helper below is now a local `el_` one.
  */
 (function (global) {
     'use strict';
 
     var docEl = document.documentElement;
+
+    /* ------------------------------------------------------------------ *
+     * Local helpers — formerly borrowed from shim-enumerable              *
+     * ------------------------------------------------------------------ */
+
+    /** Prototype's String#stripScripts. */
+    function el_stripScripts(html) {
+        return String(html).replace(/<script[^>]*>([\s\S]*?)<\/script\s*>/gim, '');
+    }
+
+    /**
+     * Prototype's `content.evalScripts.bind(content).defer()`: run every
+     * <script> body in the inserted markup, on the next tick.
+     *
+     * The deferral is not cosmetic — the scripts run *after* the caller has
+     * finished inserting the markup, so they can see the nodes they act on.
+     * Prototype's defer() is a delay(0.01), i.e. setTimeout(fn, 10).
+     */
+    function el_evalScriptsDeferred(html) {
+        var bodies = String(html).match(/<script[^>]*>([\s\S]*?)<\/script\s*>/gim) || [];
+        global.setTimeout(function () {
+            bodies.forEach(function (tag) {
+                var body = tag.replace(/<script[^>]*>/i, '').replace(/<\/script\s*>/i, '');
+                try {
+                    global.eval(body);
+                } catch (e) {
+                    if (global.console) global.console.error('[idae-shim] evalScripts', e);
+                }
+            });
+        }, 10);
+    }
+
+    /** Prototype's String#camelize: 'background-color' → 'backgroundColor'. */
+    function el_camelize(str) {
+        return String(str).replace(/-+(.)?/g, function (match, chr) {
+            return chr ? chr.toUpperCase() : '';
+        });
+    }
+
+    /** Prototype's String#blank. */
+    function el_blank(str) {
+        return /^\s*$/.test(String(str));
+    }
 
     if (!Object.isElement) {
         Object.isElement = function (object) {
@@ -51,13 +99,13 @@
             // Scripts inside inserted HTML are evaluated deferred, like
             // Prototype's Element.insert/update.
             if (/<script/i.test(html)) {
-                content.evalScripts ? content.evalScripts.bind(content).defer() : null;
+                el_evalScriptsDeferred(html);
             }
             element.insertAdjacentHTML(
                 position === 'before' ? 'beforebegin' :
                 position === 'top' ? 'afterbegin' :
                 position === 'after' ? 'afterend' : 'beforeend',
-                html.stripScripts()
+                el_stripScripts(html)
             );
         } else {
             var node = content.nodeType ? content : (content._element || null);
@@ -135,7 +183,7 @@
         var elementStyle = element.style, match;
         if (Object.isString(styles)) {
             element.style.cssText += ';' + styles;
-            return styles.include('opacity') ?
+            return styles.indexOf('opacity') !== -1 ?
                 element.setOpacity(styles.match(/opacity:\s*(\d?\.?\d*)/)[1]) : element;
         }
         for (var property in styles) {
@@ -149,7 +197,7 @@
             if (typeof value === 'number' && !CSS_NUMBER_PROPERTIES[property]) {
                 value = value + 'px';
             }
-            var prop = (property in STYLE_TRANSLATIONS) ? STYLE_TRANSLATIONS[property] : property.camelize();
+            var prop = (property in STYLE_TRANSLATIONS) ? STYLE_TRANSLATIONS[property] : el_camelize(property);
             elementStyle[prop] = value;
         }
         return element;
@@ -157,7 +205,7 @@
 
     function getStyle(element, style) {
         element = elementOf(element);
-        style = style === 'float' ? 'cssFloat' : style.camelize();
+        style = style === 'float' ? 'cssFloat' : el_camelize(style);
         var value = element.style[style];
         if (!value || value === 'auto') {
             var css = global.getComputedStyle(element, null);
@@ -224,14 +272,14 @@
         addClassName: function (className) {
             // Prototype accepted multi-class strings ('animated bounce').
             var el = this;
-            $w(className).each(function (token) {
+            $w(className).forEach(function (token) {
                 if (!el.classList.contains(token)) el.classList.add(token);
             });
             return this;
         },
         removeClassName: function (className) {
             var el = this;
-            $w(className).each(function (token) { el.classList.remove(token); });
+            $w(className).forEach(function (token) { el.classList.remove(token); });
             return this;
         },
         toggleClassName: function (className) {
@@ -274,9 +322,9 @@
                 return this;
             }
             content = String.interpret(content);
-            this.innerHTML = content.stripScripts();
+            this.innerHTML = el_stripScripts(content);
             if (/<script/i.test(content)) {
-                content.evalScripts.bind(content).defer();
+                el_evalScriptsDeferred(content);
             }
             return this;
         },
@@ -288,9 +336,9 @@
             }
             content = String.interpret(content);
             if (/<script/i.test(content)) {
-                content.evalScripts.bind(content).defer();
+                el_evalScriptsDeferred(content);
             }
-            this.insertAdjacentHTML('beforebegin', content.stripScripts());
+            this.insertAdjacentHTML('beforebegin', el_stripScripts(content));
             this.remove();
             return this;
         },
@@ -330,7 +378,7 @@
             return this;
         },
         empty: function () {
-            return this.innerHTML.blank();
+            return el_blank(this.innerHTML);
         },
         cleanWhitespace: function () {
             var node = this.firstChild;
@@ -620,27 +668,42 @@
     Element.ClassNames = function (element) {
         this.element = elementOf(element);
     };
+    // toArray is the ClassNames' own from 2026-08-12. It used to come from
+    // the Enumerable mixin below, and `$A(this)` reached it through $A's
+    // "'toArray' in the object" branch. With shim-enumerable deleted that
+    // branch would miss, $A would fall through to its length-based loop, and
+    // a ClassNames — which has no length — would come back as []. add() and
+    // remove() would then silently wipe the class attribute instead of
+    // editing it.
     Element.ClassNames.prototype = {
         _each: function (iterator, context) {
-            $w(this.element.className).each(iterator, context);
+            $w(this.element.className).forEach(iterator, context);
+        },
+        toArray: function () {
+            return $w(this.element.className);
         },
         set: function (className) {
             this.element.className = className;
         },
         add: function (classNameToAdd) {
-            this.include(classNameToAdd) || this.set($A(this).concat(classNameToAdd).join(' '));
+            this.include(classNameToAdd) || this.set(this.toArray().concat(classNameToAdd).join(' '));
         },
         remove: function (classNameToRemove) {
-            this.include(classNameToRemove) && this.set($A(this).without(classNameToRemove).join(' '));
+            this.include(classNameToRemove) && this.set(this.toArray().filter(function (name) {
+                return name !== classNameToRemove;
+            }).join(' '));
         },
         include: function (className) {
-            return $w(this.element.className).include(className);
+            return $w(this.element.className).indexOf(className) !== -1;
+        },
+        each: function (iterator, context) {
+            this._each(iterator, context);
+            return this;
         },
         toString: function () {
-            return $A(this).join(' ');
+            return this.toArray().join(' ');
         }
     };
-    Object.extend(Element.ClassNames.prototype, global.Enumerable || {});
 
     /* ------------------------------------------------------------------ *
      * Insertion.*                                                         *
@@ -829,13 +892,6 @@
     global.Element = Element;
     global.Insertion = Insertion;
     global.Position = Position;
-
-    // Hash often depends on Enumerable on Array — re-assert availability.
-    if (!global.Enumerable) {
-        // Enumerable is assigned inside shim-enumerable as a local; expose it
-        // via Array.prototype for ClassNames' benefit.
-        global.Enumerable = {};
-    }
 
     if (global.console && global.console.info) {
         console.info('[idae-shim] element loaded');

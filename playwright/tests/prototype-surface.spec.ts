@@ -63,20 +63,30 @@ const ELEMENT_METHODS = [
   'toggle', 'makePositioned', 'viewportOffset', 'inspect', 'purge', 'relativize', 'replace',
 ];
 
-const ARRAY_METHODS = [
-  'each', 'invoke', 'first', 'last', 'size', 'without', 'include', 'clone', 'toArray',
-  'reject', 'all', 'any', 'collect', 'findAll', 'detect', 'pluck', 'sortBy', 'compact', 'inject',
-];
-
-const STRING_METHODS = [
-  'stripTags', 'strip', 'toQueryParams', 'stripScripts', 'unescapeHTML', 'escapeHTML',
-  'gsub', 'sub', 'scan', 'evalScripts', 'camelize', 'evalJSON', 'capitalize', 'blank',
-  'include', 'truncate', 'underscore', 'dasherize', 'toArray',
-];
-
-const FUNCTION_METHODS = ['bind', 'bindAsEventListener', 'defer', 'delay', 'curry', 'argumentNames', 'methodize', 'wrap'];
-
-const NUMBER_METHODS = ['toPaddedString', 'times', 'succ'];
+// ARRAY_METHODS / STRING_METHODS / FUNCTION_METHODS / NUMBER_METHODS — 49
+// names in all — were dropped 2026-08-12 together with shim-enumerable.js,
+// the file that provided every one of them.
+//
+// Each name was audited individually against the loaded JavaScript and the
+// SPA's templates before the file went. Exactly one had a live caller:
+// Array#each, in the three Google-Maps modules (app_custom_map.php,
+// app_custom_map_zone.php, app_custom_ville_map.php), all of the identical
+// shape `markers.each(function (node, index) {...})` over a plain array.
+// Those are now forEach and the semantics are the same, index included.
+//
+// Everything else that a textual scan turned up was one of:
+//   - a dead file (autobahn.min.js, require.js, app_test.js, app_draggable.js,
+//     librairie/tinyeditor.js, ms-lib-prototype/ — none reachable from
+//     main_bag.js's require_trame nor from any dynamic loader),
+//   - a same-named native (String#replace, Promise.all/reject,
+//     Function#bind — 283 live `.bind(this)` sites, all served by the native
+//     from now on, whose currying matches Prototype's for these),
+//   - or a library's own object method (query-engine.js's util.toArray).
+//
+// The first pass of that audit used a regex with a `(?<![\w$])` lookbehind
+// before the dot, which only matched `).foo(` and ` .foo(` and therefore
+// missed `element.select(` — nearly every real call site. The numbers here
+// come from the corrected scan.
 
 /** Static members reached through a namespace object. */
 const NAMESPACED = [
@@ -109,7 +119,7 @@ test('prototype surface: every API the app calls is present', async () => {
   const guard = watchConsole(page);
 
   const missing = await page.evaluate(
-    ([globalFns, globalObjs, ctors, elementMethods, arrayMethods, stringMethods, fnMethods, numberMethods, namespaced]) => {
+    ([globalFns, globalObjs, ctors, elementMethods, namespaced]) => {
       const out: Record<string, string[]> = {};
       const push = (group: string, name: string) => {
         (out[group] ||= []).push(name);
@@ -132,27 +142,12 @@ test('prototype surface: every API the app calls is present', async () => {
         if (typeof el?.[name] !== 'function') push('element methods', name);
       }
       probe.remove();
-      for (const name of arrayMethods) {
-        if (typeof Array.prototype[name as any] !== 'function') push('Array.prototype', name);
-      }
-      for (const name of stringMethods) {
-        if (typeof String.prototype[name as any] !== 'function') push('String.prototype', name);
-      }
-      for (const name of fnMethods) {
-        if (typeof Function.prototype[name as any] !== 'function') push('Function.prototype', name);
-      }
-      for (const name of numberMethods) {
-        if (typeof Number.prototype[name as any] !== 'function') push('Number.prototype', name);
-      }
       for (const [ns, member] of namespaced) {
         if (w[ns] === undefined || w[ns][member] === undefined) push('namespaced', `${ns}.${member}`);
       }
       return out;
     },
-    [
-      GLOBAL_FUNCTIONS, GLOBAL_OBJECTS, CONSTRUCTORS, ELEMENT_METHODS,
-      ARRAY_METHODS, STRING_METHODS, FUNCTION_METHODS, NUMBER_METHODS, NAMESPACED,
-    ] as const
+    [GLOBAL_FUNCTIONS, GLOBAL_OBJECTS, CONSTRUCTORS, ELEMENT_METHODS, NAMESPACED] as const
   );
 
   expect(missing, `missing API surface:\n${JSON.stringify(missing, null, 2)}`).toEqual({});
@@ -188,12 +183,16 @@ test('prototype surface: core helpers actually behave', async () => {
         addClassName: child.hasClassName('marked'),
         readAttribute: child.readAttribute('data-probe'),
         getStyleColor: child.getStyle('color'),
-        // Enumerable over a real Array
-        arrayEach: (() => { let n = 0; [1, 2, 3].each((v: number) => { n += v; }); return n; })(),
-        arrayPluck: [{ x: 1 }, { x: 2 }].pluck('x').join(','),
-        stringStripTags: '<b>hi</b>'.stripTags(),
-        stringCamelize: 'foo-bar'.camelize(),
+        // The four Enumerable probes that sat here (Array#each, Array#pluck,
+        // String#stripTags, String#camelize) went with shim-enumerable on
+        // 2026-08-12 — see the note above the element-methods list.
         functionBindThis: (function (this: any) { return this.v; }).bind({ v: 42 })(),
+        // Template is the one Class.create consumer left in the templates,
+        // and its evaluate() no longer runs through String#gsub — shim-class
+        // carries a local cls_gsub. Two placeholders, because the bug a
+        // single-placeholder probe would miss is exactly the one a
+        // non-global regex + String#replace would introduce.
+        templateEvaluate: new w.Template('#{a}-#{b}').evaluate({ a: 'x', b: 'y' }),
         classCreateWorks: (() => {
           const K = w.Class.create({ initialize(v: number) { (this as any).v = v; }, get() { return (this as any).v; } });
           return new K(7).get();
@@ -217,11 +216,8 @@ test('prototype surface: core helpers actually behave', async () => {
     addClassName: true,
     readAttribute: 'yes',
     getStyleColor: 'rgb(1, 2, 3)',
-    arrayEach: 6,
-    arrayPluck: '1,2',
-    stringStripTags: 'hi',
-    stringCamelize: 'fooBar',
     functionBindThis: 42,
+    templateEvaluate: 'x-y',
     classCreateWorks: 7,
     hashGet: 5,
     objectRange: '1,2,3',

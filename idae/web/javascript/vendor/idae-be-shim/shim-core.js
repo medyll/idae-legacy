@@ -51,7 +51,9 @@
                 if (!descriptor || typeof descriptor.value !== 'function') return;
                 if (descriptor.value.__idaeShimWrapped) return;
                 // Only wrap our own additions — never native members.
-                if (!SHIM_OWNED[family] || !SHIM_OWNED[family].include(name)) return;
+                // indexOf, not Array#include: that one came from
+                // shim-enumerable, deleted 2026-08-12.
+                if (!SHIM_OWNED[family] || SHIM_OWNED[family].indexOf(name) === -1) return;
                 var original = descriptor.value;
                 var wrapped = function () {
                     shimWarn(family, name);
@@ -160,7 +162,8 @@
      * ------------------------------------------------------------------ */
     function $w(string) {
         if (!string || typeof string !== 'string') return [];
-        string = string.strip();
+        // trim(), not String#strip — shim-enumerable owned strip.
+        string = string.trim();
         return string ? string.split(/\s+/) : [];
     }
 
@@ -245,10 +248,15 @@
                 return results.join('&');
             },
             inspect: function () {
-                return '#<Hash:{' + this.map(function (pair) {
-                    return pair.key.inspect ? pair.key.inspect() : JSON.stringify(pair.key) + ': ' +
-                        (pair.value && pair.value.inspect ? pair.value.inspect() : JSON.stringify(pair.value));
-                }).join(', ') + '}>';
+                // Was this.map(...): Hash#map came from the Enumerable mixin
+                // that shim-enumerable installed on Hash.prototype, and that
+                // file is gone. _each is Hash's own.
+                var parts = [];
+                this._each(function (pair) {
+                    parts.push(pair.key.inspect ? pair.key.inspect() : JSON.stringify(pair.key) + ': ' +
+                        (pair.value && pair.value.inspect ? pair.value.inspect() : JSON.stringify(pair.value)));
+                });
+                return '#<Hash:{' + parts.join(', ') + '}>';
             },
             clone: function () {
                 return new Hash(this);

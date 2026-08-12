@@ -708,6 +708,99 @@ Une fois les gabarits réellement fonctionnels, le découpage annoncé a pu se f
 
 **Ce qui reste vrai** : `shim-form.js` n'est pas supprimable. Ses 52 appels de gabarits le tiennent.
 
+## `shim-enumerable.js` supprimé — l'audit des 67 noms, et le bug de mon propre regex (2026-08-12)
+
+Le commit précédent (`shim-form` rendu autonome) refusait explicitement de supprimer
+`shim-element.js` et `shim-enumerable.js`, au motif que ma mesure « zéro appelant »
+reposait sur un motif à moi qui n'avait jamais été confronté aux 67 noms que
+`prototype-surface.spec.ts` asserte un par un. Cet audit-là, le voici.
+
+### Le bug du motif — 5 lignes qui invalidaient tout le comptage
+
+Le premier passage utilisait `(?<![\w$])\.\s*<nom>\s*\(`. Ce lookbehind exige un
+caractère **non-mot avant le point**. Il ne matche donc que ` .foo(` et `).foo(`
+— jamais `element.select(`, c'est-à-dire quasiment tous les vrais sites d'appel.
+Constaté en le testant à la main :
+
+```
+'this.element.select(1)'  → False
+'a.next ()'               → False
+'x .select('              → True
+```
+
+C'est exactement la faute qui avait produit la régression `$('news_zoom').toggle()`
+plus tôt dans cette migration : un classificateur trop étroit pour savoir ce qu'il
+déclarait sûr. Le lookbehind supprimé, `select` passe de 0 à 3, `remove` de 0 à 52,
+`update` de 0 à 13, `bind` de 242 à 295.
+
+### Le résultat, une fois les fichiers morts écartés
+
+Écartés parce qu'introuvables dans `require_trame` **et** dans tout chargeur
+dynamique : `autobahn.min.js`, `require.js`, `app_test.js`, `app_draggable.js`,
+`librairie/tinyeditor.js`, `ms-lib-prototype/`, `node_modules`.
+
+Sur les 49 noms Array / String / Function / Number, **un seul** a un appelant
+vivant : `Array#each`, dans les trois modules Google-Maps
+(`app_custom_map.php`, `app_custom_map_zone.php`, `app_custom_ville_map.php`),
+tous de la forme identique `markers.each(function (node, index) {...})` sur un
+tableau ordinaire. Passés en `forEach` — même contrat, index compris.
+
+Le reste des occurrences textuelles était soit un homonyme natif
+(`String#replace`, `Promise.all/reject`, `Function#bind` — 283 sites vivants,
+désormais servis par le natif, dont le curry correspond à celui de Prototype),
+soit la méthode d'objet d'une bibliothèque (`util.toArray` de `query-engine.js`).
+
+### Ce que la suppression a coûté aux autres shims
+
+`shim-enumerable` n'avait plus d'appelant applicatif, mais trois shims lui
+empruntaient encore des méthodes. Chacun a reçu ses helpers locaux, comme
+`shim-form` la veille :
+
+| shim | ce qui était emprunté | remplacement |
+|---|---|---|
+| `shim-core` | `Array#include`, `String#strip`, `Hash#map` | `indexOf`, `trim`, `_each` |
+| `shim-class` | `String#gsub` ×2 (dans `Template#evaluate`) | `cls_gsub` / `cls_gsubLiteral` |
+| `shim-element` | `stripScripts`, `evalScripts`+`defer`, `camelize`, `blank`, `include`, `$w().each`, `$A(this).without` | helpers `el_*` |
+| `shim-event` | `Function#defer` | déjà gardé (`fn.defer ? … : fn()`) |
+
+Deux points méritaient mieux qu'un renommage :
+
+**`Template#evaluate` ne peut pas devenir `String.replace`.** `Template.Pattern`
+est une regex **non globale** ; `replace` substituerait le premier `#{...}` et
+laisserait le reste du gabarit intact. `gsub` de Prototype re-matche le reste en
+boucle — c'est ce qui fait marcher un gabarit à plusieurs placeholders. Et
+l'itérateur reçoit le **tableau** de match (`match[1]`, `match[3]` sont lus), pas
+la liste `(match, p1, p2, …)` de `replace`. `cls_gsub` reproduit la boucle, garde
+anti-match-vide comprise. La sonde de comportement du spec utilise maintenant deux
+placeholders : à un seul, elle ne verrait justement pas ce bug-là.
+
+**`Element.ClassNames` aurait silencieusement vidé l'attribut `class`.**
+`add()`/`remove()` faisaient `$A(this)`, qui atteignait le `toArray` du mixin
+Enumerable via la branche « `'toArray' in l'objet` » de `$A`. Sans ce mixin, la
+branche rate, `$A` retombe sur sa boucle par `length`, et un `ClassNames` — qui n'a
+pas de `length` — revient à `[]`. `toArray` est désormais une méthode propre de
+`ClassNames`.
+
+### `shim-element` reste, et c'est mesuré
+
+Contrairement à `enumerable`, `shim-element` a des appelants vivants : `setStyle`
+(`main_bag.js`), `observe`, `hide`, `up`, `show`, `hasClassName` ×2, `next` — dans
+`app_calendrier_echeance.php`, `app_component.html`, `app_explorer.php`,
+`app_explorer_search.php`. Le sondage `hasClassName` de `shim-warn.spec.ts` reste
+donc valide sans modification : c'est `shim-element` qui le fournit.
+
+**8 → 5 shims** (`core`, `class`, `element`, `event`, `form`), **656 lignes** de
+moins.
+
+### Un flake de suite, et sa vraie cause
+
+`myddeview-notifier.spec.ts` a échoué en suite complète (3 tentatives) et passé
+seul. Le spec lisait `growler.querySelector('.notifierNotice')` — le **premier**
+match — alors que `buildNotice` fait `appendChild` : il attrapait le toast que la
+socket avait déjà poussé (« Notification »). Corrigé en visant le dernier. Rien à
+voir avec les shims ; le spec était faux depuis le début et ne le montrait que
+quand une notification arrivait avant lui.
+
 ## L'angle mort des gabarits, troisième occurrence — `Effect.*` (2026-08-11)
 
 Le découpage de `shim-ajax` réglé, j'ai voulu chiffrer le « chantier de gabarits » annoncé plus bas. Le comptage a d'abord fait remonter autre chose.

@@ -2,10 +2,13 @@
  * shim-class.js — PrototypeJS compatibility layer over @medyll/idae-be
  * Class.create (+ $super), Object.extend/clone/keys/values/is*, Template
  *
- * Depends on: shim-core.js ($A, ObjectRange for $super detection)
+ * Depends on: shim-core.js ($A, $H, String.interpret, ObjectRange for $super
+ * detection). No longer on shim-enumerable — see the cls_gsub note below.
  *
  * @package idae-be-shim
  * @date 2026-08-06
+ * Modified: 2026-08-12 — dropped the two String#gsub calls in Template so
+ * this file survives the deletion of shim-enumerable.
  */
 (function (global) {
     'use strict';
@@ -13,6 +16,46 @@
     var IS_DONTENUM_BUGGY = (function () {
         for (var p in { toString: 1 }) return p === 'toString' ? false : true;
     })();
+
+    /**
+     * Prototype's String#gsub with a *function* iterator, as a free function.
+     *
+     * Not `String.prototype.replace`: Template.Pattern is a non-global regex,
+     * so replace() would substitute the first `#{...}` and leave the rest of
+     * the template untouched. Prototype's gsub re-matches the remainder in a
+     * loop, which is what makes a multi-placeholder template work at all.
+     * The iterator also receives the whole match *array* (match[1], match[3]
+     * are read below), not replace()'s (match, p1, p2, ...) argument list.
+     *
+     * The zero-length-match guard is Prototype's: without it a pattern that
+     * can match '' spins forever.
+     */
+    function cls_gsub(source, pattern, iterator) {
+        var rest = String(source), result = '', match;
+        while (rest.length > 0) {
+            match = rest.match(pattern);
+            if (!match) {
+                result += rest;
+                break;
+            }
+            result += rest.slice(0, match.index);
+            result += String(iterator(match));
+            var consumed = match.index + (match[0].length || 1);
+            if (!match[0].length) result += rest.charAt(match.index);
+            rest = rest.slice(consumed);
+        }
+        return result;
+    }
+
+    /**
+     * Prototype's String#gsub with a *string* pattern: it escapes the string
+     * into a literal regex and replaces every occurrence. split/join is the
+     * same operation without needing RegExp.escape (which shipped in
+     * shim-enumerable).
+     */
+    function cls_gsubLiteral(source, find, replacement) {
+        return String(source).split(find).join(replacement);
+    }
 
     /* ------------------------------------------------------------------ *
      * Object.extend / clone / inspect / keys / values / is*               *
@@ -213,7 +256,7 @@
             if (object && typeof object.toTemplateReplacements === 'function') {
                 object = object.toTemplateReplacements();
             }
-            return this.template.gsub(this.pattern, function (match) {
+            return cls_gsub(this.template, this.pattern, function (match) {
                 if (object == null) return match[1] + '';
                 var before = match[1] || '';
                 if (before === '\\') return match[2];
@@ -222,7 +265,7 @@
                 match = pattern.exec(expr);
                 if (match == null) return before;
                 while (match != null) {
-                    var comp = match[1].charAt(0) === '[' ? match[2].gsub('\\\\]', ']') : match[1];
+                    var comp = match[1].charAt(0) === '[' ? cls_gsubLiteral(match[2], '\\\\]', ']') : match[1];
                     ctx = ctx[comp];
                     if (ctx == null || match[3] === '') break;
                     expr = expr.substring(match[3] === '[' ? match[1].length : match[0].length);

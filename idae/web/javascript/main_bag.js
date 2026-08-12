@@ -14,7 +14,6 @@ var require_trame = {
 		'javascript/vendor/idae-be/idae-be.iife.js',
 		'javascript/vendor/idae-be-shim/shim-core.js',
 		'javascript/vendor/idae-be-shim/shim-class.js',
-		'javascript/vendor/idae-be-shim/shim-enumerable.js',
 		'javascript/vendor/idae-be-shim/shim-element.js',
 		'javascript/vendor/idae-be-shim/shim-event.js',
 		'javascript/vendor/idae-be-shim/shim-form.js',

@@ -117,8 +117,14 @@ test('myddeNotifier: growl() builds a toast and auto-dismisses it', async () => 
 
   const noticeId = await page.evaluate(() => {
     const n = new (window as any).myddeNotifier();
+    // growl() returns nothing, so the notice has to be found in the growler.
+    // It is the LAST child, not the first: buildNotice appends. Reading
+    // querySelector('.notifierNotice') — the first match — picked up whatever
+    // toast the socket had already pushed ("Notification"), which is how this
+    // test failed in a full-suite run and passed on its own.
     n.growl('Test de migration BE_PLAN', {});
-    const notice = n.growler.querySelector('.notifierNotice') as HTMLElement;
+    const notices = n.growler.querySelectorAll('.notifierNotice');
+    const notice = notices[notices.length - 1] as HTMLElement;
     notice.id = 'be_plan_migration_probe';
     return notice.id;
   });
