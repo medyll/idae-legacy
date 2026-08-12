@@ -44,6 +44,29 @@ const TEMPLATE_EXT = ['.php', '.latte', '.tpl'];
  */
 const SKIP_DIRS = new Set(['vendor', 'adodb', 'flotr', 'node_modules', '.git', 'nbproject']);
 
+/**
+ * Subtrees served in a *different* JavaScript runtime than the admin SPA.
+ *
+ * `bin/templates/app/appsite/` is the public site front. Its pages load their
+ * own script set from HTTPJAVASCRIPT (the customer site's javascript/ dir) --
+ * methods.js, engine.js, slider.js, slideBox.js, insertionQs.js, autoToggle.js
+ * -- and never load main_bag.js, idae-be, or any shim-*.js. Verified by grep:
+ * no template under bin/templates/ mentions idae-be, shim- or main_bag.
+ *
+ * That matters because this spec probes the *SPA's* window for each symbol it
+ * finds. Symbols used by an appsite page resolve against a different global
+ * scope entirely, so asserting them here tests nothing real -- and worse, it
+ * would block deleting a shim on account of a page that never loads it.
+ * page_body.latte alone accounts for 35 such lookups.
+ *
+ * Excluded on scope, not on deadness. (page_body.latte does also appear to be
+ * unreachable -- nothing includes it, no {layout}/{include} chain reaches it,
+ * and it has no compiled entry in tpl/app/cache/ where its siblings
+ * page_fiche and page_fiche_detail do -- but its live siblings would be
+ * equally out of scope here.)
+ */
+const SKIP_PREFIXES = ['bin/templates/'];
+
 /** Prototype globals reached as `Name.member` or `new Name.member(...)`. */
 const NAMESPACES = ['Effect', 'Ajax', 'Insertion', 'Position', 'Form', 'Field',
   'Element', 'Event', 'Class', 'Try', 'Draggable', 'Sortable', 'Builder',
@@ -116,9 +139,10 @@ function scanTemplates(): Found {
     let text: string;
     try { text = readFileSync(file, 'utf8'); } catch { continue; }
     const rel = file.slice(WEB_ROOT.length + 1).split(sep).join('/');
+    if (SKIP_PREFIXES.some((p) => rel.startsWith(p))) continue;
 
-    // Strip line comments so a commented-out call (page_body.latte's
-    // `//new Effect.ScrollTo('body')`) does not keep a dead API alive here.
+    // Strip line comments so a commented-out call does not keep a dead API
+    // alive here.
     const code = text.replace(/^\s*(\/\/|\*|#).*$/gm, '');
 
     for (const m of code.matchAll(nsRe)) {
