@@ -3,6 +3,66 @@
 > Branche : `feat/idae-be-migration`
 > Créé : 2026-08-05
 
+## Reprise — état au 2026-08-13, dernier commit `d73367a`
+
+Lire ceci avant de continuer, puis lire les sections "Reprise" du bas du
+fichier (ordre chronologique inverse au-dessus de cette section) pour le
+détail des décisions et des bugs déjà rencontrés — ne pas les refaire.
+
+**Où c'en est** : 8 → 5 shims (`shim-core`, `shim-class`, `shim-element`,
+`shim-event`, `shim-form`, dans `idae/web/javascript/vendor/idae-be-shim/`).
+`shim-effects`, `shim-draggable`, `shim-enumerable` supprimés — plus aucun
+appelant. `shim-class` et `shim-event` : 0 appelant gabarit restant (mais pas
+supprimables, `shim-core`/`shim-element` en dépendent encore en interne pour
+d'autres méthodes).
+
+**Ce qui reste à faire, dans l'ordre** :
+1. `shim-element.js` (899 lignes) — ~19 sites de gabarits vivants, mesurés
+   pour la dernière fois dans le commit `d73367a`. Concentrés sur peu de
+   fichiers. Refaire l'audit avant de toucher quoi que ce soit — voir la
+   méthode ci-dessous, le piège du regex y est documenté.
+2. `shim-form.js` (347 lignes) — **le vrai morceau**, ~47 sites, presque tous
+   en attributs `onclick`/`onsubmit` inline dans les gabarits PHP (pas du
+   JS). `Form.serialize`/`Form.serializeElements`/`.serialize()` sur les
+   formulaires. Chantier de gabarits, fichier par fichier.
+3. `shim-core.js` (405 lignes, `$`/`$$`/`$A`/`$H`/`$w`/`$F`/`$R`, `Hash`,
+   `ObjectRange`) — à faire **en dernier** : les 4 autres shims s'appuient
+   dessus. Ne pas y toucher avant que 1 et 2 soient vides.
+
+**Méthode qui marche** (voir commits `66d9cd3`, `9128c80`, `d73367a`) :
+- Grep les vrais appelants **avant** de migrer — JS chargé (`main_bag.js`'s
+  `require_trame`) ET gabarits PHP/Latte (les attributs `onclick`/`onsubmit`
+  inline sont invisibles à un grep JS-only et ont causé 3 régressions
+  silencieuses en Phase 3/4 — `Form.serialize`, `Effect.*`, `.fade()`).
+- **Piège vérifié à la main** : un motif avec lookbehind
+  `(?<![\w$])\.\s*nom\s*\(` ne matche que `).foo(`/` .foo(`, jamais
+  `element.select(` — c'est-à-dire quasiment tous les vrais sites. A produit
+  un faux "zéro appelant" sur 4 méthodes dans le commit `9128c80`. Ne pas
+  mettre de lookbehind avant le point.
+- Chaque site migré reçoit un commentaire expliquant la sémantique
+  Prototype exacte remplacée (ex: `.up(sel)` exclut self, `closest()` non —
+  d'où `parentElement.closest(...)` ; `.next()` sans argument =
+  `nextElementSibling`, pas un scan de tous les frères).
+- Vérifier chaque `.php`/`.html` touché : `docker exec idae-legacy php -l
+  <chemin absolu container, préfixé /var/www/html/idae/web/...>` — **jamais
+  le chemin hôte**, git-bash le mutile même avec `MSYS_NO_PATHCONV=1`.
+- Après édition JS : `node --check <fichier>`.
+- Avant de lancer Playwright : `docker restart idae-legacy` si le backend a
+  tourné longtemps (dégrade de ~30s à 10-25min de latence par test sans ça).
+- Suite complète : `cd playwright && npx playwright test --reporter=line`.
+  106 tests actuellement, tous verts. Le sous-ensemble rapide de garde-fous à
+  lancer après chaque modif de shim : `prototype-surface`,
+  `template-api-guard`, `template-parse-guard`, `shim-warn`, `smoke`.
+- `template-api-guard.spec.ts` a un garde-fou interne
+  (`found.methods.size > 5`, anciennement `> 10`) qui casse mécaniquement à
+  chaque suppression de site vivant — c'est prévu, baisser le seuil et
+  documenter pourquoi (déjà fait deux fois, voir commit `d73367a`).
+- Ne jamais naviguer sur `localhost` — `http://127.0.0.1:8080` ou un nom
+  `*.lan`. Voir CLAUDE.md, cause = résolution IPv6 sous WSL2.
+
+**Doc jumelle** : `MIGRATION_STATUS.md` peut être en retard sur ce fichier ;
+`BE_PLAN.md` est la source vivante pour ce chantier précis.
+
 ## Contexte
 
 Le SPA `idae/web/javascript/` repose sur PrototypeJS 1.7.3 + Scriptaculous, chargés par `bag.js` via le groupe `require_hell` de `idae/web/javascript/main_bag.js:13`. Prototype est mort depuis ~2015 : il patche les prototypes natifs (`Array`, `String`, `Element`), ce qui bloque toute modernisation du front et casse par intermittence avec les libs récentes déjà chargées (Chart.js, swiper, tinymce, draggabilly).
