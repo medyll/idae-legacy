@@ -19,7 +19,7 @@ test('smoke: login and desktop shell renders', async ({ page, request }) => {
   await expect(page.locator('#taskBar')).toBeAttached();
 
   // Session actually opened server-side, not just a rendered shell.
-  const resp = await request.get((process.env.BASE_URL || 'http://localhost:8080') + '/services/json_ssid.php');
+  const resp = await request.get((process.env.BASE_URL || 'http://127.0.0.1:8080') + '/services/json_ssid.php');
   const sess = await resp.json();
   expect(typeof sess.idagent).toBe('number');
   expect(sess.idagent).toBeGreaterThan(0);

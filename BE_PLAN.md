@@ -3,17 +3,16 @@
 > Branche : `feat/idae-be-migration`
 > Créé : 2026-08-05
 
-## Reprise — état au 2026-08-13, dernier commit `d73367a`
+## Reprise — état au 2026-08-13, dernier commit `86e32bb`
 
 Lire ceci avant de continuer, puis lire les sections "Reprise" du bas du
 fichier (ordre chronologique inverse au-dessus de cette section) pour le
 détail des décisions et des bugs déjà rencontrés — ne pas les refaire.
 
-**Où c'en est** : 8 → 4 shims (`shim-core`, `shim-class`, `shim-event`,
-`shim-form`, dans `idae/web/javascript/vendor/idae-be-shim/`).
-`shim-effects`, `shim-draggable`, `shim-enumerable` et `shim-element` supprimés.
-`vendor/sizzle.js` a également été retiré du chargeur et du disque. Travail du
-13/08 encore non commité dans le worktree.
+**Où c'en est** : 8 → 3 shims (`shim-core`, `shim-class`, `shim-event`,
+dans `idae/web/javascript/vendor/idae-be-shim/`). `shim-effects`,
+`shim-draggable`, `shim-enumerable`, `shim-element` et `shim-form` sont
+supprimés. `vendor/sizzle.js` a également été retiré du chargeur et du disque.
 
 **Suppression de `shim-element` (13/08)** : audit refait sans lookbehind sur
 les JS chargés et tous les gabarits PHP/Latte/TPL. Les quatre appels actifs
@@ -28,15 +27,27 @@ Validation bornée sur `127.0.0.1` : `prototype-surface` 2/2,
 `template-api-guard` 1/1, `template-parse-guard` 1/1, `shim-warn` 1/1,
 `smoke` 1/1 et `explorer` 4/4. Aucun processus Playwright orphelin.
 
+**Suppression de `shim-form` (13/08)** : les 50 appels
+exécutables de `Form.serialize`, `Form.serializeElements` et
+`Element#serialize` ont été remplacés dans 31 gabarits par
+`serializeFields`, helper natif partagé dans `engine/methods.js`. Il garde
+le contrat historique (%20, valeurs multiples répétées, champs désactivés,
+unchecked, file/image/submit exclus) et accepte formulaire, conteneur,
+collection ou champ seul sans étendre `HTMLElement.prototype`. La copie
+locale de `myddeExplorer.js`, le chargement et le fichier de shim sont retirés.
+Les deux derniers defaults Playwright exécutables en `localhost` ont aussi été
+normalisés vers `127.0.0.1`.
+Validation bornée, sans retry : `form-serialize` 1/1,
+`prototype-surface` 2/2, `template-api-guard` 1/1,
+`template-parse-guard` 1/1, `shim-warn` 1/1, `smoke` 1/1 et
+`explorer` 4/4. Les 31 gabarits passent `php -l` et les quatre fichiers JS
+modifiés passent `node --check`.
+
 **Ce qui reste à faire, dans l'ordre** :
-1. `shim-form.js` (347 lignes) — **le vrai morceau**, ~47 sites, presque tous
-   en attributs `onclick`/`onsubmit` inline dans les gabarits PHP (pas du
-   JS). `Form.serialize`/`Form.serializeElements`/`.serialize()` sur les
-   formulaires. Chantier de gabarits, fichier par fichier.
-2. Réauditer `shim-class` et `shim-event` après Form : zéro appelant gabarit,
+1. Réauditer `shim-class` et `shim-event` après Form : zéro appelant gabarit,
    mais leurs usages JS et leurs dépendances à Core doivent être prouvés avant
    toute suppression.
-3. `shim-core.js` (405 lignes, `$`/`$$`/`$A`/`$H`/`$w`/`$F`/`$R`, `Hash`,
+2. `shim-core.js` (405 lignes, `$`/`$$`/`$A`/`$H`/`$w`/`$F`/`$R`, `Hash`,
    `ObjectRange`) — à faire **en dernier**. Ne pas y toucher avant que les
    autres familles soient vides.
 

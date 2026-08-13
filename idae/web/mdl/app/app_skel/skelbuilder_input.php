@@ -76,7 +76,7 @@ $arr = $APP->plug('sitebase_app','appscheme')->findOne(array('_id' => $_POST['_i
 			elem = event.target // was Event.element(event) — the same value
 			// Was elem.up('tr') — Prototype's Element#up: nearest ancestor
 			// matching the selector.
-			vars = Form.serialize(elem.closest('tr'));
+			vars = serializeFields(elem.closest('tr'));
 			setTimeout(function () {
 				ajaxValidation('updInput', 'mdl/app/app_skel/', '_id=<?=$arr['_id']?>&' + vars)
 			}.bind(this), 1250)

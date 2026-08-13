@@ -28,14 +28,13 @@ const GLOBAL_FUNCTIONS = ['$', '$$', '$A', '$H', '$w', '$F', '$R'];
 // API this file asserted forever after its last caller was gone would have
 // blocked deleting the shim that provided it.
 //
-// 'Ajax' dropped 2026-08-11 for the same reason, when shim-ajax.js became
-// shim-form.js: no `new Ajax.*` survives outside vendor/ and flotr/'s own
+// 'Ajax' dropped 2026-08-11 for the same reason: no `new Ajax.*` survives
+// outside vendor/ and flotr/'s own
 // bundled Prototype 1.6, and the last reference — the Ajax.Responders pair in
 // engine/initApp.js — was unreachable code, since Responders only fire for
-// requests created through Ajax.Request/Ajax.Updater. 'Form' takes its place
-// here: that half of the old shim stays, held alive by 52 inline
-// onclick/onsubmit attributes in the PHP templates.
-const GLOBAL_OBJECTS = ['Prototype', 'Form', 'Event', 'Try'];
+// requests created through Ajax.Request/Ajax.Updater. 'Form' dropped
+// 2026-08-13 after those template callers moved to serializeFields.
+const GLOBAL_OBJECTS = ['Prototype', 'Event', 'Try'];
 
 // 'PeriodicalExecuter' dropped 2026-08-11 with the Ajax namespace it shipped
 // alongside. It never had a caller anywhere in the app — asserting it kept a
@@ -80,12 +79,6 @@ const ELEMENT_METHODS = ['on', 'observe', 'stopObserving', 'fire'];
 const NAMESPACED = [
   ['Class', 'create'],
   ['Object', 'extend'],
-  // Form.serialize / Form.serializeElements replace the three Ajax.* entries
-  // that sat here until 2026-08-11. They are the two the templates actually
-  // call, and both were missing at runtime for months without this spec
-  // noticing — see form-serialize.spec.ts for the behavioural coverage.
-  ['Form', 'serialize'],
-  ['Form', 'serializeElements'],
   ['Event', 'observe'],
   ['Event', 'stop'],
   ['Event', 'element'],

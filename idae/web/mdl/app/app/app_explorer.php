@@ -121,7 +121,7 @@
 	}
 
 	ax_on (ax_el ('contenu_explorer_search_<?=$table?>'), 'submit', 'form', function (event, node) {
-		var form_vars = Form.serialize (node);
+		var form_vars = serializeFields(node);
 
 		ax_el ('contenu_explorer_<?= $table ?>').loadModule ('app/app_liste/app_liste', 'table=<?= $table ?>&nbRows=750&' + form_vars);
 	});

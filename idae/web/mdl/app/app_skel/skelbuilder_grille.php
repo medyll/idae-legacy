@@ -75,7 +75,7 @@ $APP = new App();
 		register = function (event) {
 			var elem = event.target;
 			var tr = elem.closest ('tr');
-			vars = Form.serialize (tr);
+			vars = serializeFields(tr);
 			uid = tr.getAttribute ('uid')
 			setTimeout (function () {
 				ajaxValidation ('updGrille', 'mdl/app/app_skel/', '_id=<?=$arr['_id']?>&' + vars + '&uid=' + uid)

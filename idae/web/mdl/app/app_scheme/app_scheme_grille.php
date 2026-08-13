@@ -84,7 +84,7 @@
 		register_fk = function (event) {
 			var elem = event.target;
 			var tr   = elem.closest ('tr');
-			vars     = Form.serialize (tr);
+			vars     = serializeFields(tr);
 			uid      = tr.getAttribute ('uid')
 			setTimeout (function () {
 				ajaxValidation ('updFK', 'mdl/app/app_scheme/', '_id=<?=$arr['_id']?>&' + vars + '&uid=' + uid)

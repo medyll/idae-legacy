@@ -24,11 +24,11 @@ $rs         = $fs->find($vars)->sort(array('uploadDate'=>-1));
           </a> </div>
       </div>
       <div class="cell">
-        <div class="barre_entete applink disinput" > <a onClick="ajaxMdl('app_document/app_document_update_multi','<?=idioma('Supprimer')?>',Form.serialize(dl_el('tfile<?=$uniqid?>'))+'&F_action=suppr');">
+        <div class="barre_entete applink disinput" > <a onClick="ajaxMdl('app_document/app_document_update_multi','<?=idioma('Supprimer')?>',serializeFields(dl_el('tfile<?=$uniqid?>'))+'&F_action=suppr');">
           <i class="fa fa-times"></i>
           &nbsp;
           <?=idioma('supprimer')?>
-          </a> <a onClick="ajaxMdl('app_document/app_document_update_multi','<?=idioma('Rapprocher')?>',Form.serialize(dl_el('tfile<?=$uniqid?>'))+'&F_action=setmetadata');"> &nbsp;
+          </a> <a onClick="ajaxMdl('app_document/app_document_update_multi','<?=idioma('Rapprocher')?>',serializeFields(dl_el('tfile<?=$uniqid?>'))+'&F_action=setmetadata');"> &nbsp;
           <?=idioma('rapprocher')?>
           </a> <a>
           <i class="fa fa-exchange"></i>
@@ -85,8 +85,7 @@ $rs         = $fs->find($vars)->sort(array('uploadDate'=>-1));
 /*
  * Modified: 2026-08-11 — migrated off the PrototypeJS compatibility shims
  * ($, .on, .select, .readAttribute, .invoke, .fire) to native DOM, with
- * file-local `dl_` helpers. Form.serialize is deliberately kept: it is the
- * one shim API that stays (shim-form.js).
+ * file-local `dl_` helpers and the native serializeFields helper.
  */
 function dl_el(ref) {
     return typeof ref === 'string' ? document.getElementById(ref) : ref;
@@ -154,7 +153,7 @@ dl_on(dl_el('tfile<?=$uniqid?>'),'click','[mdl=trfilename]',function(event,node)
 <script>
 
 pleaseTag=function(tag){
-    vars = Form.serialize(dl_el('tfile<?=$uniqid?>'));
+    vars = serializeFields(dl_el('tfile<?=$uniqid?>'));
     // ajaxValidation('tagDocument','mdl/document/','<?=http_build_query($_POST)?>&'+vars+'&tag='+tag);
     }
 inverseTag=function(){

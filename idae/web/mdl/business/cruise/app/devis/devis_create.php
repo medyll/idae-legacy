@@ -46,7 +46,7 @@ if(empty($_POST['BIG_SCREEN'])){
 			<div style="overflow:auto;width:100%;z-index:2000;height:150px;display:none" id="div_devis_app_select" class="blanc absolute applink applinkblock toggler boxshadow"></div>
 			<div class="flex_v flex_main" style="overflow:auto;">
 				<div>
-					<form id="devis_form" name="devis_form" onsubmit="dv_show(dv_el('div_devis_create_wait')).loadModule('<?=$path_to_devis?>devis_create_wait',$(this).serialize());return false" action="">
+					<form id="devis_form" name="devis_form" onsubmit="dv_show(dv_el('div_devis_create_wait')).loadModule('<?=$path_to_devis?>devis_create_wait',serializeFields($(this)));return false" action="">
 						<input type="hidden" name="vars[idclient]" id="tmp_idclient">
 						<input type="hidden" name="vars[iddevis_type]" value="2">
 						<input type="hidden" name="vars[idagent]" value="<?= $_SESSION['idagent'] ?>">
@@ -74,8 +74,7 @@ if(empty($_POST['BIG_SCREEN'])){
 	 * DOM, with file-local `dv_` helpers.
 	 *
 	 * loadModule / unToggleContent are NOT shim calls and stay: engine/methods.js
-	 * installs both on HTMLElement.prototype. $(this).serialize() in the form
-	 * onsubmit stays too — shim-form.js is the shim that keeps living.
+	 * installs both on HTMLElement.prototype. Form values use serializeFields.
 	 */
 	function dv_el(ref) {
 		return typeof ref === 'string' ? document.getElementById(ref) : ref;
@@ -138,7 +137,7 @@ if(empty($_POST['BIG_SCREEN'])){
 
 	/*dv_el('div_devis_search').addEventListener('dom:act_change', function (event) {
 		var form = event.target;
-		vars = form.serialize();
+		vars = serializeFields();
 
 		dv_show(dv_el('div_devis_app_select')).loadModule('app/app_liste/app_liste', 'table=produit&' + vars)
 

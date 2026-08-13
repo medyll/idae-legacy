@@ -70,8 +70,7 @@
 	/*
 	 * Modified: 2026-08-11 — migrated off the PrototypeJS compatibility shims
 	 * ($, .observe, .on, .select, .first, .update, .add/removeClassName) to
-	 * native DOM, with file-local `sp_` helpers. Form.serialize is deliberately
-	 * kept: it is the one shim API that stays (shim-form.js).
+	 * native DOM, with file-local `sp_` helpers and serializeFields.
 	 */
 	function sp_el(ref) {
 		return typeof ref === 'string' ? document.getElementById(ref) : ref;
@@ -126,7 +125,7 @@
 		sp_in('form<?=$uniqid?>', '#<?=$deb?>').value = event.memo.dateDebut
 		sp_in('form<?=$uniqid?>', '#<?=$fin?>').value = event.memo.dateFin
 
-		sp_in('form<?= $uniqid ?>', '#refresh_nav_btn').setAttribute('vars', Form.serialize(sp_el('form<?=$uniqid?>')))
+		sp_in('form<?= $uniqid ?>', '#refresh_nav_btn').setAttribute('vars', serializeFields(sp_el('form<?=$uniqid?>')))
 		// Prototype's addClassName appended the raw string, which the browser
 		// then read as two class tokens; classList.add takes them separately.
 		nav.classList.add('animated', 'bounce');
@@ -139,7 +138,7 @@
 
 		var fin = sp_in('form<?=$uniqid?>', '#<?=$fin?>');
 		if (fin.value == '') fin.value = sp_in('form<?=$uniqid?>', '#<?=$deb?>').value;
-		sp_in('form<?= $uniqid ?>', '#refresh_nav_btn').setAttribute('vars', Form.serialize(sp_el('form<?=$uniqid?>')));
+		sp_in('form<?= $uniqid ?>', '#refresh_nav_btn').setAttribute('vars', serializeFields(sp_el('form<?=$uniqid?>')));
 
 		nav.classList.add('animated', 'bounce');
 	})

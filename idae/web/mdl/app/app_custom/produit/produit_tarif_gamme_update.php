@@ -86,10 +86,8 @@
 	 * ($, .on, .up, .next, .select, .first, .show, .hide, .readAttribute) to
 	 * native DOM, with file-local `ptg_` helpers.
 	 *
-	 * Form.serializeElements is deliberately kept — shim-form.js is the shim
-	 * that stays — but note it did not exist as a static until 2026-08-11, so
-	 * the change handler below was throwing "Form.serializeElements is not a
-	 * function" on every edit. See form-serialize.spec.ts.
+	 * Arbitrary field collections use the native serializeFields helper.
+	 * See form-serialize.spec.ts for the regression contract.
 	 */
 	function ptg_el(ref) {
 		return typeof ref === 'string' ? document.getElementById(ref) : ref;
@@ -161,7 +159,7 @@
 	ptg_on(ptg_el('<?=$body?>'), 'change', 'input[type="text"]', function (event, node) {
 		var value = node.value;
 		var row = ptg_up(node, 'tr');
-		var vars = Form.serializeElements(row.querySelectorAll('.' + node.getAttribute('grp')));
+		var vars = serializeFields(row.querySelectorAll('.' + node.getAttribute('grp')));
 		ajaxValidation('updateProduitTarifGamme', 'mdl/production/produittarifgamme/', vars + '&scope=idproduit&idproduit=<?=$idproduit?>');
 	})
 </script>

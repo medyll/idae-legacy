@@ -76,8 +76,8 @@
 	 * ($, .on, .observe, .up, .next, .previousSiblings, .select, .first, .each,
 	 * .readAttribute) to native DOM, with file-local `pms2_` helpers.
 	 *
-	 * Form.serialize / Form.serializeElements stay: shim-form.js is the shim
-	 * that keeps living. loadModule is not a shim call either — engine/methods.js
+	 * Form values use serializeFields. loadModule is not a shim call either —
+	 * engine/methods.js
 	 * installs it on HTMLElement.prototype.
 	 */
 	function pms2_el(ref) {
@@ -143,16 +143,16 @@
 		var vars      = 'n=p';
 		var ac_elem   = pms2_up (node, '.cellsearch');
 		var next_elem = ac_elem;
-		vars          = '&' + Form.serialize (ac_elem);
-		vars += '&' + Form.serializeElements (pms2_el ('<?=$formSearch?>').querySelectorAll ('.act_int'));
+		vars          = '&' + serializeFields(ac_elem);
+		vars += '&' + serializeFields(pms2_el ('<?=$formSearch?>').querySelectorAll ('.act_int'));
 
 		pms2_previousSiblings (ac_elem).forEach (function (danode) {
-			if ( Form.serialize (danode) != '' )vars += '&' + Form.serialize (danode);
+			if ( serializeFields(danode) != '' )vars += '&' + serializeFields(danode);
 
 		})
 
 		if ( !pms2_next (next_elem, '.cellsearch') ) {
-			vars = Form.serialize (pms2_el ('<?=$formSearch?>'));
+			vars = serializeFields(pms2_el ('<?=$formSearch?>'));
 
 		} else {
 			var wrkon, mdl, vars_item, table_from;

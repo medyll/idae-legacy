@@ -99,31 +99,6 @@
 		return new URLSearchParams (obj || {}).toString ();
 	}
 
-	/**
-	 * Prototype's Form.serialize, which — unlike FormData — accepts any
-	 * container, not just a <form>. Several call sites here serialize a
-	 * `[expl_file_list]` div rather than a form, so this has to walk fields
-	 * itself.
-	 */
-	function serializeFields(root) {
-		if ( !root ) return '';
-		var pairs = [];
-		qsa (root, 'input, select, textarea').forEach (function (field) {
-			if ( field.disabled || !field.name || field.type === 'file' || field.type === 'image' ) return;
-			if ( field.type === 'submit' || field.type === 'button' || field.type === 'reset' ) return;
-			if ( (field.type === 'checkbox' || field.type === 'radio') && !field.checked ) return;
-
-			if ( field.tagName.toLowerCase () === 'select' && field.multiple ) {
-				Array.prototype.slice.call (field.options).forEach (function (option) {
-					if ( option.selected ) pairs.push (encodeURIComponent (field.name) + '=' + encodeURIComponent (option.value));
-				});
-				return;
-			}
-			pairs.push (encodeURIComponent (field.name) + '=' + encodeURIComponent (field.value));
-		});
-		return pairs.join ('&');
-	}
-
 	/** Prototype's Element#wrap: put `wrapper` where `node` is, node inside. */
 	function wrap(node, wrapper) {
 		if ( node.parentNode ) node.parentNode.insertBefore (wrapper, node);

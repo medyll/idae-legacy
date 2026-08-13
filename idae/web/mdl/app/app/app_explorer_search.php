@@ -68,7 +68,7 @@
 	}
 </script>
 
-<form id="form<?= $uniqid ?>" onclick="gain_searchbutton(this,event)" onfocus="gain_search_summary(this,event)" onkeyup="axs_el('main_search_<?= $table ?>').loadModule('app/app_search/app_search_summary',$(this).serialize());"
+<form id="form<?= $uniqid ?>" onclick="gain_searchbutton(this,event)" onfocus="gain_search_summary(this,event)" onkeyup="axs_el('main_search_<?= $table ?>').loadModule('app/app_search/app_search_summary',serializeFields($(this)));"
       onsubmit="return false;"
       style="height: 100%;overflow:hidden;">
 	<?php foreach ($vars as $key => $input): ?>

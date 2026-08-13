@@ -6,8 +6,7 @@
  * the PHP templates called it anyway, from inline onclick/onsubmit attributes,
  * failing only when a user clicked.
  *
- *   - Form.serializeElements  — 8 call sites, missing since the Phase 3/4 swap
- *   - $(form).serialize()     — 13 call sites, same
+ *   - Form serialization APIs — migrated to serializeFields in phase 5
  *   - Effect.Appear/Highlight — 3 call sites, dead the moment shim-effects.js
  *                               was deleted on 2026-08-09
  *
@@ -172,9 +171,9 @@ test('template API guard: every Prototype symbol the templates call exists at ru
   // template vocabulary's distinct-name count to 9. Lowered to keep testing
   // "did the walk run at all", not "how many Prototype names are still
   // in use" — the latter is expected to keep shrinking as Phase 5 continues.
-  // The 2026-08-13 shim-element removal dropped .match()/.show()/.setStyle(),
-  // and the scanner now strips block/HTML comments: 4 live method names remain.
-  expect(found.methods.size, 'template scan found nothing — the walk is broken').toBeGreaterThan(3);
+  // The 2026-08-13 shim-element/form removals dropped .match()/.show()/
+  // .setStyle()/.serialize(); 3 live method names remain.
+  expect(found.methods.size, 'template scan found nothing — the walk is broken').toBeGreaterThan(2);
 
   const missing = await page.evaluate(
     ([namespaced, methods]) => {

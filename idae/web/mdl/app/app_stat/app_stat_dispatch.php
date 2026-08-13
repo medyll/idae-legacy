@@ -106,10 +106,10 @@
 	})
 
 	asd_el('date_<?=$uniqid?>').addEventListener('dom:act_click', function (event) {
-		var varsDate = Form.serialize(asd_el('date_<?=$uniqid?>'));
+		var varsDate = serializeFields(asd_el('date_<?=$uniqid?>'));
 		// loadModule returns the element, which is what let Prototype chain .show().
 		asd_show(asd_el('chart_<?=$uniqid?>').loadModule('app/app_stat/app_stat_dispatch_inner', 'table=<?=$table?>&' + varsDate));
 	});
 
-	asd_show(asd_el('chart_<?=$uniqid?>').loadModule('app/app_stat/app_stat_dispatch_inner', 'app_stat_scope=<?=$app_stat_scope?>&table=<?=$table?>&' + Form.serialize(asd_el('date_<?=$uniqid?>'))));
+	asd_show(asd_el('chart_<?=$uniqid?>').loadModule('app/app_stat/app_stat_dispatch_inner', 'app_stat_scope=<?=$app_stat_scope?>&table=<?=$table?>&' + serializeFields(asd_el('date_<?=$uniqid?>'))));
 </script> 

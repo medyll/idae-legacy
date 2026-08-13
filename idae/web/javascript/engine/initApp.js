@@ -6,8 +6,8 @@
  * request of the same `onlyLatestOfClass`, and an onComplete that ran
  * afterAjaxCall() on the response container and fired 'content:loaded' on it.
  *
- * Both were removed with the Ajax namespace itself (see shim-form.js, which
- * replaced shim-ajax.js). They were unreachable long before that: Prototype's
+ * Both were removed with the Ajax namespace itself. They were unreachable
+ * long before that: Prototype's
  * Responders only fire for requests created through Ajax.Request/Ajax.Updater,
  * and the phase 5 migrations left no `new Ajax.*` anywhere outside vendor/ and
  * flotr/'s own bundled Prototype 1.6. Nothing set `onlyLatestOfClass` either --

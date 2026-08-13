@@ -3,7 +3,7 @@ import { test, expect } from './fixtures/test-base';
 // Best-effort CRUD probe using server endpoints. May require tuning for specific tables/fields.
 
 test('crud: create -> list -> delete (probe)', async ({ request }) => {
-  const base = process.env.BASE_URL || 'http://localhost:8080';
+  const base = process.env.BASE_URL || 'http://127.0.0.1:8080';
   const user = process.env.PLAYWRIGHT_USER || '';
   const pass = process.env.PLAYWRIGHT_PASS || '';
 

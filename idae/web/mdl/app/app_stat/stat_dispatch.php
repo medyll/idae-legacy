@@ -22,7 +22,7 @@ echo $mdl = $_POST['mdl_stat'].'/'.$_POST['mdl_stat'];
 /*
  * Modified: 2026-08-11 — migrated off the PrototypeJS compatibility shims
  * ($, .on, .observe, .show) to native DOM, with file-local `sd_` helpers.
- * Form.serialize stays (shim-form.js is the shim that keeps living) and
+ * Form values now use the native serializeFields helper;
  * loadModule is not a shim call: engine/methods.js puts it on the prototype.
  */
 function sd_el(ref) {
@@ -55,8 +55,8 @@ function sd_show(node) { if (node) node.style.display = ''; return node; }
 
 // Both handlers ran the same three lines; factored out.
 function sd_refresh() {
-	var vars     = Form.serialize(sd_el('liste_<?=$uniqid?>'));
-	var varsDate = Form.serialize(sd_el('date_<?=$uniqid?>'));
+	var vars     = serializeFields(sd_el('liste_<?=$uniqid?>'));
+	var varsDate = serializeFields(sd_el('date_<?=$uniqid?>'));
 	// loadModule returns the element, which is what let Prototype chain .show().
 	sd_show(sd_el('chart_<?=$uniqid?>').loadModule('statistique/<?=$mdl?>_stat', vars + '&' + varsDate));
 }

@@ -22,7 +22,7 @@
 							<a><i class="fa fa-times textrouge"></i></a>
 						</div>
 						<div class="flex_main blanc padding">
-							<form onsubmit="main_item_search.load_data($(this).serialize());document.getElementById('main_item_search_zone').toggleContent();return false;">
+							<form onsubmit="main_item_search.load_data(serializeFields($(this)));document.getElementById('main_item_search_zone').toggleContent();return false;">
 								<button type="submit"
 								        style="position:absolute;top:0;height:100%;right: 0.5em; z-index: 10;border: none;background-color: transparent;">
 									<span class="borderl"><i class="fa fa-search"></i>

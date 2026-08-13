@@ -82,8 +82,7 @@
 	/*
 	 * Modified: 2026-08-11 — migrated off the PrototypeJS compatibility shims
 	 * ($, .on, .select, .first, .update, .add/removeClassName) to native DOM,
-	 * with file-local `nd_` helpers. Form.serialize is deliberately kept: it is
-	 * the one shim API that stays (shim-form.js), covered by
+	 * with file-local `nd_` helpers and serializeFields, covered by
 	 * playwright/tests/form-serialize.spec.ts.
 	 */
 	function nd_el(ref) {
@@ -136,7 +135,7 @@
 		nd_in('form<?=$uniqid?>', '#<?=$deb?>').value = event.memo.dateDebut
 		nd_in('form<?=$uniqid?>', '#<?=$fin?>').value = event.memo.dateFin
 
-		nd_in('form<?= $uniqid ?>', '#refresh_nav_btn').setAttribute('vars', Form.serialize(nd_el('form<?=$uniqid?>')))
+		nd_in('form<?= $uniqid ?>', '#refresh_nav_btn').setAttribute('vars', serializeFields(nd_el('form<?=$uniqid?>')))
 		// Prototype's addClassName appended the raw string, which the browser
 		// then read as two class tokens; classList.add takes them separately.
 		nav.classList.add('animated', 'bounce');
@@ -149,7 +148,7 @@
 
 		var fin = nd_in('form<?=$uniqid?>', '#<?=$fin?>');
 		if (fin.value == '') fin.value = nd_in('form<?=$uniqid?>', '#<?=$deb?>').value;
-		nd_in('form<?= $uniqid ?>', '#refresh_nav_btn').setAttribute('vars', Form.serialize(nd_el('form<?=$uniqid?>')));
+		nd_in('form<?= $uniqid ?>', '#refresh_nav_btn').setAttribute('vars', serializeFields(nd_el('form<?=$uniqid?>')));
 
 		nav.classList.add('animated', 'bounce');
 	})

@@ -102,13 +102,12 @@
 	<?php if (!empty($_POST['show_search'])) { ?>
 	/*
 	 * Modified: 2026-08-11 — migrated off the PrototypeJS compatibility shims
-	 * ($, .on) to native DOM. Form.serialize stays: shim-form.js is the shim
-	 * that keeps living.
+	 * ($, .on) to native DOM. Form values use serializeFields.
 	 */
 	document.getElementById ('app_liste_search_<?=$zone?>').addEventListener ('submit', function (event) {
 		var node = event.target.closest ('form');
 		if (!node) return;
-		var form_vars = Form.serialize (node);
+		var form_vars = serializeFields(node);
 		//alert(form_vars);
 		load_table_in_zone ('groupBy=<?=$settings_button_group?>&<?=$APP->translate_vars($vars)?>&nbRows=<?=$nbRows?>&page=0&' + form_vars, '<?=$zone?>');
 

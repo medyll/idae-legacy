@@ -34,9 +34,8 @@
 	 * ($, .on, .up, .next, .previousSiblings, .select, .first, .each,
 	 * .readAttribute, .fire) to native DOM, with file-local `sch_` helpers.
 	 *
-	 * Form.serialize / Form.serializeElements are deliberately kept: shim-form.js
-	 * is the shim that stays. serializeElements in particular did not exist as a
-	 * static until 2026-08-11, so the line using it below had been throwing --
+	 * Form values use the native serializeFields helper. Arbitrary collections
+	 * are covered too; that legacy path had been throwing until 2026-08-11 --
 	 * see form-serialize.spec.ts. loadModule() is not a shim call either;
 	 * engine/methods.js installs it on HTMLElement.prototype.
 	 */
@@ -112,17 +111,17 @@
 		var vars = 'n=p';
 		var ac_elem = sch_up(node, '.cellsearch');
 		var next_elem = ac_elem;
-		vars = '&' + Form.serialize(ac_elem);
-		vars += '&' + Form.serializeElements(sch_el('<?=$formSearch?>').querySelectorAll('.act_int'));
+		vars = '&' + serializeFields(ac_elem);
+		vars += '&' + serializeFields(sch_el('<?=$formSearch?>').querySelectorAll('.act_int'));
 
 		sch_previousSiblings(ac_elem).forEach(function (danode) {
-			if (Form.serialize(danode) != '')vars += '&' + Form.serialize(danode);
+			if (serializeFields(danode) != '')vars += '&' + serializeFields(danode);
 
 		})
 
 
 		if (!sch_next(next_elem, '.cellsearch')) {
-			vars = Form.serialize(sch_el('<?=$formSearch?>'));
+			vars = serializeFields(sch_el('<?=$formSearch?>'));
 
 		} else {
 			var wrkon, mdl, vars_item;

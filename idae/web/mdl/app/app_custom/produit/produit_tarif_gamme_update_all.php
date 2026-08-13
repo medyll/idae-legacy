@@ -35,13 +35,13 @@
 
 
 		<div id = "men<?= $uniquid ?>" class = "inline">
-			<a onclick = "ajaxMdl('production/produittarifgamme/produit_tarif_gamme_update_multi','<?= idioma('Actions multiples') . ' ' . idioma('Supprimer prix') ?>',Form.serializeElements(ptga_el('<?= $body ?>').querySelectorAll('.selectable'))+'&F_action=suppr&idproduit=<?= $idproduit ?>');"><img src = "<?= ICONPATH ?>trash16.png"/>
+			<a onclick = "ajaxMdl('production/produittarifgamme/produit_tarif_gamme_update_multi','<?= idioma('Actions multiples') . ' ' . idioma('Supprimer prix') ?>',serializeFields(ptga_el('<?= $body ?>').querySelectorAll('.selectable'))+'&F_action=suppr&idproduit=<?= $idproduit ?>');"><img src = "<?= ICONPATH ?>trash16.png"/>
 				<?= idioma('Supprimer prix') ?>
 			</a>
-			<a onclick = "ajaxMdl('production/produittarifgamme/produit_tarif_gamme_update_multi','<?= idioma('Actions multiples') . ' ' . idioma('Supprimer dates') ?>',Form.serializeElements(ptga_el('<?= $body ?>').querySelectorAll('.selectable'))+'&F_action=supprdates&idproduit=<?= $idproduit ?>');"><img src = "<?= ICONPATH ?>trash16.png"/>
+			<a onclick = "ajaxMdl('production/produittarifgamme/produit_tarif_gamme_update_multi','<?= idioma('Actions multiples') . ' ' . idioma('Supprimer dates') ?>',serializeFields(ptga_el('<?= $body ?>').querySelectorAll('.selectable'))+'&F_action=supprdates&idproduit=<?= $idproduit ?>');"><img src = "<?= ICONPATH ?>trash16.png"/>
 				<?= idioma('Supprimer dates') ?>
 			</a>
-			<a onclick = "ajaxMdl('production/produittarifgamme/produit_tarif_gamme_update_multi','<?= idioma('Actions multiples') . ' ' . idioma('Modifier prix') ?>',Form.serializeElements(ptga_el('<?= $body ?>').querySelectorAll('.selectable'))+'&F_action=edit&idproduit=<?= $idproduit ?>');"><img src = "<?= ICONPATH ?>edit16.png"/>
+			<a onclick = "ajaxMdl('production/produittarifgamme/produit_tarif_gamme_update_multi','<?= idioma('Actions multiples') . ' ' . idioma('Modifier prix') ?>',serializeFields(ptga_el('<?= $body ?>').querySelectorAll('.selectable'))+'&F_action=edit&idproduit=<?= $idproduit ?>');"><img src = "<?= ICONPATH ?>edit16.png"/>
 				<?= idioma('Modifier prix') ?>
 			</a>
 			<a onclick = "ajaxValidation('repairProduitTarif','mdl/production/produittarif/','scope=idproduit&idproduit=<?= $idproduit ?>');"><img src = "<?= ICONPATH ?>repair16.png"/>&nbsp;Ré-indexer</a>
@@ -152,10 +152,8 @@
 	 * ($, .on, .up, .next, .select, .first, .show, .hide, .readAttribute) to
 	 * native DOM, with file-local `ptga_` helpers.
 	 *
-	 * Form.serializeElements is deliberately kept — shim-form.js is the shim
-	 * that stays — but note it did not exist as a static until 2026-08-11, so
-	 * the change handler below was throwing "Form.serializeElements is not a
-	 * function" on every edit. See form-serialize.spec.ts.
+	 * Arbitrary field collections use the native serializeFields helper.
+	 * See form-serialize.spec.ts for the regression contract.
 	 */
 	function ptga_el(ref) {
 		return typeof ref === 'string' ? document.getElementById(ref) : ref;
@@ -227,7 +225,7 @@
 	ptga_on(ptga_el('<?=$body?>'), 'change', 'input[type="text"]', function (event, node) {
 		var value = node.value;
 		var row = ptga_up(node, 'tr');
-		var vars = Form.serializeElements(row.querySelectorAll('.' + node.getAttribute('grp')));
+		var vars = serializeFields(row.querySelectorAll('.' + node.getAttribute('grp')));
 		ajaxValidation('updateProduitTarifGamme', 'mdl/production/produittarifgamme/', vars + '&scope=idproduit&idproduit=<?=$idproduit?>');
 	})
 </script>

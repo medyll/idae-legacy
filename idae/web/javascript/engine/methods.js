@@ -186,6 +186,55 @@ function idae_toggle(node) {
 	return node;
 }
 
+/**
+ * Serialize a form, a field container, a single field, or an array-like field
+ * collection without extending HTMLElement.prototype.
+ *
+ * The encoding deliberately matches the legacy Form serializer: spaces are
+ * encoded as %20 and multiple-select values repeat the field name.
+ */
+function serializeFields(rootOrElements) {
+	if (!rootOrElements) return '';
+	if (typeof rootOrElements === 'string') {
+		rootOrElements = document.getElementById(rootOrElements);
+		if (!rootOrElements) return '';
+	}
+
+	var elements;
+	if (rootOrElements.nodeType === 1) {
+		var tagName = rootOrElements.tagName.toLowerCase();
+		elements = /^(input|select|textarea|button)$/.test(tagName)
+			? [rootOrElements]
+			: Array.prototype.slice.call(
+				rootOrElements.querySelectorAll('input, select, textarea, button')
+			);
+	} else {
+		elements = Array.prototype.slice.call(rootOrElements);
+	}
+
+	var pairs = [];
+	elements.forEach(function (field) {
+		if (!field || field.disabled || !field.name || field.type === 'file' || field.type === 'image') return;
+		if (field.type === 'submit') return;
+		if ((field.type === 'checkbox' || field.type === 'radio') && !field.checked) return;
+
+		var values;
+		if (field.tagName && field.tagName.toLowerCase() === 'select' && field.multiple) {
+			values = Array.prototype.slice.call(field.options)
+				.filter(function (option) { return option.selected; })
+				.map(function (option) { return option.value; });
+		} else {
+			values = [field.value == null ? '' : field.value];
+		}
+
+		values.forEach(function (value) {
+			pairs.push(encodeURIComponent(field.name) + '=' + encodeURIComponent(String(value)));
+		});
+	});
+
+	return pairs.join('&');
+}
+
 (function (global) {
 
 	/* ------------------------------------------------------------------ *

@@ -53,9 +53,8 @@
 	 * ($, .on, .up, .next, .previousSiblings, .select, .first, .each,
 	 * .readAttribute, .fire) to native DOM, with file-local `pms_` helpers.
 	 *
-	 * Form.serialize / Form.serializeElements are deliberately kept: shim-form.js
-	 * is the shim that stays. serializeElements in particular did not exist as a
-	 * static until 2026-08-11, so the line using it below had been throwing --
+	 * Form values use the native serializeFields helper. Arbitrary collections
+	 * are covered too; that legacy path had been throwing until 2026-08-11 --
 	 * see form-serialize.spec.ts. loadModule() is not a shim call either;
 	 * engine/methods.js installs it on HTMLElement.prototype.
 	 */
@@ -131,17 +130,17 @@
 		var vars = 'n=p';
 		var ac_elem = pms_up(node, '.cellsearch');
 		var next_elem = ac_elem;
-		vars = '&' + Form.serialize(ac_elem);
-		vars += '&' + Form.serializeElements(pms_el('<?=$formSearch?>').querySelectorAll('.act_int'));
+		vars = '&' + serializeFields(ac_elem);
+		vars += '&' + serializeFields(pms_el('<?=$formSearch?>').querySelectorAll('.act_int'));
 
 		pms_previousSiblings(ac_elem).forEach(function (danode) {
-			if (Form.serialize(danode) != '')vars += '&' + Form.serialize(danode);
+			if (serializeFields(danode) != '')vars += '&' + serializeFields(danode);
 
 		})
 
 
 		if (!pms_next(next_elem, '.cellsearch')) {
-			vars = Form.serialize(pms_el('<?=$formSearch?>'));
+			vars = serializeFields(pms_el('<?=$formSearch?>'));
 			alert('red')
 
 		} else {
