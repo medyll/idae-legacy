@@ -67,29 +67,79 @@
 	</div>
 </div>
 <script>
-	$('<?= $fin ?>').observe('change',function(event){
-		console.log($('<?= $fin ?>').value)
+	/*
+	 * Modified: 2026-08-11 — migrated off the PrototypeJS compatibility shims
+	 * ($, .observe, .on, .select, .first, .update, .add/removeClassName) to
+	 * native DOM, with file-local `sp_` helpers and serializeFields.
+	 */
+	function sp_el(ref) {
+		return typeof ref === 'string' ? document.getElementById(ref) : ref;
+	}
+
+	/**
+	 * Prototype's Element#on. With a selector it delegates, calling the handler
+	 * as (event, matchedElement); without one it is a plain listener — a
+	 * two-argument .on() was never delegation, the shim fell through to
+	 * Event.observe.
+	 */
+	function sp_on(root, eventName, selectorOrHandler, maybeHandler) {
+		if (!root) return;
+		if (maybeHandler === undefined) {
+			root.addEventListener(eventName, selectorOrHandler);
+			return;
+		}
+		var selector = selectorOrHandler, handler = maybeHandler;
+		root.addEventListener(eventName, function (event) {
+			var target = event.target;
+			while (target && target !== root) {
+				if (target.nodeType === 1 && target.matches(selector)) {
+					return handler(event, target);
+				}
+				target = target.parentNode;
+			}
+		}, false);
+	}
+
+	/**
+	 * `#refresh_nav` / `#refresh_nav_btn` are literal ids, not keyed off
+	 * $uniqid, so several instances of this module share them. Every lookup is
+	 * scoped to this instance's form — which is what
+	 * `$(form).select('#x').first()` did, and why a bare getElementById here
+	 * would silently drive another instance's button.
+	 */
+	function sp_in(scopeId, selector) {
+		var scope = sp_el(scopeId);
+		return scope ? scope.querySelector(selector) : null;
+	}
+
+	sp_el('<?= $fin ?>').addEventListener('change', function (event) {
+		console.log(sp_el('<?= $fin ?>').value)
 	});
-	$('body').on('dom:act_click', '#select_periode<?=$uniqid?>', function (event) {
+	sp_on(document.body, 'dom:act_click', '#select_periode<?=$uniqid?>', function (event) {
 
-		$('form<?= $uniqid ?>').select('#refresh_nav').first().removeClassName('bounce');
-		$('form<?= $uniqid ?>').select('#refresh_nav').first().removeClassName('animated');
+		var nav = sp_in('form<?= $uniqid ?>', '#refresh_nav');
+		nav.classList.remove('bounce');
+		nav.classList.remove('animated');
 
-		$('type_periode_<?=$uniqid?>').update(event.memo.value);
-		$($('form<?=$uniqid?>').querySelector('#<?=$deb?>')).value = event.memo.dateDebut
-		$($('form<?=$uniqid?>').querySelector('#<?=$fin?>')).value = event.memo.dateFin
+		sp_el('type_periode_<?=$uniqid?>').innerHTML = event.memo.value;
+		sp_in('form<?=$uniqid?>', '#<?=$deb?>').value = event.memo.dateDebut
+		sp_in('form<?=$uniqid?>', '#<?=$fin?>').value = event.memo.dateFin
 
-		$('form<?= $uniqid ?>').select('#refresh_nav_btn').first().setAttribute('vars', Form.serialize($('form<?=$uniqid?>')))
-		$('form<?= $uniqid ?>').select('#refresh_nav').first().addClassName('animated bounce');
+		sp_in('form<?= $uniqid ?>', '#refresh_nav_btn').setAttribute('vars', serializeFields(sp_el('form<?=$uniqid?>')))
+		// Prototype's addClassName appended the raw string, which the browser
+		// then read as two class tokens; classList.add takes them separately.
+		nav.classList.add('animated', 'bounce');
 	})
-	$('form<?= $uniqid ?>').on('dom:act_change', function () {
+	sp_on(sp_el('form<?= $uniqid ?>'), 'dom:act_change', function () {
 
-		$('form<?= $uniqid ?>').select('#refresh_nav').first().removeClassName('bounce');
-		$('form<?= $uniqid ?>').select('#refresh_nav').first().removeClassName('animated');
+		var nav = sp_in('form<?= $uniqid ?>', '#refresh_nav');
+		nav.classList.remove('bounce');
+		nav.classList.remove('animated');
 
-		if ($($('form<?=$uniqid?>').querySelector('#<?=$fin?>')).value == '') $($('form<?=$uniqid?>').querySelector('#<?=$fin?>')).value = $($('form<?=$uniqid?>').querySelector('#<?=$deb?>')).value;
-		$('form<?= $uniqid ?>').select('#refresh_nav_btn').first().setAttribute('vars', Form.serialize($('form<?=$uniqid?>')));
+		var fin = sp_in('form<?=$uniqid?>', '#<?=$fin?>');
+		if (fin.value == '') fin.value = sp_in('form<?=$uniqid?>', '#<?=$deb?>').value;
+		sp_in('form<?= $uniqid ?>', '#refresh_nav_btn').setAttribute('vars', serializeFields(sp_el('form<?=$uniqid?>')));
 
-		$('form<?= $uniqid ?>').select('#refresh_nav').first().addClassName('animated bounce');
+		nav.classList.add('animated', 'bounce');
 	})
 </script>

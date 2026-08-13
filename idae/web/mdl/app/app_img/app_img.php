@@ -22,9 +22,9 @@
 	<div class="flex_h flex_main">
 		<div class="frmCol1">
 			<div class="applink applinkblock flex_h borderb toggler">
-				<a class="flex_main autoToggle aligncenter active borderr"  onclick="$('app_home_field').toggleContent()"><i class="fa fa-home"></i><br>re</a>
-				<a class="flex_main autoToggle aligncenter borderr" onclick="$('app_type_field').toggleContent()"><?=idioma('Types')?></a>
-				<a class="flex_main autoToggle aligncenter" onclick="$('app_group_field').toggleContent()"><?=idioma('Groupes')?></a>
+				<a class="flex_main autoToggle aligncenter active borderr"  onclick="document.getElementById('app_home_field').toggleContent()"><i class="fa fa-home"></i><br>re</a>
+				<a class="flex_main autoToggle aligncenter borderr" onclick="document.getElementById('app_type_field').toggleContent()"><?=idioma('Types')?></a>
+				<a class="flex_main autoToggle aligncenter" onclick="document.getElementById('app_group_field').toggleContent()"><?=idioma('Groupes')?></a>
 			</div>
 		</div>
 		<div act_defer mdl="app/app_liste/app_liste"    vars="table=<?=$table?>&datadsp=app/app_img/image_dyn" class="blanc flex_main " style="overflow:auto" id="inner_skel">

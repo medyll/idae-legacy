@@ -24,7 +24,7 @@
 <div class="relative applink applinkblock autoToggle" style="max-height:350px;overflow:auto;">
 	<?php while ($arr = $rs->getNext()) {
 		?>
-		<a class="relative inline" onclick='$(this).fire("dom:datechoosen",{value: "<?= addslashes(niceUrl($arr["typeInput"])) ?>",id:"<?= $arr["typeInput"] ?>"})'>
+		<a class="relative inline" onclick='idae_fire(this,"dom:datechoosen",{value: "<?= addslashes(niceUrl($arr["typeInput"])) ?>",id:"<?= $arr["typeInput"] ?>"})'>
 			<?= $arr["typeInput"] ?>
 		</a>
 	<?php } ?>

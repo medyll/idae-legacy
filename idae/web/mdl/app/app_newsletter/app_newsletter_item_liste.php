@@ -69,41 +69,111 @@
 	</div>
 </div>
 <script>
-	$('<?= $formSearch ?>').insert({before: '<div id="django" style="display:none;"  </div>'})
-	$('body').on('dragstart', '[draggable]', function (event, node) {
+	/*
+	 * Modified: 2026-08-11 — migrated off the PrototypeJS compatibility shims
+	 * ($, $$, .on, .insert, .identify, .size, .first, .invoke, .collect,
+	 * .readAttribute, .show, .hide, Object.toQueryString) to native DOM, with
+	 * file-local `nl_` helpers.
+	 */
+	function nl_el(ref) {
+		return typeof ref === 'string' ? document.getElementById(ref) : ref;
+	}
+
+	function nl_qsa(selector) {
+		return Array.prototype.slice.call(document.querySelectorAll(selector));
+	}
+
+	function nl_show(node) { if (node) node.style.display = ''; return node; }
+	function nl_hide(node) { if (node) node.style.display = 'none'; return node; }
+
+	/**
+	 * Prototype's Element#insert({before: …}), for the two shapes used here:
+	 * an HTML string, and an existing element to be moved into place.
+	 */
+	function nl_insertBefore(node, content) {
+		if (!node) return node;
+		if (typeof content === 'string') {
+			node.insertAdjacentHTML('beforebegin', content);
+		} else if (content && node.parentNode) {
+			node.parentNode.insertBefore(content, node);
+		}
+		return node;
+	}
+
+	/** Prototype's Element#identify: give the node an id if it has none, return it. */
+	function nl_identify(node) {
+		if (!node.id) node.id = 'anonymous_element_' + Math.random().toString(36).slice(2);
+		return node.id;
+	}
+
+	/**
+	 * Prototype's Element#on. With a selector it delegates, calling the handler
+	 * as (event, matchedElement); without one it is a plain listener.
+	 */
+	function nl_on(root, eventName, selectorOrHandler, maybeHandler) {
+		if (!root) return;
+		if (maybeHandler === undefined) {
+			root.addEventListener(eventName, selectorOrHandler);
+			return;
+		}
+		var selector = selectorOrHandler, handler = maybeHandler;
+		root.addEventListener(eventName, function (event) {
+			var target = event.target;
+			while (target && target !== root) {
+				if (target.nodeType === 1 && target.matches(selector)) {
+					return handler(event, target);
+				}
+				target = target.parentNode;
+			}
+		}, false);
+	}
+
+	nl_insertBefore(nl_el('<?= $formSearch ?>'), '<div id="django" style="display:none;"  </div>')
+	nl_on(document.body, 'dragstart', '[draggable]', function (event, node) {
 		event.dataTransfer.effectAllowed = "move";
-		event.dataTransfer.setData('dragid', $(node).identify());
-		if ($$('#django').size() == 0) {
-			node.insert({before: '<div id="django" class=""></div>'})
+		event.dataTransfer.setData('dragid', nl_identify(node));
+		if (nl_qsa('#django').length == 0) {
+			nl_insertBefore(node, '<div id="django" class=""></div>')
 		}
 		node.setAttribute('dragged', 'dragged');
 	})
-	$('<?= $formSearch ?>').on('dragover', '[draggable]', function (event, node) {
-		node.insert({before: $('django').show()})
+	nl_on(nl_el('<?= $formSearch ?>'), 'dragover', '[draggable]', function (event, node) {
+		nl_insertBefore(node, nl_show(nl_el('django')))
 	})
-	$('<?= $formSearch ?>').on('dragend', '[draggable]', function (event, node) {
-		$('django').hide();
-		$$('[dragged]').invoke('removeAttribute', 'dragged')
+	nl_on(nl_el('<?= $formSearch ?>'), 'dragend', '[draggable]', function (event, node) {
+		nl_hide(nl_el('django'));
+		nl_qsa('[dragged]').forEach(function (n) { n.removeAttribute('dragged'); })
 	})
-	$('<?= $formSearch ?>').on('drop', '[draggable]', function (event, node) {
+	nl_on(nl_el('<?= $formSearch ?>'), 'drop', '[draggable]', function (event, node) {
 		if (!event.dataTransfer.getData('dragid')) return;
 		this.dnd_successful = true;
-	//	if ($$('[dragged]').size() != 0) {
-			tmpdiv = Element.clone($$('[dragged]').first(), true);
+	//	if (nl_qsa('[dragged]').length != 0) {
+			// Was `Element.clone(node, true)`. Prototype has no Element.clone --
+			// not in 1.7.3, not in the shim -- so this line has thrown
+			// "Element.clone is not a function" for as long as it has existed,
+			// killing the drop handler before anything below it ran. Predates
+			// the idae-be migration; found 2026-08-11 by template-api-guard.spec.ts.
+			// cloneNode(true) is the deep copy it was reaching for.
+			var dragged = nl_qsa('[dragged]');
+			var tmpdiv = dragged[0].cloneNode(true);
 			tmpdiv.removeAttribute('dragged');
-			$$('[dragged]').invoke('remove');
-			$('django').insert({before: tmpdiv});
-			$$('[dragged]').invoke('removeAttribute', 'dragged');
-			$('django').hide();
+			// `.invoke('remove')` ran Prototype's Element#remove, which detached
+			// the node — same thing removeChild does here.
+			dragged.forEach(function (n) { if (n.parentNode) n.parentNode.removeChild(n); });
+			nl_insertBefore(nl_el('django'), tmpdiv);
+			// The original re-ran removeAttribute('dragged') over a fresh $$
+			// query here. Those nodes were just detached, so the query returned
+			// nothing and the call was a no-op; dropped rather than reproduced.
+			nl_hide(nl_el('django'));
 
 			//
 			var pair = {};
-			a = $$('#dropzone<?=$uniqid?> [sortable]').collect(function (node, index) {
-				pair['ordreBlock[' + index + ']'] = node.readAttribute('value');
+			nl_qsa('#dropzone<?=$uniqid?> [sortable]').forEach(function (snode, index) {
+				pair['ordreBlock[' + index + ']'] = snode.getAttribute('value');
 			});
-			vars = Object.toQueryString(pair);
+			var vars = new URLSearchParams(pair).toString();
 			console.log(vars)
-			// ajaxValidation('reorder_block_enews', 'mdl/app//app_newsletter/', vars + '&idnewsletter=<?=$idnewsletter?>&uid_grille_block=' + node.readAttribute('value'))
+			// ajaxValidation('reorder_block_enews', 'mdl/app//app_newsletter/', vars + '&idnewsletter=<?=$idnewsletter?>&uid_grille_block=' + node.getAttribute('value'))
 	//	}
 	})
 </script>

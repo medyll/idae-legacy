@@ -50,7 +50,7 @@
 ?>
 <?php while ($arr = $rs->getNext()) { ?>
 	<a class="autoToggle app_select"
-	   onclick="$(this).fire('dom:act_click',{value:'<?= niceUrlSpace($arr[$nom]) ?>',code:'<?= $arr[$code] ?>',id:'<?= $arr[$id] ?>',table:'<?= $table ?>'})">
+	   onclick="idae_fire(this,'dom:act_click',{value:'<?= niceUrlSpace($arr[$nom]) ?>',code:'<?= $arr[$code] ?>',id:'<?= $arr[$id] ?>',table:'<?= $table ?>'})">
 		<div class="    flex_h flex_align_middle">
 			<div class="textgris" style="width:40px;"><?= $arr[$id] ?></div>
 			<?php if (array_key_exists('icon' . $Table, $ARR_FIELDS) && $arr['icon' . $Table]) { ?>

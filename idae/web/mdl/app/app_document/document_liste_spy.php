@@ -17,8 +17,24 @@ while($file=$rs->getNext()){
 	//$dragvars =  'drop[_id]='.$arr['_id'].'&drop[collection]='.$collection.'&drop[base]='.$base;
 ?> 
 <script> 
-    if($$('[value=<?=$arr['_id']?>]').size()==0){  
-    $$('[t_body_file]').first().socketModule('app_document/app_document'_liste_tr','uid=<?=$arr['_id']?>',{insertion:true});
+    /*
+     * Modified: 2026-08-11 — migrated off the PrototypeJS compatibility
+     * shims ($$, .size, .first) to native DOM, and fixed a syntax error that
+     * made this block unparseable: the module path below read
+     * 'app_document/app_document'_liste_tr — a string literal immediately
+     * followed by an identifier. Nothing in this block has ever run.
+     *
+     * This is the module document_liste_drop.php polls, and that file carried
+     * the identical broken quote. Both ends of the document-list live refresh
+     * were dead, for the same reason. Predates the idae-be migration.
+     *
+     * The attribute value is quoted now: an _id starting with a digit makes
+     * [value=...] invalid CSS, and native querySelectorAll throws where the
+     * shim's $$ retried with quotes added.
+     */
+    if(document.querySelectorAll('[value="<?=$arr['_id']?>"]').length==0){  
+    var spy_tbody = document.querySelector('[t_body_file]');
+    if(spy_tbody) spy_tbody.socketModule('app_document/app_document_liste_tr','uid=<?=$arr['_id']?>',{insertion:true});
     }
 </script> 
 <?php }?> 

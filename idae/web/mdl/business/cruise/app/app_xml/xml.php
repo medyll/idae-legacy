@@ -11,20 +11,20 @@
 		<div class="frmCol1 applink applinkblock applinkbig">
 			<div class="flex_h toggler applink applinkblock borderb">
 				<div class="flex_main aligncenter borderr">
-					<a class="flex_main autoToggle " onclick="$('xml_zone').loadModule('business/<?= BUSINESS ?>/app/app_xml/xml_ft','MDL=xml_ftp');"><i class="fa fa-cloud-download"></i>
+					<a class="flex_main autoToggle " onclick="document.getElementById('xml_zone').loadModule('business/<?= BUSINESS ?>/app/app_xml/xml_ft','MDL=xml_ftp');"><i class="fa fa-cloud-download"></i>
 
 						<br>
 						télécharger
 					</a>
 				</div>
 				<div class="flex_main aligncenter borderr">
-					<a class="flex_main autoToggle" onclick="$('xml_zone').loadModule('business/<?= BUSINESS ?>/app/app_xml/xml_launch','MDL=xml_ftp');"><i class="fa fa-calculator"></i>
+					<a class="flex_main autoToggle" onclick="document.getElementById('xml_zone').loadModule('business/<?= BUSINESS ?>/app/app_xml/xml_launch','MDL=xml_ftp');"><i class="fa fa-calculator"></i>
 						<br>
 						parser
 					</a>
 				</div>
 				<div class="flex_main aligncenter">
-					<a onclick="$('xml_zone').loadModule('business/<?= BUSINESS ?>/app/app_admin/app_build_pre_prod');">
+					<a onclick="document.getElementById('xml_zone').loadModule('business/<?= BUSINESS ?>/app/app_admin/app_build_pre_prod');">
 						<i class="fa fa-upload"></i>
 
 						<br><?= idioma('production') ?>

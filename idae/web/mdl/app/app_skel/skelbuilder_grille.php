@@ -46,7 +46,7 @@ $APP = new App();
 							</td>
 							<td class = "aligncenter">
 								<input type="hidden" name = "vars[requiredInput]" value="<?= $arrInput['requiredInput'] ?>" >
-								<input onclick = "$(this).previous().value= (this.checked)? 1 : 0 ;"
+								<input onclick = "this.previousElementSibling.value= (this.checked)? 1 : 0 ;"
 							                                 type = "checkbox"
 							                                 <?= checked($arrInput['requiredInput']) ?> /></td>
 							<td class = "aligncenter"><a
@@ -65,20 +65,27 @@ $APP = new App();
 		</div>
 	</div>
 	<script>
+		/*
+		 * Modified: 2026-08-11 — migrated off the PrototypeJS compatibility
+		 * shims ($, .on, Event.element, .up, .readAttribute) to native DOM.
+		 * Event.element(event) is event.target; two-argument .on() with no
+		 * selector was never delegation, the shim fell through to
+		 * Event.observe.
+		 */
 		register = function (event) {
-			var elem = Event.element (event);
-			var tr = elem.up ('tr');
-			vars = Form.serialize (tr);
-			uid = tr.readAttribute ('uid')
+			var elem = event.target;
+			var tr = elem.closest ('tr');
+			vars = serializeFields(tr);
+			uid = tr.getAttribute ('uid')
 			setTimeout (function () {
 				ajaxValidation ('updGrille', 'mdl/app/app_skel/', '_id=<?=$arr['_id']?>&' + vars + '&uid=' + uid)
-			}.bind (this), 100)
+			}, 100)
 
 		}
-		$ ('oio').on ('change', function (event) {
+		document.getElementById ('oio').addEventListener ('change', function (event) {
 			register (event)
 		})
-		$ ('oio').on ('dom:datechoosen', function (event) {
+		document.getElementById ('oio').addEventListener ('dom:datechoosen', function (event) {
 			register (event)
 		})
 

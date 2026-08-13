@@ -11,9 +11,9 @@
 
 ?>
 <script>
-$('cal_<?=$time?>').observe('dom:act_click',function(event){moveTache(event.memo.value)})
+document.getElementById('cal_<?=$time?>').addEventListener('dom:act_click',function(event){moveTache(event.memo.value)})
 	moveTache = function(date){
-	$('movespy').value = date;
+	document.getElementById('movespy').value = date;
 	}
 </script>
 <div >

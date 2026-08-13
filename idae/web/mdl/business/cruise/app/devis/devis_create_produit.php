@@ -22,7 +22,7 @@
 ?>
 
 <div class = " fond_bleu color_fond_bleu" >
-	<button onclick="$('div_produit_liste_devis').unToggleContent();$('div_devis_create_make').loadModule('<?=$path_to_devis?>devis_create_make', 'idproduit=' + idproduit)"><?=idioma('Choisir ce produit')?></button>
+	<button onclick="document.getElementById('div_produit_liste_devis').unToggleContent();document.getElementById('div_devis_create_make').loadModule('<?=$path_to_devis?>devis_create_make', 'idproduit=' + idproduit)"><?=idioma('Choisir ce produit')?></button>
 	<?= $idproduit ?>
 	&nbsp;|&nbsp;
 	<?= $arrProduit['nomProduit'] ?>

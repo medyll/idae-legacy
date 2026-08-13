@@ -17,8 +17,8 @@ au <input type="text" value="<?=$endTime?>" class='validate-date-au' name="dateF
 </div>
 </form>
 <script>
-$('form<?=$uniqid?>').observe('dom:datechoosen',function(event){ 
-	$('form<?=$uniqid?>').dateDebut.value = event.memo.dateDebut
-	$('form<?=$uniqid?>').dateFin.value = event.memo.dateFin
+document.getElementById('form<?=$uniqid?>').addEventListener('dom:datechoosen',function(event){ 
+	document.getElementById('form<?=$uniqid?>').dateDebut.value = event.memo.dateDebut
+	document.getElementById('form<?=$uniqid?>').dateFin.value = event.memo.dateFin
 	})
 </script>

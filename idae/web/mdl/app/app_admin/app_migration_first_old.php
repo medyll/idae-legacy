@@ -27,7 +27,7 @@ if(empty($_POST['run'])):
 		</table>
 		<div class="padding"><progress value="0" id="auto_first_job"></progress><progress value="0" id="auto_first_injob"></progress></div>
 		<div class="buttonZone">
-			<input type="button" class="validButton" value="Lancer" onclick="$('frame_xmlte_fst').loadModule('app/app_admin/app_migration_first','run=1')"  >
+			<input type="button" class="validButton" value="Lancer" onclick="document.getElementById('frame_xmlte_fst').loadModule('app/app_admin/app_migration_first','run=1')"  >
 			<input type="button" value="Fermer" class="cancelClose" >
 		</div>
 		<div style="width:100%;max-height:350px;border:none;overflow:auto;" id="frame_xmlte_fst" scrolling="auto"></div>

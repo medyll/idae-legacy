@@ -52,7 +52,7 @@
 										<i class="fa fa-<?= $icon_table ?> " style="color: <?= $color_table ?>;"></i>
 									</div>
 									<div class="applinkblock flex_main blanc borderl">
-										<a class="autoToggle" onclick="$('<?= $uniqid ?>').loadModule('app/app_stat/app_stat_dispatch','table=<?= $table ?>');"><?= $nom_table ?></a>
+										<a class="autoToggle" onclick="document.getElementById('<?= $uniqid ?>').loadModule('app/app_stat/app_stat_dispatch','table=<?= $table ?>');"><?= $nom_table ?></a>
 									</div>
 								</div>
 								<?php

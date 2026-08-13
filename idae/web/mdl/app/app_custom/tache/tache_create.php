@@ -66,7 +66,7 @@
 					<td style="width:120px;"><label class="nolabel">
 							<input type="checkbox" name="codeRappelTache" value="MAIL">
 							Rappel par mail</label></td>
-					<td onclick="$('mdlTachePeriodicite<?= $time ?>').toggle();" class="alignright  cursor applink "><a>
+					<td onclick="tc_toggle(tc_el('mdlTachePeriodicite<?= $time ?>'));" class="alignright  cursor applink "><a>
 							<i class="fa fa-caret-down"></i>
 							&nbsp;Périodicité</a></td>
 				</tr>
@@ -199,23 +199,60 @@
 
 
 <script>
-	$('tache_maker_first').on('dom:act_change',function(e){
-		reloadModule('app/app_field_add','456','run=1&add_field=contact&module_value=456&field[]=contact&vars[id'+e.memo.table+']='+ e.memo.id)
+	/*
+	 * Modified: 2026-08-11 — migrated off the PrototypeJS compatibility shims
+	 * ($, .observe, .on, .up, .select, .first) to native DOM, with file-local
+	 * `tc_` helpers.
+	 *
+	 * app_socket only tests `options.insertion` for truthiness, then performs
+	 * the top insertion itself. The old Insertion.Top function was never called.
+	 */
+	function tc_el(ref) {
+		return typeof ref === 'string' ? document.getElementById(ref) : ref;
+	}
+
+	/**
+	 * Prototype's Element#toggle: flip between hidden and shown. Reads the
+	 * computed style, not the inline one — the element starts hidden through
+	 * style="display:none" but a later toggle leaves the inline value empty,
+	 * and node.style.display would then read '' on a node that is visible.
+	 */
+	function tc_toggle(node) {
+		if (!node) return node;
+		var hidden = window.getComputedStyle(node).display === 'none';
+		node.style.display = hidden ? '' : 'none';
+		return node;
+	}
+
+	/** Prototype's Element#up: nearest ancestor matching `selector`. */
+	function tc_up(node, selector) {
+		var parent = node ? node.parentNode : null;
+		while (parent && parent.nodeType === 1) {
+			if (parent.matches(selector)) return parent;
+			parent = parent.parentNode;
+		}
+		return null;
+	}
+
+	// Two arguments, no selector: never delegation — the shim fell through to
+	// Event.observe, so this is a plain listener.
+	tc_el('tache_maker_first').addEventListener('dom:act_change', function (e) {
+		reloadModule('app/app_field_add', '456', 'run=1&add_field=contact&module_value=456&field[]=contact&vars[id' + e.memo.table + ']=' + e.memo.id)
 	})
-	$('dateDebutTache<?=$rand?>').observe('focus', function () {
-		$('dateDebutTache<?=$rand?>').up('form').dateFinTache.value = $('dateDebutTache<?=$rand?>').value
-	}.bind(this))
-	$('dateDebutTache<?=$rand?>').observe('blur', function () {
-		$('dateDebutTache<?=$rand?>').up('form').dateFinTache.value = $('dateDebutTache<?=$rand?>').value
-	}.bind(this))
+	tc_el('dateDebutTache<?=$rand?>').addEventListener('focus', function () {
+		tc_up(tc_el('dateDebutTache<?=$rand?>'), 'form').dateFinTache.value = tc_el('dateDebutTache<?=$rand?>').value
+	})
+	tc_el('dateDebutTache<?=$rand?>').addEventListener('blur', function () {
+		tc_up(tc_el('dateDebutTache<?=$rand?>'), 'form').dateFinTache.value = tc_el('dateDebutTache<?=$rand?>').value
+	})
 </script>
 <script>
 	addContact = function () {
-		idsociete = $('formCreateTache<?=$time?>').select('[name=societe_idsociete]').first().value
-		ajaxMdl('societehaspersonne/mdlSocieteHasPersonneCreate', '<?=idioma('Ajouter un contact')?>', 'valueModule=<?=$time?>&reloaded=true&societe_idsociete=' + idsociete, {value: idsociete, insertion: Insertion.Top});
+		var idsociete = tc_el('formCreateTache<?=$time?>').querySelector('[name=societe_idsociete]').value
+		ajaxMdl('societehaspersonne/mdlSocieteHasPersonneCreate', '<?=idioma('Ajouter un contact')?>', 'valueModule=<?=$time?>&reloaded=true&societe_idsociete=' + idsociete, {value: idsociete, insertion: true});
 	}
 	launchContact = function () {
-		idsociete = $('formCreateTache<?=$time?>').select('[name=societe_idsociete]').first().value
-		ajaxInMdl('societehaspersonne/mdlSocieteHasPersonneAdd', 'add_taskOnPersonne<?=$time?>', 'valueModule=<?=$time?>&reloaded=true&societe_idsociete=' + idsociete, {value: idsociete, insertion: Insertion.Top});
+		var idsociete = tc_el('formCreateTache<?=$time?>').querySelector('[name=societe_idsociete]').value
+		ajaxInMdl('societehaspersonne/mdlSocieteHasPersonneAdd', 'add_taskOnPersonne<?=$time?>', 'valueModule=<?=$time?>&reloaded=true&societe_idsociete=' + idsociete, {value: idsociete, insertion: true});
 	}
 </script>

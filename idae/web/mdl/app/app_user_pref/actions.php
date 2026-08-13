@@ -32,7 +32,7 @@ switch ($F_action){
 		// Use HTTPCUSTOMERSITE (includes port when present) to build image URL
 		url_w = "url(" + "<?= rtrim(HTTPCUSTOMERSITE, '/') ?>" + "/images/appimg-<?=$_id?>.jpg)";
 		localStorage.setItem('wallpaper',url_w);
-		$('body').setStyle({backgroundImage:url_w}) ;
+		document.body.style.backgroundImage = url_w ;
 		</script>
 		<?php 
 	break;

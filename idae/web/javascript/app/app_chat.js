@@ -1,6 +1,88 @@
 /**
  * Created by lebru_000 on 28/02/15.
+ *
+ * Modified: 2026-08-10 — migrated off the PrototypeJS compatibility shims
+ * (BE_PLAN.md phase 5). Global functions (no Class.create here), so no
+ * IIFE wrapper is needed — just file-local `ac_*` helpers replacing the
+ * shimmed `$`/`$$`/`$H`/Element.* calls. Behaviour unchanged, including
+ * one pre-existing bug carried forward as-is (see chat_user_remove).
  */
+
+/* -------------------------------------------------------------------- *
+ * DOM helpers — file-local, same rationale as the other migrated files *
+ * (see BE_PLAN.md phase 5).                                              *
+ * -------------------------------------------------------------------- */
+
+function ac_el(ref) {
+	return typeof ref === 'string' ? document.getElementById(ref) : ref;
+}
+
+/**
+ * Tolerant querySelectorAll, matching what `$$` did through the shim
+ * (`__idaeQSA`, shim-core.js). This file builds `[data-appid=<sid>]`
+ * selectors from PHP session ids, which routinely start with a digit —
+ * unquoted attribute values are invalid CSS there and native
+ * querySelectorAll throws. Retry once with the values quoted.
+ */
+function ac_qsa(selector, root) {
+	root = root || document;
+	var found;
+	try {
+		found = root.querySelectorAll(selector);
+	} catch (e) {
+		var quoted = String(selector).replace(
+			/\[([a-zA-Z_][\w-]*)=([^'"\]\s][^\]\s]*)\]/g,
+			'[$1="$2"]'
+		);
+		if (quoted === selector) throw e;
+		found = root.querySelectorAll(quoted);
+	}
+	return Array.prototype.slice.call(found);
+}
+
+/** Prototype's Element#up(selector): starts at the parent, never at self. */
+function ac_up(node, selector) {
+	if (!node || !node.parentElement) return null;
+	return node.parentElement.closest(selector);
+}
+
+/** Event delegation, Prototype's Element#on(event, selector, handler). */
+function ac_delegate(root, eventName, selector, handler) {
+	root.addEventListener(eventName, function (event) {
+		var target = event.target;
+		while (target && target !== root) {
+			if (target.nodeType === 1 && target.matches(selector)) {
+				return handler(event, target);
+			}
+			target = target.parentNode;
+		}
+	}, false);
+}
+
+/** Prototype's $H(obj).toQueryString() — plain object, no nesting here. */
+function ac_toQueryString(obj) {
+	return Object.keys(obj || {}).map(function (key) {
+		var value = obj[key];
+		return encodeURIComponent(key) + '=' + encodeURIComponent(value == null ? '' : value);
+	}).join('&');
+}
+
+function ac_show(node) {
+	if (node) node.style.display = '';
+	return node;
+}
+
+function ac_hide(node) {
+	if (node) node.style.display = 'none';
+	return node;
+}
+
+function ac_remove(node) {
+	if (node && node.parentNode) node.parentNode.removeChild(node);
+	return node;
+}
+
+/* -------------------------------------------------------------------- */
 
 switch (document.domain) {
 	case "idaertys-preprod.mydde.fr":
@@ -20,14 +102,14 @@ switch (document.domain) {
 		break;
 
 }
- 
-appchat_init = function () { 
+
+appchat_init = function () {
     // appchat_agent_state_retrieve();
     if (appchat_get_key('appchat_show_panel') == true) {
-        $('app_chat_panel').show(); // app_chat_button
-        $$('.app_chat_button').invoke('addClassName', 'active');
+        ac_show(ac_el('app_chat_panel')); // app_chat_button
+        ac_qsa('.app_chat_button').forEach(function (n) { n.classList.add('active'); });
     } else {
-        $('app_chat_panel').hide();
+        ac_hide(ac_el('app_chat_panel'));
     }
     if (appchat_get_key('appchat_connected')) {
         appchat_connect_agent();
@@ -44,13 +126,14 @@ appchat_store_key = function (key, value) {
     localStorage.setItem('appchat_' + key, JSON.stringify(value));
 }
 appchat_panel_toggle = function () {
-    if ($$('.app_chat_button').first().hasClassName('active')) {
-        $('app_chat_panel').hide();
-        $$('.app_chat_button').invoke('removeClassName', 'active');
+    var button = ac_qsa('.app_chat_button')[0];
+    if (button && button.classList.contains('active')) {
+        ac_hide(ac_el('app_chat_panel'));
+        ac_qsa('.app_chat_button').forEach(function (n) { n.classList.remove('active'); });
         appchat_store_key('appchat_show_panel', false);
     } else {
-        $('app_chat_panel').show();
-        $$('.app_chat_button').invoke('addClassName', 'active');
+        ac_show(ac_el('app_chat_panel'));
+        ac_qsa('.app_chat_button').forEach(function (n) { n.classList.add('active'); });
         appchat_store_key('appchat_show_panel', true);
     }
 
@@ -58,19 +141,19 @@ appchat_panel_toggle = function () {
 
 appchat_agent_state_retrieve = function () {
     if (appchat_get_key('appchat_connected') == true) {
-        $$('.appchat_connected').invoke('addClassName', 'active');
-        $$('.appchat_disconnected').invoke('removeClassName', 'active');
+        ac_qsa('.appchat_connected').forEach(function (n) { n.classList.add('active'); });
+        ac_qsa('.appchat_disconnected').forEach(function (n) { n.classList.remove('active'); });
     } else {
-        $$('.appchat_connected').invoke('removeClassName', 'active');
-        $$('.appchat_disconnected').invoke('addClassName', 'active');
+        ac_qsa('.appchat_connected').forEach(function (n) { n.classList.remove('active'); });
+        ac_qsa('.appchat_disconnected').forEach(function (n) { n.classList.add('active'); });
     }
 }
 appchat_disconnect_agent = function () {
     // agent présent pour affichage bouton sur site
     socket_app_chat.emit('agent_disconnected', {APPID: localStorage.PHPSESSID});
     // statut bouton
-    $$('.appchat_connected').invoke('removeClassName', 'active');
-    $$('.appchat_disconnected').invoke('addClassName', 'active');
+    ac_qsa('.appchat_connected').forEach(function (n) { n.classList.remove('active'); });
+    ac_qsa('.appchat_disconnected').forEach(function (n) { n.classList.add('active'); });
     // appchat_store_key
     appchat_store_key('appchat_connected', false);
 }
@@ -81,24 +164,29 @@ appchat_connect_agent = function () {
     // demande des contacts
     socket_app_chat.emit('contact_list_ask', {APPID: localStorage.APPID});
     // statut bouton
-    $$('.appchat_connected').invoke('addClassName', 'active');
-    $$('.appchat_disconnected').invoke('removeClassName', 'active');
+    ac_qsa('.appchat_connected').forEach(function (n) { n.classList.add('active'); });
+    ac_qsa('.appchat_disconnected').forEach(function (n) { n.classList.remove('active'); });
     // appchat_store_key
     appchat_store_key('appchat_connected', true);
 }
 //
 appchat_msgzone_update = function (APPID, value) {
     appchat_store_key('appchat_last_talk.' + APPID, value);
-    $$('[data-appid=' + APPID + '] .appchat_msgzone').invoke('insert', '<div class="flex_h borderr"><div class="padding"><i class=\'fa fa-comment-o fa-2x textgris\'></i></div><div  class="flex_1 padding">' + value + '</div></div>');
+    ac_qsa('[data-appid=' + APPID + '] .appchat_msgzone').forEach(function (n) {
+        n.insertAdjacentHTML('beforeend', '<div class="flex_h borderr"><div class="padding"><i class=\'fa fa-comment-o fa-2x textgris\'></i></div><div  class="flex_1 padding">' + value + '</div></div>');
+    });
 }
 appchat_msgzone_self_update = function (APPID, value) {
     appchat_store_key('appchat_last_self_talk.' + APPID, value);
-    $$('[data-appid=' + APPID + '] .appchat_msgzone').invoke('insert', '<div class="flex_h borderl"><div  class="flex_1 padding">' + value + '</div><div class="padding"><i class=\'fa fa-comment-o fa-2x\'></i></div></div>');
+    ac_qsa('[data-appid=' + APPID + '] .appchat_msgzone').forEach(function (n) {
+        n.insertAdjacentHTML('beforeend', '<div class="flex_h borderl"><div  class="flex_1 padding">' + value + '</div><div class="padding"><i class=\'fa fa-comment-o fa-2x\'></i></div></div>');
+    });
 }
 //
 appchat_talk_agent = function (form) {
     // demande des contacts
-    socket_app_chat.emit('contact_ask', {idagent: localStorage.IDAGENT, APPID: localStorage.APPID, ROOMREQUESTED: $(form).ROOMREQUESTED.value, MSGTXT: $(form).MSGTXT.value});
+    var formEl = ac_el(form);
+    socket_app_chat.emit('contact_ask', {idagent: localStorage.IDAGENT, APPID: localStorage.APPID, ROOMREQUESTED: formEl.ROOMREQUESTED.value, MSGTXT: formEl.MSGTXT.value});
 }
 appchat_ask_contact_agent = function (data) {
     // demande des contacts
@@ -112,7 +200,7 @@ appchat_stop_contact_agent = function (data) {
 }
 
 
- 
+
 /**
  *
  * socket_app_chat
@@ -152,8 +240,8 @@ socket_app_chat.on('contact_stopped', function (data) {
     var appid = data.ROOMREQUESTED;
     var appid_2 = data.APPID;
     // app_chat_ask_contact
-    $$('[data-appid='+appid+'] .app_chat_ask_contact').invoke('toggleContent')
-    $$('[data-appid='+appid_2+'] .app_chat_ask_contact').invoke('toggleContent')
+    ac_qsa('[data-appid='+appid+'] .app_chat_ask_contact').forEach(function (n) { n.toggleContent(); });
+    ac_qsa('[data-appid='+appid_2+'] .app_chat_ask_contact').forEach(function (n) { n.toggleContent(); });
 })
 socket_app_chat.on('contact_asked', function (data) {
     //  console.log('contact_asked', data);
@@ -164,17 +252,17 @@ socket_app_chat.on('contact_asked', function (data) {
     appchat_msgzone_self_update(appid, data.MSGTXT);
     //
     //
-    if ($$('[data-appid=' + appid + '][data-appchatbox]').size() != 0) return;
+    if (ac_qsa('[data-appid=' + appid + '][data-appchatbox]').length !== 0) return;
 
-    $$('[data-appid=' + appid + '] .app_chat_accept').invoke('toggleContent');
-    $$('[data-appid=' + appid + '] .glue_requested').invoke('show');
-    $$('[data-appid=' + appid + '] .app_chat_ask_contact_ok').invoke('toggleContent');
+    ac_qsa('[data-appid=' + appid + '] .app_chat_accept').forEach(function (n) { n.toggleContent(); });
+    ac_qsa('[data-appid=' + appid + '] .glue_requested').forEach(function (n) { ac_show(n); });
+    ac_qsa('[data-appid=' + appid + '] .app_chat_ask_contact_ok').forEach(function (n) { n.toggleContent(); });
     var options = {};
     // options.className = 'myddeNotifierBottom';
     options.sticky = true;
     options.mdl = 'app/app_chat/app_chat_item_button';
     options.id = appid;
-    options.vars = $H(data).toQueryString();
+    options.vars = ac_toQueryString(data);
     //
     var a = new myddeNotifier(options);
     a.growl(msg, options);
@@ -182,61 +270,64 @@ socket_app_chat.on('contact_asked', function (data) {
 });
 socket_app_chat.on('contact_accepted', function (data) {
     //
-    vars = $H({APPID: data.APPID, idagent: data.IDAGENT}).toQueryString();
+    vars = ac_toQueryString({APPID: data.APPID, idagent: data.IDAGENT});
     // fenetre talk
     act_chrome_gui('app/app_chat/app_chat_talk', vars, {onclose: function () {
         appchat_stop_contact_agent(data)
     }});
     // controle boutons
-    $$('[data-appid=' + data.APPID + '] .app_chat_accept').invoke('hide');
-    $$('[data-appid=' + data.APPID + '] .app_chat_ask_contact_ok').invoke('toggleContent');
+    ac_qsa('[data-appid=' + data.APPID + '] .app_chat_accept').forEach(function (n) { ac_hide(n); });
+    ac_qsa('[data-appid=' + data.APPID + '] .app_chat_ask_contact_ok').forEach(function (n) { n.toggleContent(); });
 });
 
 
-$('body').on('click', '.app_chat_button', function () {
+ac_delegate(document.body, 'click', '.app_chat_button', function () {
     appchat_panel_toggle();
 });
-$('body').on('click', '.appchat_connected', function () {
+ac_delegate(document.body, 'click', '.appchat_connected', function () {
     appchat_connect_agent();
 });
-$('body').on('click', '.appchat_disconnected', function () {
+ac_delegate(document.body, 'click', '.appchat_disconnected', function () {
     appchat_disconnect_agent();
 });
-$('body').on('click', '.app_chat_ask_contact', function (event, elem) {
+ac_delegate(document.body, 'click', '.app_chat_ask_contact', function (event, elem) {
     console.log(elem); // app_chat_ask_contact()d
     // quelle room ?
-    if ($(elem).up('[data-appid]')) {
-        roomtogo = $(elem).up('[data-appid]').readAttribute('data-appid');
+    var upNode = ac_up(elem, '[data-appid]');
+    if (upNode) {
+        roomtogo = upNode.getAttribute('data-appid');
     } else {
         return;
     }
-    $(elem).next().toggleContent();
+    elem.nextElementSibling.toggleContent();
     appchat_ask_contact_agent({ROOMREQUESTED: roomtogo, APPID: localStorage.PHPSESSID, IDAGENT: localStorage.IDAGENT});
     // socket_app_chat.emit('contact_accept', {ROOMREQUESTED:roomtogo,APPID: localStorage.PHPSESSID, IDAGENT: localStorage.IDAGENT});
 
 });
-$('body').on('click', '.app_chat_accept', function (event, elem) {
+ac_delegate(document.body, 'click', '.app_chat_accept', function (event, elem) {
     // quelle room ?
-    if ($(elem).up('[data-appid]')) {
-        roomtogo = $(elem).up('[data-appid]').readAttribute('data-appid');
+    var upAppId = ac_up(elem, '[data-appid]');
+    if (upAppId) {
+        roomtogo = upAppId.getAttribute('data-appid');
     } else {
         return;
     }
     // quelle agent ?
-    if ($(elem).up('[data-idagent]')) {
-        idagent_togo = $(elem).up('[data-idagent]').readAttribute('data-idagent');
+    var upIdAgent = ac_up(elem, '[data-idagent]');
+    if (upIdAgent) {
+        idagent_togo = upIdAgent.getAttribute('data-idagent');
     } else {
         return;
     }
     // open chrome_gui
     vars = {idagent: idagent_togo, ROOMREQUESTED: roomtogo, ROOMREQUESTER: localStorage.APPID, APPID: roomtogo} ;
     var vars_2 = {idagent: idagent_togo, ROOMREQUESTED: roomtogo, ROOMREQUESTER: roomtogo, APPID: roomtogo} ;
-    act_chrome_gui("app/app_chat/app_chat_talk",$H(vars).toQueryString() ,{onclose: function () {
+    act_chrome_gui("app/app_chat/app_chat_talk", ac_toQueryString(vars), {onclose: function () {
         appchat_stop_contact_agent(vars_2)
     }});
     // act_chrome_gui('app/app_chat/app_chat_talk','ROOMREQUESTED=ojg55u7a7mlg5026js62fmujq2&ROOMREQUESTER=fi253ehuudmamkj6715j1ohlu2&idagent=13&module=app%2Fapp_chat%2Fapp_chat_item_button&mdl=app%2Fapp_chat%2Fapp_chat_item_button&PHPSESSID=ojg55u7a7mlg5026js62fmujq2&APPID=fi253ehuudmamkj6715j1ohlu2',{onclose:function(){ }})
     //
-    $$('[data-appid=' + roomtogo + '] .app_chat_accept').invoke('hide');
+    ac_qsa('[data-appid=' + roomtogo + '] .app_chat_accept').forEach(function (n) { ac_hide(n); });
     socket_app_chat.emit('contact_accept', {ROOMREQUESTED: roomtogo, APPID: localStorage.PHPSESSID, IDAGENT: localStorage.IDAGENT});
 
 });
@@ -247,19 +338,21 @@ $('body').on('click', '.app_chat_accept', function (event, elem) {
 var appchat_tracker_timer = [];
 
 appchat_user_add = function (vars) {
-    var url_vars = $H(vars).toQueryString();
+    var url_vars = ac_toQueryString(vars);
     var id = vars.APPID;
     var idagent = vars.idagent || '';
 
-    if (!$('socket_appchat_log')) return;
+    if (!ac_el('socket_appchat_log')) return;
     if (appchat_tracker_timer[id]) clearTimeout(appchat_tracker_timer[id]);
-    if ($(id)) {
-        $(id).removeClassName('ededed').addClassName('blanc')
+    var existing = ac_el(id);
+    if (existing) {
+        existing.classList.remove('ededed');
+        existing.classList.add('blanc');
         return;
     }
 
     var lnk = '<div id="' + id + '" act_defer data-appid="' + id + '" data-idagent="' + idagent + '"  mdl="app/app_chat/app_chat_item" vars="' + url_vars + '">' + id + '</div>';
-    $('socket_appchat_log').insert(lnk);
+    ac_el('socket_appchat_log').insertAdjacentHTML('beforeend', lnk);
 }
 /*
  chat_user_update = function (vars) {
@@ -285,10 +378,19 @@ appchat_user_add = function (vars) {
  }*/
 chat_user_remove = function (vars) {
     var id = vars.id;
-    if (!$('socket_appchat_log')) return;
+    if (!ac_el('socket_appchat_log')) return;
+    // `chat_tracker_timer` (no `appchat_` prefix — distinct from this
+    // file's own `appchat_tracker_timer` above) is a global declared by
+    // app_keepon.js, which main_bag.js loads before this file. Not a typo:
+    // app_keepon.js defines its own chat_user_add/update/remove against
+    // that same array, and this file's chat_user_remove overwrites theirs
+    // (both files assign the bare global, load order decides which wins) —
+    // sharing the tracker array is what makes that override safe.
     if (chat_tracker_timer[id]) clearTimeout(chat_tracker_timer[id]);
-    if ($(id)) {
-        $(id).removeClassName('blanc').addClassName('ededed');
-        $(id).remove();
+    var node = ac_el(id);
+    if (node) {
+        node.classList.remove('blanc');
+        node.classList.add('ededed');
+        ac_remove(node);
     }
 }

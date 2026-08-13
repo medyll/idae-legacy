@@ -93,7 +93,7 @@
 			//return $dozat;
 		}
 
-		function doCurl($module, $array = []) {
+		static function doCurl($module, $array = []) {
 			/*$ckfile = COOKIE_PATH . "cookie.txt";
 			$fp     = fopen($ckfile, "w");
 			fclose($fp);*/

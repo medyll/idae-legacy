@@ -23,5 +23,5 @@
 </div>
 <div style="display:none"><?php//= skelMdl::cf_module('app_document/document_spy', array('document' => $_SESSION['idagent']), $_SESSION['idagent']) ?></div>
 <script>
-	new myddeExplorer($('explorer<?=$uniqid?>'));
+	new myddeExplorer(document.getElementById('explorer<?=$uniqid?>'));
 </script>

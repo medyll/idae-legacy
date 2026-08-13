@@ -29,8 +29,31 @@ $projectRoot = realpath($webDir . DIRECTORY_SEPARATOR . '..') . DIRECTORY_SEPARA
 
 // Host detection
 $http_host = str_replace('www.', '', $_SERVER['HTTP_HOST']);
-$host      = explode(':', $http_host)[0];
-$host_port = explode(':', $http_host)[1] ?? '';
+// IPv6 literals arrive bracketed ("[::1]:8080"), so the port split has to
+// happen on the last colon outside the brackets, not the first one.
+if (str_starts_with($http_host, '[')) {
+    $close     = strpos($http_host, ']');
+    $host      = substr($http_host, 1, $close - 1);
+    $host_port = ltrim(substr($http_host, $close + 1), ':');
+} else {
+    $host      = explode(':', $http_host)[0];
+    $host_port = explode(':', $http_host)[1] ?? '';
+}
+// Loopback aliases resolve to the same dev host entry. Without this, hitting
+// the stack over 127.0.0.1 (the only address Docker's WSL2 port-forward
+// actually binds — "localhost" resolves to ::1 first on Windows and stalls
+// ~21s on the SYN retries before falling back) dies on the hosts lookup
+// below, and $host_name would degrade to "127".
+// `$host` is only the *config lookup key* from here on. Every URL the app
+// emits must keep the host the browser actually asked for ($request_host):
+// localhost and 127.0.0.1 are distinct origins, so a page served on
+// 127.0.0.1 that renders <form action="http://localhost:8080/..."> posts
+// cross-origin, without the session cookie, and the request lands
+// unauthenticated.
+$request_host = $host;
+if (in_array($host, ['127.0.0.1', '::1', '0.0.0.0'], true)) {
+    $host = 'localhost';
+}
 $host_name = explode('.', $host)[0];
 $host_parts = explode('.', $host);
 
@@ -100,13 +123,14 @@ DEFINE("APPCLASSES_APP", SITEPATH . "bin" . DIRECTORY_SEPARATOR . "classes_app" 
 DEFINE("OLDAPPCLASSES", SITEPATH . "classes" . DIRECTORY_SEPARATOR);
 DEFINE('REPFONCTIONS', SITEPATH . 'appfunc' . DIRECTORY_SEPARATOR);
 
-// URLs and domain related constants
-DEFINE('DOCUMENTDOMAIN', $host);
-DEFINE('DOCUMENTDOMAINNOPORT', $host);
+// URLs and domain related constants — built on $request_host, not on the
+// aliased config key (see the loopback alias above).
+DEFINE('DOCUMENTDOMAIN', $request_host);
+DEFINE('DOCUMENTDOMAINNOPORT', $request_host);
 DEFINE('DOCUMENTDOMAINPORT', $host_port);
 $host_port_part = !empty($host_port) ? ':' . $host_port : '';
-DEFINE('HTTPCUSTOMERSITE', $HTTP_PREFIX . $host . $host_port_part . '/');
-DEFINE('HTTPAPP', $HTTP_PREFIX . $host . $host_port_part . '/');
+DEFINE('HTTPCUSTOMERSITE', $HTTP_PREFIX . $request_host . $host_port_part . '/');
+DEFINE('HTTPAPP', $HTTP_PREFIX . $request_host . $host_port_part . '/');
 DEFINE('FLATTENIMGDIR', CUSTOMERPATH . 'images_base' . DIRECTORY_SEPARATOR . CUSTOMERNAME . DIRECTORY_SEPARATOR);
 DEFINE('FLATTENIMGHTTP', HTTPCUSTOMERSITE . 'images_base/' . CUSTOMERNAME . '/');
 DEFINE('SOCKETIO_PORT', 3005);

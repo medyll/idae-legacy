@@ -47,7 +47,7 @@ while($arr =  $rsOri->getNext()){
 	$meta = 'meta[nom]='.$name;
 	$meta .= '&meta[email]='.$value;
 	?>
-	<a class="autoToggle" onclick="$(this).fire('dom:act_click',{value:'<?=$value?>',meta:'<?=$meta?>'})" ><?=$name?></a>
+	<a class="autoToggle" onclick="idae_fire(this,'dom:act_click',{value:'<?=$value?>',meta:'<?=$meta?>'})" ><?=$name?></a>
 	<?php  }
 while($arr =  $rs->getNext()){
 	$value = strtolower($arr["email"]);
@@ -55,6 +55,6 @@ while($arr =  $rs->getNext()){
 	$meta = 'meta[nom]='.$name;
 	$meta .= '&meta[email]='.$value;
 	?>
-	<a class="autoToggle" onclick="$(this).fire('dom:act_click',{value:'<?=$value?>',meta:'<?=$meta?>'})" ><?=$name?></a>
+	<a class="autoToggle" onclick="idae_fire(this,'dom:act_click',{value:'<?=$value?>',meta:'<?=$meta?>'})" ><?=$name?></a>
 	<?php  }
 }?>

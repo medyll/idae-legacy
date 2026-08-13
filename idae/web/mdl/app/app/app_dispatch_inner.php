@@ -27,7 +27,7 @@
 <div class="flex_v" style="height:100%; overflow:hidden;width:100%;">
 	<div class="flex_main flex flex_v" style="overflow:hidden;">
 		<div class="none">
-			<form onsubmit="load_table_in_zone($(this).serialize(),'<?= $patolon_bismuth ?>');$('<?= $patolon_bismuth ?>').show();return false;">
+			<form onsubmit="load_table_in_zone(serializeFields(this),'<?= $patolon_bismuth ?>');document.getElementById('<?= $patolon_bismuth ?>').style.display='';return false;">
 				<input type="hidden" name="table" value="<?= $table ?>">
 				<button type="submit" style="position:absolute;right: 0.5em; z-index: 10;border: none;background-color: transparent;"><i
 						class="fa fa-search"></i></button>

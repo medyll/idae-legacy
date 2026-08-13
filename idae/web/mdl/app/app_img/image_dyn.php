@@ -73,7 +73,7 @@
 					<a class="flex_main" onclick="load_panel_img('needResize=true&<?= http_build_query($_POST) ?>');">
 						<i class="fa fa-upload  fa-fw bold"></i><?= idioma('charger image') ?>
 					</a>
-					<a class="flex_main" onclick="ajaxMdl('app/app_img/app_img_delete','','src=<?= $codeImage ?>');Event.stop(event);return false;">
+					<a class="flex_main" onclick="ajaxMdl('app/app_img/app_img_delete','','src=<?= $codeImage ?>');event.preventDefault();event.stopPropagation();return false;">
 						<i class="fa fa-times textrouge  fa-fw bold"></i><?= idioma('supprimer image') ?>
 					</a>
 				</div>
@@ -88,16 +88,17 @@
 </div>
 <script>
 	load_panel_img = function (vars) {
-		if ( !$ ('auto_expl_preview_zone') ) {
+		if ( !document.getElementById ('auto_expl_preview_zone') ) {
 			var frag_app_left_panel = window.APP.APPTPL['app_left_panel']
 			var elem_left_panel     = create_element_of (frag_app_left_panel);
 			document.body.appendChild (elem_left_panel);
 			this.expl_preview_zone  = elem_left_panel;
 		} else {
-			this.expl_preview_zone = $ ('auto_expl_preview_zone');
+			this.expl_preview_zone = document.getElementById ('auto_expl_preview_zone');
 		}
-		this.act_target = this.expl_preview_zone.select ('[expl_preview_zone_file]').first();
-		this.expl_preview_zone.show ();
+		this.act_target = this.expl_preview_zone.querySelector ('[expl_preview_zone_file]');
+		// Prototype's show() only restored the inline display value here.
+		this.expl_preview_zone.style.display = '';
 		this.act_target.loadModule ('app/app_img/app_img_upload',vars);
 	}
 </script>

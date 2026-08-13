@@ -127,14 +127,318 @@
  * See scriptaculous.js for full scriptaculous licence
  */
  
+
+/* ---------------------------------------------------------------------- *
+ * Native helpers — Modified: 2026-08-11                                    *
+ *                                                                          *
+ * This file was the last JavaScript in the app still calling the PrototypeJS
+ * compatibility shims, and the sole remaining caller of shim-class,
+ * shim-element and shim-draggable. Every shim call below is replaced by one
+ * of these file-local `cr_` helpers, matching the per-file-prefix pattern the
+ * rest of the phase 5 migration used (BE_PLAN.md).
+ *
+ * Draggable / Draggables were the last shim dependency here; they now live
+ * in this file too (below), and shim-draggable.js is deleted.
+ * ---------------------------------------------------------------------- */
+
+function cr_noop() {}
+
+/** Prototype's `$`: an id resolves to its element, an element passes through. */
+function cr_el(ref) {
+	return typeof ref === 'string' ? document.getElementById(ref) : ref;
+}
+
+function cr_qsa(selector, root) {
+	return Array.prototype.slice.call((root || document).querySelectorAll(selector));
+}
+
+/**
+ * Prototype's `cr_make(tag, attributes)`. Only the `class` attribute is
+ * ever passed in this file; the generic branch is kept so a future caller
+ * with `id` or a data attribute does not silently lose it.
+ */
+function cr_make(tag, attrs) {
+	var node = document.createElement(tag);
+	if (attrs) {
+		for (var k in attrs) {
+			if (!Object.prototype.hasOwnProperty.call(attrs, k)) continue;
+			if (k === 'class' || k === 'className') node.className = attrs[k];
+			else node.setAttribute(k, attrs[k]);
+		}
+	}
+	return node;
+}
+
+/**
+ * Prototype's Element#insert with a bare node appends it — and returns the
+ * *parent*, which is what the chained `cr_insert(cr_make(...), ...)` calls in
+ * buildUI rely on to assign the wrapper rather than the child.
+ */
+function cr_insert(parent, child) {
+	if (parent && child) parent.appendChild(child);
+	return parent;
+}
+
+function cr_on(node, eventName, handler) {
+	if (node) node.addEventListener(eventName, handler, false);
+	return node;
+}
+
+function cr_off(node, eventName, handler) {
+	if (node) node.removeEventListener(eventName, handler, false);
+	return node;
+}
+
+/** Prototype's Event.stop: cancel the default and stop the bubble. */
+function cr_stop(event) {
+	if (!event) return;
+	event.preventDefault();
+	event.stopPropagation();
+}
+
+function cr_target(event) { return event.target; }
+
+function cr_pointerX(event) {
+	return event.pageX !== undefined ? event.pageX
+		: event.clientX + (document.documentElement.scrollLeft || document.body.scrollLeft || 0);
+}
+
+function cr_pointerY(event) {
+	return event.pageY !== undefined ? event.pageY
+		: event.clientY + (document.documentElement.scrollTop || document.body.scrollTop || 0);
+}
+
+/** Prototype's Element#setStyle: a {property: value} bag, camelCase or not. */
+function cr_setStyle(node, styles) {
+	if (!node) return node;
+	for (var k in styles) {
+		if (!Object.prototype.hasOwnProperty.call(styles, k)) continue;
+		var v = styles[k];
+		if (typeof v === 'number' && k !== 'zIndex' && k !== 'opacity') v = v + 'px';
+		node.style[k.replace(/-(\w)/g, function (m, c) { return c.toUpperCase(); })] = v;
+	}
+	return node;
+}
+
+function cr_show(node) { if (node) node.style.display = ''; return node; }
+function cr_hide(node) { if (node) node.style.display = 'none'; return node; }
+
+/** Prototype's Element.cumulativeOffset: [left, top], also .left / .top. */
+function cr_cumulativeOffset(node) {
+	var left = 0, top = 0;
+	if (node && node.parentNode) {
+		do {
+			top += node.offsetTop || 0;
+			left += node.offsetLeft || 0;
+			node = node.offsetParent;
+		} while (node);
+	}
+	var out = [left, top];
+	out.left = left;
+	out.top = top;
+	return out;
+}
+
+function cr_extend(destination, source) {
+	for (var property in source) destination[property] = source[property];
+	return destination;
+}
+
+/**
+ * Prototype's Class.create, reduced to what this file uses: an optional
+ * parent, a methods object, and `initialize` as the constructor. No $super —
+ * cropper.js never uses it (checked), so the wrapper Prototype builds to
+ * provide it is not reproduced.
+ */
+function cr_class(parent, methods) {
+	if (methods === undefined) { methods = parent; parent = null; }
+	function Klass() { this.initialize.apply(this, arguments); }
+	if (parent) Klass.prototype = Object.create(parent.prototype);
+	Klass.prototype.constructor = Klass;
+	for (var k in methods) {
+		if (Object.prototype.hasOwnProperty.call(methods, k)) Klass.prototype[k] = methods[k];
+	}
+	return Klass;
+}
+
+/* ---------------------------------------------------------------------- *
+ * Draggable / Draggables — Modified: 2026-08-11                            *
+ *                                                                          *
+ * Moved here from vendor/idae-be-shim/shim-draggable.js, which this file was
+ * the last caller of, and which is now deleted. Scriptaculous' lifecycle, not
+ * a convenient subset: CropDraggable below overrides `initialize` and `draw`
+ * and calls `this.currentDelta()` / binds `this.initDrag` from inside its own
+ * initialize, so those have to exist with those exact names.
+ *
+ *   mousedown on handle -> initDrag
+ *     -> records where inside the element the pointer grabbed it, then
+ *        cr_Draggables.activate(this)
+ *   document mousemove   -> cr_Draggables.updateDrag
+ *     -> first move calls startDrag, then updateDrag -> this.draw(pointer)
+ *   document mouseup     -> cr_Draggables.endDrag -> finishDrag
+ *
+ * `draw` is the override point: the base moves the element, CropDraggable
+ * forwards to the Cropper's own drawMethod instead and never touches it.
+ * ---------------------------------------------------------------------- */
+
+var cr_Draggables = {
+	drags: [],
+	activeDraggable: null,
+	_pumpInstalled: false,
+	_lastPointer: null,
+
+	register: function (draggable) {
+		if (this.drags.indexOf(draggable) !== -1) return;
+		this.drags.push(draggable);
+		this._installPump();
+	},
+	unregister: function (draggable) {
+		this.drags = this.drags.filter(function (d) { return d !== draggable; });
+	},
+
+	/**
+	 * One pair of document listeners for every draggable, installed on first
+	 * register. Per-instance listeners would leak: nothing calls destroy() on
+	 * a CropDraggable when its Cropper is torn down.
+	 */
+	_installPump: function () {
+		if (this._pumpInstalled) return;
+		this._pumpInstalled = true;
+		var self = this;
+		document.addEventListener('mousemove', function (e) { self.updateDrag(e); }, false);
+		document.addEventListener('mouseup', function (e) { self.endDrag(e); }, false);
+	},
+
+	activate: function (draggable) { this.activeDraggable = draggable; },
+	deactivate: function () { this.activeDraggable = null; },
+
+	updateDrag: function (event) {
+		var draggable = this.activeDraggable;
+		if (!draggable) return;
+		var pointer = [cr_pointerX(event), cr_pointerY(event)];
+		// Same-position mousemove events are common; skip them so a click
+		// without movement never counts as a drag.
+		if (this._lastPointer &&
+			this._lastPointer[0] === pointer[0] && this._lastPointer[1] === pointer[1]) return;
+		this._lastPointer = pointer;
+
+		if (!draggable.dragging) draggable.startDrag(event);
+		draggable.updateDrag(event, pointer);
+	},
+
+	endDrag: function (event) {
+		var draggable = this.activeDraggable;
+		this._lastPointer = null;
+		if (!draggable) return;
+		this.deactivate();
+		if (!draggable.dragging) return;
+		draggable.finishDrag(event, true);
+	}
+};
+
+var cr_Draggable = function (element) {
+	this.initialize(element, arguments[1]);
+};
+
+cr_extend(cr_Draggable.prototype, {
+	/** Subclasses override this wholesale — CropDraggable does. */
+	initialize: function (element, options) {
+		this.options = cr_extend({ handle: false, revert: false, zindex: 1000 }, options || {});
+		this.element = cr_el(element);
+		this.handle = this.options.handle ? cr_el(this.options.handle) : this.element;
+		this.delta = this.currentDelta();
+		this.dragging = false;
+
+		this.eventMouseDown = this.initDrag.bind(this);
+		cr_on(this.handle, 'mousedown', this.eventMouseDown);
+		cr_Draggables.register(this);
+	},
+
+	/**
+	 * [left, top] as numbers, from the *computed* style.
+	 *
+	 * Prototype read this through Element.getStyle, which resolves the
+	 * cascade. Reading this.element.style instead only sees inline values and
+	 * returns 0 for anything a stylesheet positioned — which silently shifts
+	 * every draw() by the stylesheet's offset, since draw() subtracts this
+	 * from the cumulative offset.
+	 */
+	currentDelta: function () {
+		if (!this.element) return [0, 0];
+		var computed = window.getComputedStyle(this.element);
+		return [
+			parseInt(computed.left || '0', 10) || 0,
+			parseInt(computed.top || '0', 10) || 0
+		];
+	},
+
+	initDrag: function (event) {
+		if (event.button !== 0) return;
+
+		// Never start a drag from a form control: the user is interacting with
+		// it, not moving its container.
+		var src = cr_target(event);
+		var tag = src && src.tagName ? src.tagName.toUpperCase() : '';
+		if (tag === 'INPUT' || tag === 'SELECT' || tag === 'OPTION' ||
+			tag === 'BUTTON' || tag === 'TEXTAREA') return;
+
+		var pointer = [cr_pointerX(event), cr_pointerY(event)];
+		var pos = cr_cumulativeOffset(this.element);
+		this.offset = [pointer[0] - pos[0], pointer[1] - pos[1]];
+
+		cr_Draggables.activate(this);
+		cr_stop(event);
+	},
+
+	startDrag: function (event) {
+		this.dragging = true;
+		this.delta = this.currentDelta();
+		if (this.options && this.options.zindex) {
+			// Computed, not inline — same reason as currentDelta above.
+			this.originalZ = parseInt(window.getComputedStyle(this.element).zIndex || '0', 10);
+			this.element.style.zIndex = this.options.zindex;
+		}
+	},
+
+	updateDrag: function (event, pointer) {
+		this.draw(pointer);
+		cr_stop(event);
+	},
+
+	draw: function (point) {
+		var pos = cr_cumulativeOffset(this.element);
+		var d = this.currentDelta();
+		pos[0] -= d[0];
+		pos[1] -= d[1];
+		this.element.style.left = (point[0] - pos[0] - this.offset[0]) + 'px';
+		this.element.style.top = (point[1] - pos[1] - this.offset[1]) + 'px';
+	},
+
+	finishDrag: function (event, success) {
+		this.dragging = false;
+		if (this.options && this.options.zindex && this.originalZ !== undefined) {
+			this.element.style.zIndex = this.originalZ;
+		}
+		if (this.options && this.options.revert) {
+			this.element.style.left = this.delta[0] + 'px';
+			this.element.style.top = this.delta[1] + 'px';
+		}
+	},
+
+	destroy: function () {
+		if (this.eventMouseDown) cr_off(this.handle, 'mousedown', this.eventMouseDown);
+		cr_Draggables.unregister(this);
+	}
+});
+
 /**
  * Extend the Draggable class to allow us to pass the rendering
  * down to the Cropper object.
  */
-var CropDraggable = Class.create(Draggable, {
+var CropDraggable = cr_class(cr_Draggable, {
 	
 	initialize: function(element) {
-		this.options = Object.extend(
+		this.options = cr_extend(
 			{
 				/**
 				 * The draw method to defer drawing to
@@ -144,24 +448,24 @@ var CropDraggable = Class.create(Draggable, {
 			arguments[1] || {}
 		);
 
-		this.element = $(element);
+		this.element = cr_el(element);
 
 		this.handle = this.element;
 
 		this.delta    = this.currentDelta();
 		this.dragging = false;   
 
-		this.eventMouseDown = this.initDrag.bindAsEventListener(this);
-		Event.observe(this.handle, "mousedown", this.eventMouseDown);
+		this.eventMouseDown = this.initDrag.bind(this);
+		cr_on(this.handle, "mousedown", this.eventMouseDown);
 
-		Draggables.register(this);
+		cr_Draggables.register(this);
 	},
 	
 	/**
 	 * Defers the drawing of the draggable to the supplied method
 	 */
 	draw: function(point) {
-		var pos = Element.cumulativeOffset(this.element),
+		var pos = cr_cumulativeOffset(this.element),
 		    d = this.currentDelta();
 		pos[0] -= d[0]; 
 		pos[1] -= d[1];
@@ -224,17 +528,17 @@ var CropDraggable = Class.create(Draggable, {
  *   
  *   Example:
  *     function onEndCrop( coords, dimensions ) {
- *         $( 'x1' ).value = coords.x1;
- *         $( 'y1' ).value = coords.y1;
- *         $( 'x2' ).value = coords.x2;
- *         $( 'y2' ).value = coords.y2;
- *         $( 'width' ).value = dimensions.width;
- *         $( 'height' ).value = dimensions.height;
+ *         cr_el( 'x1' ).value = coords.x1;
+ *         cr_el( 'y1' ).value = coords.y1;
+ *         cr_el( 'x2' ).value = coords.x2;
+ *         cr_el( 'y2' ).value = coords.y2;
+ *         cr_el( 'width' ).value = dimensions.width;
+ *         cr_el( 'height' ).value = dimensions.height;
  *     }
  * 
  */
 var Cropper = {};
-Cropper.Img = Class.create({
+Cropper.Img = cr_class({
 	
 	/**
 	 * Initialises the class
@@ -245,7 +549,7 @@ Cropper.Img = Class.create({
 	 * @return void
 	 */
 	initialize: function(element, options) {
-		this.options = Object.extend(
+		this.options = cr_extend(
 			{
 				/**
 				 * @var obj
@@ -271,7 +575,7 @@ Cropper.Img = Class.create({
 				 * @var function
 				 * The call back function to pass the final values to
 				 */
-				onEndCrop: Prototype.emptyFunction,
+				onEndCrop: cr_noop,
 				/**
 				 * @var boolean
 				 * Whether to capture key presses or not
@@ -304,7 +608,7 @@ Cropper.Img = Class.create({
 		 * @var obj
 		 * The img node to attach to
 		 */
-		this.img = $( element );
+		this.img = cr_el( element );
 		/**
 		 * @var obj
 		 * The x & y coordinates of the click point
@@ -368,7 +672,7 @@ Cropper.Img = Class.create({
 		
 		// include the stylesheet
 		if( this.options.autoIncludeCSS ) {
-			$$('script').each(function(s) {
+			cr_qsa('script').forEach(function(s) {
 				if( s.src.match( /\/cropper([^\/]*)\.js/ ) ) {
 					var path    = s.src.replace( /\/cropper([^\/]*)\.js.*/, '' ),
 					    style   = document.createElement( 'link' );
@@ -398,7 +702,7 @@ Cropper.Img = Class.create({
 		if( this.img.complete || this.isWebKit ) {
 			this.onLoad(); // for some reason Safari seems to support img.complete but returns 'undefined' on the this.img object
 		} else {
-			Event.observe( this.img, 'load', this.onLoad.bindAsEventListener( this) );
+			cr_on( this.img, 'load', this.onLoad.bind(this) );
 		}
 	},
 	
@@ -463,34 +767,34 @@ Cropper.Img = Class.create({
 		// apply an extra class to the wrapper to fix Opera below version 9
 		var fixOperaClass = '';
 		if( this.isOpera8 ) { fixOperaClass = ' opera8'; }
-		this.imgWrap = new Element( 'div', { 'class': cNamePrefix + 'wrap' + fixOperaClass } );
+		this.imgWrap = cr_make( 'div', { 'class': cNamePrefix + 'wrap' + fixOperaClass } );
 		
-		this.north = new Element( 'div', { 'class': cNamePrefix + 'overlay ' + cNamePrefix + 'north' }).insert(new Element( 'span' ));
-		this.east  = new Element( 'div', { 'class': cNamePrefix + 'overlay ' + cNamePrefix + 'east' }).insert(new Element( 'span' ));
-		this.south = new Element( 'div', { 'class': cNamePrefix + 'overlay ' + cNamePrefix + 'south' }).insert(new Element( 'span' ));
-		this.west  = new Element( 'div', { 'class': cNamePrefix + 'overlay ' + cNamePrefix + 'west' }).insert(new Element( 'span' ));
+		this.north = cr_insert(cr_make( 'div', { 'class': cNamePrefix + 'overlay ' + cNamePrefix + 'north' }), cr_make( 'span' ));
+		this.east  = cr_insert(cr_make( 'div', { 'class': cNamePrefix + 'overlay ' + cNamePrefix + 'east' }), cr_make( 'span' ));
+		this.south = cr_insert(cr_make( 'div', { 'class': cNamePrefix + 'overlay ' + cNamePrefix + 'south' }), cr_make( 'span' ));
+		this.west  = cr_insert(cr_make( 'div', { 'class': cNamePrefix + 'overlay ' + cNamePrefix + 'west' }), cr_make( 'span' ));
 		
 		var overlays = [ this.north, this.east, this.south, this.west ];
 
-		this.dragArea = new Element( 'div', { 'class': cNamePrefix + 'dragArea' } );
+		this.dragArea = cr_make( 'div', { 'class': cNamePrefix + 'dragArea' } );
 		
-		overlays.each(function(o){this.dragArea.insert(o);}, this);
+		overlays.forEach(function(o){cr_insert(this.dragArea, o);}, this);
 		
-		this.handleN  = new Element( 'div', { 'class': cNamePrefix + 'handle ' + cNamePrefix + 'handleN' } );
-		this.handleNE = new Element( 'div', { 'class': cNamePrefix + 'handle ' + cNamePrefix + 'handleNE' } );
-		this.handleE  = new Element( 'div', { 'class': cNamePrefix + 'handle ' + cNamePrefix + 'handleE' } );
-		this.handleSE = new Element( 'div', { 'class': cNamePrefix + 'handle ' + cNamePrefix + 'handleSE' } );
-		this.handleS  = new Element( 'div', { 'class': cNamePrefix + 'handle ' + cNamePrefix + 'handleS' } );
-		this.handleSW = new Element( 'div', { 'class': cNamePrefix + 'handle ' + cNamePrefix + 'handleSW' } );
-		this.handleW  = new Element( 'div', { 'class': cNamePrefix + 'handle ' + cNamePrefix + 'handleW' } );
-		this.handleNW = new Element( 'div', { 'class': cNamePrefix + 'handle ' + cNamePrefix + 'handleNW' } );
+		this.handleN  = cr_make( 'div', { 'class': cNamePrefix + 'handle ' + cNamePrefix + 'handleN' } );
+		this.handleNE = cr_make( 'div', { 'class': cNamePrefix + 'handle ' + cNamePrefix + 'handleNE' } );
+		this.handleE  = cr_make( 'div', { 'class': cNamePrefix + 'handle ' + cNamePrefix + 'handleE' } );
+		this.handleSE = cr_make( 'div', { 'class': cNamePrefix + 'handle ' + cNamePrefix + 'handleSE' } );
+		this.handleS  = cr_make( 'div', { 'class': cNamePrefix + 'handle ' + cNamePrefix + 'handleS' } );
+		this.handleSW = cr_make( 'div', { 'class': cNamePrefix + 'handle ' + cNamePrefix + 'handleSW' } );
+		this.handleW  = cr_make( 'div', { 'class': cNamePrefix + 'handle ' + cNamePrefix + 'handleW' } );
+		this.handleNW = cr_make( 'div', { 'class': cNamePrefix + 'handle ' + cNamePrefix + 'handleNW' } );
 				
-		this.selArea = new Element( 'div', { 'class': cNamePrefix + 'selArea' });
+		this.selArea = cr_make( 'div', { 'class': cNamePrefix + 'selArea' });
 			[
-				new Element( 'div', { 'class': cNamePrefix + 'marqueeHoriz ' + cNamePrefix + 'marqueeNorth' }).insert(new Element( 'span' )),
-				new Element( 'div', { 'class': cNamePrefix + 'marqueeVert ' + cNamePrefix + 'marqueeEast' }).insert(new Element( 'span' )),
-				new Element( 'div', { 'class': cNamePrefix + 'marqueeHoriz ' + cNamePrefix + 'marqueeSouth' }).insert(new Element( 'span' )),
-				new Element( 'div', { 'class': cNamePrefix + 'marqueeVert ' + cNamePrefix + 'marqueeWest' }).insert(new Element( 'span' )),
+				cr_insert(cr_make( 'div', { 'class': cNamePrefix + 'marqueeHoriz ' + cNamePrefix + 'marqueeNorth' }), cr_make( 'span' )),
+				cr_insert(cr_make( 'div', { 'class': cNamePrefix + 'marqueeVert ' + cNamePrefix + 'marqueeEast' }), cr_make( 'span' )),
+				cr_insert(cr_make( 'div', { 'class': cNamePrefix + 'marqueeHoriz ' + cNamePrefix + 'marqueeSouth' }), cr_make( 'span' )),
+				cr_insert(cr_make( 'div', { 'class': cNamePrefix + 'marqueeVert ' + cNamePrefix + 'marqueeWest' }), cr_make( 'span' )),
 				this.handleN,
 				this.handleNE,
 				this.handleE,
@@ -499,38 +803,38 @@ Cropper.Img = Class.create({
 				this.handleSW,
 				this.handleW,
 				this.handleNW,
-				new Element( 'div', { 'class': cNamePrefix + 'clickArea' } )
-			].each(function(o){this.selArea.insert(o);}, this);
+				cr_make( 'div', { 'class': cNamePrefix + 'clickArea' } )
+			].forEach(function(o){cr_insert(this.selArea, o);}, this);
 		
 				
 		this.imgWrap.appendChild( this.img );
 		this.imgWrap.appendChild( this.dragArea );
 		this.dragArea.appendChild( this.selArea );
-		this.dragArea.appendChild( new Element( 'div', { 'class': cNamePrefix + 'clickArea' } ) );
+		this.dragArea.appendChild( cr_make( 'div', { 'class': cNamePrefix + 'clickArea' } ) );
 
 		insertPoint.appendChild( this.imgWrap );
 
 		// add event observers
-		this.startDragBind = this.startDrag.bindAsEventListener( this );
-		Event.observe( this.dragArea, 'mousedown', this.startDragBind );
+		this.startDragBind = this.startDrag.bind(this);
+		cr_on( this.dragArea, 'mousedown', this.startDragBind );
 		
-		this.onDragBind = this.onDrag.bindAsEventListener( this );
-		Event.observe( document, 'mousemove', this.onDragBind );
+		this.onDragBind = this.onDrag.bind(this);
+		cr_on( document, 'mousemove', this.onDragBind );
 		
-		this.endCropBind = this.endCrop.bindAsEventListener( this );
-		Event.observe( document, 'mouseup', this.endCropBind );
+		this.endCropBind = this.endCrop.bind(this);
+		cr_on( document, 'mouseup', this.endCropBind );
 		
-		this.resizeBind = this.startResize.bindAsEventListener( this );
+		this.resizeBind = this.startResize.bind(this);
 		this.handles = [ this.handleN, this.handleNE, this.handleE, this.handleSE, this.handleS, this.handleSW, this.handleW, this.handleNW ];
 		this.registerHandles( true );
 		
 		if( this.options.captureKeys ) {
-			this.keysBind = this.handleKeys.bindAsEventListener( this );
-			Event.observe( document, 'keypress', this.keysBind );
+			this.keysBind = this.handleKeys.bind(this);
+			cr_on( document, 'keypress', this.keysBind );
 		}
 
 		// attach the dragable to the select area
-		var x = new CropDraggable( this.selArea, { drawMethod: this.moveArea.bindAsEventListener( this ) } );
+		var x = new CropDraggable( this.selArea, { drawMethod: this.moveArea.bind(this) } );
 		
 		this.setParams();
 	},
@@ -544,7 +848,7 @@ Cropper.Img = Class.create({
 	 */
 	registerHandles: function( registration ) {	
 		for( var i = 0; i < this.handles.length; i++ ) {
-			var handle = $( this.handles[i] );
+			var handle = cr_el( this.handles[i] );
 			
 			if( registration ) {
 				var hideHandle	= false;	// whether to hide the handle
@@ -563,13 +867,13 @@ Cropper.Img = Class.create({
 					}
 				}
 				if( hideHandle ) { 
-					handle.hide(); 
+					cr_hide(handle); 
 				} else {
-					Event.observe( handle, 'mousedown', this.resizeBind );
+					cr_on( handle, 'mousedown', this.resizeBind );
 				}
 			} else {
-				handle.show();
-				Event.stopObserving( handle, 'mousedown', this.resizeBind );
+				cr_show(handle);
+				cr_off( handle, 'mousedown', this.resizeBind );
 			}
 		}
 	},
@@ -593,16 +897,16 @@ Cropper.Img = Class.create({
 		 */
 		this.imgH = this.img.height;			
 
-		$( this.north ).setStyle( { height: 0 } );
-		$( this.east ).setStyle( { width: 0, height: 0 } );
-		$( this.south ).setStyle( { height: 0 } );
-		$( this.west ).setStyle( { width: 0, height: 0 } );
+		cr_setStyle( this.north, { height: 0 } );
+		cr_setStyle( this.east, { width: 0, height: 0 } );
+		cr_setStyle( this.south, { height: 0 } );
+		cr_setStyle( this.west, { width: 0, height: 0 } );
 		
 		// resize the container to fit the image
-		$( this.imgWrap ).setStyle( { 'width': this.imgW + 'px', 'height': this.imgH + 'px' } );
+		cr_setStyle( this.imgWrap, { 'width': this.imgW + 'px', 'height': this.imgH + 'px' } );
 		
 		// hide the select area
-		$( this.selArea ).hide();
+		cr_hide( this.selArea );
 						
 		// setup the starting position of the select area
 		var startCoords = { x1: 0, y1: 0, x2: 0, y2: 0 },
@@ -625,7 +929,7 @@ Cropper.Img = Class.create({
 		this.setAreaCoords( startCoords, false, false, 1 );
 		
 		if( this.options.displayOnInit && validCoordsSet ) {
-			this.selArea.show();
+			cr_show(this.selArea);
 			this.drawArea();
 			this.endCrop();
 		}
@@ -648,12 +952,12 @@ Cropper.Img = Class.create({
 			this.imgWrap.parentNode.removeChild( this.imgWrap );
 			
 			// remove the event observers
-			Event.stopObserving( this.dragArea, 'mousedown', this.startDragBind );
-			Event.stopObserving( document, 'mousemove', this.onDragBind );		
-			Event.stopObserving( document, 'mouseup', this.endCropBind );
+			cr_off( this.dragArea, 'mousedown', this.startDragBind );
+			cr_off( document, 'mousemove', this.onDragBind );		
+			cr_off( document, 'mouseup', this.endCropBind );
 			this.registerHandles( false );
 			if( this.options.captureKeys ) {
-				Event.stopObserving( document, 'keypress', this.keysBind );
+				cr_off( document, 'keypress', this.keysBind );
 			}
 		}
 	},
@@ -706,7 +1010,7 @@ Cropper.Img = Class.create({
 				
 				this.moveArea( [ this.areaCoords.x1 + dir.x, this.areaCoords.y1 + dir.y ] );
 				this.endCrop();
-				Event.stop( e ); 
+				cr_stop( e ); 
 			}
 		}
 	},
@@ -949,7 +1253,7 @@ Cropper.Img = Class.create({
 	 * @return obj Coords object (a1, b1, a2, b2) where a = x & b = y in example
 	 */
 	applyRatioToAxis: function( coords, ratio, direction, bounds ) {
-		var newCoords = Object.extend( coords, {} ),
+		var newCoords = cr_extend( coords, {} ),
 				calcDimA = newCoords.a2 - newCoords.a1, // calculate dimension a (e.g. width)
 				targDimB = Math.floor( calcDimA * ratio.b / ratio.a ), // the target dimension b (e.g. height)
 				targB = null, // to hold target b (e.g. y value)
@@ -1077,17 +1381,17 @@ Cropper.Img = Class.create({
 		
 			if( this.isIE ) { fixEl = this.selArea; }
 			else if( this.isWebKit ) {
-				fixEl = document.getElementsByClassName( 'imgCrop_marqueeSouth', this.imgWrap )[0];
+				fixEl = this.imgWrap.querySelector( '.imgCrop_marqueeSouth' );
 				/* 
 					we have to be a bit more forceful for Safari, otherwise the the marquee &
 					the south handles still don't move
 				*/ 
-				d = new Element( 'div' );
+				d = cr_make( 'div' );
 				d.style.visibility = 'hidden';
 				
 				var classList = ['SE','S','SW'];
 				for( i = 0; i < classList.length; i++ ) {
-					el = document.getElementsByClassName( 'imgCrop_handle' + classList[i], this.selArea )[0];
+					el = this.selArea.querySelector( '.imgCrop_handle' + classList[i] );
 					if( el.childNodes.length ) { el.removeChild( el.childNodes[0] ); }
 					el.appendChild(d);
 				}
@@ -1108,9 +1412,9 @@ Cropper.Img = Class.create({
 		this.startCoords = this.cloneCoords( this.areaCoords );
 		
 		this.resizing = true;
-		this.resizeHandle = Event.element( e ).classNames().toString().replace(/([^N|NE|E|SE|S|SW|W|NW])+/, '');
+		this.resizeHandle = cr_target( e ).className.replace(/([^N|NE|E|SE|S|SW|W|NW])+/, '');
 		// dump( 'this.resizeHandle : ' + this.resizeHandle + '\n' );
-		Event.stop( e );
+		cr_stop( e );
 	},
 	
 	/**
@@ -1121,14 +1425,14 @@ Cropper.Img = Class.create({
 	 * @return void
 	 */
 	startDrag: function( e ) {
-		this.selArea.show();
+		cr_show(this.selArea);
 		this.clickCoords = this.getCurPos( e );
 
 		this.setAreaCoords( { x1: this.clickCoords.x, y1: this.clickCoords.y, x2: this.clickCoords.x, y2: this.clickCoords.y }, false, false, null );
 
 		this.dragging = true;
 		this.onDrag( e ); // incase the user just clicks once after already making a selection
-		Event.stop( e );
+		cr_stop( e );
 	},
 	
 	/**
@@ -1141,7 +1445,7 @@ Cropper.Img = Class.create({
 	getCurPos: function( e ) {
 		// get the offsets for the wrapper within the document
 		// get the offsets for the wrapper within the document
-		var el = this.imgWrap, wrapOffsets = Element.cumulativeOffset( el );
+		var el = this.imgWrap, wrapOffsets = cr_cumulativeOffset( el );
 		// remove any scrolling that is applied to the wrapper (this may be buggy) - don't count the scroll on the body as that won't affect us
 		while( el.nodeName != 'BODY' ) {
 			wrapOffsets[1] -= el.scrollTop  || 0;
@@ -1149,8 +1453,8 @@ Cropper.Img = Class.create({
 			el = el.parentNode;
 		}
 		return { 
-			x: Event.pointerX(e) - wrapOffsets[0],
-			y: Event.pointerY(e) - wrapOffsets[1]
+			x: cr_pointerX(e) - wrapOffsets[0],
+			y: cr_pointerY(e) - wrapOffsets[1]
 		};
 	},
 	                               
@@ -1203,7 +1507,7 @@ Cropper.Img = Class.create({
 		
 			this.setAreaCoords( newCoords, false, e.shiftKey, direction, resizeHandle );
 			this.drawArea();
-			Event.stop( e ); // stop the default event (selecting images & text) in Safari & IE PC
+			cr_stop( e ); // stop the default event (selecting images & text) in Safari & IE PC
 		}
 	},
 	
@@ -1277,7 +1581,7 @@ Cropper.Img = Class.create({
  *			- see Cropper.Img for base options
  *			- previewWrap obj HTML element that will be used as a container for the preview image
  */
-Cropper.ImgWithPreview = Class.create(Cropper.Img, {
+Cropper.ImgWithPreview = cr_class(Cropper.Img, {
 	
 	/**
 	 * Implements the abstract method from Cropper.Img to initialize preview image settings.
@@ -1297,7 +1601,7 @@ Cropper.ImgWithPreview = Class.create(Cropper.Img, {
 			 * The preview image wrapper element
 			 * @var obj HTML element
 			 */
-			this.previewWrap = $( this.options.previewWrap );
+			this.previewWrap = cr_el( this.options.previewWrap );
 			/**
 			 * The preview image element
 			 * @var obj HTML IMG element
@@ -1311,9 +1615,9 @@ Cropper.ImgWithPreview = Class.create(Cropper.Img, {
 
 			this.hasPreviewImg = true;
 			
-			this.previewWrap.addClassName( 'imgCrop_previewWrap' );
+			this.previewWrap.classList.add( 'imgCrop_previewWrap' );
 			
-			this.previewWrap.setStyle({ 
+			cr_setStyle(this.previewWrap, { 
 				width: this.options.minWidth + 'px',
 				height: this.options.minHeight + 'px'
 			});

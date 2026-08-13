@@ -1,7 +1,6 @@
 /**
  * Javascript code to store data as JSON strings in cookies. 
- * It uses prototype.js (http://www.prototypejs.org)
- * and json.js (http://www.json.org/json.js)
+ * Modernized 2026-08-13: no PrototypeJS dependency.
  * 
  * Author : Lalit Patel
  * Website: http://www.lalit.org/lab/jsoncookies
@@ -10,7 +9,9 @@
  * Updated: Apr 12, 2007 8:50pm 
  */
 
-var CookieJar = Class.create();
+var CookieJar = function (options) {
+	this.initialize(options);
+};
 
 CookieJar.prototype = {
 	/**
@@ -23,7 +24,7 @@ CookieJar.prototype = {
 			domain: '',			// cookie domain
 			secure: ''			// secure ?
 		};
-		Object.extend(this.options, options || {});
+		Object.assign(this.options, options || {});
 
 		if (this.options.expires != '') {
 			var date = new Date();
@@ -47,7 +48,7 @@ CookieJar.prototype = {
 	 * Adds a name values pair.
 	 */
 	put: function(name, value) {
-		cookie = this.options;
+		var cookie = this.options;
 		var type = typeof value;
 		switch(type) {
 		  case 'undefined':
@@ -70,7 +71,7 @@ CookieJar.prototype = {
 	 * Removes a particular cookie (name value pair) form the Cookie Jar.
 	 */
 	remove: function(name) {
-		cookie = this.options; 
+		var cookie = this.options;
 		try {
 			var date = new Date();
 			date.setTime(date.getTime() - (3600 * 1000));
@@ -99,9 +100,9 @@ CookieJar.prototype = {
 	 * Empties the Cookie Jar. Deletes all the cookies.
 	 */
 	empty: function() {
-		keys = this.getKeys(); 
-		size = keys.size();
-		for(i=0; i<size; i++) {
+		var keys = this.getKeys();
+		var size = keys.length;
+		for(var i=0; i<size; i++) {
 			this.remove(keys[i]);
 		}
 	},
@@ -110,11 +111,11 @@ CookieJar.prototype = {
 	 * Returns all cookies as a single object
 	 */
 	getPack: function() {
-		pack = {};
-		keys = this.getKeys();
+		var pack = {};
+		var keys = this.getKeys();
 
-		size = keys.size();
-		for(i=0; i<size; i++) {
+		var size = keys.length;
+		for(var i=0; i<size; i++) {
 			pack[keys[i]] = this.get(keys[i]);
 		}
 		return pack;
@@ -124,11 +125,12 @@ CookieJar.prototype = {
 	 * Returns all keys.
 	 */
 	getKeys: function() {
-		keys = $A();
-		keyRe= /[^=; ]+(?=\=)/g;
-		str  = document.cookie;
+		var keys = [];
+		var keyRe = /[^=; ]+(?=\=)/g;
+		var str = document.cookie;
+		var match;
 		while((match = keyRe.exec(str)) != undefined) {
-			keys.push(match[0].strip());
+			keys.push(match[0].trim());
 		}
 		return keys;
 	}

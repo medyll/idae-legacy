@@ -4,6 +4,9 @@
  *
  * Date: 07/07/14
  * Modified: 2026-03-15 — removed extract($_POST), removed display_errors, English comments
+ * Modified: 2026-08-11 — Effect.Highlight -> highlightElement (engine/methods.js);
+ *                        the Scriptaculous shim was deleted on 2026-08-09 and the
+ *                        two calls below had been throwing "Effect is not defined"
  */
 	include_once($_SERVER['CONF_INC']);
 
@@ -21,6 +24,34 @@
 	$table_value = $_POST['table_value'] ?? '';
 ?>
 	<script>
+	/*
+	 * Modified: 2026-08-11 — the emitted JavaScript below no longer goes
+	 * through the PrototypeJS compatibility shims ($, $$, .each, .fire).
+	 *
+	 * $(node) was a no-op on an element: the shim, like Prototype, patches
+	 * HTMLElement.prototype, so `$(node).foo()` and `node.foo()` reach the same
+	 * function. That includes the dynamic `node.<?=$val?>()` afterAction call
+	 * and `node.close()`, which app_window.js assigns per instance
+	 * (app_window.js:195), and socketModule, which engine/methods.js installs
+	 * on the prototype.
+	 */
+	function pa_el(ref) {
+		return typeof ref === 'string' ? document.getElementById(ref) : ref;
+	}
+
+	function pa_qsa(selector) {
+		return Array.prototype.slice.call(document.querySelectorAll(selector));
+	}
+
+	/** Prototype's Element#fire: a bubbling, cancelable CustomEvent carrying `memo`. */
+	function pa_fire(node, eventName, memo) {
+		if (!node) return null;
+		var event = new CustomEvent(eventName, {bubbles: true, cancelable: true});
+		event.memo = memo || {};
+		node.dispatchEvent(event);
+		return event;
+	}
+
 		options = {}
 		options.className = 'myddeNotifier';
 
@@ -42,7 +73,7 @@
 		if(!empty($_SESSION['idagent'])){   
 		?>
 		// ajaxInMdl('identificationagent/mdlIdentificationGood','div_notification_result_login','idagent=<?=$_SESSION['idagent']?>');  
-		$('div_notification_result_login').socketModule('identificationagent/mdlIdentificationGood', 'idagent=<?=$_SESSION['idagent']?>');
+		pa_el('div_notification_result_login').socketModule('identificationagent/mdlIdentificationGood', 'idagent=<?=$_SESSION['idagent']?>');
 		// document.location.href='http://<?=$_SERVER['HTTP_HOST']?>';
 		<?php	 } else {  ?>
 		ajaxInMdl('identificationagent/mdlIdentificationFail', 'div_notification_result_login', '', {single: true});
@@ -113,24 +144,24 @@ foreach($_POST['deleteModule'] as $key=>$val)  {
 	
 	if(!is_array($val)){
 		?>
-		$$('[mdl="<?=stripslashes($key)?>"]').each(function (node) {
+		pa_qsa('[mdl="<?=stripslashes($key)?>"]').forEach(function (node) {
 			if (node.getAttribute('value') == '<?=$val?>' || '<?=$val?>' == '*') {
-				new Effect.Highlight(node);
+				highlightElement(node);
 				setTimeout(function () {
 					try {
-						$(node).close()
+						node.close()
 					} catch (e) {
-						$(node).remove();
+						if (node.parentNode) node.parentNode.removeChild(node);
 					}
 					try {
-						$(node).fire('dom:close')
+						pa_fire(node, 'dom:close')
 					} catch (e) {
-						$(node).remove();
+						if (node.parentNode) node.parentNode.removeChild(node);
 					}
 					try {
-						$(node).remove()
+						if (node.parentNode) node.parentNode.removeChild(node)
 					} catch (e) {
-						$(node).remove();
+						if (node.parentNode) node.parentNode.removeChild(node);
 					}
 				}.bind(this), 500)
 			}
@@ -139,24 +170,24 @@ foreach($_POST['deleteModule'] as $key=>$val)  {
 		}else{
 			foreach($val as $keykey=>$realval):
 				?>
-		$$('[mdl="<?=stripslashes($keykey)?>"]').each(function (node) {
+		pa_qsa('[mdl="<?=stripslashes($keykey)?>"]').forEach(function (node) {
 			if (node.getAttribute('value') == '<?=$realval?>' || '<?=$realval?>' == '*') {
-				new Effect.Highlight(node);
+				highlightElement(node);
 				setTimeout(function () {
 					try {
-						$(node).close()
+						node.close()
 					} catch (e) {
-						$(node).remove();
+						if (node.parentNode) node.parentNode.removeChild(node);
 					}
 					try {
-						$(node).fire('dom:close')
+						pa_fire(node, 'dom:close')
 					} catch (e) {
-						$(node).remove();
+						if (node.parentNode) node.parentNode.removeChild(node);
 					}
 					try {
-						$(node).remove()
+						if (node.parentNode) node.parentNode.removeChild(node)
 					} catch (e) {
-						$(node).remove();
+						if (node.parentNode) node.parentNode.removeChild(node);
 					}
 				}.bind(this), 500)
 			}
@@ -169,9 +200,9 @@ foreach($_POST['deleteModule'] as $key=>$val)  {
 	if(!empty($_POST['afterAction'])){
 	foreach($_POST['afterAction'] as $key=>$val)  {
 		?>
-		$$("[mdl='<?=stripslashes($key)?>']").each(function (node) {
+		pa_qsa("[mdl='<?=stripslashes($key)?>']").forEach(function (node) {
 			try {
-				$(node).<?=$val?>()
+				node.<?=$val?>()
 			} catch (e) {
 			}
 		})

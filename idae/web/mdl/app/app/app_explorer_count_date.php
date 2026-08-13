@@ -90,7 +90,7 @@
 						$nomdate = $valf['nomAppscheme_field'];
 						?>
 						<a class="autoToggle"
-						   onclick="$('type_date_<?= $uniqid ?>').update('<?= $nomdate .' ' . $table ?>');reloadModule('app/app/app_explorer_count_date','<?=$table?>','nomDate=<?=$nomdate?>&typeDate=<?=$valf['codeAppscheme_field']?>&table=<?=$table?>')">
+						   onclick="document.getElementById('type_date_<?= $uniqid ?>').innerHTML='<?= $nomdate .' ' . $table ?>';reloadModule('app/app/app_explorer_count_date','<?=$table?>','nomDate=<?=$nomdate?>&typeDate=<?=$valf['codeAppscheme_field']?>&table=<?=$table?>')">
 							<i class="fa fa-<?= $valf['iconAppscheme_field'] ?>"></i> <?= ucfirst(idioma($valf['nomAppscheme_field'])) . ' ' . $table; ?></a>                                <?php } ?>
 				</div>                        <?php } ?>
 		</div>

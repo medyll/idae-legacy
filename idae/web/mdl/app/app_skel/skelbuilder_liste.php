@@ -91,10 +91,10 @@
 
 	</div>
 	<div class="app_onglet toggler">
-		<a class="autoToggle active" onclick="$('inner_skel').loadModule('app/app_skel/skelbuilder_liste_inner');">Collections</a>
-		<a class="autoToggle"  onclick="$('inner_skel').loadModule('app/app_skel/skelbuilder_liste_group');">champs groupe</a>
-		<a class="autoToggle"  onclick="$('inner_skel').loadModule('app/app_skel/skelbuilder_liste_fields');">champs définis</a>
-		<a class="autoToggle"  onclick="$('inner_skel').loadModule('app/app_skel/skelbuilder_liste_collection_fields');">champs att</a>
+		<a class="autoToggle active" onclick="document.getElementById('inner_skel').loadModule('app/app_skel/skelbuilder_liste_inner');">Collections</a>
+		<a class="autoToggle"  onclick="document.getElementById('inner_skel').loadModule('app/app_skel/skelbuilder_liste_group');">champs groupe</a>
+		<a class="autoToggle"  onclick="document.getElementById('inner_skel').loadModule('app/app_skel/skelbuilder_liste_fields');">champs définis</a>
+		<a class="autoToggle"  onclick="document.getElementById('inner_skel').loadModule('app/app_skel/skelbuilder_liste_collection_fields');">champs att</a>
 	</div>
 	<div act_defer mdl="app/app_skel/skelbuilder_liste_inner" vars="" class="blanc flex_main " style="overflow:auto" id="inner_skel">
 

@@ -10,7 +10,7 @@
 			<div class="titre_entete borderb flex_h">
 				<div class="flex_main">Ftp</div>
 				<div>
-					<a onclick="$('run_ftp_costa').loadModule('<?= $PATH ?>ftp/costa')">lancer recupération ftp</a>
+					<a onclick="document.getElementById('run_ftp_costa').loadModule('<?= $PATH ?>ftp/costa')">lancer recupération ftp</a>
 				</div>
 			</div>
 			<div id="run_ftp_costa" class="flex_main" style="overflow:auto;">
@@ -47,7 +47,7 @@
 				<div class="flex_main">Récupération destinations</div>
 				<div>
 					<a onclick="runModule('mdl/<?= $PATH ?>read/readcosta_destination','run=1')">lancer</a>
-					<!--<a onclick="$('debug_destinations').loadModule('<?php/*= $PATH */?>read/readcosta_destination','run=1')">lancer</a>-->
+					<!--<a onclick="document.getElementById('debug_destinations').loadModule('<?php/*= $PATH */?>read/readcosta_destination','run=1')">lancer</a>-->
 				</div>
 			</div>
 			<div id="debug_destinations" ></div>
@@ -73,7 +73,7 @@
 			<div class="titre_entete borderb flex_h">
 				<div class="flex_main">Récupération dates de depart</div>
 				<div>
-					<!--<a onclick="$('debug_iti_costa').loadModule('<?php/*= $PATH */?>read/readcosta_datedepart','run=1')">debug</a>-->
+					<!--<a onclick="document.getElementById('debug_iti_costa').loadModule('<?php/*= $PATH */?>read/readcosta_datedepart','run=1')">debug</a>-->
 					<a onclick="runModule('mdl/<?= $PATH ?>read/readcosta_datedepart','run=1')">lancer</a>
 				</div>
 			</div>
@@ -87,7 +87,7 @@
 			<div class="titre_entete borderb flex_h">
 				<div class="flex_main">Récupération croisieres</div>
 				<div>
-					<a onclick="$('debug_cruise_costa').loadModule('<?= $PATH ?>read/readcosta_cruise','run=1')">debug</a>
+					<a onclick="document.getElementById('debug_cruise_costa').loadModule('<?= $PATH ?>read/readcosta_cruise','run=1')">debug</a>
 					<a onclick="runModule('mdl/<?= $PATH ?>read/readcosta_cruise','run=1')">lancer</a>
 				</div>
 			</div>
@@ -101,7 +101,7 @@
 			<div class="titre_entete borderb flex_h">
 				<div class="flex_main">Itinéraires</div>
 				<div>
-					<a onclick="$('debug_itilast_costa').loadModule('<?= $PATH ?>read/readcosta_iti','run=1')">debug</a>
+					<a onclick="document.getElementById('debug_itilast_costa').loadModule('<?= $PATH ?>read/readcosta_iti','run=1')">debug</a>
 					<a onclick="runModule('mdl/<?= $PATH ?>read/readcosta_iti','run=1')">lancer</a>
 				</div>
 			</div>

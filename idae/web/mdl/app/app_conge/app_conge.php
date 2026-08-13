@@ -44,8 +44,8 @@
 			<a class="avoid boredr4 ededed" onclick="<?= fonctionsJs::app_create('conge') ?>" >
 				&nbsp;<i class="fa fa-plus" ></i >&nbsp;
 				<?= idioma('Faire une demande') ?>&nbsp;&nbsp;
-			</a > <a onclick="$('<?= $zone_grille ?>').toggleContent()" class="autoToggle active" >Calendrier</a >
-			<a onclick="$('<?= $zone_liste ?>').toggleContent().loadModule('app/app_conge/app_conge_liste')" class="none autoToggle" >Liste </a >
+			</a > <a onclick="document.getElementById('<?= $zone_grille ?>').toggleContent()" class="autoToggle active" >Calendrier</a >
+			<a onclick="document.getElementById('<?= $zone_liste ?>').toggleContent().loadModule('app/app_conge/app_conge_liste')" class="none autoToggle" >Liste </a >
 		</div >
 		<div class="flex_main relative" style="height:100%;overflow:hidden;" >
 			<div style="height:100%;overflow:hidden;" id="<?= $zone_grille ?>" data-cache="true" act_defer mdl="app/app_conge/app_conge_grille"  ></div >
@@ -68,7 +68,7 @@
 </div >
 <script >
 
-	$('cal_planning_<?=$time?>').observe('dom:act_click', function (event) {
+	document.getElementById('cal_planning_<?=$time?>').addEventListener('dom:act_click', function (event) {
 		navCal(event.memo.value)
 	})
 

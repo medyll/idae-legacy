@@ -56,17 +56,35 @@
 	</div>
 </div>
 <script>
-	$('content_edit_note<?=$table_value?>').on('click', function () {
-		$('content_edit_note<?=$table_value?>').removeClassName('cursor');
-		if (!this.readAttribute('contenteditable')) $('content_edit_note<?=$table_value?>').setAttribute('contenteditable', 'true')
+	/*
+	 * Modified: 2026-08-11 — migrated off the PrototypeJS compatibility shims
+	 * ($, .on, .readAttribute, .add/removeClassName, .update, String#escapeHTML)
+	 * to native DOM, with file-local `agn_` helpers.
+	 *
+	 * Both .on() calls are two-argument with no selector, so they were never
+	 * delegation — the shim fell through to Event.observe. Ported as plain
+	 * listeners, which also keeps `this` pointing at the element.
+	 */
+	function agn_el(ref) {
+		return typeof ref === 'string' ? document.getElementById(ref) : ref;
+	}
+
+	/** Prototype's String#escapeHTML: & < > only, exactly as 1.7.3 did it. */
+	function agn_escapeHTML(str) {
+		return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+	}
+
+	agn_el('content_edit_note<?=$table_value?>').addEventListener('click', function () {
+		agn_el('content_edit_note<?=$table_value?>').classList.remove('cursor');
+		if (!this.getAttribute('contenteditable')) agn_el('content_edit_note<?=$table_value?>').setAttribute('contenteditable', 'true')
 	})
-	$('content_edit_note<?=$table_value?>').on('blur', function () {
-		$('content_edit_note<?=$table_value?>').addClassName('cursor');
-		var desc = $('content_edit_note<?=$table_value?>').innerHTML;
-		desc = desc.escapeHTML();
-		$('content_testarea_note<?=$table_value?>').update(desc)
-		ajaxFormValidation($('form_testarea_note<?= $table_value ?>'))
-		$('content_edit_note<?=$table_value?>').removeAttribute('contenteditable');
+	agn_el('content_edit_note<?=$table_value?>').addEventListener('blur', function () {
+		agn_el('content_edit_note<?=$table_value?>').classList.add('cursor');
+		var desc = agn_el('content_edit_note<?=$table_value?>').innerHTML;
+		desc = agn_escapeHTML(desc);
+		agn_el('content_testarea_note<?=$table_value?>').innerHTML = desc
+		ajaxFormValidation(agn_el('form_testarea_note<?= $table_value ?>'))
+		agn_el('content_edit_note<?=$table_value?>').removeAttribute('contenteditable');
 	})
 </script>
 <style>

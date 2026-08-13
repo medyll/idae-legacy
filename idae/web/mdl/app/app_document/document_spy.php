@@ -27,7 +27,7 @@ while($arr=$rs->getNext()){
 		$total=($ct==0)? '' : $ct ;
 		?>
 		<script>
-			$$('[base=<?=$base?>][collection=<?=$collection?>][tag=<?=$TAG?>] [count]').invoke('update',' <?=$total?>')
+			document.querySelectorAll('[base="<?=$base?>"][collection="<?=$collection?>"][tag="<?=$TAG?>"] [count]').forEach(function(node){node.innerHTML=' <?=$total?>';})
 		</script>
 		<?php 
 	endforeach;

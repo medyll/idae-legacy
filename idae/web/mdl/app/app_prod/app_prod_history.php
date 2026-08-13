@@ -35,7 +35,7 @@
 <div class="menu_nav flex_h flex_align_middle flex_margin  padding">
 	<div class="flex_main" >
 		<div style="z-index: 100;overflow:hidden;" class="fauxInput applink  relative"
-		     onclick="$(this).next().toggle();">
+		     onclick="idae_toggle(this.nextElementSibling);">
 			<a>
 				<i class="fa fa-caret-right"></i>
 				&nbsp;

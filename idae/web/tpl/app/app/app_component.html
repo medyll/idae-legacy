@@ -64,7 +64,8 @@
 <div auto_tag="app_left_panel" app_left_panel id="auto_expl_preview_zone"
      style="display: none;right: 0px; top: 0px; bottom: 0px; z-index: 1000;" class="absolute">
 	<div class="flex_h blanc borderl" style="height:100%;">
-		<div onclick="$($(this).up('#auto_expl_preview_zone')).hide()"
+		<!-- onclick was $($(this).up('#auto_expl_preview_zone')).hide() — the ancestor it looked for is this fixed id -->
+		<div onclick="document.getElementById('auto_expl_preview_zone').style.display='none'"
 		     class="applink applinkblock ededed blanc padding borderr">
 			<a class="border4 blanc padding bold textrouge"><i class="fa fa-close"></i></a>
 		</div>

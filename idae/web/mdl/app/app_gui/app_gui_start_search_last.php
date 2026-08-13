@@ -48,7 +48,7 @@
 					$tr_vars = ['table_value' => (int)$arr['valeurAgent_recherche'], 'table' => $table, 'field_name_raw' => 'nom', 'field_value' => strtolower($arr['nom' . $Table])];
 					?>
 					<div  data-table="<?=$table?>" data-table_value="<?=$arr['id' . $table]?>" class="demi flex_h flex_align_middle mastershow">
-						<a class="flex_main ellipsis" onclick="main_item_search.load_data('search=<?= addslashes($arr['nom' . $Table]) ?>');$('main_item_search_zone').toggleContent();">
+						<a class="flex_main ellipsis" onclick="main_item_search.load_data('search=<?= addslashes($arr['nom' . $Table]) ?>');document.getElementById('main_item_search_zone').toggleContent();">
 							<?= $APP_TMP->draw_field($tr_vars) ?>
 						</a>
 						<div>

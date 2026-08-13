@@ -63,7 +63,7 @@
 					</div>                <?php } ?></div>
 			<div class="borderl"  >
 				<div class="disinput">
-					<a onclick="$('image_upload_<?= $time ?>').fire('dom:submit');">
+					<a onclick="iu_fire(iu_el('image_upload_<?= $time ?>'), 'dom:submit');">
 						<i class="fa fa-check"></i> <?= idioma('Valider et terminer') ?>
 					</a>
 				</div>
@@ -124,74 +124,146 @@
 
 </form>
 <script>
-	new myddeAttach($('myddeUpload<?=$time?>'), {preview_zone: '<?=$listing_img?>', form: 'image_upload_<?=$time?>'});
+	/*
+	 * Modified: 2026-08-11 — migrated off the PrototypeJS compatibility shims
+	 * ($, .select, .size, .first, .getDimensions, .writeAttribute, .fire,
+	 * .update, .getWidth/.getHeight, .readAttribute, .each, .add/removeClassName,
+	 * .setStyle, .identify) to native DOM, with file-local `iu_` helpers.
+	 *
+	 * The helpers are redefined on every render rather than guarded: this
+	 * module can be opened several times in one session (each instance keys its
+	 * ids off $time), and the functions below are pure, so the last definition
+	 * winning is harmless. That is already how recalcSizeImg / needResize /
+	 * savResizeeCoords behaved — they are globals overwritten per instance, and
+	 * cropper.js calls them back by name.
+	 */
+	function iu_el(ref) {
+		return typeof ref === 'string' ? document.getElementById(ref) : ref;
+	}
+
+	/** Prototype's `element.select(css)`, as a real Array. */
+	function iu_select(ref, selector) {
+		var node = iu_el(ref);
+		if (!node) return [];
+		return Array.prototype.slice.call(node.querySelectorAll(selector));
+	}
+
+	/** Prototype's Element#fire: a bubbling, cancelable CustomEvent carrying `memo`. */
+	function iu_fire(node, eventName, memo) {
+		if (!node) return null;
+		var event = new CustomEvent(eventName, {bubbles: true, cancelable: true});
+		event.memo = memo || {};
+		node.dispatchEvent(event);
+		return event;
+	}
+
+	/**
+	 * Prototype's Element#getDimensions: offset box when the node is displayed,
+	 * otherwise measured behind a temporary visibility:hidden / display:block so
+	 * a hidden node still reports a real size instead of 0x0.
+	 */
+	function iu_getDimensions(node) {
+		if (!node) return {width: 0, height: 0};
+		if (window.getComputedStyle(node).display !== 'none') {
+			return {width: node.offsetWidth, height: node.offsetHeight};
+		}
+		var style = node.style;
+		var originalVisibility = style.visibility,
+			originalPosition = style.position,
+			originalDisplay = style.display;
+		style.visibility = 'hidden';
+		if (originalPosition !== 'fixed') style.position = 'absolute';
+		style.display = 'block';
+		var width = node.clientWidth, height = node.clientHeight;
+		style.display = originalDisplay;
+		style.position = originalPosition;
+		style.visibility = originalVisibility;
+		return {width: width, height: height};
+	}
+
+	/** Prototype's Element#identify: give the node an id if it has none, return it. */
+	function iu_identify(node) {
+		if (!node.id) node.id = 'anonymous_element_' + Math.random().toString(36).slice(2);
+		return node.id;
+	}
+
+	new myddeAttach(iu_el('myddeUpload<?=$time?>'), {preview_zone: '<?=$listing_img?>', form: 'image_upload_<?=$time?>'});
 </script>
 <script>
 	recalcSizeImg = function (args) {
 
 		setTimeout(function () {
 			if (args == null) return false;
-			if ($('<?=$listing_img?>').select('img').size() == 0) {
+			var imgs = iu_select('<?=$listing_img?>', 'img');
+			if (imgs.length == 0) {
 				return false;
 			}
-			img = $('<?=$listing_img?>').select('img').first();
-			dim = $('<?=$listing_img?>').select('img').first().getDimensions();
+			var img = imgs[0];
+			var dim = iu_getDimensions(img);
 			/*img.width  = args.width
 			 img.height = args.height */
-			ratiowidth = args.width / dim.width
-			ratioheight = args.height / dim.height
-			img.writeAttribute({ratiowidth: ratiowidth, ratioheight: ratioheight})
-		}.bind(this), 1000)
+			var ratiowidth = args.width / dim.width;
+			var ratioheight = args.height / dim.height;
+			img.setAttribute('ratiowidth', ratiowidth);
+			img.setAttribute('ratioheight', ratioheight);
+		}, 1000)
 	}
 	endUpload_img = function () {
-		if ($('<?=$listing_img?>').select('img').size() == 0) {
+		if (iu_select('<?=$listing_img?>', 'img').length == 0) {
 			alert('Echec upload');
 			return false;
 		}
 	}
 	<?php if(!empty($_POST['needResize']) ){ ?>
 	savResizeeCoords = function (coords, dimensions) {
-		if (!$('<?=$listing_img?>')) return;
-		if (!$('<?=$listing_img?>').show()) return;
-		if ($('<?=$listing_img?>').select('img').size() == 0) {
+		var zone = iu_el('<?=$listing_img?>');
+		if (!zone) return;
+		// Was `if (!$(zone).show()) return;`. Prototype's show() returns the
+		// element, so the guard could never fire — the line's only real effect
+		// was displaying the zone. Kept as that, without the dead branch.
+		zone.style.display = '';
+		var imgs = iu_select(zone, 'img');
+		if (imgs.length == 0) {
 			return false;
 		}
-		img = $('<?=$listing_img?>').select('img').first();
-		ratiowidth = eval(img.readAttribute('ratiowidth')) || 1;
-		ratioheight = eval(img.readAttribute('ratioheight')) || 1;
-		if ($('x1') == null) return
-		$('x1').value = eval(coords.x1) * ratiowidth;
-		$('y1').value = eval(coords.y1) * ratioheight;
-		$('x2').value = eval(coords.x2) * ratiowidth;
-		$('y2').value = eval(coords.y2) * ratioheight;
-		$('width').value = eval(dimensions.width) * ratiowidth;
-		$('height').value = eval(dimensions.height) * ratioheight;
-		$('display_width').value = $('<?=$listing_img?>').getWidth();
-		$('display_height').value = $('<?=$listing_img?>').getHeight();
+		var img = imgs[0];
+		var ratiowidth = parseFloat(img.getAttribute('ratiowidth')) || 1;
+		var ratioheight = parseFloat(img.getAttribute('ratioheight')) || 1;
+		if (iu_el('x1') == null) return
+		iu_el('x1').value = coords.x1 * ratiowidth;
+		iu_el('y1').value = coords.y1 * ratioheight;
+		iu_el('x2').value = coords.x2 * ratiowidth;
+		iu_el('y2').value = coords.y2 * ratioheight;
+		iu_el('width').value = dimensions.width * ratiowidth;
+		iu_el('height').value = dimensions.height * ratioheight;
+		iu_el('display_width').value = iu_getDimensions(zone).width;
+		iu_el('display_height').value = iu_getDimensions(zone).height;
 		//
-		$('spy_x1').update(eval(coords.x1) * ratiowidth);
-		$('spy_y1').update(eval(coords.y1) * ratioheight);
-		$('spy_x2').update(eval(coords.x2) * ratiowidth);
-		$('spy_y2').update(eval(coords.y2) * ratioheight);
+		iu_el('spy_x1').innerHTML = coords.x1 * ratiowidth;
+		iu_el('spy_y1').innerHTML = coords.y1 * ratioheight;
+		iu_el('spy_x2').innerHTML = coords.x2 * ratiowidth;
+		iu_el('spy_y2').innerHTML = coords.y2 * ratioheight;
 	}
 
 	<?php } ?>
 </script>
 <script>
 	needResize = function () {
-		$('<?=$listing_img?>').select('img.just_uploaded').each(function (node) {
-			$(node).removeClassName('just_uploaded');//.setStyle({visibility:'hidden'});
-			dim = $(node).getDimensions();
-			$('original_width').value = dim.width;
-			$('original_height').value = dim.height;
-			$(node).addClassName('just_uploaded').setStyle({visibility: 'visible'});
+		iu_select('<?=$listing_img?>', 'img.just_uploaded').forEach(function (node) {
+			node.classList.remove('just_uploaded');
+			var dim = iu_getDimensions(node);
+			iu_el('original_width').value = dim.width;
+			iu_el('original_height').value = dim.height;
+			node.classList.add('just_uploaded');
+			node.style.visibility = 'visible';
 		})
 
-		if ($('<?=$listing_img?>').select('img').size() == 0) {
+		var imgs = iu_select('<?=$listing_img?>', 'img');
+		if (imgs.length == 0) {
 			return false;
 		}
 		var daCrop = new Cropper.Img(
-			$('<?=$listing_img?>').select('img').first().identify(),
+			iu_identify(imgs[0]),
 			{
 				minWidth:<?=$width?>,
 				minHeight:<?=empty($height)? 0 : $height ?>,

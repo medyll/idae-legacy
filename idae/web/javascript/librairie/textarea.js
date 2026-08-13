@@ -1,121 +1,106 @@
-function nl2br(str, is_xhtml) {
+/**
+ * Modified: 2026-08-11 — migrated off the PrototypeJS compatibility shims
+ * (BE_PLAN.md phase 5).
+ *
+ * Two things live here:
+ *
+ * 1. `nl2br` — deliberately kept, and deliberately *not* deduplicated.
+ *    app_php.js:11 defines a global of the same name with a different
+ *    implementation (it replaces the newline with `<br />`, this one keeps
+ *    the newline and only inserts `<br>` before it, skipping matches
+ *    preceded by `>`). main_bag.js loads app_php.js at line 27 and this
+ *    file at line 75, so *this* version is the one the app actually runs —
+ *    including for app_socket.js:672. Deleting it would silently swap the
+ *    behaviour of every live-data update.
+ *
+ * 2. `resizeInput` — auto-sizing text input. Live: app_insertionQ.js:419
+ *    and myddeDatalist.js:179.
+ *
+ * Removed: `ResizingTextArea`, which was defined here but never
+ * instantiated anywhere in the repo.
+ */
+(function (global) {
 
-    return (str + '').replace(/([^>\r\n]?)(\r\n|\n\r|\r|\n)/g, '$1<br>$2');
-}
+	/* ------------------------------------------------------------------ *
+	 * DOM helpers — file-local, same rationale as the other migrated       *
+	 * files (see BE_PLAN.md phase 5).                                      *
+	 * ------------------------------------------------------------------ */
 
-var ResizingTextArea = Class.create();
-var resizeInput = Class.create();
+	function ta_el(ref) {
+		return typeof ref === 'string' ? document.getElementById(ref) : ref;
+	}
 
-resizeInput.prototype = {
-    initialize: function (element, options) {
+	/** Prototype's Element#update: strip <script> before innerHTML, eval the original on a 10ms defer. */
+	function ta_update(node, content) {
+		if (content === undefined) content = '';
+		content = String(content);
+		node.innerHTML = engine_stripScripts(content);
+		if (/<script/i.test(content)) {
+			setTimeout(function () { engine_evalScripts(content); }, 10);
+		}
+		return node;
+	}
 
-        this.options = Object.extend({ }, options || {});
-        this.element = $(element);
-        this.wrapper_holder = this.element.parentNode;
+	/**
+	 * Prototype's Element#getWidth (via getDimensions): clientWidth, forcing
+	 * the element visible first if it is display:none.
+	 */
+	function ta_getWidth(node) {
+		if (window.getComputedStyle(node).display !== 'none') return node.clientWidth;
+		var style = node.style;
+		var originalVisibility = style.visibility,
+			originalPosition = style.position,
+			originalDisplay = style.display;
+		style.visibility = 'hidden';
+		if (originalPosition !== 'fixed') style.position = 'absolute';
+		style.display = 'block';
+		var width = node.clientWidth;
+		style.display = originalDisplay;
+		style.position = originalPosition;
+		style.visibility = originalVisibility;
+		return width;
+	}
 
-        this.span = new Element('span', {style: 'position:absolute;z-index:-1;display:inline-block;right:0;top:-1500px;visibility:hidden;padding:0.5em;padding-right:2.5em;min-width:80px;'});
-        this.span.update(this.element.value);
-        this.element.style.width = this.span.getWidth() + 'px';
-        this.element.style.minWidth =  '80px';
-        this.wrapper_holder.appendChild(this.span);
-        $(this.element).on('keydown', function (event, node) {
-            this.span.update(this.element.value);
-            this.element.style.width = this.span.getWidth() + 'px';
-        }.bind(this));
-    }
+	/* ------------------------------------------------------------------ */
 
-}
+	// Shadows app_php.js's nl2br on purpose — see the file header.
+	global.nl2br = function nl2br(str, is_xhtml) {
 
-ResizingTextArea.prototype = {
-    defaultRows: 1,
+	    return (str + '').replace(/([^>\r\n]?)(\r\n|\n\r|\r|\n)/g, '$1<br>$2');
+	}
 
-    initialize: function (field, options) {
-        this.options = Object.extend({
-            layout: true,
-            height: true,
-            width: true
-        }, options || {});
+	var resizeInput = function () {
+		this.initialize.apply(this, arguments);
+	};
 
+	resizeInput.prototype = {
+	    initialize: function (element, options) {
 
-        this.field = $(field);
-        this.parent = $(field).parentNode
+	        this.options = Object.assign({ }, options || {});
+	        this.element = ta_el(element);
+	        this.wrapper_holder = this.element.parentNode;
 
-        if ($(field).readAttribute('layout')) {
-            this.options.layout = $(field).readAttribute('layout');
-        }
-        this.defaultRows = Math.max(field.rows, 1);
-        this.tplhref = '<a onclick="#{value}">#{value}</a>';
-        this.hrefsyntax = /http:(.*?)\s+/;
-        this.syntax = /\lien\((.*?)\)/;
-        this.datesyntax = /(\d{2})\/(\d{2})\/(\d{4})/;
+	        this.span = document.createElement('span');
+	        this.span.setAttribute('style', 'position:absolute;z-index:-1;display:inline-block;right:0;top:-1500px;visibility:hidden;padding:0.5em;padding-right:2.5em;min-width:80px;');
+	        ta_update(this.span, this.element.value);
+	        // Pre-existing ordering quirk, kept verbatim: the span is measured
+	        // here but only appended to the document on the next line, so this
+	        // first measurement is always 0 (a detached element has no
+	        // clientWidth). The initial width is therefore '0px', rescued by
+	        // the minWidth below; subsequent keydown measurements are real.
+	        this.element.style.width = ta_getWidth(this.span) + 'px';
+	        this.element.style.minWidth =  '80px';
+	        this.wrapper_holder.appendChild(this.span);
+	        // Two-arg .on(event, handler): a plain listener under the shim,
+	        // not delegation.
+	        this.element.addEventListener('keydown', function (event) {
+	            ta_update(this.span, this.element.value);
+	            this.element.style.width = ta_getWidth(this.span) + 'px';
+	        }.bind(this));
+	    }
 
-        this.display = new Element('div')
+	}
 
-        $(this.display).addClassName($(this.field).classNames());
-        if (this.options.layout == true) {
-            this.parent.appendChild(this.display);
-            this.field.observe('blur', this.deactivate.bind(this));
-            this.display.update(nl2br(field.value));
-            //this.field.setStyle({'width': this.display.getWidth()+'px' });
+	global.resizeInput = resizeInput;
 
-            this.deactivate();
-        }
-
-        this.resizeNeeded();
-        this.field.observe("click", function (event) {
-            this.resizeNeeded();
-        }.bind(this));
-        this.field.observe("keyup", function (event) {
-            this.resizeNeeded();
-        }.bind(this));
-        this.display.observe('click', function (event) {
-            this.activate();
-        }.bind(this));
-    },
-    activate: function (event) {
-        if (event) {
-            if (Event.element(event).match('a')) {/*Event.stop(event);*/
-                return;
-            }
-        }
-
-        $(this.field).toggleContent().focus();
-    },
-    deactivate: function () {
-        this.display.toggleContent();
-    },
-    resizeNeeded: function () {
-        lineHeight = this.field.getStyle('lineHeight')
-        this.display.setStyle({'line-height': lineHeight });
-        this.display.style.fontSize = this.field.getStyle('fontSize');
-        if (this.field.getHeight() == 0) {
-            height = '50'
-        } else {
-            height = this.field.getHeight()
-        }
-
-        if (this.options.height == true) {
-            var t = this.field;
-            var lines = t.value.split('\n');
-            var newRows = lines.length + 1;
-            this.field.rows = newRows;
-            this.display.setStyle({height: newRows * lineHeight + 'px'});
-        }
-        if (this.options.width == true) {
-            this.field.setStyle({'width': 'auto' });
-            this.field.setStyle({'width': this.field.scrollWidth + 10 + 'px' });
-        }
-        toPrint = this.field.value.sub(this.syntax, function (match) {
-            return   '<a onclick="fctquickPaste(this.innerHTML,$(this))">' + match[1] + '</a>';
-        })
-        /*toPrint  =  toPrint.sub(this.datesyntax, function(match) {
-         return   '<a onclick="ajaxMdl(\'calendrier/mdlCalendrierDesk\',\'Date et heure\',\'date='+match[1]+'/'+match[2]+'/'+match[3]+'\', {buttonClose:false,inTask: false,parent:\'desktop\',hasHandle: false});return false;">'+match[1]+'/'+match[2]+'/'+match[3]+'</a>' ;
-         })*/
-        //toPrint  = this.field.value.gsub(syntax,'<a onclick="fctquickPaste(this.innerHTML,$(this))">');
-        //syntax = /\:(.*?)/
-        //toPrint  = toPrint.gsub(this.hrefsyntax,'<a href="#{0}" target="_blank">#{0}</a>');
-        //dlink = 'http://www.destinationsreve.com/trains-de-luxe/pt2/nos-voyages.html et des choses';
-        //console.log(dlink.gsub(/http:(.*?)\s+/,'<a href="#{0}">#{0}</a>'));
-        this.display.update(nl2br(toPrint))
-    }
-}
+})(window);

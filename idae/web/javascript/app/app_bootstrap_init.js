@@ -48,11 +48,11 @@ function idae_log() {
 							console.log ('popup  !!! ');
 							console.log (arrpop);
 							// MODULE
-							$ ('inBody').socketModule (arrpop.mdl, arrpop.vars, { cache : false });
+							document.getElementById ('inBody').socketModule (arrpop.mdl, arrpop.vars, { cache : false });
 
 							localStorage.removeItem ('popup')
 						} else {
-							$ ('inBody').socketModule ('app/app_gui/app_gui_main', '');// , {cache: true}
+							document.getElementById ('inBody').socketModule ('app/app_gui/app_gui_main', '');// , {cache: true}
 						}
 						// $('main_progress').hide();
 					}
@@ -84,15 +84,24 @@ function idae_log() {
 function request_login() {
 	// $('main_progress').hide();
 	var div_login    = document.createElement ("div");
-	$ (div_login).setStyle ({ position : 'absolute', 'bottom' : 0, 'width' : '100%', 'height' : '100%' });
+	// Modified: 2026-08-11 — migrated off the $ / setStyle shims. div_login is
+	// an element this function just created, so `$(div_login)` was already a
+	// no-op: the shim patches HTMLElement.prototype and hands the node back.
+	div_login.style.position = 'absolute';
+	div_login.style.bottom = 0;
+	div_login.style.width = '100%';
+	div_login.style.height = '100%';
 	document.body.appendChild (div_login);
-	$ (div_login).id = 'div_login';
-	$ (div_login).socketModule ('app/app_login/app_login', '', { cache : true });
+	div_login.id = 'div_login';
+	div_login.socketModule ('app/app_login/app_login', '', { cache : true });
 	return div_login;
 }
 function hide_login() {
 	// $('main_progress').hide();
-	if ( !$ ('div_login') ) return;
-	$ ('div_login').fade ();
+	if ( !document.getElementById ('div_login') ) return;
+	// Was Scriptaculous' Effect.Fade via the shim, replaced by a native
+	// opacity transition (fadeElement, engine/methods.js) — same contract:
+	// fade to 0, then hide and restore opacity for the next show().
+	fadeElement (document.getElementById ('div_login'));
 
 }

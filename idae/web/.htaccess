@@ -88,6 +88,21 @@ FileETag none
 	<FilesMatch "\\.(x?html?|php)$">
 	Header set Cache-Control "max-age=216000, publics"
 	</FilesMatch>
+
+	# index.php/reindex.php carry per-request state (session, CSRF token,
+	# and — as of the asset_versions.php change — the live
+	# {file: mtime} manifest main_bag.js uses to cache-bust individual
+	# scripts). The blanket 60h max-age above, inherited from the generic
+	# .php rule, was caching the entry page itself: a returning visitor
+	# within that window got a stale manifest no matter what changed on
+	# disk, silently defeating the per-file cache-busting entirely. <Files>
+	# is more specific than FilesMatch and applies after it, so this wins.
+	<Files "index.php">
+	Header set Cache-Control "no-cache, must-revalidate"
+	</Files>
+	<Files "reindex.php">
+	Header set Cache-Control "no-cache, must-revalidate"
+	</Files>
 </IfModule>
 
 # Désactiver temporairement les règles de réécriture pour le débogage

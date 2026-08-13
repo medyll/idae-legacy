@@ -53,7 +53,12 @@ $time = time();
   </tr>
 </table>
 <script>
-/*$$('#reou input').each(function(node){
-	$('reou').insert(node.readAttribute('name')+'<br>')
-	})*/
+/*
+ * Modified: 2026-08-11 — this block has been a dead comment since before the
+ * idae-be migration; left commented, not ported, but rewritten in plain JS
+ * so it reads correctly if anyone revives it.
+ * Array.prototype.slice.call(document.querySelectorAll('#reou input')).forEach(function(node){
+ *   document.getElementById('reou').insertAdjacentHTML('beforeend', node.getAttribute('name')+'<br>')
+ * })
+ */
 </script>

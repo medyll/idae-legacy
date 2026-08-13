@@ -37,7 +37,7 @@
 			<div class="titre_entete">Groupes</div>
 			<div class="applink applinkblock toggler">
 			<?php while($ARRG = $RSG->getNext()): ?>
-			<a class="autoToggle" onclick="$('liste_droit').loadModule('app/app_droit/app_droit_liste','vars[idagent_groupe]=<?=$ARRG['idagent_groupe']?>');$('liste_droit_agent').loadModule('app/app_droit/app_droit_liste_agent','vars[idagent_groupe]=<?=$ARRG['idagent_groupe']?>')"><?=$ARRG['nomAgent_groupe']?></a>
+			<a class="autoToggle" onclick="document.getElementById('liste_droit').loadModule('app/app_droit/app_droit_liste','vars[idagent_groupe]=<?=$ARRG['idagent_groupe']?>');document.getElementById('liste_droit_agent').loadModule('app/app_droit/app_droit_liste_agent','vars[idagent_groupe]=<?=$ARRG['idagent_groupe']?>')"><?=$ARRG['nomAgent_groupe']?></a>
 			<?php endwhile; ?>
 			</div>
 		</div>

@@ -55,7 +55,7 @@
 						<?= $selectA ?>
 					</div>
 					<div class="cell aligncenter " style="width:130px;">
-						<button style="width:120px;" type="submit" class="cursor" onclick="ajaxFormValidation($('form<?= $uniqid ?>'));">
+						<button style="width:120px;" type="submit" class="cursor" onclick="ajaxFormValidation(cms_el('form<?= $uniqid ?>'));">
 							<i class="fa fa-envelope"></i>
 							Envoyer
 						</button>
@@ -167,35 +167,67 @@
 	<input type="hidden" name="mail_tmp" value="<?= $mail_tmp ?>"/>
 </form>
 <script>
-	$ ('attach<?=$uniqid?>').on ('click', 'a[filename]', function (event, node) {
-		filename = $ (node).readAttribute ('filename');
+	/*
+	 * Modified: 2026-08-11 — migrated off the PrototypeJS compatibility shims
+	 * ($, .on, .observe, .readAttribute) to native DOM, with file-local `cms_`
+	 * helpers. (`ms_` belongs to librairie/myddeSelection.js, loaded on every
+	 * page; app_mail/mail_send.php already took mls_.)
+	 */
+	function cms_el(ref) {
+		return typeof ref === 'string' ? document.getElementById(ref) : ref;
+	}
+
+	/**
+	 * Prototype's Element#on. With a selector it delegates, calling the handler
+	 * as (event, matchedElement); without one it is a plain listener.
+	 */
+	function cms_on(root, eventName, selectorOrHandler, maybeHandler) {
+		if (!root) return;
+		if (maybeHandler === undefined) {
+			root.addEventListener(eventName, selectorOrHandler);
+			return;
+		}
+		var selector = selectorOrHandler, handler = maybeHandler;
+		root.addEventListener(eventName, function (event) {
+			var target = event.target;
+			while (target && target !== root) {
+				if (target.nodeType === 1 && target.matches(selector)) {
+					return handler(event, target);
+				}
+				target = target.parentNode;
+			}
+		}, false);
+	}
+
+	cms_on (cms_el ('attach<?=$uniqid?>'), 'click', 'a[filename]', function (event, node) {
+		filename = node.getAttribute ('filename');
 		ajaxValidation ('deleteAttach', 'mdl/app/app_custom/mail/', 'scope=mail_tmp&mail_tmp=<?=$mail_tmp?>&idagent=<?=$_SESSION['idagent']?>&filename=' + filename);
 	});
-	$ ('attach<?=$uniqid?>').on ('click', 'a[deleteFichier]', function (event, node) {
-		filename = $ (node).readAttribute ('deleteFichier');
+	cms_on (cms_el ('attach<?=$uniqid?>'), 'click', 'a[deleteFichier]', function (event, node) {
+		filename = node.getAttribute ('deleteFichier');
 		ajaxValidation ('deleteFichier', 'mdl/app/app_custom/mail/', 'scope=mail_tmp&mail_tmp=<?=$mail_tmp?>&idagent=<?=$_SESSION['idagent']?>&filename=' + filename);
 	});
-	$ ('contact<?=$uniqid?>').on ('click', 'a[email]', function (event, node) {
-		email = $ (node).readAttribute ('email');
+	cms_on (cms_el ('contact<?=$uniqid?>'), 'click', 'a[email]', function (event, node) {
+		email = node.getAttribute ('email');
 		ajaxValidation ('deleteContact', 'mdl/app/app_custom/mail/', 'scope=mail_tmp&mail_tmp=<?=$mail_tmp?>&idagent=<?=$_SESSION['idagent']?>&email=' + email + '&reloadModule[mdl/app/app_custom/mail_compose_contact]=<?=$mail_tmp?>');
 	});
-	$ ('contact_cc<?=$uniqid?>').on ('click', 'a[email]', function (event, node) {
-		email = $ (node).readAttribute ('email');
+	cms_on (cms_el ('contact_cc<?=$uniqid?>'), 'click', 'a[email]', function (event, node) {
+		email = node.getAttribute ('email');
 		ajaxValidation ('deleteContactCC', 'mdl/app/app_custom/mail/', 'scope=mail_tmp&mail_tmp=<?=$mail_tmp?>&idagent=<?=$_SESSION['idagent']?>&email=' + email + '&reloadModule[mdl/app/app_custom/mail_compose_contact_cc]=<?=$mail_tmp?>');
 	});
 </script>
 <script>
-	var input_contact = $ (document.body.querySelector ('[datalist_input_name=emailInfo]'));
-	var input_contact_cc = $ (document.body.querySelector ('[datalist_input_name=emailInfoCC]'));
+	var input_contact = document.body.querySelector ('[datalist_input_name=emailInfo]');
+	var input_contact_cc = document.body.querySelector ('[datalist_input_name=emailInfoCC]');
 	// Add contact
-	$ (input_contact).observe ('dom:act_change', function (event) {
+	input_contact.addEventListener ('dom:act_change', function (event) {
 		var email               = event.memo.value;
 		var meta                = event.memo.meta || 'meta[nom]=' + email + '&meta[email]=' + email;
 		ajaxValidation ('addContact', 'mdl/app/app_custom/mail/', 'mail_tmp=<?=$mail_tmp?>&email=' + email + '&' + meta);
-		$ (input_contact).value = '';
+		input_contact.value = '';
 	}.bind (this))
 	// addcontact CC
-	$ (input_contact_cc).observe ('dom:act_change', function (event) {
+	input_contact_cc.addEventListener ('dom:act_change', function (event) {
 		var email              = event.memo.value;
 		var meta               = event.memo.meta || 'meta[nom]=' + email + '&meta[email]=' + email;
 		ajaxValidation ('addContactCC', 'mdl/app/app_custom/mail/', 'mail_tmp=<?=$mail_tmp?>&email=' + email + '&reloadModule[mdl/app/app_custom/mail_compose_contact]=<?=$mail_tmp?>&' + meta);
@@ -204,5 +236,5 @@
 
 	// mce_area("textarea#texteMail<?=$time?>");
 	//
-	new myddeAttach ($ ('drag<?=$uniqid?>'), { form : 'formdrag<?=$uniqid?>', autoSubmit : true });
+	new myddeAttach (cms_el ('drag<?=$uniqid?>'), { form : 'formdrag<?=$uniqid?>', autoSubmit : true });
 </script> 

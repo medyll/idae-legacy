@@ -20,9 +20,9 @@
 				<i class="fa fa-refresh"></i> <?= $arr['nomProduit'] ?></a>
 		</div>
 		<div class="applink applinkbig  toggler uppercase borderb">
-			<a class="autoToggle active aligncenter" onclick="$('<?= $uniqid ?>').loadModule('app/app_custom/produit/produit_main','idproduit=<?= $idproduit ?>')">Fiche croisiere</a>
-			<a class="autoToggle aligncenter" onclick="$('<?= $uniqid ?>').loadModule('app/app_custom/produit/produit_tarif_gamme_update','idproduit=<?= $idproduit ?>',{value:<?= $idproduit ?>})">Tarification complete</a>
-			<a class="autoToggle aligncenter" onclick="$('<?= $uniqid ?>').loadModule('app/app_custom/produit/produit_web','idproduit=<?= $idproduit ?>')">Vue web</a>
+			<a class="autoToggle active aligncenter" onclick="document.getElementById('<?= $uniqid ?>').loadModule('app/app_custom/produit/produit_main','idproduit=<?= $idproduit ?>')">Fiche croisiere</a>
+			<a class="autoToggle aligncenter" onclick="document.getElementById('<?= $uniqid ?>').loadModule('app/app_custom/produit/produit_tarif_gamme_update','idproduit=<?= $idproduit ?>',{value:<?= $idproduit ?>})">Tarification complete</a>
+			<a class="autoToggle aligncenter" onclick="document.getElementById('<?= $uniqid ?>').loadModule('app/app_custom/produit/produit_web','idproduit=<?= $idproduit ?>')">Vue web</a>
 		</div>
 		<div class="flex_main " style="position:relative;overflow:hidden;">
 			<div act_defer mdl="app/app_custom/produit/produit_main" vars="idproduit=<?= $idproduit ?>" class="flex_h" style="height: 100%;width:100%;" id="<?= $uniqid ?>">

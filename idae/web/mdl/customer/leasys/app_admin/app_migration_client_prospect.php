@@ -44,7 +44,7 @@
 			<br>
 			<br>
 			<div class="buttonZone">
-				<input type="button" class="validButton" value="Lancer" onclick="$('frame_xmlte_fst').loadModule('customer/<?= CUSTOMERNAME ?>/app_admin/app_migration_client_prospect','run=1')">
+				<input type="button" class="validButton" value="Lancer" onclick="document.getElementById('frame_xmlte_fst').loadModule('customer/<?= CUSTOMERNAME ?>/app_admin/app_migration_client_prospect','run=1')">
 				<input type="button" value="Fermer" class="cancelClose">
 			</div>
 			<div style="width:100%;max-height:350px;border:none;overflow:auto;" id="frame_xmlte_fst"></div>

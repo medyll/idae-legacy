@@ -72,15 +72,15 @@
 							</div>
 						</div>
 						<div id="whatyd" data-act_target_toggle="true" class="applink applinkblock applinkbig" style="height:100%;display:none;">
-							<a onclick="$('news_zoom_main').loadModule('app/app_newsletter/app_newsletter_build_source','idnewsletter=<?= $idnewsletter ?>')"><i class="fa fa-code"></i> <?=idioma('Code source html')?></a>
+							<a onclick="document.getElementById('news_zoom_main').loadModule('app/app_newsletter/app_newsletter_build_source','idnewsletter=<?= $idnewsletter ?>')"><i class="fa fa-code"></i> <?=idioma('Code source html')?></a>
 							<a onclick="ajaxMdl('app/app_custom/mail/mail_send','Mail : <?= $arr['emailDevis'] ?>','idnewsletter=<?= $idnewsletter ?>')"><i class="fa fa-mail"></i> Envoyer un mail Bat</a>
-							<a onclick="$('news_zoom_main').loadModule('app/app_liste/app_liste','table=newsletter_contact')"><i class="fa fa-mail"></i>Liste des contacts</a>
+							<a onclick="document.getElementById('news_zoom_main').loadModule('app/app_liste/app_liste','table=newsletter_contact')"><i class="fa fa-mail"></i>Liste des contacts</a>
 						</div>
 						<div id="gdgfdsgfsd" data-act_target_toggle="true" style="height:100%;display:none;">
 							<div  class="applink applinkbig applinkblock borderb">
-								<a onclick="$('news_zoom_main').loadModule('app/app_newsletter/app_newsletter_build_item','idnewsletter=<?= $idnewsletter ?>')"><i class="fa fa-wrench"></i>Construire</a>
+								<a onclick="document.getElementById('news_zoom_main').loadModule('app/app_newsletter/app_newsletter_build_item','idnewsletter=<?= $idnewsletter ?>')"><i class="fa fa-wrench"></i>Construire</a>
 
-								<a onclick="$('news_zoom').toggle();"><i class="fa fa-eye"></i> Visualiser</a>
+								<a onclick="idae_toggle(document.getElementById('news_zoom'));"><i class="fa fa-eye"></i> Visualiser</a>
 							</div>
 							<div><?= skelMdl::cf_module('app/app_newsletter/app_newsletter_build_mini_liste', array('idnewsletter' => $idnewsletter), $idnewsletter); ?></div>
 						</div>

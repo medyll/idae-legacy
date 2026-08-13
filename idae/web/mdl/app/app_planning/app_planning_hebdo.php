@@ -103,11 +103,11 @@
 			</table>
 			<div class="relative blanc padding" style="position:sticky;top:0;width:auto;z-index:10">
 				<div class="applink padding blanc flex_h">
-					<a onclick="$('innerPlanningHebdo').fade();reloadModule('app/app_planning/app_planning_hebdo','*','sd=<?= $lienAvant; ?>');">
+					<a onclick="fadeElement(document.getElementById('innerPlanningHebdo'));reloadModule('app/app_planning/app_planning_hebdo','*','sd=<?= $lienAvant; ?>');">
 						<i class="fa fa-chevron-left"></i> &nbsp;
 						<?= date("d", $debutSemaine) . " " . strtolower($tabMois[date("n", $debutSemaine) - 1]); ?>
 					</a>
-					<a onclick="$('innerPlanningHebdo').fade();reloadModule('app/app_planning/app_planning_hebdo','*','sd=<?= $lienApres; ?>');">
+					<a onclick="fadeElement(document.getElementById('innerPlanningHebdo'));reloadModule('app/app_planning/app_planning_hebdo','*','sd=<?= $lienApres; ?>');">
 						<?= date("d", $finSemaine) . " " . strtolower($tabMois[date("n", $finSemaine) - 1]) . " " . date("Y", $finSemaine); ?>
 						&nbsp;&nbsp;<i class="fa fa-chevron-right"></i>
 					</a>

@@ -81,26 +81,85 @@
 	</div>
 </div>
 <script>
-	$('<?=$body?>').on('click', 'input[type="checkbox"].avoid', function (event, node) {
-		value = node.checked;
-		monitor = $(node).up('td').next().select('input[name="prixPromoProduit_tarif_gamme"]').first();
+	/*
+	 * Modified: 2026-08-11 — migrated off the PrototypeJS compatibility shims
+	 * ($, .on, .up, .next, .select, .first, .show, .hide, .readAttribute) to
+	 * native DOM, with file-local `ptg_` helpers.
+	 *
+	 * Arbitrary field collections use the native serializeFields helper.
+	 * See form-serialize.spec.ts for the regression contract.
+	 */
+	function ptg_el(ref) {
+		return typeof ref === 'string' ? document.getElementById(ref) : ref;
+	}
+
+	function ptg_show(node) { if (node) node.style.display = ''; return node; }
+	function ptg_hide(node) { if (node) node.style.display = 'none'; return node; }
+
+	/** Prototype's Element#up: nearest ancestor matching `selector`. */
+	function ptg_up(node, selector) {
+		var parent = node ? node.parentNode : null;
+		while (parent && parent.nodeType === 1) {
+			if (parent.matches(selector)) return parent;
+			parent = parent.parentNode;
+		}
+		return null;
+	}
+
+	/**
+	 * Prototype's Element#on. With a selector it delegates, calling the handler
+	 * as (event, matchedElement); without one it is a plain listener.
+	 */
+	function ptg_on(root, eventName, selectorOrHandler, maybeHandler) {
+		if (!root) return;
+		if (maybeHandler === undefined) {
+			root.addEventListener(eventName, selectorOrHandler);
+			return;
+		}
+		var selector = selectorOrHandler, handler = maybeHandler;
+		root.addEventListener(eventName, function (event) {
+			var target = event.target;
+			while (target && target !== root) {
+				if (target.nodeType === 1 && target.matches(selector)) {
+					return handler(event, target);
+				}
+				target = target.parentNode;
+			}
+		}, false);
+	}
+
+	ptg_on(ptg_el('<?=$body?>'), 'click', 'input[type="checkbox"].avoid', function (event, node) {
+		var value = node.checked;
+		// `.up('td').next()` — next() with no argument is the next sibling
+		// *element*, which is nextElementSibling.
+		var cell = ptg_up(node, 'td');
+		var monitor = cell && cell.nextElementSibling
+			? cell.nextElementSibling.querySelector('input[name="prixPromoProduit_tarif_gamme"]')
+			: null;
 		if (value == true) {
-			$(monitor).show()
+			ptg_show(monitor)
 		} else {
-			$(monitor).hide();
+			ptg_hide(monitor);
 		}
 	})
-	$('<?=$body?>').on('click', 'input[type="checkbox"]:not(.avoid)', function (event, node) {
-		value = node.checked;
+	ptg_on(ptg_el('<?=$body?>'), 'click', 'input[type="checkbox"]:not(.avoid)', function (event, node) {
+		var value = node.checked;
+		// The else branch read `$(men<?=$uniquid?>)` — a bare identifier, not a
+		// quoted id. It only ever resolved because browsers expose an element's
+		// id as a window property; any minifier or a `use strict` module scope
+		// would have turned it into a ReferenceError. Both branches now go
+		// through the id string, as the show branch already did.
+		var menu = ptg_el('men<?=$uniquid?>');
 		if (value == true) {
-			$('men<?=$uniquid?>').show()
+			ptg_show(menu)
 		} else {
-			$(men<?=$uniquid?>).hide();
+			ptg_hide(menu);
 		}
 	})
-	$('<?=$body?>').on('change', 'input[type="text"]', function (event, node) {
-		value = node.value;
-		vars = Form.serializeElements($(node).up('tr').select('.' + node.readAttribute('grp')));
+	ptg_on(ptg_el('<?=$body?>'), 'change', 'input[type="text"]', function (event, node) {
+		var value = node.value;
+		var row = ptg_up(node, 'tr');
+		var vars = serializeFields(row.querySelectorAll('.' + node.getAttribute('grp')));
 		ajaxValidation('updateProduitTarifGamme', 'mdl/production/produittarifgamme/', vars + '&scope=idproduit&idproduit=<?=$idproduit?>');
 	})
 </script>

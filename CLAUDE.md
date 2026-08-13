@@ -23,6 +23,36 @@ Helper scripts (PowerShell):
 
 MongoDB is expected on the host at `host.docker.internal:27017`. Configure credentials via environment variables `MDB_USER`, `MDB_PASSWORD`, `MDB_PREFIX` or edit `idae/web/conf.lan.inc.php` for local LAN/dev.
 
+### Never browse the app on `localhost` (Windows + WSL2)
+
+Use **`http://127.0.0.1:8080`** — or a hosts-file name such as
+`http://tactac.idae.preprod.lan:8080` / `http://maw.idae.preprod.lan:8080`.
+Never `http://localhost:8080`. This applies to the browser, to Playwright, and
+to any manual `curl`.
+
+Why: Windows resolves `localhost` to `::1` before `127.0.0.1`, and since the
+move to WSL2 nothing answers there. Measured 2026-08-10:
+`curl --ipv6 http://localhost:3005/health` → **21.05s then code 000**;
+`--ipv4` → **200 in 3ms**. The browser hides this for plain HTTP (Happy
+Eyeballs falls back in ~250ms), but not for socket.io: the connection dies,
+reconnects with a new sid every second, and the server answers each in-flight
+ack to a connection that no longer exists.
+
+`*.lan` names are immune because the Windows hosts file is IPv4-only by
+construction — which is why this never showed up back when the app was browsed
+on `idaenext.idae.lan` and appeared the day someone typed `localhost`.
+
+Not fixable from the app: the socket.io host is derived from `document.domain`,
+which is correct. Rewriting the socket host without rewriting the page would
+split the cookie jar (`localhost` and `127.0.0.1` are different hosts),
+`PHPSESSID` would not follow, and `json_ssid` would report a mismatch on every
+boot — a login loop instead of a socket loop.
+
+`docker-compose.yml` publishes both `0.0.0.0` and `[::]` for ports 8080/3005.
+The `[::]` half is **inert under Docker Desktop + WSL2 mirrored networking**
+(`docker port` reports it, the host has no listener, `curl --ipv6` still times
+out). It is kept because it is correct on a Linux host. It is not the fix here.
+
 ## Running Tests
 
 After the stack is running:
@@ -109,10 +139,10 @@ A 2015-era SPA built without bundlers:
 - **`javascript/vendor/bag.js`** — custom asset loader; caches scripts as blobs in IndexedDB.
 - **`javascript/main_bag.js`** — defines the dependency graph (`require_trame`) and drives sequential loading via `dyn_require()`.
 - **`javascript/app/app_bootstrap.js`** — calls `schemeLoad()` to fetch schema JSON from PHP, populates `window.APP.APPSCHEMES` / `window.APP.APPFIELDS`.
-- **PrototypeJS 1.7.3** (`require_hell` bundle) — extends native `Array`, `String`, `Element`. Cannot be replaced; patterns like `$A()`, `Class.create()`, `$('id')` are ubiquitous.
+- **`require_hell` bundle** — as of `feat/idae-be-migration` Phase 4 (`41d3985`), this is `@medyll/idae-be` (`javascript/vendor/idae-be/idae-be.iife.js`) plus 7 compatibility shims (`javascript/vendor/idae-be-shim/shim-*.js`), **not PrototypeJS/Scriptaculous** — those were swapped out and removed. The shims exist to keep the ~1,667 `$()` / ~2,074 `Element.*` / `Class.create` / `Ajax.*` / `Effect.*` call sites working unmodified (patterns like `$A()`, `Class.create()`, `$('id')` are still ubiquitous in app code — only their implementation changed). Full plan, phase checklist, and what's still native-Prototype-shaped vs. migrated: `BE_PLAN.md` at the repo root. Do not reintroduce `vendor/prototype/` or `vendor/scriptaculous/`: they were finally deleted on 2026-08-11 (364K, 9 files), together with `javascript/main.js` — a leftover RequireJS config that was their only referrer and was itself loaded by nothing. (An earlier note here claimed Phase 3 had already removed them; that was wrong, they had merely stopped being loaded. `index.php` pulls only `main_bag.js`, which references neither.) Unrelated: `javascript/flotr/` vendors its own Prototype 1.6 copy — leave that alone, it belongs to flotr.
 - **`app_cache.js`** — data/state cache via `localforage`. Call `app_cache_reset()` after schema changes to avoid stale client state.
 
-Do not rewrite the loader or remove PrototypeJS. The JSON shape returned by `json_data.php` / `json_scheme.php` must remain structurally identical to legacy output.
+The loader (`bag.js`/`main_bag.js`) itself is stable and should not be rewritten — only its `require_hell` payload changed. The JSON shape returned by `json_data.php` / `json_scheme.php` must remain structurally identical to legacy output.
 
 ## Critical Conventions
 

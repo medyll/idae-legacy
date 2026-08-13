@@ -48,6 +48,14 @@
 		<div id="log" class="blanc absolute" style="bottom:0"></div>
 		<div id="msg_log" class="blanc absolute" style="display:none;top:20px;right:20px;"></div>
 	</body>
-	<script src="javascript/main_bag.js?v=<?=time()?>" type="text/javascript"></script>
+	<?php
+		// Per-file cache-busting for main_bag.js's asset loader — see
+		// appfunc/asset_versions.php for why this replaced a single global
+		// Date.now() cache-buster.
+		require_once(REPFONCTIONS_APP . 'asset_versions.php');
+		$assetVersions = build_asset_version_manifest(SITEPATH, ['js', 'css'], ['javascript', 'css']);
+	?>
+	<script>window.FILE_VERSIONS = <?= json_encode($assetVersions, JSON_UNESCAPED_SLASHES) ?>;</script>
+	<script src="javascript/main_bag.js?v=<?= $assetVersions['javascript/main_bag.js'] ?? time() ?>" type="text/javascript"></script>
 	<link type='text/css' rel='stylesheet' href='css/fontawesome/css/font-awesome.css' >
 </html>

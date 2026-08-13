@@ -134,7 +134,7 @@
 									<?= idioma("Probabilité") ?>
 								</td>
 								<td colspan="3">
-									<input class="inline" style="width:250px;" type="range" max="4" value="1" name="vars[rangOpportunite]" onchange="$(this).next().value=value">
+									<input class="inline" style="width:250px;" type="range" max="4" value="1" name="vars[rangOpportunite]" onchange="this.nextElementSibling.value=this.value">
 									<output class="inline"></output>
 								</td>
 							</tr>
@@ -150,7 +150,7 @@
 									<?= idioma("Commentaires") ?>
 								</td>
 								<td colspan="3"><?php//=str_replace(APPMDL,'',__DIR__)?>
-									<textarea class="inputLarge" name="vars[descriptionOpportunite]" onkeyup="$('oppo_zone').loadModule('app/app_custom/opportunite/opportunite_create_log','table=opportunite&descriptionOpportunite='+this.value)"></textarea>
+									<textarea class="inputLarge" name="vars[descriptionOpportunite]" onkeyup="opc_el('oppo_zone').loadModule('app/app_custom/opportunite/opportunite_create_log','table=opportunite&descriptionOpportunite='+this.value)"></textarea>
 								<div id="oppo_zone"></div>
 								</td>
 							</tr>
@@ -175,26 +175,48 @@
 	<div class="titre_entete fond_noir color_fond_noir "><?= idioma('Nouvelle opportunité').' '.$arr_tmp['nom'.ucfirst($_POST['add_table'])] ?></div>
 </div>
 <script>
-	$('dateDebutOpportunite<?=$rand?>').observe('focus', function () {
-		$('dateDebutOpportunite<?=$rand?>').up('form').dateFinOpportunite.value = $('dateDebutOpportunite<?=$rand?>').value
-	}.bind(this))
-	$('dateDebutOpportunite<?=$rand?>').observe('blur', function () {
-		$('dateDebutOpportunite<?=$rand?>').up('form').dateFinOpportunite.value = $('dateDebutOpportunite<?=$rand?>').value
-	}.bind(this))
+	/*
+	 * Modified: 2026-08-11 — migrated off the PrototypeJS compatibility shims
+	 * ($, .observe, .on, .up, .select, .first) to native DOM, with file-local
+	 * `opc_` helpers.
+	 *
+	 * app_socket only tests `options.insertion` for truthiness, then performs
+	 * the top insertion itself. The old Insertion.Top function was never called.
+	 */
+	function opc_el(ref) {
+		return typeof ref === 'string' ? document.getElementById(ref) : ref;
+	}
+
+	/** Prototype's Element#up: nearest ancestor matching `selector`. */
+	function opc_up(node, selector) {
+		var parent = node ? node.parentNode : null;
+		while (parent && parent.nodeType === 1) {
+			if (parent.matches(selector)) return parent;
+			parent = parent.parentNode;
+		}
+		return null;
+	}
+
+	opc_el('dateDebutOpportunite<?=$rand?>').addEventListener('focus', function () {
+		opc_up(opc_el('dateDebutOpportunite<?=$rand?>'), 'form').dateFinOpportunite.value = opc_el('dateDebutOpportunite<?=$rand?>').value
+	})
+	opc_el('dateDebutOpportunite<?=$rand?>').addEventListener('blur', function () {
+		opc_up(opc_el('dateDebutOpportunite<?=$rand?>'), 'form').dateFinOpportunite.value = opc_el('dateDebutOpportunite<?=$rand?>').value
+	})
 </script>
 <script>
 	addContact = function () {
-		idsociete = $('formCreateOpportunite<?=$time?>').select('[name=societe_idsociete]').first().value
+		var idsociete = opc_el('formCreateOpportunite<?=$time?>').querySelector('[name=societe_idsociete]').value
 		ajaxMdl('societehaspersonne/mdlSocieteHasPersonneCreate', '<?=idioma('Ajouter un contact')?>', 'valueModule=<?=$time?>&reloaded=true&societe_idsociete=' + idsociete, {
 			value: idsociete,
-			insertion: Insertion.Top
+			insertion: true
 		});
 	}
 	launchContact = function () {
-		idsociete = $('formCreateOpportunite<?=$time?>').select('[name=societe_idsociete]').first().value
+		var idsociete = opc_el('formCreateOpportunite<?=$time?>').querySelector('[name=societe_idsociete]').value
 		ajaxInMdl('societehaspersonne/mdlSocieteHasPersonneAdd', 'add_taskOnPersonne<?=$time?>', 'valueModule=<?=$time?>&reloaded=true&societe_idsociete=' + idsociete, {
 			value: idsociete,
-			insertion: Insertion.Top
+			insertion: true
 		});
 	}
 </script>

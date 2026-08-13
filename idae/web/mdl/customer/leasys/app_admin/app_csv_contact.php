@@ -32,7 +32,7 @@
 		</table>
 		<div class="padding"><progress value="0" id="auto_csv_job"></progress></div>
 		<div class="buttonZone">
-			<input type="button" class="validButton" value="Importer" onclick="$('frame_xmltes').loadModule('app/app_admin/app_csv_contact','run=1')"  >
+			<input type="button" class="validButton" value="Importer" onclick="document.getElementById('frame_xmltes').loadModule('app/app_admin/app_csv_contact','run=1')"  >
 			<input type="reset" value="Fermer" class="cancelClose" >
 		</div>
 		<div style="width:100%;max-height:350px;border:none;overflow:auto;" id="frame_xmltes" scrolling="auto"></div>

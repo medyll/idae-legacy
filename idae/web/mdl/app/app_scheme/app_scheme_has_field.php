@@ -20,13 +20,13 @@
 		<div class="flex_h" style="height:100%;overflow:hidden;">
 			<div class="frmCol1 flex_v" style="overflow:hidden;">
 				<div class="applink applinkblock flex_h flex_align_middle borderb toggler">
-					<a class="flex_main autoToggle aligncenter active borderr" onclick="$('app_home_field').toggleContent()"><i class="fa fa-home"></i>
+					<a class="flex_main autoToggle aligncenter active borderr" onclick="document.getElementById('app_home_field').toggleContent()"><i class="fa fa-home"></i>
 
 						<br>
 						home
 					</a>
-					<a class="flex_main autoToggle aligncenter borderr" onclick="$('app_type_field').toggleContent()"><?= idioma('Types') ?></a>
-					<a class="flex_main autoToggle aligncenter" onclick="$('app_group_field').toggleContent()"><?= idioma('Base') ?></a>
+					<a class="flex_main autoToggle aligncenter borderr" onclick="document.getElementById('app_type_field').toggleContent()"><?= idioma('Types') ?></a>
+					<a class="flex_main autoToggle aligncenter" onclick="document.getElementById('app_group_field').toggleContent()"><?= idioma('Base') ?></a>
 				</div>
 				<div class="padding borderb aligcenter inline alignright ededed">
 					<input type="text" data-quickFind="" data-quickFind-where="zone_has_field_menu" data-quickFind-tag=".autoToggle" data-quickFind-spy="uyt">
@@ -42,9 +42,9 @@
 	</div>
 </div>
 <script>
-	$ ('zone_has_field_menu').on ('click', '[data-table][data-table_value]', function (event, node) {
-		var table       = node.readAttribute ('data-table');
-		var table_value = node.readAttribute ('data-table_value');
-		$ ('inner_col_f').loadModule ('app/app_scheme/app_scheme_has_field_update', 'table=' + table + '&idappscheme=' + table_value);
+	document.getElementById('zone_has_field_menu').on ('click', '[data-table][data-table_value]', function (event, node) {
+		var table       = node.getAttribute ('data-table'); // was readAttribute — plain getAttribute, no Prototype translation applies to data-*
+		var table_value = node.getAttribute ('data-table_value');
+		document.getElementById('inner_col_f').loadModule ('app/app_scheme/app_scheme_has_field_update', 'table=' + table + '&idappscheme=' + table_value);
 	})
 </script>

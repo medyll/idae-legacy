@@ -34,7 +34,7 @@
 		</table>
 		<div class="padding"><progress value="0" id="auto_prod_job"></progress></div>
 		<div class="buttonZone">
-			<input type="button" class="validButton" value="Mise en production" onclick="$('frame_xmlte').loadModule('app/app_admin/app_build_prod','run=1')"  >
+			<input type="button" class="validButton" value="Mise en production" onclick="document.getElementById('frame_xmlte').loadModule('app/app_admin/app_build_prod','run=1')"  >
 			<input type="reset" value="Fermer" class="cancelClose" >
 		</div>
 		<div style="display:none;width:100%;max-height:350px;border:none;overflow:auto;" id="frame_xmlte" scrolling="auto"></div>

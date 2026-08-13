@@ -100,13 +100,19 @@
 	load_table_in_zone ('groupBy=<?=$settings_button_group?>&<?=$APP->translate_vars($vars)?>&<?=http_build_query($_POST)?>&nbRows=<?=$nbRows?>&page=0', '<?=$zone?>');
 
 	<?php if (!empty($_POST['show_search'])) { ?>
-	$ ('app_liste_search_<?=$zone?>').on ('submit', 'form', function (event, node) {
-		var form_vars = $ (node).serialize ();
+	/*
+	 * Modified: 2026-08-11 — migrated off the PrototypeJS compatibility shims
+	 * ($, .on) to native DOM. Form values use serializeFields.
+	 */
+	document.getElementById ('app_liste_search_<?=$zone?>').addEventListener ('submit', function (event) {
+		var node = event.target.closest ('form');
+		if (!node) return;
+		var form_vars = serializeFields(node);
 		//alert(form_vars);
 		load_table_in_zone ('groupBy=<?=$settings_button_group?>&<?=$APP->translate_vars($vars)?>&nbRows=<?=$nbRows?>&page=0&' + form_vars, '<?=$zone?>');
 
 		// $ ('contenu_explorer_<?= $zone ?>').loadModule ('app/app_liste/app_liste', 'table=<?= $table ?>&nbRows=750&' + form_vars);
-	}.bind (this));
+	});
 	<?php } ?>
 </script>
 <style>

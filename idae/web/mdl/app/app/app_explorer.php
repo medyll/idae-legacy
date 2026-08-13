@@ -15,22 +15,22 @@
 	<div app_gui_explorer class="flex_h flex_main" style="overflow:hidden;width:100%;z-index:0;">
 		<div class="frmColSmall  flex_v dark_1 app_component_info_bar_vert gradb_<?=$table?>"  >
 			<div class="flex_main toggler rgba_link">
-				<a class="autoToggle aligncenter active" onclick="$('contenu_explorer_<?= $table ?>').loadModule('app/app/app_explorer_home','<?= http_build_query($_POST) ?>')">
+				<a class="autoToggle aligncenter active" onclick="ax_el('contenu_explorer_<?= $table ?>').loadModule('app/app/app_explorer_home','<?= http_build_query($_POST) ?>')">
 					<i class="fa fa-home"></i>
 				</a>
-				<a class="autoToggle aligncenter" onclick="$('contenu_explorer_<?= $table ?>').loadModule('app/app_liste/app_liste','table=<?= $table ?>&nbRows=750');">
+				<a class="autoToggle aligncenter" onclick="ax_el('contenu_explorer_<?= $table ?>').loadModule('app/app_liste/app_liste','table=<?= $table ?>&nbRows=750');">
 					<i class="fa fa-list-ul"></i>
 				</a>
-				<a class="autoToggle aligncenter" onclick="$('contenu_explorer_<?= $table ?>').loadModule('app/app_prod/app_prod_search','vars[mainscope_app]=prod&vars[collection]=<?= $table ?>&table=<?= $table ?>');">
+				<a class="autoToggle aligncenter" onclick="ax_el('contenu_explorer_<?= $table ?>').loadModule('app/app_prod/app_prod_search','vars[mainscope_app]=prod&vars[collection]=<?= $table ?>&table=<?= $table ?>');">
 					<i class="fa fa-search-plus"></i>
 				</a>
-				<a class="autoToggle aligncenter" onclick="$('contenu_explorer_<?= $table ?>').loadModule('app/app/app_explorer_home_entete','way=back&table=<?= $table ?>&nbRows=750');">
+				<a class="autoToggle aligncenter" onclick="ax_el('contenu_explorer_<?= $table ?>').loadModule('app/app/app_explorer_home_entete','way=back&table=<?= $table ?>&nbRows=750');">
 					<i class="fa fa-info-circle"></i>
 				</a>
-				<a class="autoToggle aligncenter" onclick="$('contenu_explorer_<?= $table ?>').loadModule('app/app_echeance/app_echeance','table=<?= $table ?>&nbRows=750');">
+				<a class="autoToggle aligncenter" onclick="ax_el('contenu_explorer_<?= $table ?>').loadModule('app/app_echeance/app_echeance','table=<?= $table ?>&nbRows=750');">
 					<i class="fa fa-calendar"></i>
 				</a>
-				<a class="autoToggle aligncenter" onclick="$('contenu_explorer_<?= $table ?>').loadModule('app/app_echeance/app_echeance','way=back&table=<?= $table ?>&nbRows=750');">
+				<a class="autoToggle aligncenter" onclick="ax_el('contenu_explorer_<?= $table ?>').loadModule('app/app_echeance/app_echeance','way=back&table=<?= $table ?>&nbRows=750');">
 					<i class="fa fa-history"></i>
 				</a>
 			</div>
@@ -42,15 +42,15 @@
 		<div class="frmCol1 flex_v transpblanc">
 			<div class="flex_h toggler applink applinkblock borderb none">
 				<div class="flex_main aligncenter borderr">
-					<a class="flex_main autoToggle " onclick="$('contenu_explorer_<?= $table ?>').loadModule('app/app/app_explorer_home','<?= http_build_query($_POST) ?>')"><i class="fa fa-home"></i>
+					<a class="flex_main autoToggle " onclick="ax_el('contenu_explorer_<?= $table ?>').loadModule('app/app/app_explorer_home','<?= http_build_query($_POST) ?>')"><i class="fa fa-home"></i>
 
 						<br>
 						Home
 					</a>
 				</div>
 				<div class="flex_main aligncenter borderr">
-					<!--<a class="flex_main autoToggle" onclick=" $('menu_expl_<?php /*=$table*/ ?>').show();load_table_in_zone('table=<?php /*= $table */ ?>&nbRows=350', 'contenu_explorer_<?php /*= $table */ ?>');"><i class="fa fa-list-ul"></i>-->
-					<a class="flex_main autoToggle" onclick="$('contenu_explorer_<?= $table ?>').loadModule('app/app_liste/app_liste','table=<?= $table ?>&nbRows=750');"><i class="fa fa-list-ul"></i>
+					<!--<a class="flex_main autoToggle" onclick=" ax_el('menu_expl_<?php /*=$table*/ ?>').show();load_table_in_zone('table=<?php /*= $table */ ?>&nbRows=350', 'contenu_explorer_<?php /*= $table */ ?>');"><i class="fa fa-list-ul"></i>-->
+					<a class="flex_main autoToggle" onclick="ax_el('contenu_explorer_<?= $table ?>').loadModule('app/app_liste/app_liste','table=<?= $table ?>&nbRows=750');"><i class="fa fa-list-ul"></i>
 
 						<br>
 						Voir tout
@@ -88,18 +88,52 @@
 	}
 </style>
 <script>
-	$ ('contenu_explorer_search_<?=$table?>').on ('submit', 'form', function (event, node) {
-		var form_vars = $ (node).serialize ();
+	/*
+	 * Modified: 2026-08-11 — migrated off the PrototypeJS compatibility shims
+	 * ($, .on, .serialize, .readAttribute, Event.stop) to native DOM, with
+	 * file-local `ax_` helpers. Form.serialize stays; loadModule is not a shim
+	 * call, engine/methods.js puts it on HTMLElement.prototype.
+	 */
+	function ax_el(ref) {
+		return typeof ref === 'string' ? document.getElementById(ref) : ref;
+	}
 
-		$ ('contenu_explorer_<?= $table ?>').loadModule ('app/app_liste/app_liste', 'table=<?= $table ?>&nbRows=750&' + form_vars);
-	}.bind (this));
+	/**
+	 * Prototype's Element#on. With a selector it delegates, calling the handler
+	 * as (event, matchedElement); without one it is a plain listener.
+	 */
+	function ax_on(root, eventName, selectorOrHandler, maybeHandler) {
+		if (!root) return;
+		if (maybeHandler === undefined) {
+			root.addEventListener(eventName, selectorOrHandler);
+			return;
+		}
+		var selector = selectorOrHandler, handler = maybeHandler;
+		root.addEventListener(eventName, function (event) {
+			var target = event.target;
+			while (target && target !== root) {
+				if (target.nodeType === 1 && target.matches(selector)) {
+					return handler(event, target);
+				}
+				target = target.parentNode;
+			}
+		}, false);
+	}
 
-	$ ('contenu_explorer_search_<?=$table?>').on ('click', '[app_button]', function (event, node) {
+	ax_on (ax_el ('contenu_explorer_search_<?=$table?>'), 'submit', 'form', function (event, node) {
+		var form_vars = serializeFields(node);
+
+		ax_el ('contenu_explorer_<?= $table ?>').loadModule ('app/app_liste/app_liste', 'table=<?= $table ?>&nbRows=750&' + form_vars);
+	});
+
+	ax_on (ax_el ('contenu_explorer_search_<?=$table?>'), 'click', '[app_button]', function (event, node) {
+		// Was preventDefault() followed by Event.stop(event), which repeated the
+		// preventDefault and added stopPropagation.
 		event.preventDefault ();
-		Event.stop (event)
-		var form_vars = $ (node).readAttribute ('vars');
+		event.stopPropagation ();
+		var form_vars = node.getAttribute ('vars');
 
-		$ ('contenu_explorer_<?= $table ?>').loadModule ('app/app_liste/app_liste', 'table=<?= $table ?>&nbRows=750&' + form_vars);
+		ax_el ('contenu_explorer_<?= $table ?>').loadModule ('app/app_liste/app_liste', 'table=<?= $table ?>&nbRows=750&' + form_vars);
 		return false;
-	}.bind (this));
+	});
 </script>

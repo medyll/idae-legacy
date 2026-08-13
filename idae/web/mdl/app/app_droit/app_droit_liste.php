@@ -163,46 +163,102 @@
 	</div>
 </div>
 <script>
-	$('<?=$warp?>').on('click', 'input[type=checkbox][data-group-line-ch]', function (event, node) {
+	/*
+	 * Modified: 2026-08-11 — migrated off the PrototypeJS compatibility shims
+	 * ($, $A, .on, .select, .invoke, .each, .readAttribute) to native DOM,
+	 * with file-local `dr_` helpers.
+	 *
+	 * doCheck / doUnCheck are NOT shim calls and stay as-is: engine/methods.js
+	 * installs both directly on HTMLElement.prototype.
+	 */
+	function dr_el(ref) {
+		return typeof ref === 'string' ? document.getElementById(ref) : ref;
+	}
+
+	/** Prototype's Element#select, as a real Array. */
+	function dr_select(ref, selector) {
+		var node = dr_el(ref);
+		if (!node) return [];
+		return Array.prototype.slice.call(node.querySelectorAll(selector));
+	}
+
+	/**
+	 * Prototype's Element#on. With a selector it delegates, calling the handler
+	 * as (event, matchedElement); without one it is a plain listener.
+	 */
+	function dr_on(root, eventName, selectorOrHandler, maybeHandler) {
+		if (!root) return;
+		if (maybeHandler === undefined) {
+			root.addEventListener(eventName, selectorOrHandler);
+			return;
+		}
+		var selector = selectorOrHandler, handler = maybeHandler;
+		root.addEventListener(eventName, function (event) {
+			var target = event.target;
+			while (target && target !== root) {
+				if (target.nodeType === 1 && target.matches(selector)) {
+					return handler(event, target);
+				}
+				target = target.parentNode;
+			}
+		}, false);
+	}
+
+	/**
+	 * `.invoke(name)` over a node list. The interpolated attribute values in
+	 * every selector below are quoted: these are ids and permission codes, so
+	 * one starting with a digit makes the selector invalid CSS and native
+	 * querySelectorAll throws SyntaxError. The shim's $$/select retried with
+	 * quotes added; nothing does that here.
+	 */
+	function dr_invoke(nodes, methodName) {
+		nodes.forEach(function (node) { node[methodName](); });
+		return nodes;
+	}
+
+	dr_on(dr_el('<?=$warp?>'), 'click', 'input[type=checkbox][data-group-line-ch]', function (event, node) {
 
 		var ch = node.checked ? 'doCheck' : 'doUnCheck';
-		var datach = node.readAttribute('data-group-line-ch');
+		var datach = node.getAttribute('data-group-line-ch');
 
-		$('<?=$warp?>').select('input[type=checkbox][data-collection-value=' + datach + ']').invoke(ch);
-		$('<?=$warp?>').select('input[type=checkbox][data-collection-value=' + datach + ']').each(function (danode) {
+		var targets = dr_select('<?=$warp?>', 'input[type=checkbox][data-collection-value="' + datach + '"]');
+		dr_invoke(targets, ch);
+		targets.forEach(function (danode) {
 			node_validate(danode)
 		});
 
-	}.bind(this));
-	$('<?=$warp?>').on('click', 'input[type=checkbox][data-main-ch]', function (event, node) {
+	});
+	dr_on(dr_el('<?=$warp?>'), 'click', 'input[type=checkbox][data-main-ch]', function (event, node) {
 
 		var ch = node.checked ? 'doCheck' : 'doUnCheck';
-		var datach = node.readAttribute('data-main-ch');
+		var datach = node.getAttribute('data-main-ch');
 
-		$A($('for_<?=$warp?>').querySelectorAll('input[type=checkbox][data-ch=' + datach + ']')).invoke(ch);
-		$A($('for_<?=$warp?>').querySelectorAll('input[type=checkbox][data-maingroup-ch=' + datach + ']')).invoke(ch);
-		$A($('for_<?=$warp?>').querySelectorAll('input[type=checkbox][data-ch=' + datach + ']')).each(function (danode) {
+		var targets = dr_select('for_<?=$warp?>', 'input[type=checkbox][data-ch="' + datach + '"]');
+		dr_invoke(targets, ch);
+		dr_invoke(dr_select('for_<?=$warp?>', 'input[type=checkbox][data-maingroup-ch="' + datach + '"]'), ch);
+		targets.forEach(function (danode) {
 			node_validate(danode)
 		});
 
-	}.bind(this));
-	$('<?=$warp?>').on('click', 'input[type=checkbox][data-maingroup-ch]', function (event, node) {
+	});
+	dr_on(dr_el('<?=$warp?>'), 'click', 'input[type=checkbox][data-maingroup-ch]', function (event, node) {
 
 		var ch = node.checked ? 'doCheck' : 'doUnCheck';
-		var datach = node.readAttribute('data-maingroup-ch');
-		var datype = node.readAttribute('data-type-ch');
+		var datach = node.getAttribute('data-maingroup-ch');
+		var datype = node.getAttribute('data-type-ch');
 
-		$A($('for_<?=$warp?>').querySelectorAll('input[type=checkbox][data-ch=' + datach + '][data-type-ch=' + datype + ']')).invoke(ch);
-		$A($('for_<?=$warp?>').querySelectorAll('input[type=checkbox][data-ch=' + datach + '][data-type-ch=' + datype + ']')).each(function (danode) {
+		var targets = dr_select('for_<?=$warp?>', 'input[type=checkbox][data-ch="' + datach + '"][data-type-ch="' + datype + '"]');
+		dr_invoke(targets, ch);
+		targets.forEach(function (danode) {
 			node_validate(danode)
 		});
 
-	}.bind(this));
+	});
 	node_validate = function (node) {
-		var table = node.readAttribute('data-collection');
-		var table_value = node.readAttribute('data-collection-value');
-		var table_droit_value = node.readAttribute('data-droit-value');
-		var data_ch = node.readAttribute('data-ch');
+		var table = node.getAttribute('data-collection');
+		var table_value = node.getAttribute('data-collection-value');
+		var table_droit_value = node.getAttribute('data-droit-value');
+		var data_ch = node.getAttribute('data-ch');
 		console.log(table, table_value, table_droit_value, data_ch);
 		// '&vars[idappscheme]=' + table_value +
 		ajaxValidation('app_update', 'mdl/app/', 'table=agent_groupe_droit&table_value=' + table_droit_value + '&vars[idappscheme]=' + table_value + '&vars[' + data_ch + ']=' + (node.checked == true));

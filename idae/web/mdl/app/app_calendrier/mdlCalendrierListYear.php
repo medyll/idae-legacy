@@ -1,4 +1,9 @@
 <?php
+/**
+ * Modified: 2026-08-11 — Effect.Appear -> appearElement (engine/methods.js);
+ *                        the Scriptaculous shim was deleted on 2026-08-09 and
+ *                        this call had been throwing "Effect is not defined"
+ */
 if(file_exists('../conf.inc.php')) include_once('../conf.inc.php');
 if(file_exists('../../conf.inc.php')) include_once('../../conf.inc.php'); 
 $sd = $_POST['sd'];
@@ -40,12 +45,37 @@ $i++;
 } 
 </style>
 <script>
- $('dynlistYear').cleanWhitespace()
- new Effect.Appear($('dynlistYear'))
-// new tableGui($('dynlistYear'),{numRow: 3, numCol: 3   })
+ /*
+  * Modified: 2026-08-11 — migrated the remaining PrototypeJS shim calls
+  * ($, .cleanWhitespace) to native DOM. The Effect.Appear on the next line was
+  * already replaced (ed8b761); this finishes the file.
+  */
+ function cly_el(ref) {
+ 	return typeof ref === 'string' ? document.getElementById(ref) : ref;
+ }
+
+ /**
+  * Prototype's Element#cleanWhitespace: drop the whitespace-only text nodes
+  * between children, which is what made its inline-block grid lay out without
+  * stray gaps.
+  */
+ function cly_cleanWhitespace(node) {
+ 	if (!node) return node;
+ 	var child = node.firstChild, next;
+ 	while (child) {
+ 		next = child.nextSibling;
+ 		if (child.nodeType === 3 && !/\S/.test(child.nodeValue)) node.removeChild(child);
+ 		child = next;
+ 	}
+ 	return node;
+ }
+
+ cly_cleanWhitespace(cly_el('dynlistYear'))
+ appearElement(cly_el('dynlistYear'))
+// new tableGui(cly_el('dynlistYear'),{numRow: 3, numCol: 3   })
 closeFrmListYear=function(file,div,links){
 	ajaxInMdl('file','div','link');
-	if( $('mouseDiv')) {$('mouseDiv').close();}
+	if( cly_el('mouseDiv')) {cly_el('mouseDiv').close();}
 }
 
 </script>

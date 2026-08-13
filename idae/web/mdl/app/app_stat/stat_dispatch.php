@@ -19,14 +19,52 @@ echo $mdl = $_POST['mdl_stat'].'/'.$_POST['mdl_stat'];
   </div>
 </div>
 <script>
-$('liste_<?=$uniqid?>').on('click','input[type=checkbox]',function(event,node){ 
-	vars		= Form.serialize($('liste_<?=$uniqid?>'));
-	varsDate	= Form.serialize($('date_<?=$uniqid?>'));
-	$('chart_<?=$uniqid?>').loadModule('statistique/<?=$mdl?>_stat',vars+'&'+varsDate).show(); 
-}.bind(this)) 	
-$('date_<?=$uniqid?>').observe('dom:datechoosen',function(event){
-	vars		= Form.serialize($('liste_<?=$uniqid?>'));
-	varsDate	= Form.serialize($('date_<?=$uniqid?>'));
-	$('chart_<?=$uniqid?>').loadModule('statistique/<?=$mdl?>_stat',vars+'&'+varsDate).show(); 
-}.bind(this)) 	
+/*
+ * Modified: 2026-08-11 — migrated off the PrototypeJS compatibility shims
+ * ($, .on, .observe, .show) to native DOM, with file-local `sd_` helpers.
+ * Form values now use the native serializeFields helper;
+ * loadModule is not a shim call: engine/methods.js puts it on the prototype.
+ */
+function sd_el(ref) {
+	return typeof ref === 'string' ? document.getElementById(ref) : ref;
+}
+
+function sd_show(node) { if (node) node.style.display = ''; return node; }
+
+	/**
+	 * Prototype's Element#on. With a selector it delegates, calling the handler
+	 * as (event, matchedElement); without one it is a plain listener.
+	 */
+	function sd_on(root, eventName, selectorOrHandler, maybeHandler) {
+		if (!root) return;
+		if (maybeHandler === undefined) {
+			root.addEventListener(eventName, selectorOrHandler);
+			return;
+		}
+		var selector = selectorOrHandler, handler = maybeHandler;
+		root.addEventListener(eventName, function (event) {
+			var target = event.target;
+			while (target && target !== root) {
+				if (target.nodeType === 1 && target.matches(selector)) {
+					return handler(event, target);
+				}
+				target = target.parentNode;
+			}
+		}, false);
+	}
+
+// Both handlers ran the same three lines; factored out.
+function sd_refresh() {
+	var vars     = serializeFields(sd_el('liste_<?=$uniqid?>'));
+	var varsDate = serializeFields(sd_el('date_<?=$uniqid?>'));
+	// loadModule returns the element, which is what let Prototype chain .show().
+	sd_show(sd_el('chart_<?=$uniqid?>').loadModule('statistique/<?=$mdl?>_stat', vars + '&' + varsDate));
+}
+
+sd_on(sd_el('liste_<?=$uniqid?>'), 'click', 'input[type=checkbox]', function (event, node) {
+	sd_refresh();
+})
+sd_el('date_<?=$uniqid?>').addEventListener('dom:datechoosen', function (event) {
+	sd_refresh();
+})
 </script> 

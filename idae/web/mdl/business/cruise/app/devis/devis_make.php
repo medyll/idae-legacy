@@ -82,8 +82,8 @@
 			<a onclick="reloadModule('<?= $_POST['module'] ?>','*')"><i class="fa fa-refresh"></i></a>
 		</div>
 		<div class="applink applinkblock applinkbig borderb">
-			<a onclick="$('build<?= $uniqkey ?>').toggleContent()"><i class="fa fa-info-circle"></i> <?= idioma('Détails') ?> </a>
-			<a onclick="$('preview<?= $uniqkey ?>').toggleContent()"><i class="fa fa-eye"></i> <?= idioma('Visualiser version client') ?> </a>
+			<a onclick="document.getElementById('build<?= $uniqkey ?>').toggleContent()"><i class="fa fa-info-circle"></i> <?= idioma('Détails') ?> </a>
+			<a onclick="document.getElementById('preview<?= $uniqkey ?>').toggleContent()"><i class="fa fa-eye"></i> <?= idioma('Visualiser version client') ?> </a>
 		</div>
 		<?php //  if ($arr_type['codeDevis_type'] != 'STE'): ?>
 			<br>
@@ -145,7 +145,7 @@
 				}
 			</style>
 			<script>
-				// new myddeAttach($('fiche_table_<?=$table?>_<?=$table_value?>'), {form: 'form_upload_<?= $table ?>', autoSubmit: true});
+				// new myddeAttach(document.getElementById('fiche_table_<?=$table?>_<?=$table_value?>'), {form: 'form_upload_<?= $table ?>', autoSubmit: true});
 			</script>
 		</div>
 	</div>
@@ -314,7 +314,7 @@
 		<div id="preview<?= $uniqkey ?>" class="flex_v relative border4 boxshadow" style="display:none;height:100%;overflow:hidden;">
 			<div class="padding applink  borderb">
 				<div class="inline padding ededed">
-					<a onclick="$('preview<?= $uniqkey ?>').unToggleContent()"><i class="fa fa-times textrouge"></i> <?= idioma('Fermer') ?></a>
+					<a onclick="document.getElementById('preview<?= $uniqkey ?>').unToggleContent()"><i class="fa fa-times textrouge"></i> <?= idioma('Fermer') ?></a>
 					<a onclick="runModule('mdl/dyn/dyn_devis_html','iddevis=<?= $iddevis ?>')"><i class="fa fa-cogs textbleu"></i> Reconstruire</a>
 				</div>
 			</div>
@@ -323,5 +323,5 @@
 	</div>
 </div>
 <script>
-	// var redt = new resizeGui($('maindevisresie<?=$iddevis?>'));
+	// var redt = new resizeGui(document.getElementById('maindevisresie<?=$iddevis?>'));
 </script>

@@ -1,4 +1,11 @@
-
+/**
+ * Modified: 2026-08-09 — migrated off the PrototypeJS compatibility shims
+ * (BE_PLAN.md phase 5). Behaviour unchanged; only the DOM layer is native.
+ *
+ * This is the socket.io command dispatcher: every real-time push from the
+ * Node bridge (`app_node/src/socket/handlers.js`) lands in one of the
+ * `socket.on(...)` handlers below.
+ */
 window.opener=null;
 
 var conn_options = {
@@ -39,6 +46,179 @@ conn_options.forceNew = true;
 
 var socket = io.connect(socketUrl, conn_options);
 
+/* ------------------------------------------------------------------ *
+ * DOM helpers — file-local, same rationale as the other migrated       *
+ * files (see BE_PLAN.md phase 5): sharing them would mean touching     *
+ * main_bag.js's load graph, which this phase has no reason to disturb. *
+ * ------------------------------------------------------------------ */
+
+function sk_el(ref) {
+	return typeof ref === 'string' ? document.getElementById(ref) : ref;
+}
+
+function sk_identify(node) {
+	if (!node.id) node.id = uniqid('anonymous_element');
+	return node.id;
+}
+
+function sk_show(node) {
+	if (node) node.style.display = '';
+	return node;
+}
+
+function sk_hide(node) {
+	if (node) node.style.display = 'none';
+	return node;
+}
+
+function sk_remove(node) {
+	// Not node.remove(): the shim replaces Element.prototype.remove with
+	// Prototype's version, so calling it would route back through the shim.
+	if (node && node.parentNode) node.parentNode.removeChild(node);
+	return node;
+}
+
+function sk_fire(node, eventName, memo) {
+	if (!node) return null;
+	var event = new CustomEvent(eventName, {bubbles: true, cancelable: true});
+	event.memo = memo || {};
+	node.dispatchEvent(event);
+	return event;
+}
+
+/** Prototype's Element#up(selector): starts at the parent, never at self. */
+function sk_up(node, selector) {
+	if (!node || !node.parentElement) return null;
+	return selector ? node.parentElement.closest(selector) : node.parentElement;
+}
+
+/**
+ * Tolerant querySelectorAll, returning a real array. Values interpolated
+ * into these selectors — table_value, stream_to, filenames — can be
+ * anything a server sends: digit-leading strings, values with dots, none of
+ * which are valid unquoted CSS attribute values. Prototype's own selector
+ * engine tolerated them; this retries once with the value quoted rather than
+ * assuming every caller already sanitized its input. Same algorithm as
+ * shim-core.js's tolerantQueryAll, copied rather than called — the point of
+ * migrating this file is to stop needing that shim at all.
+ */
+function sk_qsa(root, selector) {
+	var nodes;
+	try {
+		nodes = root.querySelectorAll(selector);
+	} catch (e) {
+		var quoted = String(selector).replace(
+			/\[([a-zA-Z_][\w-]*)=([^'"\]\s][^\]\s]*)\]/g,
+			'[$1="$2"]'
+		);
+		if (quoted === selector) throw e;
+		nodes = root.querySelectorAll(quoted);
+	}
+	return Array.prototype.slice.call(nodes);
+}
+
+/**
+ * Prototype's Element#update/#insert both strip `<script>` tags out of the
+ * HTML before inserting it, then eval each script's content afterward
+ * (deferred ~10ms, so it runs after the DOM settles) — in the GLOBAL scope,
+ * via indirect eval, same as Prototype's own evalScripts.
+ *
+ * This is not a nicety worth dropping: the server-rendered fragments this
+ * handler injects routinely end in a bare `<script>` block that calls
+ * `load_table_in_zone(...)` or similar to kick off the *next* request —
+ * `mdl/app/app_liste/app_liste.php:100` is exactly this, and it is how a
+ * list actually gets its rows (the outer window frame is one socketModule
+ * response; the row data is a second, separate request this script starts).
+ * Plain `node.innerHTML = html` never executes embedded `<script>` tags —
+ * no browser does, regardless of Prototype/shim status — so skipping this
+ * would silently break every fragment built that way, not just this file.
+ */
+var SK_SCRIPT_FRAGMENT = /<script[^>]*>([\s\S]*?)<\/script>/img;
+
+function sk_stripScripts(html) {
+	return html.replace(SK_SCRIPT_FRAGMENT, '');
+}
+
+function sk_evalScriptsDeferred(html) {
+	if (!/<script/i.test(html)) return;
+	setTimeout(function () {
+		var match;
+		var re = new RegExp(SK_SCRIPT_FRAGMENT.source, 'img');
+		while ((match = re.exec(html))) {
+			(1, eval)(match[1]); // indirect eval: run in global scope, like Prototype's
+		}
+	}, 10);
+}
+
+/** Prototype's Element#update: string -> innerHTML, Node -> replace children, null -> clear. */
+function sk_update(node, content) {
+	if (!node) return node;
+	if (content == null) {
+		node.innerHTML = '';
+	} else if (content.nodeType) {
+		node.innerHTML = '';
+		node.appendChild(content);
+	} else {
+		var html = String(content);
+		node.innerHTML = sk_stripScripts(html);
+		sk_evalScriptsDeferred(html);
+	}
+	return node;
+}
+
+function sk_insertAt(node, position, content) {
+	if (content && content.nodeType) {
+		switch (position) {
+			case 'top': node.insertBefore(content, node.firstChild); break;
+			case 'bottom': node.appendChild(content); break;
+			case 'before': if (node.parentNode) node.parentNode.insertBefore(content, node); break;
+			case 'after': if (node.parentNode) node.parentNode.insertBefore(content, node.nextSibling); break;
+		}
+		return;
+	}
+	var html = String(content);
+	var stripped = sk_stripScripts(html);
+	switch (position) {
+		case 'top': node.insertAdjacentHTML('afterbegin', stripped); break;
+		case 'bottom': node.insertAdjacentHTML('beforeend', stripped); break;
+		case 'before': node.insertAdjacentHTML('beforebegin', stripped); break;
+		case 'after': node.insertAdjacentHTML('afterend', stripped); break;
+	}
+	sk_evalScriptsDeferred(html);
+}
+
+/**
+ * Prototype's Element#insert: a bare string/Node appends at 'bottom'; an
+ * object with top/bottom/before/after keys inserts each at that position.
+ */
+function sk_insert(node, spec) {
+	if (!node) return node;
+	if (typeof spec === 'string' || (spec && spec.nodeType)) {
+		sk_insertAt(node, 'bottom', spec);
+		return node;
+	}
+	['top', 'bottom', 'before', 'after'].forEach(function (position) {
+		if (spec[position] !== undefined) sk_insertAt(node, position, spec[position]);
+	});
+	return node;
+}
+
+/**
+ * The three `data-count` refresh blocks in the receive_cmd switch below were
+ * byte-identical except for which `table` value each branch had already
+ * computed — deduplicated here, that discrepancy preserved: act_close_mdl
+ * passes 'id' + vars.table (already the case before this migration; not
+ * this pass's place to decide whether that's a pre-existing bug).
+ */
+function sk_refreshCounts(scanTable, runModuleTable) {
+	sk_qsa(document.body, '[data-table="' + scanTable + '"][data-count]').forEach(function (node) {
+		var vars = node.getAttribute('data-vars');
+		runModule('services/json_data_table', 'table=' + runModuleTable + '&' + vars + '&piece=count&count_id=' + sk_identify(node));
+	});
+}
+
+/* ------------------------------------------------------------------ */
+
 // Add connection error handling
 socket.on('connect', function() {
 	console.log('[SOCKET] ✓ Connected successfully:', socket.id);
@@ -53,10 +233,10 @@ socket.on('connect_error', function(error) {
 
 socket.on ('message', function (data) {
 	console.log('message on socket',data);
-	$ ('msg_log').update (data);
+	sk_update (sk_el ('msg_log'), data);
 }.bind (this));
 socket.on ('heartbeat_app', function (data) {
-	$ ('msg_log').update (data);
+	sk_update (sk_el ('msg_log'), data);
 }.bind (this));
 
 socket.on ('notify', function (data) {
@@ -91,16 +271,15 @@ socket.on ('receive_cmd', function (data) {
 			var table = 'id' + vars.table;
 
 			if ( document.body.querySelector ('[scope=' + id + ']') ) {
-				$$ ('[scope=' + id + '][value=' + vars.table_value + ']').invoke ('fire', 'dom:close');
-				$$ ('[scope=' + id + '][value=' + vars.table_value + ']').invoke ('remove');
+				sk_qsa (document, '[scope=' + id + '][value=' + vars.table_value + ']').forEach (function (node) {
+					sk_fire (node, 'dom:close');
+				});
+				sk_qsa (document, '[scope=' + id + '][value=' + vars.table_value + ']').forEach (sk_remove);
 			}
-			$$ ('[data-table=' + vars.table + '] [data-table_value=' + vars.table_value + ']').invoke ('remove');
+			sk_qsa (document, '[data-table=' + vars.table + '] [data-table_value=' + vars.table_value + ']').forEach (sk_remove);
 			// unstream_from_cache
 
-			$A (document.body.querySelectorAll ('[data-table="' + vars.table + '"][data-count]')).each (function (node) {
-				var vars = $ (node).readAttribute ('data-vars');
-				runModule ('services/json_data_table', 'table=' + table + '&' + vars + '&piece=count&count_id=' + node.identify ());
-			}.bind (this))
+			sk_refreshCounts (vars.table, table);
 
 			break;
 		case'act_upd_data': // remplace  upd_data({table: table, table_value: table_value});
@@ -114,10 +293,7 @@ socket.on ('receive_cmd', function (data) {
 
 			act_upd_data (new_data);
 
-			$A (document.body.querySelectorAll ('[data-table="' + vars.table + '"][data-count]')).each (function (node) {
-				var vars = $ (node).readAttribute ('data-vars');
-				runModule ('services/json_data_table', 'table=' + table + '&' + vars + '&piece=count&count_id=' + node.identify ());
-			}.bind (this))
+			sk_refreshCounts (vars.table, table);
 
 			break;
 
@@ -136,10 +312,7 @@ socket.on ('receive_cmd', function (data) {
 
 			// lance test data-count
 
-			$A (document.body.querySelectorAll ('[data-table="' + vars.table + '"][data-count]')).each (function (node) {
-				var vars = $ (node).readAttribute ('data-vars');
-				runModule ('services/json_data_table', 'table=' + table + '&' + vars + '&piece=count&count_id=' + node.identify ());
-			}.bind (this))
+			sk_refreshCounts (vars.table, table);
 			/* var vars = data.vars;
 			 var table = vars.table;
 			 // $$('[data-table='+table+']').invoke('fire','dom:data_reload');
@@ -159,15 +332,17 @@ socket.on ('receive_cmd', function (data) {
 			var table    = vars.table;
 			var count    = vars.count;
 			var count_id = vars.count_id;
-			$ (count_id).addClassName ('animated bounce');
-			$ (count_id).update (count);
-			if ( $ (count_id).up ('[data-count_trigger]') ) {
-				if ( eval (count) != 0 ) {
-					$ (count_id).up ('[data-count_trigger]').setAttribute('data-count_trigger','true');
-					// $ (count_id).up ('[data-count_trigger]').show ();
+			var count_node = sk_el (count_id);
+			count_node.classList.add ('animated', 'bounce');
+			sk_update (count_node, count);
+			var trigger = sk_up (count_node, '[data-count_trigger]');
+			if ( trigger ) {
+				if ( Number (count) !== 0 ) {
+					trigger.setAttribute ('data-count_trigger', 'true');
+					// sk_show (trigger);
 				} else {
-					$ (count_id).up ('[data-count_trigger]').setAttribute('data-count_trigger','hide');
-					// $ (count_id).up ('[data-count_trigger]').hide ();
+					trigger.setAttribute ('data-count_trigger', 'hide');
+					// sk_hide (trigger);
 				}
 			}
 
@@ -175,71 +350,75 @@ socket.on ('receive_cmd', function (data) {
 		case'act_reload_img':
 			var vars     = data.vars;
 			var filename = vars.filename;
-			$$ ('[data-filename=' + filename + ']').each (function (node) {
+			sk_qsa (document, '[data-filename=' + filename + ']').forEach (function (node) {
 				node.src = "blank.png";
-				node.src = node.readAttribute ('data-src') + '?act_reload=' + uniqid ();
-			}.bind (this));
+				node.src = node.getAttribute ('data-src') + '?act_reload=' + uniqid ();
+			});
 
 			break;
 
 		case'act_progress':
 			var vars   = data.vars;
 			var name_p = 'auto_' + vars.progress_name;
-			if ( !$ (name_p) && vars.progress_parent ) {
-				 if($ (vars.progress_parent)){
-					 $ (vars.progress_parent).insert ({ top : '<div class="flex_v" style="height:auto!important;overflow:hidden;"><progress id="' + name_p + '"></progress></div>' })
+			if ( !sk_el (name_p) && vars.progress_parent ) {
+				 if( sk_el (vars.progress_parent) ){
+					 sk_insert (sk_el (vars.progress_parent), { top : '<div class="flex_v" style="height:auto!important;overflow:hidden;"><progress id="' + name_p + '"></progress></div>' })
 					 }
 			}
 
-			if ( $ (name_p) ) {
-				if ( $ (name_p).time_p ) clearTimeout ($ (name_p).time_p);
-				$ (name_p).show ();
-				if ( vars.progress_value ) $ (name_p).value = vars.progress_value;
-				if ( vars.progress_max ) $ (name_p).max = vars.progress_max;
+			if ( sk_el (name_p) ) {
+				var progress_node = sk_el (name_p);
+				if ( progress_node.time_p ) clearTimeout (progress_node.time_p);
+				sk_show (progress_node);
+				if ( vars.progress_value ) progress_node.value = vars.progress_value;
+				if ( vars.progress_max ) progress_node.max = vars.progress_max;
 				if ( vars.progress_value && vars.progress_max ) {
 					if ( vars.progress_value == vars.progress_max ) {
-						$ (name_p).time_p = setTimeout (function () {
-							$ (name_p).hide ();
+						progress_node.time_p = setTimeout (function () {
+							sk_hide (progress_node);
 						}.bind (this), 5000)
 					}
 				}
 				if ( vars.progress_text ) {
-					if ( !$ ('text_' + name_p) ) {
-						var text_ = new Element ('div', { id : 'progress_text' + name_p });
-						$ (name_p).insert ({ before : '<div class="borderb padding" id="text_' + name_p + '">' + vars.progress_text + '</div>' })
-					} else {
-						var text_ = $ ('text_' + name_p);
+					if ( !sk_el ('text_' + name_p) ) {
+						sk_insert (progress_node, { before : '<div class="borderb padding" id="text_' + name_p + '">' + vars.progress_text + '</div>' })
 					}
 				}
 				if ( vars.progress_text_remove ) {
-					if ( $ ('text_' + name_p) ) {
-						$ ('text_' + name_p).remove ();
+					if ( sk_el ('text_' + name_p) ) {
+						sk_remove (sk_el ('text_' + name_p));
 					}
 				}
 				if ( vars.progress_message ) {
-					if ( !$ ('msg_' + name_p) ) {
-						var msg_ = new Element ('div', { className:'padding ededed',id : 'msg_' + name_p });
-						$ (name_p).insert ({ before : msg_ })
+					var msg_;
+					if ( !sk_el ('msg_' + name_p) ) {
+						msg_ = document.createElement ('div');
+						msg_.className = 'padding ededed';
+						msg_.id = 'msg_' + name_p;
+						sk_insert (progress_node, { before : msg_ })
 					} else {
-						var msg_ = $ ('msg_' + name_p);
+						msg_ = sk_el ('msg_' + name_p);
 					}
-					msg_.update (vars.progress_message);
+					sk_update (msg_, vars.progress_message);
 				}
 
 				if ( vars.progress_message_remove ) {
-					if ( $ ('msg_' + name_p) ) {
-						$ ('msg_' + name_p).remove ();
+					if ( sk_el ('msg_' + name_p) ) {
+						sk_remove (sk_el ('msg_' + name_p));
 					}
 				}
 				if ( vars.progress_log ) {
-					if ( !$ ('log_' + name_p) ) {
-						var msg_ = new Element ('div', { id : 'log_' + name_p, className:'flex_main',style : '' });
-						   msg_.setStyle ({ overflow : 'auto'  });
-						$ (name_p).insert ({ after : msg_ })
+					var log_;
+					if ( !sk_el ('log_' + name_p) ) {
+						log_ = document.createElement ('div');
+						log_.id = 'log_' + name_p;
+						log_.className = 'flex_main';
+						log_.style.overflow = 'auto';
+						sk_insert (progress_node, { after : log_ })
 					} else {
-						var msg_ = $ ('log_' + name_p);
+						log_ = sk_el ('log_' + name_p);
 					}
-					msg_.insert ({ bottom : '<div class="retrait padding borderb">' + vars.progress_log + '</div>' });
+					sk_insert (log_, { bottom : '<div class="retrait padding borderb">' + vars.progress_log + '</div>' });
 				}
 			}
 			;
@@ -267,15 +446,21 @@ socket.on ('receive_cmd', function (data) {
 			var data      = data;
 			var dvars     = data.vars;
 			var stream_to = dvars.stream_to;
-			if ( $$ ('[data-uniqid=' + stream_to + ']').size () != 0 ) {
+			if ( sk_qsa (document, '[data-uniqid=' + stream_to + ']').length !== 0 ) {
 				// console.log('stream_to !! ',data)
 				var tmp_stream = uniqid ('uniqid');
 				if ( !window.register_stream ) window.register_stream = []
 				window.register_stream[tmp_stream] = dvars;
 
-				$$ ('[data-uniqid=' + stream_to + ']')[0].fire ('dom:stream_chunk', tmp_stream);
+				sk_fire (sk_qsa (document, '[data-uniqid=' + stream_to + ']')[0], 'dom:stream_chunk', tmp_stream);
 				setTimeout (function () {
-					$$ ('[data-uniqid=' + stream_to + ']')[0].fire ('content:loaded', tmp_stream);
+					// Re-query: half a second is long enough for the window to
+					// have been closed or the table rebuilt, and firing on
+					// [0] of an empty result threw "Cannot read properties of
+					// undefined (reading 'fire')" — the suite's oldest flake.
+					var target = sk_qsa (document, '[data-uniqid=' + stream_to + ']')[0];
+					if ( !target ) return;
+					sk_fire (target, 'content:loaded', tmp_stream);
 				}.bind (this), 500);
 
 			} else {
@@ -368,14 +553,15 @@ socket.on ('socketModule', function (data) {
 	if ( arr_inspect_vars.table_value ) {
 		objDta.table_value = arr_inspect_vars.table_value;
 	}
-	if ( !$ (this.out.element) ) {
+	var target = sk_el (this.out.element);
+	if ( !target ) {
 		//
 		return false;
 	}
-	var id_l = 'loading_loader_' + $ (this.out.element).identify ();
+	var id_l = 'loading_loader_' + sk_identify (target);
 	//
-	if ( $ (id_l) ) {
-		$ (id_l).remove ();
+	if ( sk_el (id_l) ) {
+		sk_remove (sk_el (id_l));
 	}
 	var key_name = build_cache_key (this.out.file, (this.out.vars || ''));
 
@@ -394,37 +580,37 @@ socket.on ('socketModule', function (data) {
 		var frag_node   = in_tmp_fragment.querySelector ('[data-app_fragment=' + fragment + ']');
 		var frag_node_2 = in_tmp_fragment.querySelector ('div');
 
-		$ (this.out.element).update (frag_node);
+		sk_update (target, frag_node);
 		return;
 	}
 
-	$ (this.out.element).removeAttribute ('data-need_cache')
+	target.removeAttribute ('data-need_cache')
 	if ( options.append ) {
-		$ (this.out.element).insert (data_body);
+		sk_insert (target, data_body);
 	} else if ( options.insertion ) {
-		$ (this.out.element).insert ({ top : data_body });
+		sk_insert (target, { top : data_body });
 	} else {
-		$ (this.out.element).update (data_body);
+		sk_update (target, data_body);
 	}
 
-	afterAjaxCall ($ (this.out.element));
-	$ (this.out.element).fire ('content:loaded');
+	afterAjaxCall (target);
+	sk_fire (target, 'content:loaded');
 
 	}.bind (this));
 //
 socket.on ('disconnect', function () {
-	if ( $ ('socket_status') )  $ ('socket_status').show ();
+	if ( sk_el ('socket_status') )  sk_show (sk_el ('socket_status'));
 });
 socket.on ('reconnect', function () {
 	// $('body').undoLoading();
-	if ( $ ('socket_status') )  $ ('socket_status').hide ();
+	if ( sk_el ('socket_status') )  sk_hide (sk_el ('socket_status'));
 });
 
 socket.on ('reconnecting', function (nextRetry) {
-	if ( $ ('socket_status') )    $ ('socket_status').update (' .. ' + eval (nextRetry) / 1000) + ' s ';
+	if ( sk_el ('socket_status') )    sk_update (sk_el ('socket_status'), ' .. ' + (Number (nextRetry) / 1000)) + ' s ';
 });
 socket.on ('reconnect_failed', function () {
-	if ( $ ('socket_status') ) $ ('socket_status').update (' dead ');
+	if ( sk_el ('socket_status') ) sk_update (sk_el ('socket_status'), ' dead ');
 });
 
 socket.on ('upd_data', function (data) {
@@ -444,13 +630,12 @@ socket.on ('upd_data', function (data) {
 
 	var table       = vars.table;
 	var table_value = vars.table_value;
-	$H (rev).each (function (node) {
-		var field_name  = node.key;
-		var field_value = node.value;
-		$A (document.body.querySelectorAll ('[table="' + table + '"][table_value="' + table_value + '"] [field_name="' + field_name + '"]')).each (function (node) {
-			$ (node).update (field_value);
-		}.bind (this))
-	}.bind (this))
+	Object.keys (rev).forEach (function (field_name) {
+		var field_value = rev[field_name];
+		sk_qsa (document.body, '[table="' + table + '"][table_value="' + table_value + '"] [field_name="' + field_name + '"]').forEach (function (node) {
+			sk_update (node, field_value);
+		});
+	});
 
 });
 //
@@ -480,12 +665,12 @@ socket.on ('receive_data', function (obj_data) {
 					}).then (function (res) {
 						res = JSON.parse (res);
 
-						$H (data).each (function (pair) {
-							data_field_name = base + '.' + table + '.' + pair.key;
+						Object.keys (data).forEach (function (key) {
+							var data_field_name = base + '.' + table + '.' + key;
 
-							$A (document.body.querySelectorAll ('[data-field_name="' + data_field_name + '"][data-mongokey="' + _id + '"]')).each (function (node) {
-								node.update (nl2br (pair.value));
-							})
+							sk_qsa (document.body, '[data-field_name="' + data_field_name + '"][data-mongokey="' + _id + '"]').forEach (function (node) {
+								sk_update (node, nl2br (data[key]));
+							});
 
 						});
 

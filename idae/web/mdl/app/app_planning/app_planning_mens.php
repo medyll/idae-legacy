@@ -161,5 +161,5 @@
 </script>
 <script>
 
-	new tableGui($('tablePlanningMensuel'), {numRow: <?=$nombreSemainer?>, onlyClass: 'caseMois' })
+	new tableGui(document.getElementById('tablePlanningMensuel'), {numRow: <?=$nombreSemainer?>, onlyClass: 'caseMois' })
 </script>

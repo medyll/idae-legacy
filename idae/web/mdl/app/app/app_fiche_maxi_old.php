@@ -61,10 +61,10 @@
 		<div class="flex_h">
 
 			<div class="toggler app_onglet_push">
-				<a class="autoToggle borderr toggler_visible" onclick="$('fme<?= $table . $table_value ?>').unToggleContent()">
+				<a class="autoToggle borderr toggler_visible" onclick="fmo_el('fme<?= $table . $table_value ?>').unToggleContent()">
 					<i class="fa fa-window-maximize"></i>
 				</a>
-				<a class="autoToggle borderr toggler_visible" onclick="$('fme<?= $table . $table_value ?>').toggleContent()">
+				<a class="autoToggle borderr toggler_visible" onclick="fmo_el('fme<?= $table . $table_value ?>').toggleContent()">
 					<i class="fa fa-window-restore"></i>
 				</a>
 			</div>
@@ -130,25 +130,60 @@
 </div>
 <div id="<?= $zou ?>" class="flex_h blanc border4 boxshadow absolute" style="max-width:50%;height:100%;right:0;top:0;overflow:hidden;display:none;z-index:100;">
 	<div class="applink applinkblock padding ededed">
-		<a onclick="$('<?= $zou ?>').hide();" class="textrouge"><i class="fa fa-close"></i></a>
+		<a onclick="fmo_hide(fmo_el('<?= $zou ?>'));" class="textrouge"><i class="fa fa-close"></i></a>
 	</div>
 	<div id="for_<?= $zou ?>" class="flex_main borderl" style="overflow:hidden;">
 	</div>
 </div>
 <script>
-	$ ('<?=$zouzou?>').on ('click', '[data-table][data-table_value][data-link]', function (event, node) {
-		var table       = node.readAttribute ('data-table');
-		var table_value = node.readAttribute ('data-table_value');
-		$ ('<?=$zou?>').show ();
-		$ ('for_<?=$zou?>').loadModule ('app/app/app_fiche_preview', 'table=' + table + '&table_value=' + table_value);
+	/*
+	 * Modified: 2026-08-11 — migrated off the PrototypeJS compatibility shims
+	 * ($, .on, .readAttribute, .show, .hide) to native DOM, with file-local
+	 * `fmo_` helpers. toggleContent / unToggleContent / loadModule are not shim
+	 * calls: engine/methods.js installs them on HTMLElement.prototype.
+	 */
+	function fmo_el(ref) {
+		return typeof ref === 'string' ? document.getElementById(ref) : ref;
+	}
+
+	function fmo_show(node) { if (node) node.style.display = ''; return node; }
+	function fmo_hide(node) { if (node) node.style.display = 'none'; return node; }
+
+	/**
+	 * Prototype's Element#on. With a selector it delegates, calling the handler
+	 * as (event, matchedElement); without one it is a plain listener.
+	 */
+	function fmo_on(root, eventName, selectorOrHandler, maybeHandler) {
+		if (!root) return;
+		if (maybeHandler === undefined) {
+			root.addEventListener(eventName, selectorOrHandler);
+			return;
+		}
+		var selector = selectorOrHandler, handler = maybeHandler;
+		root.addEventListener(eventName, function (event) {
+			var target = event.target;
+			while (target && target !== root) {
+				if (target.nodeType === 1 && target.matches(selector)) {
+					return handler(event, target);
+				}
+				target = target.parentNode;
+			}
+		}, false);
+	}
+
+	fmo_on (fmo_el ('<?=$zouzou?>'), 'click', '[data-table][data-table_value][data-link]', function (event, node) {
+		var table       = node.getAttribute ('data-table');
+		var table_value = node.getAttribute ('data-table_value');
+		fmo_show (fmo_el ('<?=$zou?>'));
+		fmo_el ('for_<?=$zou?>').loadModule ('app/app/app_fiche_preview', 'table=' + table + '&table_value=' + table_value);
 	});
 	//
-	$ ('<?=$zouzou?>').on ('click', '[data-link][data-table][data-vars]', function (event, node) {
-		if ( node.readAttribute ('data-table_value') ) return;
-		var table = node.readAttribute ('data-table');
-		var vars  = node.readAttribute ('data-vars');
-		$ ('<?=$zou?>').show ();
-		$ ('for_<?=$zou?>').loadModule ('app/app_liste/app_liste', 'table=' + table + '&' + vars);
+	fmo_on (fmo_el ('<?=$zouzou?>'), 'click', '[data-link][data-table][data-vars]', function (event, node) {
+		if ( node.getAttribute ('data-table_value') ) return;
+		var table = node.getAttribute ('data-table');
+		var vars  = node.getAttribute ('data-vars');
+		fmo_show (fmo_el ('<?=$zou?>'));
+		fmo_el ('for_<?=$zou?>').loadModule ('app/app_liste/app_liste', 'table=' + table + '&' + vars);
 		// act_chrome_gui('app/app_liste/app_liste', 'table=' + table + '&' + vars);
 		// alert('dre')
 	})

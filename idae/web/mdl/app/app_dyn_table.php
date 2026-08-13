@@ -79,7 +79,7 @@
 	};
 
 	tableGrid1 = new MY.TableGrid(tableModel);
-	tableGrid1.render($('mytable1'));
+	tableGrid1.render(document.getElementById('mytable1'));
 
 
 </script>

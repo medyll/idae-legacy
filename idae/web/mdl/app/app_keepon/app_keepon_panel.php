@@ -50,21 +50,32 @@
 		}
 	}
 
+	/*
+	 * Modified: 2026-08-11 — migrated off the PrototypeJS compatibility shims
+	 * ($$, .invoke, .add/removeClassName) to native DOM, with file-local `kpp_`
+	 * helpers. (`kp_` is taken by app/app_keepon.js, loaded on every page.)
+	 */
+	function kpp_setActive(selector, on) {
+		document.querySelectorAll(selector).forEach(function (node) {
+			node.classList[on ? 'add' : 'remove']('active');
+		});
+	}
+
 	keepon_agent_state_retrieve = function () {
 		if (keepon_get_key('keepon_connected')==true) {
-			$$('.keepon_connected').invoke('addClassName', 'active');
-			$$('.keepon_disconnected').invoke('removeClassName', 'active');
+			kpp_setActive('.keepon_connected', true);
+			kpp_setActive('.keepon_disconnected', false);
 		} else {
-			$$('.keepon_connected').invoke('removeClassName', 'active');
-			$$('.keepon_disconnected').invoke('addClassName', 'active');
+			kpp_setActive('.keepon_connected', false);
+			kpp_setActive('.keepon_disconnected', true);
 		}
 	}
 	keepon_disconnect_agent = function () {
 		// agent présent pour affichage bouton sur site
 		socket_keep_on.emit('undeclare_glue', {APPID: localStorage.PHPSESSID, IDAGENT: localStorage.IDAGENT});
 		// statut bouton
-		$$('.keepon_connected').invoke('removeClassName', 'active');
-		$$('.keepon_disconnected').invoke('addClassName', 'active');
+		kpp_setActive('.keepon_connected', false);
+		kpp_setActive('.keepon_disconnected', true);
 		// keepon_store_key
 		keepon_store_key('keepon_connected', false);
 	}
@@ -72,8 +83,8 @@
 		// agent présent pour affichage bouton sur site
 		socket_keep_on.emit('declare_glue', {APPID: localStorage.PHPSESSID, IDAGENT: localStorage.IDAGENT});
 		// statut bouton
-		$$('.keepon_connected').invoke('addClassName', 'active');
-		$$('.keepon_disconnected').invoke('removeClassName', 'active');
+		kpp_setActive('.keepon_connected', true);
+		kpp_setActive('.keepon_disconnected', false);
 		// keepon_store_key
 		keepon_store_key('keepon_connected', true);
 	}

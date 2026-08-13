@@ -11,10 +11,7 @@ var require_trame = {
 		'javascript/vendor/moment.js',
 		'javascript/vendor/polyfill/json2.js'],
 	require_hell       : [
-		'javascript/vendor/prototype/prototype-1.7.3.js',
-		'javascript/vendor/scriptaculous/scriptaculous.js',
-		'javascript/vendor/scriptaculous/effects.js',
-		'javascript/vendor/scriptaculous/dragdrop.js',
+		'javascript/vendor/idae-be/idae-be.iife.js',
 	],
 	require_insertionQ : ['javascript/app/app.js',/*'javascript/app/app_mutateobserve.js',*/'javascript/vendor/insertionQ.js', 'javascript/app/app_insertionQ.js'],
 	require_to_log     : [
@@ -34,7 +31,6 @@ var require_trame = {
 		'javascript/vendor/detect-element-resize.js',
 		'javascript/vendor/pikaday.js',
 		'javascript/vendor/jsoncookie.js',
-		'javascript/vendor/sizzle.js',
 		'javascript/vendor/tinymce/tinymce.min.js',
 		'javascript/vendor/swiper.min.js'],
 	require_boostrap   : ['javascript/app/app_bootstrap.js'],
@@ -62,18 +58,12 @@ var require_trame = {
 	require_librairie  : [
 		'javascript/librairie/observers.js',
 		'javascript/librairie/appGui.js',
-		'javascript/librairie/validation.js',
 		'javascript/librairie/autoToggle.js',
-		'javascript/librairie/resize.js',
 		'javascript/librairie/myddeNotifier.js',
 		'javascript/librairie/cropper.js',
-		'javascript/librairie/resizeGui.js',
-		'javascript/librairie/sortdiv.js',
 		'javascript/librairie/tableGui.js',
 		'javascript/librairie/textarea.js',
-		'javascript/librairie/picPicker.js',
 		'javascript/librairie/mask.js',
-		'javascript/librairie/myddeupload.js',
 		'javascript/librairie/myddeAttach.js',
 		'javascript/librairie/myddeview.js',
 		'javascript/librairie/myddeSelection.js',
@@ -98,18 +88,35 @@ var require_sheet = [
 	HTTPCSS + 'officeui/fabric.components.css',
 	HTTPCSS + 'vendor/animate/animate-min.css'
 ];
-// BANG
-// Force cache refresh
-var cache_buster = '?v=' + new Date().getTime();
+// Per-file cache-busting: index.php injects window.FILE_VERSIONS, a
+// {relative_path: mtime} map built server-side (appfunc/asset_versions.php).
+// A file's query string only changes when the file's own mtime does, so
+// bag.js's IndexedDB cache actually gets used — a page-appended
+// Date.now() busted every file on every load, forever, defeating that
+// cache entirely. Falls back to Date.now() for a path with no manifest
+// entry (e.g. a file added after the manifest was generated in this
+// request — shouldn't happen since both come from the same request, but
+// cheap insurance) so a missing entry never means "silently uncached
+// forever" instead of "cached like normal after the next load".
+var FILE_VERSIONS = window.FILE_VERSIONS || {};
+// Strips any pre-existing query string before the manifest lookup and
+// before rebuilding the URL — engine.js shipped with a hardcoded
+// '?v=debug1' manual cache-bust that the automatic system below makes
+// unnecessary; left as-is it would double up into '?v=debug1?v=169...',
+// a malformed URL that also never benefited from the manifest lookup.
+var version_of = function (path) {
+	var clean = path.split('?')[0];
+	return clean + '?v=' + (FILE_VERSIONS[clean] || new Date().getTime());
+};
 for (var key in require_trame) {
     if (require_trame.hasOwnProperty(key)) {
         for(var i=0; i<require_trame[key].length; i++) {
-        	require_trame[key][i] += cache_buster;
+        	require_trame[key][i] = version_of(require_trame[key][i]);
         }
     }
 }
 for(var i=0; i<require_sheet.length; i++) {
-    require_sheet[i] += cache_buster;
+    require_sheet[i] = version_of(require_sheet[i]);
 }
 
 var app_dom_loaded = false;
@@ -147,7 +154,7 @@ var dyn_require = function () {
 			console.log ('log ok');
 			if ( localStorage.getItem ('wallpaper') ) {
 				setTimeout (function () {
-					$ ('body').setStyle ({ backgroundImage : localStorage.getItem ('wallpaper') });
+					document.body.style.backgroundImage = localStorage.getItem ('wallpaper');
 				}, 0);
 			}
 		})
@@ -182,11 +189,20 @@ function require_progress(value, max, text) {
 	}
 	//
 	if ( value == max ) {
-		$ ('main_progress_hold').fade ('bounce');
+		// Was Scriptaculous' Effect.Fade via the shim; fadeElement
+		// (engine/methods.js) is the native replacement, same contract.
+		// The 'bounce' argument was already inert under the shim — Element#
+		// fade(options) only ever read an options *object* (from/to/
+		// afterFinish); a string doesn't have those keys, so this always ran
+		// the plain default fade, never an actual bounce effect.
+		fadeElement (document.getElementById ('main_progress_hold'));
 	}
 }
 
-var require_boot = ['javascript/vendor/js.cookie.js' + cache_buster, 'javascript/vendor/socket.io.js' + cache_buster];
+var require_boot = [
+	version_of('javascript/vendor/js.cookie.js'),
+	version_of('javascript/vendor/socket.io.js')
+];
 bag.require (require_sheet).then (function () {
 	bag.require (require_boot).then (
 		function () {

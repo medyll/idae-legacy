@@ -35,7 +35,7 @@
 </div>
 <script>
 	// load_table_in_zone ('nbRows=10&table=<?=$table?>&vars[idagent]=<?=$_SESSION['idagent']?>&vars[dateDebut<?=$Table?>]=<?=date('Y-m-d')?>', 'cal_list_echeance');
-	$ ('cal_echeance').observe ('dom:act_click', function (event) {
+	document.getElementById('cal_echeance').addEventListener('dom:act_click', function (event) {
 		load_table_in_zone ('nbRows=10&table=<?=$table?>&vars[idagent]=<?=$_SESSION['idagent']?>&vars[dateDebut<?=$Table?>]=' + event.memo.value_us, 'cal_list_echeance');
 
 	})

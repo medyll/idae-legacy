@@ -75,7 +75,7 @@
 <?php } ?>
 <?php if (filter_var($DAMAIL, FILTER_VALIDATE_EMAIL)) {
 	$meta = 'meta[email]=' . $DAMAIL; ?>
-	<div class="fond_noir color_fond_noir padding_more flex_h flex_margin flex_align_middle" onclick="$(this).fire('dom:act_click',{value:'<?= $DAMAIL ?>',meta:'<?= $meta ?>'})">
+	<div class="fond_noir color_fond_noir padding_more flex_h flex_margin flex_align_middle" onclick="idae_fire(this,'dom:act_click',{value:'<?= $DAMAIL ?>',meta:'<?= $meta ?>'})">
 		<div class="padding borderr"><i class="fa fa-link"></i></div>
 		<div>
 			<a class="autoToggle">
@@ -88,7 +88,7 @@
 <?php
 	function display_contact($email, $nom, $meta = '') {
 
-		$onclick = "onclick=\"$(this).fire('dom:act_click',{value:'$email',meta:'$meta'})\"";
+		$onclick = "onclick=\"idae_fire(this,'dom:act_click',{value:'$email',meta:'$meta'})\"";
 
 		$out = "<div $onclick class='borderb padding'><a  class='autoToggle flex flex_h flex_margin flex_align_top cursor'>";
 		$out .= "<div><i class='fa fa-user-o'></i></div>";

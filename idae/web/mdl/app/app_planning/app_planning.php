@@ -31,13 +31,13 @@
 		</div>
 		<div class="flex_main" >
 			<div class="applink applinkblock toggler applinkbig" id="app_planning_menu">
-				<a class="autoToggle active flex flex_align_middle flex_h" onclick="$('loaderPlanning').loadModule('app/app_planning/app_planning_hebdo');"> <span class="flex_main"><?=idioma('Hebdomadaire')?></span><i class="fa fa-caret-right"></i></a>
-				<a class="autoToggle flex flex_align_middle flex_h" onclick="$('loaderPlanning').loadModule('app/app_planning/app_planning_quoti_bi');"><span class="flex_main"><?=idioma('Bi-qotidien')?></span><i class="fa fa-caret-right"></i></a>
-				<a class="autoToggle flex flex_align_middle flex_h" onclick="$('loaderPlanning').loadModule('app/app_planning/app_planning_quoti');"><span class="flex_main"><?=idioma('Quotidien')?></span><i class="fa fa-caret-right"></i></a>
-				<a class="autoToggle flex flex_align_middle flex_h" onclick="$('loaderPlanning').loadModule('app/app_planning/app_planning_mens','<?= $time ?>','','');"><span class="flex_main"><?=idioma('Mensuel')?></span><i class="fa fa-caret-right"></i></a>
+				<a class="autoToggle active flex flex_align_middle flex_h" onclick="apl_el('loaderPlanning').loadModule('app/app_planning/app_planning_hebdo');"> <span class="flex_main"><?=idioma('Hebdomadaire')?></span><i class="fa fa-caret-right"></i></a>
+				<a class="autoToggle flex flex_align_middle flex_h" onclick="apl_el('loaderPlanning').loadModule('app/app_planning/app_planning_quoti_bi');"><span class="flex_main"><?=idioma('Bi-qotidien')?></span><i class="fa fa-caret-right"></i></a>
+				<a class="autoToggle flex flex_align_middle flex_h" onclick="apl_el('loaderPlanning').loadModule('app/app_planning/app_planning_quoti');"><span class="flex_main"><?=idioma('Quotidien')?></span><i class="fa fa-caret-right"></i></a>
+				<a class="autoToggle flex flex_align_middle flex_h" onclick="apl_el('loaderPlanning').loadModule('app/app_planning/app_planning_mens','<?= $time ?>','','');"><span class="flex_main"><?=idioma('Mensuel')?></span><i class="fa fa-caret-right"></i></a>
 				<div class="padding bordertb">
-				<a class="autoToggle flex flex_align_middle flex_h textvert" onclick="$('loaderPlanning').loadModule('app/app_liste/app_liste','table=tache&vars[idagent]=<?=$_SESSION['idagent']?>&vars[ne][codeTache_statut]=END',{value:'planning'});"><span class="flex_main borderr"><?=idioma('Liste taches actives')?></span><i class="fa fa-caret-right"></i></a>
-				<a class="autoToggle flex flex_align_middle flex_h textrouge" onclick="$('loaderPlanning').loadModule('app/app_liste/app_liste','table=tache&vars[idagent]=<?=$_SESSION['idagent']?>&vars[codeTache_statut]=END',{value:'planning'});"><span class="flex_main borderr"><?=idioma('Liste taches inactives')?></span><i class="fa fa-caret-right"></i></a>
+				<a class="autoToggle flex flex_align_middle flex_h textvert" onclick="apl_el('loaderPlanning').loadModule('app/app_liste/app_liste','table=tache&vars[idagent]=<?=$_SESSION['idagent']?>&vars[ne][codeTache_statut]=END',{value:'planning'});"><span class="flex_main borderr"><?=idioma('Liste taches actives')?></span><i class="fa fa-caret-right"></i></a>
+				<a class="autoToggle flex flex_align_middle flex_h textrouge" onclick="apl_el('loaderPlanning').loadModule('app/app_liste/app_liste','table=tache&vars[idagent]=<?=$_SESSION['idagent']?>&vars[codeTache_statut]=END',{value:'planning'});"><span class="flex_main borderr"><?=idioma('Liste taches inactives')?></span><i class="fa fa-caret-right"></i></a>
 			</div></div>
 		</div>
 		<div class="titre_entete ededed bordert aligncenter">
@@ -50,7 +50,17 @@
 </div>
 <script>
 // load_table_in_zone('table_tache','loaderPlanning');
-	$('cal_planning_<?=$time?>').observe('dom:act_click', function (event) {
+	/*
+	 * Modified: 2026-08-11 — migrated off the PrototypeJS compatibility shims
+	 * ($, .observe) to native DOM, with a file-local `apl_` helper. (`ap_` is
+	 * taken by app/app_planning.js, loaded on every page.) loadModule is not a
+	 * shim call: engine/methods.js puts it on HTMLElement.prototype.
+	 */
+	function apl_el(ref) {
+		return typeof ref === 'string' ? document.getElementById(ref) : ref;
+	}
+
+	apl_el('cal_planning_<?=$time?>').addEventListener('dom:act_click', function (event) {
 		navCal(event.memo.value)
 		navCalUs(event.memo.value_us)
 	})

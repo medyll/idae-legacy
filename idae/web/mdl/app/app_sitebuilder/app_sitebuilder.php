@@ -38,24 +38,58 @@
 	</div>
 </div>
 <script>
-	$ ('dropzone_site').on ('dom:act_drop', function (event, node) {
-		var node      = $ (node)
-		var drop_node = $ (event.memo.drop_node);
-		// if ( !node.readAttribute ('dropzone') ) node = node.up ('[dropzone]')
-		Event.stop (event);
-		var className = drop_node.readAttribute ('data-className') || '';
-		var type      = drop_node.readAttribute ('data-type') || 'normal';
+	/*
+	 * Modified: 2026-08-11 — migrated off the PrototypeJS compatibility shims
+	 * ($, .on, .select, .first, .addClassName, .insert, .readAttribute,
+	 * Event.stop) to native DOM, with file-local `asb_` helpers. The two
+	 * `$(node)` wrappers were no-ops — the shim patches HTMLElement.prototype,
+	 * so wrapping an element hands back the same element.
+	 */
+	function asb_el(ref) {
+		return typeof ref === 'string' ? document.getElementById(ref) : ref;
+	}
+
+	/**
+	 * Prototype's Element#on. With a selector it delegates, calling the handler
+	 * as (event, matchedElement); without one it is a plain listener.
+	 */
+	function asb_on(root, eventName, selectorOrHandler, maybeHandler) {
+		if (!root) return;
+		if (maybeHandler === undefined) {
+			root.addEventListener(eventName, selectorOrHandler);
+			return;
+		}
+		var selector = selectorOrHandler, handler = maybeHandler;
+		root.addEventListener(eventName, function (event) {
+			var target = event.target;
+			while (target && target !== root) {
+				if (target.nodeType === 1 && target.matches(selector)) {
+					return handler(event, target);
+				}
+				target = target.parentNode;
+			}
+		}, false);
+	}
+
+	asb_on (asb_el ('dropzone_site'), 'dom:act_drop', function (event, node) {
+		var drop_node = event.memo.drop_node;
+		// if ( !node.getAttribute ('dropzone') ) node = asb_up (node, '[dropzone]')
+		event.preventDefault ();
+		event.stopPropagation ();
+		var className = drop_node.getAttribute ('data-className') || '';
+		var type      = drop_node.getAttribute ('data-type') || 'normal';
 		switch (type) {
 			case 'normal' :
 				var  inserted_node = create_element_of('<div class="padding ededed"><div class="padding borderb">'+className+'</div> <div dropzone="dropzone" class="blanc padding_more   border4"></div></div>');
-				inserted_node.select('[dropzone]').first().addClassName(className);
-				node.insert (inserted_node);
+				inserted_node.querySelector('[dropzone]').classList.add(className);
+				// Element#insert with a bare node appends it at the bottom.
+				node.appendChild (inserted_node);
 				break;
 			case 'element' :
 				var  inserted_node = create_element_of('<div class="padding flex_main"><div act_defer mdl="app/app_sitebuilder/app_sitebuilder_element"></div></div>');
 
-				// inserted_node.select('[dropzone]').first().addClassName(className);
-				node.insert (inserted_node);
+				// inserted_node.querySelector('[dropzone]').classList.add(className);
+				node.appendChild (inserted_node);
 				break;
 		}
 		register_site_module (node);

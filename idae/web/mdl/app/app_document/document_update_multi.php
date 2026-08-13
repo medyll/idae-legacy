@@ -88,8 +88,15 @@
 						</label>
 						<div id = "treg"></div>
 						<script>
-							//   new myddeDatalist($('id
-							<?=$uniqid?>'));
+							/*
+							 * Modified: 2026-08-11 — this commented-out call spanned two
+							 * lines behind a single `//`, so its second line was live code
+							 * and a syntax error, making the whole block unparseable.
+							 * Turned into a block comment; the call stays disabled, as
+							 * intended.
+							 *
+							 *   new myddeDatalist(document.getElementById('id<?=$uniqid?>'));
+							 */
 						</script>
 						<?php
 						break;

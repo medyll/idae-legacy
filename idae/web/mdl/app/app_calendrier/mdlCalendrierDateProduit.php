@@ -14,10 +14,15 @@ $tabmonth  = array(1 => "Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "
 $tabjour  = array("Lundi","Mardi","Mercredi","Jeudi","Vendredi","Samedi","Dimanche");
 $tabjour  = array("L","M","M","J","V","S","D");
 
-if(!empty($_POST['form'])){ $inputString = "$('".$_POST['form']."').".$_POST['input']; }
-if(empty($_POST['form']) && !empty($_POST['input'] )){ $inputString = "$('".$_POST['input']."')"; }
+// Modified: 2026-08-11 — $inputString is interpolated straight into the
+// onClick attribute below as fillInput's first argument. It used to emit
+// `$('someform').somefield` / `$('someid')`, a call through the Prototype $()
+// shim; fillInput (mdlCalendrierHeure.php's twin) already accepts either a
+// plain id string or an element, which is exactly what $() absorbed. Emits
+// the id/property-access expression as plain JS now, unshimmed.
+if(!empty($_POST['form'])){ $inputString = "document.getElementById('".$_POST['form']."').".$_POST['input']; }
+if(empty($_POST['form']) && !empty($_POST['input'] )){ $inputString = "'".$_POST['input']."'"; }
 if(!empty($_POST['function'])){ $inputString = $_POST['function']."()"; }
-//$inputString = "$('".$_POST['input']."')";
 $input = time();
 
 if(!empty($_POST['date'])){
@@ -77,11 +82,15 @@ $moisSuiv = mktime(12,0,0,$moisEnCours+1,$jourEnCours,$anneeEnCours);
  
 
  
+/*
+ * Modified: 2026-08-11 — migrated off the PrototypeJS `$` shim. `input`
+ * arrives here both as an id and as an element, which is what $() absorbed.
+ */
 fillInput = function(input,vars){
 	<?php if(!empty($_POST['function'])){ ?> 
 		<?=$_POST['function']?>(vars) 
 	<?php }else{ ?>
-	$(input).value = vars;
+	(typeof input === 'string' ? document.getElementById(input) : input).value = vars;
 	<?php }?> 
 	return false;
 }
