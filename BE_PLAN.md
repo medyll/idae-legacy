@@ -9,10 +9,11 @@ Lire ceci avant de continuer, puis lire les sections "Reprise" du bas du
 fichier (ordre chronologique inverse au-dessus de cette section) pour le
 détail des décisions et des bugs déjà rencontrés — ne pas les refaire.
 
-**Où c'en est** : 8 → 3 shims (`shim-core`, `shim-class`, `shim-event`,
-dans `idae/web/javascript/vendor/idae-be-shim/`). `shim-effects`,
-`shim-draggable`, `shim-enumerable`, `shim-element` et `shim-form` sont
-supprimés. `vendor/sizzle.js` a également été retiré du chargeur et du disque.
+**Où c'en est** : 8 → 1 shim (`shim-core`, dans
+`idae/web/javascript/vendor/idae-be-shim/`). `shim-effects`,
+`shim-draggable`, `shim-enumerable`, `shim-element`, `shim-form`,
+`shim-class` et `shim-event` sont supprimés. `vendor/sizzle.js` a également
+été retiré du chargeur et du disque.
 
 **Suppression de `shim-element` (13/08)** : audit refait sans lookbehind sur
 les JS chargés et tous les gabarits PHP/Latte/TPL. Les quatre appels actifs
@@ -43,11 +44,29 @@ Validation bornée, sans retry : `form-serialize` 1/1,
 `explorer` 4/4. Les 31 gabarits passent `php -l` et les quatre fichiers JS
 modifiés passent `node --check`.
 
+**Suppression de `shim-class` et `shim-event` (13/08)** : audit limité aux
+scripts réellement listés dans `main_bag.js`,
+puis audit exhaustif hors vendor/flotr. Aucun `Class.create`,
+`Object.extend`, `Template` ni API DOM `Event.*` n'est encore exécuté.
+Les `.on()` restants sont ceux de Socket.IO/Draggabilly. Les cinq appels Class
+textuels restaient dans `app_draggable.js`, `app_sse.js` et
+`myddeCropper.js` : aucun chargeur, aucune instanciation, aucune référence
+hors de leur propre fichier ; ces trois fichiers morts sont supprimés avec les
+shims. Le front public `bin/templates/app/appsite/` reste hors du runtime SPA
+et conserve son propre jeu de scripts, comme documenté dans le garde templates.
+`shim-core` instrumente désormais aussi ses sept fonctions globales : le
+contrôle positif `IDAE_SHIM_WARN` utilise `$A` au lieu d'une méthode Event
+supprimée.
+Le premier smoke a révélé le seul consommateur chargé oublié par le filtre
+initial (qui ne prenait que `app/engine/librairie`) :
+`vendor/jsoncookie.js`, encore en `Class.create`/`Object.extend` avec
+`Array#size` et `String#strip`. Il est désormais constructeur natif +
+`Object.assign`/`length`/`trim`. Validation sans retry sur
+`127.0.0.1` : `prototype-surface` 2/2, `template-api-guard` 1/1,
+`shim-warn` 1/1 et `smoke` 1/1.
+
 **Ce qui reste à faire, dans l'ordre** :
-1. Réauditer `shim-class` et `shim-event` après Form : zéro appelant gabarit,
-   mais leurs usages JS et leurs dépendances à Core doivent être prouvés avant
-   toute suppression.
-2. `shim-core.js` (405 lignes, `$`/`$$`/`$A`/`$H`/`$w`/`$F`/`$R`, `Hash`,
+1. `shim-core.js` (405 lignes, `$`/`$$`/`$A`/`$H`/`$w`/`$F`/`$R`, `Hash`,
    `ObjectRange`) — à faire **en dernier**. Ne pas y toucher avant que les
    autres familles soient vides.
 

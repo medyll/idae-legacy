@@ -13,8 +13,6 @@ var require_trame = {
 	require_hell       : [
 		'javascript/vendor/idae-be/idae-be.iife.js',
 		'javascript/vendor/idae-be-shim/shim-core.js',
-		'javascript/vendor/idae-be-shim/shim-class.js',
-		'javascript/vendor/idae-be-shim/shim-event.js',
 	],
 	require_insertionQ : ['javascript/app/app.js',/*'javascript/app/app_mutateobserve.js',*/'javascript/vendor/insertionQ.js', 'javascript/app/app_insertionQ.js'],
 	require_to_log     : [

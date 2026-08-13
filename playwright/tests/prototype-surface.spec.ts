@@ -34,7 +34,7 @@ const GLOBAL_FUNCTIONS = ['$', '$$', '$A', '$H', '$w', '$F', '$R'];
 // engine/initApp.js — was unreachable code, since Responders only fire for
 // requests created through Ajax.Request/Ajax.Updater. 'Form' dropped
 // 2026-08-13 after those template callers moved to serializeFields.
-const GLOBAL_OBJECTS = ['Prototype', 'Event', 'Try'];
+const GLOBAL_OBJECTS = ['Prototype', 'Try'];
 
 // 'PeriodicalExecuter' dropped 2026-08-11 with the Ajax namespace it shipped
 // alongside. It never had a caller anywhere in the app — asserting it kept a
@@ -44,11 +44,10 @@ const GLOBAL_OBJECTS = ['Prototype', 'Event', 'Try'];
 // Draggable — and now carries its own copy, so nothing global provides these
 // any more. Asserting them here would have blocked the deletion for the sake
 // of a class no shim owns.
-const CONSTRUCTORS = ['Class', 'Template', 'Hash', 'ObjectRange'];
+const CONSTRUCTORS = ['Hash', 'ObjectRange'];
 
-// Element compatibility now belongs only to shim-event. The generic Element
-// surface was removed with shim-element on 2026-08-13.
-const ELEMENT_METHODS = ['on', 'observe', 'stopObserving', 'fire'];
+// Every compatibility method has left HTMLElement.prototype.
+const ELEMENT_METHODS: string[] = [];
 
 // ARRAY_METHODS / STRING_METHODS / FUNCTION_METHODS / NUMBER_METHODS — 49
 // names in all — were dropped 2026-08-12 together with shim-enumerable.js,
@@ -76,13 +75,7 @@ const ELEMENT_METHODS = ['on', 'observe', 'stopObserving', 'fire'];
 // come from the corrected scan.
 
 /** Static members reached through a namespace object. */
-const NAMESPACED = [
-  ['Class', 'create'],
-  ['Object', 'extend'],
-  ['Event', 'observe'],
-  ['Event', 'stop'],
-  ['Event', 'element'],
-];
+const NAMESPACED: string[][] = [];
 
 test('prototype surface: every API the app calls is present', async () => {
   const page = getPage();
@@ -157,16 +150,6 @@ test('prototype surface: core helpers actually behave', async () => {
         // String#stripTags, String#camelize) went with shim-enumerable on
         // 2026-08-12 — see the note above the element-methods list.
         functionBindThis: (function (this: any) { return this.v; }).bind({ v: 42 })(),
-        // Template is the one Class.create consumer left in the templates,
-        // and its evaluate() no longer runs through String#gsub — shim-class
-        // carries a local cls_gsub. Two placeholders, because the bug a
-        // single-placeholder probe would miss is exactly the one a
-        // non-global regex + String#replace would introduce.
-        templateEvaluate: new w.Template('#{a}-#{b}').evaluate({ a: 'x', b: 'y' }),
-        classCreateWorks: (() => {
-          const K = w.Class.create({ initialize(v: number) { (this as any).v = v; }, get() { return (this as any).v; } });
-          return new K(7).get();
-        })(),
         hashGet: new w.Hash({ a: 5 }).get('a'),
         objectRange: w.$R(1, 3).toArray().join(','),
         dollarW: w.$w('a b c').length,
@@ -187,8 +170,6 @@ test('prototype surface: core helpers actually behave', async () => {
     readAttribute: 'yes',
     getStyleColor: 'rgb(1, 2, 3)',
     functionBindThis: 42,
-    templateEvaluate: 'x-y',
-    classCreateWorks: 7,
     hashGet: 5,
     objectRange: '1,2,3',
     dollarW: 3,

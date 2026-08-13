@@ -388,13 +388,19 @@
     /* ------------------------------------------------------------------ *
      * Exports                                                             *
      * ------------------------------------------------------------------ */
-    global.$ = $;
-    global.$$ = $$;
-    global.$A = $A;
-    global.$w = $w;
-    global.$F = $F;
-    global.$R = $R;
-    global.$H = $H;
+    function warned(name, fn) {
+        return function () {
+            shimWarn('Core', name);
+            return fn.apply(this, arguments);
+        };
+    }
+    global.$ = warned('$', $);
+    global.$$ = warned('$$', $$);
+    global.$A = warned('$A', $A);
+    global.$w = warned('$w', $w);
+    global.$F = warned('$F', $F);
+    global.$R = warned('$R', $R);
+    global.$H = warned('$H', $H);
     global.Hash = Hash;
     global.ObjectRange = ObjectRange;
     global.Try = Try;

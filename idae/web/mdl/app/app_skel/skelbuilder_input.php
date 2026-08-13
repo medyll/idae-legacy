@@ -73,7 +73,7 @@ $arr = $APP->plug('sitebase_app','appscheme')->findOne(array('_id' => $_POST['_i
 	</div>
 	<script>
 		register = function (event) {
-			elem = event.target // was Event.element(event) — the same value
+			elem = event.target // same value as the removed legacy event helper
 			// Was elem.up('tr') — Prototype's Element#up: nearest ancestor
 			// matching the selector.
 			vars = serializeFields(elem.closest('tr'));
