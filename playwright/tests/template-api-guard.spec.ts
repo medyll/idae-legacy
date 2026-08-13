@@ -141,9 +141,12 @@ function scanTemplates(): Found {
     const rel = file.slice(WEB_ROOT.length + 1).split(sep).join('/');
     if (SKIP_PREFIXES.some((p) => rel.startsWith(p))) continue;
 
-    // Strip line comments so a commented-out call does not keep a dead API
-    // alive here.
-    const code = text.replace(/^\s*(\/\/|\*|#).*$/gm, '');
+    // Strip HTML, block and line comments so dead examples cannot keep a shim
+    // alive. Inline onclick/onsubmit attributes remain part of the scan.
+    const code = text
+      .replace(/<!--[\s\S]*?-->/g, '')
+      .replace(/\/\*[\s\S]*?\*\//g, '')
+      .replace(/^\s*(\/\/|#).*$/gm, '');
 
     for (const m of code.matchAll(nsRe)) {
       const key = `${m[1]}.${m[2]}`;
@@ -169,7 +172,9 @@ test('template API guard: every Prototype symbol the templates call exists at ru
   // template vocabulary's distinct-name count to 9. Lowered to keep testing
   // "did the walk run at all", not "how many Prototype names are still
   // in use" — the latter is expected to keep shrinking as Phase 5 continues.
-  expect(found.methods.size, 'template scan found nothing — the walk is broken').toBeGreaterThan(5);
+  // The 2026-08-13 shim-element removal dropped .match()/.show()/.setStyle(),
+  // and the scanner now strips block/HTML comments: 4 live method names remain.
+  expect(found.methods.size, 'template scan found nothing — the walk is broken').toBeGreaterThan(3);
 
   const missing = await page.evaluate(
     ([namespaced, methods]) => {
@@ -185,10 +190,10 @@ test('template API guard: every Prototype symbol the templates call exists at ru
       probe.innerHTML = '<span>x</span>';
       document.body.appendChild(probe);
       const el = typeof w.$ === 'function' ? w.$(probe) : probe;
-      // A name passes if any Prototype-extended host provides it. The scan
-      // cannot tell which receiver a `.foo(` in a template belongs to, and it
-      // does not need to — all it must rule out is "nothing provides it".
-      const hosts: any[] = [el, Array.prototype, String.prototype, Function.prototype, Number.prototype];
+      // A name passes if any possible receiver provides it. DOMTokenList is
+      // included for native classList.toggle/remove calls in inline scripts.
+      const hosts: any[] = [el, probe.classList, Array.prototype, String.prototype,
+        Function.prototype, Number.prototype];
       for (const name of methods) {
         if (!hosts.some((h) => typeof h?.[name] === 'function')) out.methods.push(name);
       }

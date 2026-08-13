@@ -250,7 +250,7 @@
 <script>
 	needResize = function () {
 		iu_select('<?=$listing_img?>', 'img.just_uploaded').forEach(function (node) {
-			node.classList.remove('just_uploaded');//.setStyle({visibility:'hidden'});
+			node.classList.remove('just_uploaded');
 			var dim = iu_getDimensions(node);
 			iu_el('original_width').value = dim.width;
 			iu_el('original_height').value = dim.height;

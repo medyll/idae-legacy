@@ -154,7 +154,8 @@
 	gain_searchbutton = function (form, event) {
 		if ( form.querySelector ('.zone_button') ) {
 			var button_zone = form.querySelector ('.zone_button');
-			if ( event.target.match ('input[type=text]') || event.target.match ('input[type=radio]') ) {
+			// Prototype's Element#match is the native Element#matches predicate.
+			if ( event.target.matches ('input[type=text]') || event.target.matches ('input[type=radio]') ) {
 				var input_zone = event.target;
 				// Was .up('.searchMdl') (nearest matching ANCESTOR, self excluded)
 				// and .next() (next element SIBLING, no selector). closest()
@@ -173,7 +174,7 @@
 				input_insert_after.insertAdjacentElement ('afterend', button_zone)
 			}
 		}
-		if ( event.target.match ('input[type=text]') ) {
+		if ( event.target.matches ('input[type=text]') ) {
 			// gain_search_summary(event.target);
 		}
 	}

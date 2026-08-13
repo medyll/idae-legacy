@@ -3,7 +3,7 @@
  * Event.observe/stopObserving/stop/element/pointer, delegation via
  * Element#on(selector...), Element#fire through CustomEvent, dom:loaded.
  *
- * Depends on: shim-core.js, shim-element.js
+ * Depends on: shim-core.js
  * (shim-enumerable was deleted 2026-08-12; the one thing this file used from
  * it — Function#defer, line ~195 — was already written as a guarded
  * `fn.defer ? fn.defer() : fn()`, so it now takes the immediate branch.)
@@ -90,7 +90,10 @@
         findElement: function (event, expression) {
             var element = Event.element(event);
             if (!expression) return element;
-            return element.match(expression) ? element : element.up(expression);
+            // Prototype's match() tested self; up(expression) searched only
+            // matching ancestors, excluding self.
+            return element.matches(expression) ? element :
+                (element.parentElement ? element.parentElement.closest(expression) : null);
         },
 
         isLeftClick: function (event) { return event.button === 0; },
@@ -185,6 +188,17 @@
     }
     if (NATIVE_ELEMENT_PROTO) {
         NATIVE_ELEMENT_PROTO.on = delegateOn;
+        NATIVE_ELEMENT_PROTO.observe = function (eventName, handler) {
+            return Event.observe(this, eventName, handler);
+        };
+        NATIVE_ELEMENT_PROTO.stopObserving = function (eventName, handler) {
+            return Event.stopObserving(this, eventName, handler);
+        };
+        NATIVE_ELEMENT_PROTO.fire = function (eventName, memo, bubble) {
+            return Event.fire(this, eventName, memo, bubble);
+        };
+        // shim-core's warning hook resolves this list after every shim loads.
+        global.Element.__shimMethods = ['on', 'observe', 'stopObserving', 'fire'];
     }
 
     /* ------------------------------------------------------------------ *

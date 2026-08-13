@@ -97,7 +97,8 @@
 			this.expl_preview_zone = document.getElementById ('auto_expl_preview_zone');
 		}
 		this.act_target = this.expl_preview_zone.querySelector ('[expl_preview_zone_file]');
-		this.expl_preview_zone.show ();
+		// Prototype's show() only restored the inline display value here.
+		this.expl_preview_zone.style.display = '';
 		this.act_target.loadModule ('app/app_img/app_img_upload',vars);
 	}
 </script>

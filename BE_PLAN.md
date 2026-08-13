@@ -9,25 +9,36 @@ Lire ceci avant de continuer, puis lire les sections "Reprise" du bas du
 fichier (ordre chronologique inverse au-dessus de cette section) pour le
 détail des décisions et des bugs déjà rencontrés — ne pas les refaire.
 
-**Où c'en est** : 8 → 5 shims (`shim-core`, `shim-class`, `shim-element`,
-`shim-event`, `shim-form`, dans `idae/web/javascript/vendor/idae-be-shim/`).
-`shim-effects`, `shim-draggable`, `shim-enumerable` supprimés — plus aucun
-appelant. `shim-class` et `shim-event` : 0 appelant gabarit restant (mais pas
-supprimables, `shim-core`/`shim-element` en dépendent encore en interne pour
-d'autres méthodes).
+**Où c'en est** : 8 → 4 shims (`shim-core`, `shim-class`, `shim-event`,
+`shim-form`, dans `idae/web/javascript/vendor/idae-be-shim/`).
+`shim-effects`, `shim-draggable`, `shim-enumerable` et `shim-element` supprimés.
+`vendor/sizzle.js` a également été retiré du chargeur et du disque. Travail du
+13/08 encore non commité dans le worktree.
+
+**Suppression de `shim-element` (13/08)** : audit refait sans lookbehind sur
+les JS chargés et tous les gabarits PHP/Latte/TPL. Les quatre appels actifs
+étaient trois `Element#match` dans `app_explorer_search.php` et un
+`Element#show` dans `image_dyn.php`, migrés vers `matches()` et
+`style.display = ''`. Huit `Insertion.Top` résiduels dans quatre gabarits ont
+été remplacés par `insertion: true` : `app_socket.js` ne testait déjà que la
+truthiness de l'option avant son propre `sk_insert(..., {top: ...})`. Le seul
+couplage interne, `Event.findElement` (`match` + `up`), est maintenant natif ;
+`shim-event` installe lui-même `on/observe/stopObserving/fire`.
+Validation bornée sur `127.0.0.1` : `prototype-surface` 2/2,
+`template-api-guard` 1/1, `template-parse-guard` 1/1, `shim-warn` 1/1,
+`smoke` 1/1 et `explorer` 4/4. Aucun processus Playwright orphelin.
 
 **Ce qui reste à faire, dans l'ordre** :
-1. `shim-element.js` (899 lignes) — ~19 sites de gabarits vivants, mesurés
-   pour la dernière fois dans le commit `d73367a`. Concentrés sur peu de
-   fichiers. Refaire l'audit avant de toucher quoi que ce soit — voir la
-   méthode ci-dessous, le piège du regex y est documenté.
-2. `shim-form.js` (347 lignes) — **le vrai morceau**, ~47 sites, presque tous
+1. `shim-form.js` (347 lignes) — **le vrai morceau**, ~47 sites, presque tous
    en attributs `onclick`/`onsubmit` inline dans les gabarits PHP (pas du
    JS). `Form.serialize`/`Form.serializeElements`/`.serialize()` sur les
    formulaires. Chantier de gabarits, fichier par fichier.
+2. Réauditer `shim-class` et `shim-event` après Form : zéro appelant gabarit,
+   mais leurs usages JS et leurs dépendances à Core doivent être prouvés avant
+   toute suppression.
 3. `shim-core.js` (405 lignes, `$`/`$$`/`$A`/`$H`/`$w`/`$F`/`$R`, `Hash`,
-   `ObjectRange`) — à faire **en dernier** : les 4 autres shims s'appuient
-   dessus. Ne pas y toucher avant que 1 et 2 soient vides.
+   `ObjectRange`) — à faire **en dernier**. Ne pas y toucher avant que les
+   autres familles soient vides.
 
 **Méthode qui marche** (voir commits `66d9cd3`, `9128c80`, `d73367a`) :
 - Grep les vrais appelants **avant** de migrer — JS chargé (`main_bag.js`'s
@@ -54,7 +65,7 @@ d'autres méthodes).
   lancer après chaque modif de shim : `prototype-surface`,
   `template-api-guard`, `template-parse-guard`, `shim-warn`, `smoke`.
 - `template-api-guard.spec.ts` a un garde-fou interne
-  (`found.methods.size > 5`, anciennement `> 10`) qui casse mécaniquement à
+  (`found.methods.size > 3`, anciennement `> 10`) qui casse mécaniquement à
   chaque suppression de site vivant — c'est prévu, baisser le seuil et
   documenter pourquoi (déjà fait deux fois, voir commit `d73367a`).
 - Ne jamais naviguer sur `localhost` — `http://127.0.0.1:8080` ou un nom
@@ -224,7 +235,7 @@ Emplacement : `idae/web/javascript/vendor/idae-be-shim/` (colocalisé avec le bu
 - [x] Remplacer le contenu de `require_hell` dans `idae/web/javascript/main_bag.js` par le bundle idae-be + les 7 shims, **au même rang** dans `require_trame` (3e sur 9) — tout ce qui suit dépend de la présence des globals
 - [x] Vérifier que `fade` est bien shimé : `main_bag.js` appelle lui-même `$('main_progress_hold').fade('bounce')` et `$('body').setStyle({...})` après drainage de la queue
 - [x] Rejouer la suite Playwright **sans `--update-snapshots`** : zéro erreur console, zéro diff de snapshot — tous les specs verts (retries de boot flake inclus ; `datatable: search hides non-matching rows` reste flaky mais échoue **aussi sans le swap** — `.fire` sur élément disparu, `app_socket.js:278`, apparu avec `d0c6ece` — pas une régression du shim). Ajout : sonde bridge `playwright/global-setup.ts`, échec explicite en 15 s si Apache/phpBridge est wedged (HANG_TEST.md)
-- [ ] Évaluer la suppression de `vendor/sizzle.js` (chargé dans `require_scripts`, redondant avec `querySelectorAll`) — à valider séparément
+- [x] `vendor/sizzle.js` supprimé : aucun appel applicatif à `Sizzle`, aucun shim ne le référence, et `$$` utilise déjà `querySelectorAll` via `tolerantQueryAll`. Retiré de `require_scripts` ; `prototype-surface.spec.ts` (2/2) et `smoke.spec.ts` verts sur `127.0.0.1`.
 
 ---
 

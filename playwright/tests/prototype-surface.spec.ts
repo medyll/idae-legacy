@@ -35,7 +35,7 @@ const GLOBAL_FUNCTIONS = ['$', '$$', '$A', '$H', '$w', '$F', '$R'];
 // requests created through Ajax.Request/Ajax.Updater. 'Form' takes its place
 // here: that half of the old shim stays, held alive by 52 inline
 // onclick/onsubmit attributes in the PHP templates.
-const GLOBAL_OBJECTS = ['Prototype', 'Form', 'Event', 'Element', 'Position', 'Insertion', 'Try'];
+const GLOBAL_OBJECTS = ['Prototype', 'Form', 'Event', 'Try'];
 
 // 'PeriodicalExecuter' dropped 2026-08-11 with the Ajax namespace it shipped
 // alongside. It never had a caller anywhere in the app — asserting it kept a
@@ -47,21 +47,9 @@ const GLOBAL_OBJECTS = ['Prototype', 'Form', 'Event', 'Element', 'Position', 'In
 // of a class no shim owns.
 const CONSTRUCTORS = ['Class', 'Template', 'Hash', 'ObjectRange'];
 
-/**
- * Methods the app calls on an element, ordered by call count.
- *
- * Checked on a live element rather than on `Element.prototype`: Prototype 1.7.3
- * patches `HTMLElement.prototype`, a shim may well choose a different host, and
- * what the application actually depends on is that `someElement.foo()` works.
- */
-const ELEMENT_METHODS = [
-  'readAttribute', 'setStyle', 'select', 'observe', 'addClassName', 'update', 'insert',
-  'hide', 'up', 'show', 'writeAttribute', 'identify', 'fire', 'remove', 'removeClassName',
-  'hasClassName', 'next', 'down', 'getStyle', 'getDimensions', 'getHeight', 'stopObserving',
-  'getWidth', 'childElements', 'previous', 'visible', 'empty', 'wrap', 'clonePosition',
-  'cumulativeOffset', 'siblings', 'scrollTo', 'toggleClassName', 'setOpacity', 'classNames',
-  'toggle', 'makePositioned', 'viewportOffset', 'inspect', 'purge', 'relativize', 'replace',
-];
+// Element compatibility now belongs only to shim-event. The generic Element
+// surface was removed with shim-element on 2026-08-13.
+const ELEMENT_METHODS = ['on', 'observe', 'stopObserving', 'fire'];
 
 // ARRAY_METHODS / STRING_METHODS / FUNCTION_METHODS / NUMBER_METHODS — 49
 // names in all — were dropped 2026-08-12 together with shim-enumerable.js,
@@ -101,17 +89,6 @@ const NAMESPACED = [
   ['Event', 'observe'],
   ['Event', 'stop'],
   ['Event', 'element'],
-  ['Element', 'extend'],
-  ['Element', 'addMethods'],
-  ['Insertion', 'After'],
-  ['Insertion', 'Before'],
-  ['Insertion', 'Top'],
-  ['Insertion', 'Bottom'],
-  ['Position', 'prepare'],
-  ['Position', 'cumulativeOffset'],
-  ['Position', 'within'],
-  ['Position', 'absolutize'],
-  ['Position', 'relativize'],
 ];
 
 test('prototype surface: every API the app calls is present', async () => {
@@ -168,21 +145,21 @@ test('prototype surface: core helpers actually behave', async () => {
     try {
       const el = w.$('pw_surface_probe');
       const spans = w.$$('#pw_surface_probe span.a');
-      const child = el.down('span');
+      const child = el.querySelector('span') as HTMLElement;
 
-      child.addClassName('marked');
-      child.writeAttribute('data-probe', 'yes');
-      child.setStyle({ color: 'rgb(1, 2, 3)' });
+      child.classList.add('marked');
+      child.setAttribute('data-probe', 'yes');
+      child.style.color = 'rgb(1, 2, 3)';
 
       return {
         dollarReturnsElement: el === probe,
         dollarDollarCount: spans.length,
-        selectCount: el.select('span').length,
+        selectCount: el.querySelectorAll('span').length,
         downIsFirstSpan: child === probe.firstElementChild,
-        upIsProbe: child.up() === probe,
-        addClassName: child.hasClassName('marked'),
-        readAttribute: child.readAttribute('data-probe'),
-        getStyleColor: child.getStyle('color'),
+        upIsProbe: child.parentElement === probe,
+        addClassName: child.classList.contains('marked'),
+        readAttribute: child.getAttribute('data-probe'),
+        getStyleColor: getComputedStyle(child).color,
         // The four Enumerable probes that sat here (Array#each, Array#pluck,
         // String#stripTags, String#camelize) went with shim-enumerable on
         // 2026-08-12 — see the note above the element-methods list.

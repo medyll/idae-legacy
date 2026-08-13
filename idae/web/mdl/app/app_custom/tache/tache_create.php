@@ -204,9 +204,8 @@
 	 * ($, .observe, .on, .up, .select, .first) to native DOM, with file-local
 	 * `tc_` helpers.
 	 *
-	 * Insertion.Top is deliberately left below: it is passed straight through
-	 * to ajaxMdl / ajaxInMdl as an option value, so replacing it means changing
-	 * those consumers too — out of scope for this file.
+	 * app_socket only tests `options.insertion` for truthiness, then performs
+	 * the top insertion itself. The old Insertion.Top function was never called.
 	 */
 	function tc_el(ref) {
 		return typeof ref === 'string' ? document.getElementById(ref) : ref;
@@ -250,10 +249,10 @@
 <script>
 	addContact = function () {
 		var idsociete = tc_el('formCreateTache<?=$time?>').querySelector('[name=societe_idsociete]').value
-		ajaxMdl('societehaspersonne/mdlSocieteHasPersonneCreate', '<?=idioma('Ajouter un contact')?>', 'valueModule=<?=$time?>&reloaded=true&societe_idsociete=' + idsociete, {value: idsociete, insertion: Insertion.Top});
+		ajaxMdl('societehaspersonne/mdlSocieteHasPersonneCreate', '<?=idioma('Ajouter un contact')?>', 'valueModule=<?=$time?>&reloaded=true&societe_idsociete=' + idsociete, {value: idsociete, insertion: true});
 	}
 	launchContact = function () {
 		var idsociete = tc_el('formCreateTache<?=$time?>').querySelector('[name=societe_idsociete]').value
-		ajaxInMdl('societehaspersonne/mdlSocieteHasPersonneAdd', 'add_taskOnPersonne<?=$time?>', 'valueModule=<?=$time?>&reloaded=true&societe_idsociete=' + idsociete, {value: idsociete, insertion: Insertion.Top});
+		ajaxInMdl('societehaspersonne/mdlSocieteHasPersonneAdd', 'add_taskOnPersonne<?=$time?>', 'valueModule=<?=$time?>&reloaded=true&societe_idsociete=' + idsociete, {value: idsociete, insertion: true});
 	}
 </script>

@@ -44,7 +44,11 @@ test('IDAE_SHIM_WARN logs shimmed calls', async () => {
   await page.evaluate(() => {
     (window as any).IDAE_SHIM_WARN = 1;
     (window as any).__idaeShimInstallWarn();
-    try { (document.body as any).hasClassName('idae-shim-probe'); } catch (e) { /* reported below */ }
+    const handler = () => {};
+    try {
+      (document.body as any).observe('idae-shim-probe', handler);
+      (document.body as any).stopObserving('idae-shim-probe', handler);
+    } catch (e) { /* reported below */ }
     (window as any).IDAE_SHIM_WARN = 0;
   });
 
