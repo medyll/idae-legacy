@@ -125,8 +125,6 @@ test('app_functions: native implementation does not call compatibility shims', a
   });
 
   await page.evaluate(() => {
-    (window as any).IDAE_SHIM_WARN = 1;
-    (window as any).__idaeShimInstallWarn();
   });
 
   await page.evaluate(() => {

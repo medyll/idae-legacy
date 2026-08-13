@@ -46,7 +46,7 @@ if(empty($_POST['BIG_SCREEN'])){
 			<div style="overflow:auto;width:100%;z-index:2000;height:150px;display:none" id="div_devis_app_select" class="blanc absolute applink applinkblock toggler boxshadow"></div>
 			<div class="flex_v flex_main" style="overflow:auto;">
 				<div>
-					<form id="devis_form" name="devis_form" onsubmit="dv_show(dv_el('div_devis_create_wait')).loadModule('<?=$path_to_devis?>devis_create_wait',serializeFields($(this)));return false" action="">
+					<form id="devis_form" name="devis_form" onsubmit="dv_show(dv_el('div_devis_create_wait')).loadModule('<?=$path_to_devis?>devis_create_wait',serializeFields(this));return false" action="">
 						<input type="hidden" name="vars[idclient]" id="tmp_idclient">
 						<input type="hidden" name="vars[iddevis_type]" value="2">
 						<input type="hidden" name="vars[idagent]" value="<?= $_SESSION['idagent'] ?>">

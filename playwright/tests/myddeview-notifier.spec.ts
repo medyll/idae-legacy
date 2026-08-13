@@ -91,8 +91,6 @@ test('myddeview: native implementation does not call compatibility shims', async
   });
 
   await page.evaluate(() => {
-    (window as any).IDAE_SHIM_WARN = 1;
-    (window as any).__idaeShimInstallWarn();
   });
 
   const win = await openList(page, TABLE);
@@ -152,8 +150,6 @@ test('myddeNotifier: native implementation does not call compatibility shims', a
   });
 
   await page.evaluate(() => {
-    (window as any).IDAE_SHIM_WARN = 1;
-    (window as any).__idaeShimInstallWarn();
   });
 
   await page.evaluate(() => {

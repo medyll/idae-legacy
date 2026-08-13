@@ -41,8 +41,6 @@ test('sorttable: constructs on a real list without shim warnings or errors', asy
     if (directCaller?.includes('librairie/sorttable.js')) sortWarnings.push(message.text());
   });
   await page.evaluate(() => {
-    (window as any).IDAE_SHIM_WARN = 1;
-    (window as any).__idaeShimInstallWarn();
   });
 
   const win = await openList(page, TABLE);

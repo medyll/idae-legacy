@@ -25,7 +25,7 @@
 		<?= idioma('Préférences') ?> : <?= idioma($titre_zone) ?>
 	</div>
 	<br>
-	<form onsubmit="ajaxValidation('init_settings', 'mdl/app/', serializeFields($(this)));return false;">
+	<form onsubmit="ajaxValidation('init_settings', 'mdl/app/', serializeFields(this));return false;">
 		<input type="hidden" name="vars[idagent]" value="<?=$_SESSION['idagent']?>" >
 		<div class="flex_main applink applinkblock blanc" style="overflow-y:auto;overflow-x:hidden;">
 			<?php foreach ($arr_code as $key => $value) { ?>

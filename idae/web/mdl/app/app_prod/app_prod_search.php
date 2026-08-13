@@ -33,7 +33,7 @@
 				<div class="flex_h" style="height:100%;overflow: hidden;">
 					<div class="frmCol1 ededed">
 						<div class="padding ededed borderb aligncenter">
-							<form onsubmit="load_table_in_zone(serializeFields($(this)),'<?=$patolon_bismuth?>');aps_show(aps_el('<?=$patolon_bismuth?>'));return false;">
+							<form onsubmit="load_table_in_zone(serializeFields(this),'<?=$patolon_bismuth?>');aps_show(aps_el('<?=$patolon_bismuth?>'));return false;">
 								<input type="hidden" name="table" value="<?=$table?>">
 								<button type="submit" style="position:absolute;right: 0.5em; z-index: 10;border: none;background-color: transparent;"><i class="fa fa-search"></i></button>
 								<input placeholder="Recherche" name="search"

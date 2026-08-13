@@ -63,8 +63,6 @@ test('app_calendrier: native implementation does not call compatibility shims', 
   });
 
   await page.evaluate(() => {
-    (window as any).IDAE_SHIM_WARN = 1;
-    (window as any).__idaeShimInstallWarn();
   });
 
   const win = await openChrome(page, 'app/app_calendrier/app_calendrier_echeance');

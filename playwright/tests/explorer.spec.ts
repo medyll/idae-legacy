@@ -92,8 +92,6 @@ test('desktop panel: app_tree native implementation does not call compatibility 
   });
 
   await page.evaluate(() => {
-    (window as any).IDAE_SHIM_WARN = 1;
-    (window as any).__idaeShimInstallWarn();
   });
 
   const panel = page.locator('#desktop [auto_tree_main]').first();

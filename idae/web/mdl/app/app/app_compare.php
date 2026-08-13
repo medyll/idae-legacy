@@ -36,7 +36,7 @@
 								// main_item_search_finder = new BuildSearch('<?=$patolon_bismuth?>');
 							</script>
 							<form
-								onsubmit="load_table_in_zone(serializeFields($(this)),'<?=$patolon_bismuth?>');cmp_show(cmp_el('<?=$patolon_bismuth?>'));return false;">
+								onsubmit="load_table_in_zone(serializeFields(this),'<?=$patolon_bismuth?>');cmp_show(cmp_el('<?=$patolon_bismuth?>'));return false;">
 								<input type="hidden" name="table" value="<?=$table?>">
 								<button type="submit" style="position:absolute;right: 0.5em; z-index: 10;border: none;background-color: transparent;"><i class="fa fa-search"></i></button>
 								<input placeholder="Recherche" name="search" style="position: relative;margin-right:0px;z-index:1;width:100%;line-height:2" value="" type="text" class="border4"/>

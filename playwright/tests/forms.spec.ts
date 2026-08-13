@@ -37,7 +37,7 @@ function openUpdate(page: Parameters<typeof openChrome>[0]) {
   return openChrome(page, 'app/app/app_update', `table=${TABLE}&table_value=${TABLE_VALUE}`);
 }
 
-test('forms: update tab renders a form with a readable field value ($F)', async () => {
+test('forms: update tab renders a form with a readable native field value', async () => {
   const page = getPage();
   const guard = watchConsole(page);
 
@@ -50,14 +50,13 @@ test('forms: update tab renders a form with a readable field value ($F)', async 
   await expect(form.locator('input[name=table]')).toHaveValue(TABLE);
   await expect(form.locator('input[name=table_value]')).toHaveValue(TABLE_VALUE);
 
-  // $F() is Prototype's field accessor — the shim must keep it working on
-  // live elements, whatever the field name happens to be in this dataset.
+  // Read the live control through the native value property, whatever the
+  // field name happens to be in this dataset.
   const field = form.locator('input[name^="vars["]:not([type=hidden])').first();
   await expect(field).toBeVisible();
-  const handle = await field.elementHandle();
   const domValue = await field.inputValue();
-  const viaF = await page.evaluate((el) => (window as any).$F(el), handle);
-  expect(viaF).toEqual(domValue);
+  const nativeValue = await field.evaluate((el: HTMLInputElement) => el.value);
+  expect(nativeValue).toEqual(domValue);
 
   await closeWindow(win);
   guard.assertClean();
@@ -106,8 +105,6 @@ test('forms: engine.js\'s form/navigation stack does not call compatibility shim
   });
 
   await page.evaluate(() => {
-    (window as any).IDAE_SHIM_WARN = 1;
-    (window as any).__idaeShimInstallWarn();
   });
 
   // act_chrome_gui (opening the tab) and ajaxFormValidation/Real (submitting

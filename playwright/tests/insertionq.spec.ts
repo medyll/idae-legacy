@@ -82,8 +82,6 @@ test('insertionQ: native implementation does not call compatibility shims', asyn
   });
 
   await page.evaluate(() => {
-    (window as any).IDAE_SHIM_WARN = 1;
-    (window as any).__idaeShimInstallWarn();
   });
 
   // Opening a list and a record sheet re-runs most of the watcher registry

@@ -58,8 +58,6 @@ test('socket: native implementation does not call compatibility shims', async ()
   });
 
   await page.evaluate(() => {
-    (window as any).IDAE_SHIM_WARN = 1;
-    (window as any).__idaeShimInstallWarn();
   });
 
   // Exercises receive_cmd's act_stream_to/act_count/act_progress branches

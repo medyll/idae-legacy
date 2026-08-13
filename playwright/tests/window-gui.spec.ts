@@ -107,8 +107,6 @@ test('window: native implementation does not call compatibility shims', async ()
   });
 
   await page.evaluate(() => {
-    (window as any).IDAE_SHIM_WARN = 1;
-    (window as any).__idaeShimInstallWarn();
   });
 
   // Build, focus, drag-position and tear down: the full lifecycle in one pass.

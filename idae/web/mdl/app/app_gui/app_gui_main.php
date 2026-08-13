@@ -136,7 +136,7 @@
 		<!--<div id="gui_menu" data-setting="gui_menu_visible" data-setting-default-value="none" data-setting-mode="display" data-setting-apply="true" class="gradb frmCol1 flex_v" style="display:none">-->
 		<div id="gui_menu" class="gradb frmCol1 flex_v" style="display:none">
 			<div class="padding ededed borderb aligncenter">
-				<form onsubmit="main_item_search_gui.load_data(serializeFields($(this)));gm_show(gm_el('for_patolon_bis'));return false;">
+				<form onsubmit="main_item_search_gui.load_data(serializeFields(this));gm_show(gm_el('for_patolon_bis'));return false;">
 					<button type="submit" style="position:absolute;right: 0.5em; z-index: 10;border: none;background-color: transparent;">
 						<i class="fa fa-search"></i></button>
 					<input placeholder="Recherche" name="search" style="position: relative;margin-right:0px;z-index:1;width:100%;line-height:2" value="" type="text" class=""/>

@@ -58,8 +58,6 @@ test('afterAjaxCall: native implementation does not call compatibility shims', a
   });
 
   await page.evaluate(() => {
-    (window as any).IDAE_SHIM_WARN = 1;
-    (window as any).__idaeShimInstallWarn();
   });
 
   const win = await openRecord(page, TABLE, TABLE_VALUE);

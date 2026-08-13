@@ -3,16 +3,16 @@
 > Branche : `feat/idae-be-migration`
 > Créé : 2026-08-05
 
-## Reprise — état au 2026-08-13, dernier commit `86e32bb`
+## Reprise — état au 2026-08-13, base avant clôture `b13da94`
 
 Lire ceci avant de continuer, puis lire les sections "Reprise" du bas du
 fichier (ordre chronologique inverse au-dessus de cette section) pour le
 détail des décisions et des bugs déjà rencontrés — ne pas les refaire.
 
-**Où c'en est** : 8 → 1 shim (`shim-core`, dans
-`idae/web/javascript/vendor/idae-be-shim/`). `shim-effects`,
+**Où c'en est** : 8 → 0 shim. `shim-effects`,
 `shim-draggable`, `shim-enumerable`, `shim-element`, `shim-form`,
-`shim-class` et `shim-event` sont supprimés. `vendor/sizzle.js` a également
+`shim-class`, `shim-event` et `shim-core` sont supprimés.
+`vendor/sizzle.js` a également
 été retiré du chargeur et du disque.
 
 **Suppression de `shim-element` (13/08)** : audit refait sans lookbehind sur
@@ -65,10 +65,34 @@ initial (qui ne prenait que `app/engine/librairie`) :
 `127.0.0.1` : `prototype-surface` 2/2, `template-api-guard` 1/1,
 `shim-warn` 1/1 et `smoke` 1/1.
 
+**Suppression de `shim-core` (13/08)** : l'inventaire
+des scripts réellement chargés et des gabarits SPA ne trouve aucun
+`$A/$H/$w/$F/$R/Hash/ObjectRange/Try`. Les `$$` et `$` textuels des scripts
+chargés étaient dans des blocs commentés ou des fonctions locales de vendor ;
+les neuf seuls appels SPA exécutables étaient les `$(this)` introduits lors
+du chantier Form, maintenant passés directement en `this`. L'audit exhaustif
+hors vendor retrouve seulement deux fichiers non chargés
+(`app_mutateobserve.js`, `app_test.js`) et des homonymes locaux
+(`canvasjs`, `query-engine`, `tinyeditor`). Le loader et `shim-core.js`
+sont retirés. Les 29 specs qui armaient l'ancien instrument de warnings ne
+l'arment plus et son contrôle positif est supprimé : avec zéro shim, il n'y a
+plus de surface à instrumenter. `prototype-surface.spec.ts` vérifie désormais
+l'absence des globals hérités et le comportement des remplacements DOM natifs.
+Validation finale sur `127.0.0.1`, toujours `--retries=0` : les **105 tests
+Playwright sont verts**. La suite monolithique dégrade encore le bridge au fil
+des boots ; elle a donc été achevée par reliquats après
+`docker restart idae-socket idae-legacy`, avec `--global-timeout` interne
+Playwright. Chaque expiration a effectivement terminé le runner et une
+vérification Win32 a confirmé zéro processus de test orphelin. Le premier
+passage a trouvé un résidu dans le test `forms` lui-même (`window.$F`) :
+remplacé par la propriété native `HTMLInputElement.value`. La baseline visuelle
+`desktop` a divergé une fois au milieu d'une stack dégradée, puis est repassée
+verte isolément sur stack fraîche ; les trois autres snapshots étaient déjà
+verts. Les neuf gabarits finaux passent `php -l`, les JS modifiés
+`node --check`, et `git diff --check` est propre.
+
 **Ce qui reste à faire, dans l'ordre** :
-1. `shim-core.js` (405 lignes, `$`/`$$`/`$A`/`$H`/`$w`/`$F`/`$R`, `Hash`,
-   `ObjectRange`) — à faire **en dernier**. Ne pas y toucher avant que les
-   autres familles soient vides.
+1. Validation finale complète, puis arrêt : aucun shim ne reste à migrer.
 
 **Méthode qui marche** (voir commits `66d9cd3`, `9128c80`, `d73367a`) :
 - Grep les vrais appelants **avant** de migrer — JS chargé (`main_bag.js`'s

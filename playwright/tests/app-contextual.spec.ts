@@ -122,8 +122,6 @@ test('app_contextual: native implementation does not call compatibility shims', 
   });
 
   await page.evaluate(() => {
-    (window as any).IDAE_SHIM_WARN = 1;
-    (window as any).__idaeShimInstallWarn();
   });
 
   await page.evaluate(() => {
