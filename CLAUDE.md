@@ -34,24 +34,26 @@ Why: Windows resolves `localhost` to `::1` before `127.0.0.1`, and since the
 move to WSL2 nothing answers there. Measured 2026-08-10:
 `curl --ipv6 http://localhost:3005/health` → **21.05s then code 000**;
 `--ipv4` → **200 in 3ms**. The browser hides this for plain HTTP (Happy
-Eyeballs falls back in ~250ms), but not for socket.io: the connection dies,
-reconnects with a new sid every second, and the server answers each in-flight
-ack to a connection that no longer exists.
+Eyeballs falls back in ~250ms).
 
 `*.lan` names are immune because the Windows hosts file is IPv4-only by
 construction — which is why this never showed up back when the app was browsed
 on `idaenext.idae.lan` and appeared the day someone typed `localhost`.
 
-Not fixable from the app: the socket.io host is derived from `document.domain`,
-which is correct. Rewriting the socket host without rewriting the page would
-split the cookie jar (`localhost` and `127.0.0.1` are different hosts),
-`PHPSESSID` would not follow, and `json_ssid` would report a mismatch on every
-boot — a login loop instead of a socket loop.
+**The socket.io half of this is gone since the container merge (2026-09-12).**
+socket.io used to be its own published port, with the host derived from
+`document.domain` — so a page on `localhost:8080` opened `ws://localhost:3005`,
+stalled on `::1`, and reconnected with a new sid every second while the server
+kept acking a dead connection. The socket is now served **same-origin** through
+Apache (`/socket.io/`, see `config/apache/socketio.conf`), so it inherits the
+page's host and cookie jar instead of guessing them. Browsing on `localhost`
+still costs the plain-HTTP penalty above; it no longer breaks the socket.
 
-`docker-compose.yml` publishes both `0.0.0.0` and `[::]` for ports 8080/3005.
-The `[::]` half is **inert under Docker Desktop + WSL2 mirrored networking**
-(`docker port` reports it, the host has no listener, `curl --ipv6` still times
-out). It is kept because it is correct on a Linux host. It is not the fix here.
+`docker-compose.yml` publishes both `0.0.0.0` and `[::]` for port 8080 (3005 is
+no longer published at all). The `[::]` half is **inert under Docker Desktop +
+WSL2 mirrored networking** (`docker port` reports it, the host has no listener,
+`curl --ipv6` still times out). It is kept because it is correct on a Linux
+host. It is not the fix here.
 
 ## Running Tests
 
@@ -81,6 +83,21 @@ npm start      # production (node src/main.js)
 ```
 
 Structure: `src/config/`, `src/db/`, `src/services/`, `src/socket/`, `src/web/`.
+
+**Runs inside the main `idae-legacy` container since 2026-09-12.** There is no
+separate `socket` compose service any more: `supervisord`
+(`config/supervisor/supervisord.conf`) starts `apache2` and `node src/main.js`
+side by side, node's dependencies are installed at image build time (no
+`npm install` on every boot), and port 3005 is bound to the container only —
+browsers reach it through the Apache reverse proxy on `/socket.io/`
+(`config/apache/socketio.conf`). The PHP → node bridge now talks to
+`127.0.0.1`, and node → PHP too (`PHP_BRIDGE_HOST=127.0.0.1`).
+
+Restart just the socket server, without recreating the container:
+
+```bash
+docker exec idae-legacy supervisorctl restart socket
+```
 
 ## Architecture Overview
 

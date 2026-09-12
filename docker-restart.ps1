@@ -22,10 +22,12 @@ switch ($Mode) {
     }
     
     'socket' {
-        Write-Host "Restarting socket service..." -ForegroundColor Yellow
-        docker compose restart socket
-        Start-Sleep -Seconds 2
-        Write-Host "✅ Socket restart requested (check 'docker logs --follow idae-socket')" -ForegroundColor Green
+        # Le serveur socket tourne dans le conteneur idae-legacy, piloté par
+        # supervisord (fusion des images, 2026-09-12). Il n'y a plus de service
+        # compose `socket` ni de conteneur `idae-socket` à redémarrer.
+        Write-Host "Restarting socket program (supervisord)..." -ForegroundColor Yellow
+        docker exec idae-legacy supervisorctl restart socket
+        Write-Host "✅ Socket restarted (logs: .\logs\socket.log)" -ForegroundColor Green
     }
     
     'container' {

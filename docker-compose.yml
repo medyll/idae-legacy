@@ -1,12 +1,19 @@
 services:
+  # Une seule image applicative : Apache/PHP **et** le serveur socket.io node
+  # tournent dans ce conteneur, sous supervisord (config/supervisor/supervisord.conf).
+  #
+  # Avant (jusqu'au 2026-09-12) il y avait un second service `socket` sur
+  # node:20-slim, qui refaisait `npm install` à chaque démarrage, publiait son
+  # propre port 3005, et obligeait l'app à l'attendre via wait-for-socket.sh.
+  # Tout ça a disparu : les deps node sont installées au build, node écoute sur
+  # 127.0.0.1:3005 et n'est joignable que par le reverse proxy Apache.
   app:
     build: .
     ports:
       # Dual-stack. Windows resolves "localhost" to ::1 before 127.0.0.1, and
       # nothing answered there: measured 21s of SYN retries before the fallback.
-      # HTTP survives it via the browser's Happy Eyeballs race, socket.io does
-      # not — it reconnects forever. Hosts-file names (*.lan) never hit this,
-      # that file being IPv4 only.
+      # HTTP survives it via the browser's Happy Eyeballs race. Hosts-file names
+      # (*.lan) never hit this, that file being IPv4 only.
       #
       # NOTE: the [::] line is inert under Docker Desktop + WSL2 mirrored
       # networking (measured 2026-08-10: `docker port` reports [::]:8080, yet
@@ -15,14 +22,27 @@ services:
       # and does work on a Linux host; it is not the fix on this machine. For
       # local dev on Windows, browse a *.lan name or 127.0.0.1, never
       # "localhost".
+      #
+      # socket.io n'a plus de port publié : il passe par ce même 8080, en
+      # same-origin, sur /socket.io/.
       - "8080:80"
       - "[::]:8080:80"
     volumes:
       - ./idae:/var/www/html/idae
+      # Le bind-mount ci-dessus recouvre app_node : ce volume anonyme protège le
+      # node_modules installé au build (l'hôte est en pnpm/Windows, ses symlinks
+      # ne survivent pas dans le conteneur Linux).
+      - /var/www/html/idae/web/app_node/node_modules
       - ./logs:/var/log/apache2
+      - ./logs:/logs
     depends_on:
       - mongo-test
-      - socket
+    env_file:
+      # PORT / MONGO_USER / MONGO_PASS / MONGO_DB / NODE_ENV du serveur socket.
+      # Aucune de ces clés n'est lue par PHP (PHP lit MDB_* / MONGO_HOST /
+      # MONGO_ENV / MONGO_TEST_DSN), et `environment:` ci-dessous gagne sur
+      # env_file en cas de doublon.
+      - ./idae/web/app_node/.env
     environment:
       - APACHE_RUN_USER=www-data
       - APACHE_RUN_GROUP=www-data
@@ -40,59 +60,21 @@ services:
       - DEBUG_DB=
       - DEBUG_SESSION=
       - SOCKET_PORT=3005
+      # Le bridge PHP du serveur socket tape sur Apache : même conteneur
+      # désormais, donc loopback (avant : nom de service `idae-legacy`).
+      - PHP_BRIDGE_HOST=127.0.0.1
+      - LOG_DIR=/logs
     container_name: idae-legacy
-    command: sh -c "sh /var/www/html/idae/web/wait-for-socket.sh && apache2-foreground"
     healthcheck:
-      test: ["CMD", "curl", "-f", "-m", "3", "http://localhost/idae/web/check_mongo.php"]
+      # Les deux process, pas seulement Apache : supervisord peut très bien
+      # servir du PHP pendant que node crash-loop.
+      # NB: DocumentRoot = idae/web, donc l'URL est /check_mongo.php (l'ancien
+      # /idae/web/check_mongo.php renvoyait 404).
+      test: ["CMD-SHELL", "curl -fsS -m 3 http://127.0.0.1/check_mongo.php > /dev/null && curl -fsS -m 3 http://127.0.0.1:3005/health > /dev/null"]
       interval: 30s
-      timeout: 5s
+      timeout: 8s
       retries: 3
       start_period: 40s
-    restart: unless-stopped
-
-  socket:
-    image: node:20-slim
-    container_name: idae-socket
-    working_dir: /app
-    # --omit=dev: devDependencies include @medyll/idae-be as a file: link to
-    # a host path (D:/development/idae/...) that only exists on Windows, not
-    # inside this Linux container. The socket runtime (src/main.js) needs
-    # none of the devDeps (esbuild/idae-be/sass/nodemon are host-side build
-    # tooling).
-    # --package-lock=false: package-lock.json resolves that file: dep to
-    # ../../../../idae/packages/idae-be, which npm's arborist still touches
-    # during install even with --omit=dev (a known npm bug on local file:
-    # devDeps, surfaces as "Cannot read properties of undefined (reading
-    # 'extraneous')" and crash-loops the container). Skipping the lockfile
-    # makes npm resolve straight from package.json's dependencies, never
-    # reaching the broken entry.
-    command: sh -c "npm install --omit=dev --package-lock=false --no-audit --no-fund && npm run start"
-    ports:
-      # Dual-stack — same reason, and same WSL2 caveat, as the app service
-      # above. This is the port that actually broke: the browser derives the
-      # socket.io host from document.domain, so a page on localhost:8080 opened
-      # ws://localhost:3005 and stalled on ::1.
-      - "3005:3005"
-      - "[::]:3005:3005"
-    env_file:
-      - ./idae/web/app_node/.env
-    environment:
-      - PHP_BRIDGE_HOST=idae-legacy
-      - LOG_DIR=/logs
-    volumes:
-      - ./idae/web/app_node:/app:cached
-      # Named volume: keeps Linux node_modules isolated from Windows bind mount
-      # (host pnpm symlinks previously broke npm install inside the container)
-      - node_modules_socket:/app/node_modules
-      - ./logs:/logs
-    depends_on:
-      - mongo-test
-    healthcheck:
-      test: ["CMD-SHELL", "node -e \"const http=require('http');http.get('http://127.0.0.1:3005/health',res=>process.exit(res.statusCode===200?0:1)).on('error',()=>process.exit(1));\""]
-      interval: 30s
-      timeout: 5s
-      retries: 3
-      start_period: 10s
     restart: unless-stopped
 
   # Isolated MongoDB instance for PHPUnit tests.
@@ -105,6 +87,3 @@ services:
     tmpfs:
       - /data/db
     restart: "no"
-
-volumes:
-  node_modules_socket:

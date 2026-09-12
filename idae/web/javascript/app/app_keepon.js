@@ -96,30 +96,15 @@ function kp_update(node, content) {
 
 /* -------------------------------------------------------------------- */
 
-switch (document.domain) {
-	case "idaertys-preprod.mydde.fr":
-		var port = 3006;
-		break;
-	case "tactac_idae.preprod.mydde.fr":
-		var port = 3006;
-		break;
-	case "appcrfr.idaertys-preprod.mydde.fr":
-		var port = 3006;
-		break;
-	case "appmaw-idaertys-preprod.mydde.fr":
-		var port = 3006;
-		break;
-	default:
-		var port = 3005;
-		break;
-
-}
+/* socket.io is same-origin now (Apache reverse-proxies /socket.io/ to the node
+ * server in the same container) — the document.domain → port switch that used
+ * to live here is gone. See config/apache/socketio.conf. */
 
 /**
  *
  * socket_keep_on
  */
-var socket_keep_on = io(document.location.protocol+'//' + document.domain + ':' + port + '/keep_on');
+var socket_keep_on = io('/keep_on');
 
 socket_keep_on.on('mitete', function (vars) {
     var APPID = vars.APPID;

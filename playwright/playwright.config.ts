@@ -91,7 +91,7 @@ export default defineConfig({
   //
   // If a run suddenly collapses into boot timeouts everywhere, suspect the
   // stack before this number: a wedged phpBridge produces exactly that
-  // signature. `docker restart idae-socket idae-legacy` (HANG_TEST.md).
+  // signature. `docker restart idae-legacy` (HANG_TEST.md).
   workers: 2,
   // Measured directly (Chromium, real network, 2026-08-08) after the
   // per-file cache-busting fix (f4f090a): cold boot to login-form-visible

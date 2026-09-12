@@ -113,28 +113,9 @@ function testClientSocket() {
         return;
     }
     
-    // Utiliser la même logique que app_socket.js
-    var socketHost, socketPort;
-    
-    switch (document.domain) {
-        case "idaertys-preprod.mydde.fr":
-        case "tactac_idae.preprod.mydde.fr": 
-        case "appcrfr.idaertys-preprod.mydde.fr":
-        case "appmaw-idaertys-preprod.mydde.fr":
-            socketPort = 3006;
-            socketHost = document.domain;
-            break;
-        default:
-            socketPort = 3005;
-            if (document.domain === 'host.docker.internal' || document.domain.includes('docker')) {
-                socketHost = 'localhost';
-            } else {
-                socketHost = document.domain;
-            }
-            break;
-    }
-    
-    var socketUrl = document.location.protocol + '//' + socketHost + ':' + socketPort;
+    // Même logique que app_socket.js : same-origin, Apache reverse-proxy
+    // /socket.io/ vers le serveur node du même conteneur.
+    var socketUrl = document.location.origin;
     log('Tentative de connexion à: ' + socketUrl);
     
     const socket = io.connect(socketUrl, {

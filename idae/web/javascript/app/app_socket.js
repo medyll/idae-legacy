@@ -13,29 +13,14 @@ var conn_options = {
 };
 
 
-// Determine WebSocket host and port for different environments
-var socketHost, socketPort;
-
-switch (document.domain) {
-	case "idaertys-preprod.mydde.fr":
-	case "tactac_idae.preprod.mydde.fr":
-	case "appcrfr.idaertys-preprod.mydde.fr":
-	case "appmaw-idaertys-preprod.mydde.fr":
-		socketPort = 3006;
-		socketHost = document.domain;
-		break;
-	default:
-		// For local development: use localhost instead of host.docker.internal for browser compatibility
-		socketPort = 3005;
-		if (document.domain === 'host.docker.internal' || document.domain.includes('docker')) {
-			socketHost = 'localhost'; // Browser can't resolve host.docker.internal
-		} else {
-			socketHost = document.domain;
-		}
-		break;
-}
-
-var socketUrl = document.location.protocol + '//' + socketHost + ':' + socketPort;
+// socket.io is served same-origin: Apache reverse-proxies /socket.io/ to the
+// node server running in the same container (config/apache/socketio.conf).
+//
+// There is no port to guess from document.domain any more — no 3005/3006 split
+// between local and preprod, no cross-origin, and no localhost/::1 trap (see
+// CLAUDE.md): the socket follows the page's own origin, PHPSESSID cookie jar
+// included, whatever host the page was loaded from.
+var socketUrl = document.location.origin;
 console.log('[SOCKET] Connecting to:', socketUrl, conn_options);
 console.log('[SOCKET] Document cookies:', document.cookie);
 console.log('[SOCKET] Local storage PHPSESSID:', localStorage.getItem('PHPSESSID'));

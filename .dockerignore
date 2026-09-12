@@ -1,0 +1,14 @@
+# node_modules are installed inside the image (Dockerfile runs npm install for
+# idae/web/app_node). Copying the host tree in would drag Windows pnpm symlinks
+# into a Linux container — the exact breakage the old `node_modules_socket`
+# named volume existed to avoid.
+**/node_modules
+
+# Bind-mounted at runtime (./logs:/var/log/apache2 and ./logs:/logs).
+logs/
+
+.git
+.github
+.idea
+.vscode
+.claude

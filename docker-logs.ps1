@@ -18,7 +18,9 @@ switch ($Mode) {
         if (Test-Path .\logs\socket.log) {
             Get-Content .\logs\socket.log -Tail $Lines
         } else {
-            docker logs --tail $Lines idae-socket
+            # Plus de conteneur idae-socket depuis la fusion des images
+            # (2026-09-12) : supervisord capture la sortie brute de node ici.
+            docker exec idae-legacy tail -n $Lines /var/log/apache2/socket-stdout.log
         }
     }
 

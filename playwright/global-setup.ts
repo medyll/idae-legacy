@@ -10,7 +10,7 @@
  *
  * This hits the exact endpoint the bridge calls for the boot's first
  * get_data (services/json_scheme.php), through the same published port.
- * It deliberately does NOT restart anything itself: idae-socket is the
+ * It deliberately does NOT restart anything itself: the dev stack is the
  * daily dev stack, not a test fixture — the restart decision stays human.
  */
 import { request } from '@playwright/test';
@@ -30,7 +30,7 @@ export default async function globalSetup(): Promise<void> {
   } catch (e) {
     throw new Error(
       `[bridge-probe] ${url} did not answer within ${PROBE_TIMEOUT_MS / 1000}s (${(e as Error).message}).\n` +
-      `Apache or the phpBridge path is probably wedged — run \`docker restart idae-socket\`, ` +
+      `Apache or the phpBridge path is probably wedged — run \`docker restart idae-legacy\`, ` +
       `wait for the container to be healthy, then re-run the suite.\n` +
       `Context: HANG_TEST.md.`
     );
