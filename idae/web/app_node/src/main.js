@@ -37,18 +37,13 @@ async function bootstrap() {
     app.use(express.json({ limit: '50mb' }));
 
     // 3. Setup Socket.IO
+    // No `cors` option on purpose. Since the container merge (2026-09-12) this
+    // server is only reachable through Apache's reverse proxy on /socket.io/,
+    // on the very origin that served the page (config/apache/socketio.conf);
+    // port 3005 is bound to the container and never published. There is no
+    // cross-origin caller left to allow-list, and a same-origin request carries
+    // the PHPSESSID cookie whether or not withCredentials is set.
     const io = new Server(server, {
-        cors: {
-            origin: [
-                "http://localhost:8080", "http://127.0.0.1:8080", "http://localhost",
-                "http://localhost:80", "http://127.0.0.1:80", "http://127.0.0.1",
-                /^http:\/\/.*\.lan(:\d+)?$/, // Allow .lan domains with optional port
-                /^http:\/\/localhost(:\d+)?$/, // Allow localhost with any port
-                /^http:\/\/127\.0\.0\.1(:\d+)?$/ // Allow 127.0.0.1 with any port
-            ],
-            methods: ["GET", "POST"],
-            credentials: true
-        },
         allowEIO3: true // Support legacy clients if needed (v2/v3)
     });
 
