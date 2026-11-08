@@ -142,3 +142,16 @@ devient ^4.5.7 ; l'exclusion historique d'un avis de sécurité élevé est reti
 PHPUnit doit désormais échouer si un parcours testé émet une dépréciation.
 Le déploiement applique le verrou avec arrêt temporaire d'Apache pour éviter
 de servir un autoloader pendant le remplacement des fichiers de dépendances.
+
+Après déploiement de Smarty : navigation avec cookies, contrôle MongoDB et
+handshake Socket.IO passent ; suite complète sur le vendor déployé : 133 tests,
+325 assertions. composer audit --abandoned=report retourne zéro avis de sécurité
+et conserve le signalement Elephant.io abandonné. PHP 8.2 est désormais accepté
+par toutes les dépendances ; seule l'extension IMAP manque encore à cette image.
+
+L'essai de reconstruction a découvert une dépendance à l'ordre des tests : les
+doubles de App/Act/fonctionsProduction étaient déclarés pendant la découverte de
+JsonDataRegressionTest. Ils sont déplacés dans la fixture conf_test.php, chargée
+uniquement lors de l'appel isolé au service. Preuves sur l'environnement actuel :
+Integration seule, 25 tests/153 assertions ; suite complète, 133 tests/325
+assertions ; les deux commandes sortent avec 0.
