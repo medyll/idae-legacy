@@ -129,7 +129,7 @@
 	$i_pass              = 0;
 	while ($arrPrestation = $rsPrestation->getNext()) {
 		$i_pass ++;
-		unset($arrPrestation{"_id"});
+		unset($arrPrestation['_id']);
 		if (!empty($arrPrestation['prixDevis_prestation'])) {
 			$arrPrestation['totalDevis_prestation'] = $arrPrestation['prixDevis_prestation'] * $arrPrestation['quantiteDevis_prestation']; //. ' &euro;';
 			$arrF['prixDevis'] += $arrPrestation['totalDevis_prestation'];
@@ -155,7 +155,7 @@
 	$i_pass = 0;
 	$rsPrestation->reset();
 	while ($arrPrestation = $rsPrestation->getNext()) {
-		unset($arrPrestation{"_id"});
+		unset($arrPrestation['_id']);
 		/*if ( ! empty($arrPrestation['descriptionDevis_prestation']) ) {
 			$i_pass ++;
 			$outPresta['descriptionDevis_prestation'] = '(' . $i_pass . ') ' . $arrPrestation['descriptionDevis_prestation'];
