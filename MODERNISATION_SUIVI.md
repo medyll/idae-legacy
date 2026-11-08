@@ -45,3 +45,18 @@ Il conserve le code de sortie du processus. Sans PHPUnit il sort avec 2 et
 un diagnostic explicite ; avec IDAE_PHPUNIT_BINARY pointant sur l'installation
 isolée, il exécute 18 tests et expose les 3 erreurs existantes (124 assertions).
 Les requêtes Web ne peuvent plus déclencher ce lanceur de tests.
+
+Mise à jour de sécurité préparée dans Composer : mongodb/mongodb 2.1.2 → 2.5.1,
+avec contrainte ^2.4.2 pour exclure les versions visées par les deux avis trouvés.
+Les deux polyfills Symfony requis évoluent avec cette dépendance. TLS et
+secure-http sont réactivés. composer validate passe ; composer audit --locked
+ne signale plus d'avis MongoDB. Il reste deux avis Smarty actifs et un avis
+Smarty élevé déjà ignoré dans la configuration d'origine.
+
+Le bootstrap PHPUnit accepte IDAE_TEST_AUTOLOAD, uniquement après sa garde
+MONGO_ENV=test, pour vérifier les candidats sans remplacer le vendor applicatif.
+Avec l'autoloader candidat : 126 tests, 298 assertions, les mêmes 3 erreurs
+préexistantes et aucun avertissement. La plateforme de la bibliothèque MongoDB
+est satisfaite ; IMAP et Smarty restent incompatibles. Le vendor applicatif
+en cours d'utilisation n'a pas été remplacé : cette étape modifie le manifeste
+et le verrou pour la prochaine installation, pas le déploiement actif.

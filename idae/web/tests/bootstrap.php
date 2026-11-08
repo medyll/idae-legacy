@@ -29,7 +29,8 @@ if ($mongo_env !== 'test') {
 // ------------------------------------------------------------------
 // 2. Composer autoloader
 // ------------------------------------------------------------------
-$autoload = __DIR__ . '/../vendor/autoload.php';
+// Allow dependency candidates to be validated without replacing the application's vendor tree.
+$autoload = getenv('IDAE_TEST_AUTOLOAD') ?: __DIR__ . '/../vendor/autoload.php';
 if (!file_exists($autoload)) {
     fwrite(STDERR,
         "\n[PHPUnit bootstrap] FATAL: vendor/autoload.php not found.\n" .

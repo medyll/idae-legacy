@@ -1,7 +1,7 @@
 {
   "config":{
-    "disable-tls": true,
-    "secure-http": false,
+    "disable-tls": false,
+    "secure-http": true,
     "platform-check": false,
     "audit": {
       "ignore": ["PKSA-5rsx-p2fk-h2gr"]
@@ -14,7 +14,7 @@
     "smarty/smarty": "^3.1.48",
     "latte/latte": "^2.10.6",
     "altorouter/altorouter": "v1.2.0",
-    "mongodb/mongodb": "^2.0"
+    "mongodb/mongodb": "^2.4.2"
   },
   "autoload": {
     "psr-4": {
