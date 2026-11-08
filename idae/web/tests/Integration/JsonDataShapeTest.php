@@ -203,53 +203,38 @@ class JsonDataShapeTest extends TestCase
     // =========================================================================
 
     /**
-     * Test countBy() response shape.
+     * Test the raw distinct API actually exposed by the application.
      */
-    public function testCountByResponseShape(): void
+    public function testRawDistinctReturnsStoredIds(): void
     {
-        $agg = new \AppCommon\ClassAppAgg('produit');
-        $result = $agg->countBy('actif');
-
-        $this->assertIsArray($result);
-        foreach ($result as $item) {
-            $this->assertArrayHasKey('actif', $item);
-            $this->assertArrayHasKey('count', $item);
-            $this->assertIsInt($item['count']);
-        }
+        $app = new \App('produit');
+        $result = \AppCommon\ClassAppAgg::distinct($app, 'produit', [], 200, 'raw');
+        $this->assertEqualsCanonicalizing([1, 2], $result);
     }
 
     /**
-     * Test statsForField() response shape.
+     * Test that distinct_all preserves numeric field values.
      */
-    public function testStatsForFieldResponseShape(): void
+    public function testDistinctPricesPreserveStoredValues(): void
     {
-        $agg = new \AppCommon\ClassAppAgg('produit');
-        $stats = $agg->statsForField('prixProduit');
-
-        $this->assertArrayHasKey('min', $stats);
-        $this->assertArrayHasKey('max', $stats);
-        $this->assertArrayHasKey('avg', $stats);
-        $this->assertArrayHasKey('sum', $stats);
-        $this->assertArrayHasKey('count', $stats);
-        $this->assertIsFloat($stats['min']);
-        $this->assertIsFloat($stats['max']);
-        $this->assertIsFloat($stats['avg']);
-        $this->assertIsFloat($stats['sum']);
-        $this->assertIsInt($stats['count']);
+        $app = new \App('produit');
+        $result = \AppCommon\ClassAppAgg::distinct_all($app, 'prixProduit', []);
+        $this->assertEqualsCanonicalizing([10.0, 20.0], $result);
     }
 
     /**
-     * Test search() response shape.
+     * Test filters and full-record resolution through the supported distinct API.
      */
-    public function testSearchResponseShape(): void
+    public function testFilteredDistinctReturnsMatchingRecord(): void
     {
-        $agg = new \AppCommon\ClassAppAgg('produit');
-        $results = iterator_to_array($agg->search('Widget', ['nomProduit']));
-
-        $this->assertIsArray($results);
-        foreach ($results as $item) {
-            $this->assertArrayHasKey('idproduit', $item);
-            $this->assertArrayHasKey('nomProduit', $item);
-        }
+        $app = new \App('produit');
+        $cursor = \AppCommon\ClassAppAgg::distinct(
+            $app, 'produit', ['prixProduit' => ['$gte' => 20.0]], 10, 'full'
+        );
+        $rows = iterator_to_array($cursor);
+        $this->assertCount(1, $rows);
+        $row = reset($rows);
+        $this->assertSame(2, $row['idproduit']);
+        $this->assertSame('Widget B', $row['nomProduit']);
     }
 }

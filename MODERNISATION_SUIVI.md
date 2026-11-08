@@ -107,3 +107,29 @@ avec les API réellement utilisées, caractériser les droits sur une session HT
 traiter Smarty et IMAP avec leurs parcours effectifs, puis installer des contrôles
 reproductibles avant les extractions structurelles et les benchmarks. Aucun
 déploiement ni changement de secrets n'a été effectué.
+
+## Déploiement systématique et poursuite
+
+Instruction utilisateur : déployer après chaque étape validée, en plus du commit
+et du push. Cible actuellement identifiée : pile Docker locale idae-legacy.
+Les sources sont montées depuis ce dépôt ; les dépendances nécessitent une
+installation explicite et Apache doit être rechargé après leur remplacement.
+
+Les changements précédents sont maintenant déployés : vendor applicatif en
+mongodb/mongodb 2.5.1, configuration Apache valide puis rechargée. Snapshot de
+retour arrière : /tmp/idae-vendor-before-554cd2f dans le conteneur. Les deux
+contournements temporaires IMAP/borne PHP Smarty restent nécessaires à Composer.
+
+Vérification : page d'entrée HTTP 200 avec session persistante et titre
+idae-localhost-lan ; check_mongo.php HTTP 200 ; handshake Engine.IO valide via
+Apache ; test_migration.php 26 succès et sortie 0 sur le sidecar de test.
+Une sonde sans gestion des cookies provoquait la protection contre les boucles
+de redirection ; une navigation avec cookie jar confirme que la session persiste.
+
+Trois tests appelaient des méthodes inexistantes (countBy/statsForField/search).
+Ils vérifient maintenant les API existantes avec les données MongoDB de test :
+distinct brut, valeurs numériques distinctes et résolution filtrée des documents.
+Aucune fonctionnalité de statistiques/recherche n'a été ajoutée pour ces tests.
+Suite complète : 130 tests, 322 assertions, sortie 0, aucun avertissement.
+Cela ne rend pas les autres tests simulant des tableaux constants représentatifs
+des réponses HTTP : leur remplacement progressif reste nécessaire.
