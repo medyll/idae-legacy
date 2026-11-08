@@ -5,6 +5,7 @@
          cacheDirectory="../../tmp/phpunit"
          colors="true"
          failOnWarning="true"
+         failOnDeprecation="true"
          failOnRisky="true">
 
     <testsuites>

@@ -133,3 +133,12 @@ Aucune fonctionnalité de statistiques/recherche n'a été ajoutée pour ces tes
 Suite complète : 130 tests, 322 assertions, sortie 0, aucun avertissement.
 Cela ne rend pas les autres tests simulant des tableaux constants représentatifs
 des réponses HTTP : leur remplacement progressif reste nécessaire.
+
+Smarty : candidat 4.5.8 validé avec trois contrats de rendu (échappement HTML,
+boucles de données, héritage compilé). Ces tests passent aussi sur l'ancienne
+version, qui émet 11 dépréciations. Le candidat passe la suite complète :
+133 tests et 325 assertions, sans avertissement ni dépréciation. La contrainte
+devient ^4.5.7 ; l'exclusion historique d'un avis de sécurité élevé est retirée.
+PHPUnit doit désormais échouer si un parcours testé émet une dépréciation.
+Le déploiement applique le verrou avec arrêt temporaire d'Apache pour éviter
+de servir un autoloader pendant le remplacement des fichiers de dépendances.
