@@ -60,3 +60,15 @@ préexistantes et aucun avertissement. La plateforme de la bibliothèque MongoDB
 est satisfaite ; IMAP et Smarty restent incompatibles. Le vendor applicatif
 en cours d'utilisation n'a pas été remplacé : cette étape modifie le manifeste
 et le verrou pour la prochaine installation, pas le déploiement actif.
+
+Contrôle de lecture ajouté à services/json_data.php avant tout accès aux données :
+401 sans agent connecté, 403 si droit_table_enforce('R', table) refuse, 400 pour
+une table absente ou transmise sous forme de tableau. Les réponses autorisées
+conservent leur forme. Le helper conserve sa politique historique, notamment
+l'accès administrateur et les tables internes sans configuration de droits.
+
+Preuve : JsonDataRegressionTest passe avec 9 tests et 72 assertions, sans
+avertissement ; Unit reste à 108 tests et 172 assertions, sortie 0. Le double
+d'autorisation vérifie l'appel au helper et le refus avant exposition des données,
+pas les règles internes du helper ni une session HTTP complète. Les 3 erreurs
+d'intégration préexistantes restent à traiter séparément.

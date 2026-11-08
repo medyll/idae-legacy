@@ -92,11 +92,18 @@ class JsonDataRegressionTest extends TestCase
         $_SERVER['CONF_INC']      = realpath(__DIR__ . '/conf_test.php');
         $_SERVER['HTTP_HOST']     = 'localhost';
         $_SERVER['REQUEST_METHOD'] = 'POST';
+        $_GET = [];
+        $_SESSION = ['idagent' => 1, '_test_read_allowed' => true];
+        $GLOBALS['json_data_auth_calls'] = [];
+        http_response_code(200);
     }
 
     protected function tearDown(): void
     {
         $_POST = [];
+        $_SESSION = [];
+        unset($GLOBALS['json_data_auth_calls']);
+        http_response_code(200);
         parent::tearDown();
     }
 
@@ -119,7 +126,7 @@ class JsonDataRegressionTest extends TestCase
         } finally {
             $output = (string) ob_get_clean();
         }
-        $this->assertNotEmpty($output, 'json_data.php returned no output for table=' . ($post['table'] ?? '?'));
+        $this->assertNotEmpty($output, 'json_data.php returned no output for table=' . json_encode($post['table'] ?? null));
         $decoded = json_decode($output, true);
         $this->assertIsArray($decoded, 'json_data.php did not return a JSON array/object');
         return $decoded;
@@ -137,6 +144,7 @@ class JsonDataRegressionTest extends TestCase
         ]);
 
         $rows = $this->callJsonData(['table' => 'produit', 'piece' => 'data']);
+        $this->assertSame([['R', 'produit']], $GLOBALS['json_data_auth_calls']);
 
         // PIECE=data returns a flat array of row objects
         $this->assertIsArray($rows);
@@ -155,6 +163,35 @@ class JsonDataRegressionTest extends TestCase
         $names = array_column($rows, 'nomProduit');
         $this->assertContains('Shape Alpha', $names);
         $this->assertContains('Shape Beta', $names);
+    }
+
+    public function testAnonymousReadIsRejectedBeforeAuthorization(): void
+    {
+        $_SESSION = [];
+        $this->assertSame(['error' => 'not_authenticated'], $this->callJsonData(['table' => 'produit']));
+        $this->assertSame(401, http_response_code());
+        $this->assertSame([], $GLOBALS['json_data_auth_calls']);
+    }
+
+    public function testForbiddenReadDoesNotExposeRecords(): void
+    {
+        $this->insertOne('produit', ['idproduit' => 999, 'nomProduit' => 'Private record']);
+        $_SESSION['_test_read_allowed'] = false;
+        $this->assertSame(['error' => 'not_authorized'], $this->callJsonData(['table' => 'produit']));
+        $this->assertSame(403, http_response_code());
+        $this->assertSame([['R', 'produit']], $GLOBALS['json_data_auth_calls']);
+    }
+
+    public function testMissingTableIsRejected(): void
+    {
+        $this->assertSame(['error' => 'missing_or_invalid_table'], $this->callJsonData([]));
+        $this->assertSame(400, http_response_code());
+    }
+
+    public function testArrayTableIsRejected(): void
+    {
+        $this->assertSame(['error' => 'missing_or_invalid_table'], $this->callJsonData(['table' => ['produit']]));
+        $this->assertSame(400, http_response_code());
     }
 
     // ------------------------------------------------------------------

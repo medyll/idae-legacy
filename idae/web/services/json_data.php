@@ -8,8 +8,7 @@
 	 * 
 	 * MIGRATION NOTE: MongoId/MongoRegex converted to MongoCompat (2026-02-02)
 	 * Modified: 2026-03-15 — replace exit with return so file is require-safe for PHPUnit
-	 * TODO(rbac): this endpoint returns records for any `table` the caller names, with no
-	 * droit_table_enforce('R', $table) check. See the OPEN TODO section of SCHEMA-AUTH.md.
+	 * Modified: 2026-11-08 — Enforce read authorization before accessing table data.
 	 */
 
 	include_once($_SERVER['CONF_INC']);
@@ -17,7 +16,22 @@
 	use AppCommon\MongoCompat;
 	$_POST = array_merge($_POST,$_GET);
 	ini_set('display_errors', 55);
-	$table = $_POST['table'];
+	$table = $_POST['table'] ?? '';
+	if (!is_string($table) || $table === '') {
+		http_response_code(400);
+		echo json_encode(['error' => 'missing_or_invalid_table']);
+		return;
+	}
+	if (empty($_SESSION['idagent'])) {
+		http_response_code(401);
+		echo json_encode(['error' => 'not_authenticated']);
+		return;
+	}
+	if (!droit_table_enforce('R', $table)) {
+		http_response_code(403);
+		echo json_encode(['error' => 'not_authorized']);
+		return;
+	}
 	if (!empty($_POST['table_value']))
 		$_POST['vars']['id' . $table] = $_POST['table_value'];
 	// if (!empty($_POST['table_mongoid'])) $_POST['vars']['id' . $table] = $_POST['table_mongoid'];
