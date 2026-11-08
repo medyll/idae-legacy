@@ -1,0 +1,61 @@
+name: PHP compatibility
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: php-compatibility-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  compatibility:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Check out sources
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+
+      - name: Build the application image
+        run: docker build --tag idae-ci:verify .
+
+      - name: Start isolated test MongoDB
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker network create idae-ci
+          docker run --detach --name mongo-test --network idae-ci mongo:7
+          for attempt in {1..30}; do
+            if docker exec mongo-test mongosh --quiet --eval 'if (!db.adminCommand({ping: 1}).ok) { quit(1); }'; then
+              exit 0
+            fi
+            sleep 1
+          done
+          echo 'Test MongoDB did not become ready' >&2
+          exit 1
+
+      - name: Verify platform, contracts and dependencies
+        shell: bash
+        run: |
+          docker run --rm --network idae-ci --env MONGO_ENV=test idae-ci:verify \
+            sh -eu -c '
+              cd /var/www/html/idae/web
+              composer validate --no-check-publish
+              composer install --no-interaction --no-scripts --no-plugins --prefer-dist
+              composer check-platform-reqs
+              composer test -- --colors=never
+              php test_migration.php
+              php test_integration.php
+              composer audit --abandoned=report
+            '
+
+      - name: Clean up isolated database
+        if: always()
+        shell: bash
+        run: |
+          docker rm --force mongo-test || true
+          docker network rm idae-ci || true

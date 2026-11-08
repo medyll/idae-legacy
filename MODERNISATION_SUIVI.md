@@ -182,3 +182,25 @@ Retour arrière d'image : idae-legacy-app:before-imap est conservée. Un retour 
 cette image nécessiterait aussi de régénérer l'autoloader avec
 composer install --ignore-platform-req=ext-imap, car elle ne possède pas IMAP.
 Les fichiers sous /tmp de l'ancien conteneur ne survivent pas à sa recréation.
+
+Déploiement de 104c501 effectué : seul app est recréé ; les autres services
+restent en place. composer install avec dépendances de développement passe
+normalement dans le volume local, Apache étant arrêté pendant cette opération.
+Après redémarrage : conteneur healthy, Apache/Socket.IO RUNNING, navigation
+persistante HTTP 200, handshake Engine.IO valide, lecture anonyme HTTP 401.
+Commandes exécutées sur le vendor réellement déployé : composer test 133/325,
+test_migration.php 26/0 et test_integration.php 25/153, toutes avec sortie 0.
+check-platform-reqs passe pour toutes les extensions et PHP ; audit Composer
+ne trouve aucun avis et signale toujours Elephant.io abandonné. Les tests sur
+le montage Windows prennent plus de temps que dans l'image Linux isolée ; le
+délai des contrôles est adapté et les journaux sont écrits pendant l'exécution.
+
+## Contrôles continus
+
+.github/workflows/php-modernization.yml reconstruit l'image et exécute les mêmes
+contrôles sur push, pull request ou lancement manuel. Le job crée son réseau et
+son MongoDB sans port publié ; il ne charge aucun fichier de secrets de la pile
+locale. Le checkout v6 utilise un SHA vérifié et les permissions sont en lecture
+seule. Les erreurs de tests, de plateforme et les avis de sécurité font échouer
+le job ; l'abandon connu d'Elephant.io reste signalé sans masquer les avis.
+PHPStan reste une dette ouverte, et n'est pas présenté comme un contrôle vert.
