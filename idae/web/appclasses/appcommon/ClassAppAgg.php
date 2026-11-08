@@ -155,7 +155,8 @@ class ClassAppAgg
             $arr_collect[$arr_basedist[$field]] = $arr_basedist[$field];
 
             $count_cursor = new \AppCommon\MongodbCursorWrapper(
-                $base_rs->find($vars + [$idgroupBy_table => (int)$arr_basedist[$idgroupBy_table]], ['_id' => 0])
+                // Counting needs only IDs; preserve find/filter semantics without transferring full records.
+                $base_rs->find($vars + [$idgroupBy_table => (int)$arr_basedist[$idgroupBy_table]], ['_id' => 1])
             );
             $row_count = $count_cursor->count();
 

@@ -204,3 +204,35 @@ locale. Le checkout v6 utilise un SHA vérifié et les permissions sont en lectu
 seule. Les erreurs de tests, de plateforme et les avis de sécurité font échouer
 le job ; l'abandon connu d'Elephant.io reste signalé sans masquer les avis.
 PHPStan reste une dette ouverte, et n'est pas présenté comme un contrôle vert.
+
+Premier passage GitHub Actions confirmé réussi :
+https://github.com/medyll/idae-legacy/actions/runs/42525195627
+
+## Première optimisation mesurée des regroupements
+
+distinct_rs() conserve ses requêtes find et leurs filtres, mais les lectures
+servant uniquement à compter projettent désormais _id au lieu du document entier.
+Cela conserve notamment les opérateurs de recherche et les comptages hors de la
+fenêtre de lecture de 3 000 lignes. Le nombre de requêtes n'est pas réduit ici.
+
+Benchmark reproductible :
+MONGO_ENV=test php tests/benchmark_grouping.php
+Il exige le sidecar mongo-test, génère 200 produits supplémentaires de 16 Kio,
+réutilise les trois produits de la fixture et supprime ses données après mesure.
+
+| Mesure sur le jeu synthétique | Avant | Après |
+|---|---:|---:|
+| Documents source reçus | 406 | 406 |
+| Commandes de réponse source | 6 | 6 |
+| Taille JSON cumulée des lots de documents | 6 588 517 octets | 3 303 194 octets |
+| Pic mémoire PHP du benchmark | 14 Mio | 12 Mio |
+| Comptages par catégorie | 102 / 101 | 102 / 101 |
+
+Réduction du volume JSON : 49,86 %. Ce n'est pas une mesure des octets réseau
+compressés ni de la latence en production. Les résultats sérialisés ont le même
+SHA-256 avant/après : 2ae8af3bd0ddb2eac643ce6cbf1672cbee14e8749ebfcdb4f158adfa4b1bd098.
+
+Trois tests de caractérisation passent avant et après la modification : compte
+par groupe, filtre source et comptage de 3 007 produits malgré la fenêtre de
+3 000 lignes. Validation complète : 136 tests/328 assertions ; Integration seule
+25 tests/153 assertions ; les deux commandes sortent avec 0.

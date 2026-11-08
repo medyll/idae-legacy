@@ -147,4 +147,42 @@ class ClassAppAggTest extends TestCase
             $this->assertArrayHasKey('count', $row, 'Each row must have a count key');
         }
     }
+
+    public function testDistinctRsCountsEachGroup(): void
+    {
+        $rows = \AppCommon\ClassAppAgg::distinct_rs(new \App('produit'), [
+            'groupBy_table' => 'categorie', 'limit' => 50,
+        ]);
+        $counts = array_column($rows, 'count', 'idcategorie');
+        ksort($counts);
+        $this->assertSame([10 => 2, 20 => 1], $counts);
+    }
+
+    public function testDistinctRsCountsRespectTheSourceFilter(): void
+    {
+        $rows = \AppCommon\ClassAppAgg::distinct_rs(new \App('produit'), [
+            'groupBy_table' => 'categorie', 'vars' => ['idcategorie' => 10], 'limit' => 50,
+        ]);
+        $this->assertSame([10 => 2], array_column($rows, 'count', 'idcategorie'));
+    }
+
+    public function testDistinctRsCountIncludesRowsBeyondTheReadWindow(): void
+    {
+        $prefix = defined('MDB_PREFIX') ? MDB_PREFIX : '';
+        $collection = self::$mongoClient->selectDatabase($prefix . 'sitebase_pref')->selectCollection('produit');
+        $documents = [];
+        for ($i = 0; $i < 3005; $i++) {
+            $documents[] = ['idproduit' => 10000 + $i, 'nomProduit' => 'Count fixture ' . $i,
+                'idcategorie' => 10, 'descriptionProduit' => str_repeat('x', 1024), 'benchmarkProduit' => true];
+        }
+        try {
+            $collection->insertMany($documents);
+            $rows = \AppCommon\ClassAppAgg::distinct_rs(new \App('produit'), [
+                'groupBy_table' => 'categorie', 'vars' => ['idcategorie' => 10], 'limit' => 50,
+            ]);
+            $this->assertSame([10 => 3007], array_column($rows, 'count', 'idcategorie'));
+        } finally {
+            $collection->deleteMany(['benchmarkProduit' => true]);
+        }
+    }
 }
