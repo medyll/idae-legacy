@@ -284,3 +284,23 @@ clarification de contrats et de propriétés existantes, pas de 135 bugs de runt
 corrigés. Les cinq exclusions historiques inutilisées sont supprimées ; les
 erreurs de configuration passent de 5 à 0. La baseline reste vide et inchangée.
 PHPStan sort toujours avec 1 à cause de la dette restante ; il n'est pas déclaré vert.
+
+## Requête inutile dans les relations inverses
+
+ClassAppFk::get_grille_rfk() ouvrait un curseur appscheme qui n'était jamais lu.
+La requête est supprimée ; les recherches distinctes, les filtres de schéma et
+les comptages des documents liés restent en place. La façade App utilisait déjà
+ce helper : cette suppression concerne donc le chemin de l'application.
+
+Six nouveaux tests utilisent de vraies métadonnées dans le sidecar : comptage
+des liens vers une entité, filtre de schéma autorisé/refusé, absence de liens,
+retour historique pour une table vide et budget de requêtes. Avant correction,
+les vérifications de résultat passent mais le test de budget échoue : deux
+find appscheme sont observés au lieu d'un. Après correction, le budget d'une
+recherche appscheme et de quatre commandes au maximum est respecté.
+
+Validation globale après suppression : 148 tests et suite Integration seule
+37 tests passent ; migration 26 succès/0 échec. Les tests de budget ciblés
+passent aussi après adaptation pour accepter de futures réductions de requêtes.
+PHPStan reste à 3 108 diagnostics de fichiers, aucune erreur de configuration.
+Les collections de cette caractérisation sont exclusivement dans mongo-test.

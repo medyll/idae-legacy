@@ -35,12 +35,6 @@ class ClassAppFk {
         // Convert legacy filters to modern driver types
         $vars = MongoCompat::convertFilter($vars);
 
-        if (empty($add)) {
-            $rs = $app->app_conn->find(['grilleFK.table' => $table]);
-        } else {
-            $rs = $app->app_conn->find($add + ['grilleFK.table' => $table]);
-        }
-
         $arr_ty = $app->appscheme->distinct('idappscheme_type', ['grilleFK.table' => $table]);
         $rs_ty  = $app->appscheme_type->find(['idappscheme_type' => ['$in' => $arr_ty]])->sort(['nomAppscheme_type' => 1]);
 
