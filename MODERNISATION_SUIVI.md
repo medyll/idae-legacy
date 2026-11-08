@@ -38,3 +38,10 @@ PHPStan a réellement été exécuté au niveau 6 : 3 267 erreurs de fichiers et
 5 motifs d'exclusion devenus inutiles. Le journal conserve le détail. Aucune
 baseline n'a été créée pour masquer cette dette ; le total inclut des
 bibliothèques embarquées et des symboles historiques non résolus.
+
+Le lanceur test_integration.php exécute maintenant la suite Integration de
+PHPUnit en environnement test, sans conf.inc.php ni prérequis de requête HTTP.
+Il conserve le code de sortie du processus. Sans PHPUnit il sort avec 2 et
+un diagnostic explicite ; avec IDAE_PHPUNIT_BINARY pointant sur l'installation
+isolée, il exécute 18 tests et expose les 3 erreurs existantes (124 assertions).
+Les requêtes Web ne peuvent plus déclencher ce lanceur de tests.
