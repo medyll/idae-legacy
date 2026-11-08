@@ -5,6 +5,7 @@
  * Validates MongoCompat helper and MongoDB connection
  * Run: php test_migration.php
  * 
+ * Modified: 2026-11-08 — Fail on connection errors and inspect command cursors correctly.
  * @version 1.0.0
  * @date 2026-02-02
  */
@@ -184,23 +185,24 @@ testResult('convertFilter basic', is_array($converted) && count($converted) === 
 echo "\n";
 
 // ============================================
-// TEST 9: MongoDB Connection (if available)
+// TEST 9: MongoDB Connection (required)
 // ============================================
 echo "TEST 9: MongoDB Connection\n";
 
 // Check if ext-mongodb is loaded
 if (!extension_loaded('mongodb')) {
-    echo "Note: ext-mongodb not loaded - skipping MongoDB connection tests\n";
-    echo "This is expected in local dev environment (will work in Docker)\n";
+    testResult('MongoDB connection', false, 'ext-mongodb is required');
 } else {
     try {
         // Try to connect to MongoDB (use localhost for local testing)
         $mongoHost = getenv('MONGO_HOST') ?: 'localhost';
         $mongoPort = getenv('MONGO_PORT') ?: '27017';
         
-        echo "Attempting connection to mongodb://{$mongoHost}:{$mongoPort}\n";
+        $dsn = getenv('MONGO_ENV') === 'test'
+            ? (getenv('MONGO_TEST_DSN') ?: 'mongodb://mongo-test:27017')
+            : "mongodb://{$mongoHost}:{$mongoPort}";
         
-        $client = new Client("mongodb://{$mongoHost}:{$mongoPort}", [], [
+        $client = new Client($dsn, ['serverSelectionTimeoutMS' => 3000, 'connectTimeoutMS' => 3000], [
             'typeMap' => [
                 'root' => 'array',
                 'document' => 'array',
@@ -210,26 +212,13 @@ if (!extension_loaded('mongodb')) {
         
         // Test connection with ping
         $admin = $client->selectDatabase('admin');
-        $result = $admin->command(['ping' => 1]);
+        $result = $admin->command(['ping' => 1])->toArray();
         
-        testResult('MongoDB connection', $result['ok'] == 1);
+        testResult('MongoDB connection', ($result[0]['ok'] ?? 0) == 1);
         
-        // List databases
-        $databases = $client->listDatabases();
-        echo "Available databases: ";
-        $dbNames = array();
-        foreach ($databases as $db) {
-            $dbNames[] = $db['name'];
-        }
-        echo implode(', ', $dbNames) . "\n";
-        testResult('List databases', count($dbNames) > 0);
-        
-    } catch (\Exception $e) {
-        echo "Note: MongoDB connection test failed (expected in local dev)\n";
-        echo "Error: " . $e->getMessage() . "\n";
-    } catch (\Error $e) {
-        echo "Note: MongoDB driver issue (expected in local dev environment)\n";
-        echo "This will work correctly in Docker with proper ext-mongodb setup\n";
+    } catch (\Throwable $e) {
+        // Do not disclose connection strings or require permission to list databases.
+        testResult('MongoDB connection', false, get_class($e));
     }
 }
 
