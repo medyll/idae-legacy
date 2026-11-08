@@ -28,3 +28,13 @@ Les erreurs viennent de tests appelant countBy, statsForField et search sur
 ClassAppAgg, qui n'expose aucune de ces méthodes. Ces tests ne justifient pas,
 à eux seuls, d'ajouter des fonctionnalités à l'application.
 Journaux locaux : tmp/audit-modernisation-2026-11-08/.
+
+Deux avertissements corrigés : update() vérifie l'absence d'identifiant sans
+accéder à une clé inexistante ; distinct() en mode brut ne recherche plus les
+métadonnées de la table liée, utilisées uniquement pour le mode complet.
+La suite Unit passe : 108 tests, 172 assertions, sortie 0, aucun avertissement.
+
+PHPStan a réellement été exécuté au niveau 6 : 3 267 erreurs de fichiers et
+5 motifs d'exclusion devenus inutiles. Le journal conserve le détail. Aucune
+baseline n'a été créée pour masquer cette dette ; le total inclut des
+bibliothèques embarquées et des symboles historiques non résolus.

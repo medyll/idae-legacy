@@ -62,12 +62,12 @@ class ClassAppAgg
             $first_arr_dist = [];
         }
 
-        $base = $app->get_base_from_table($groupBy);
-        if (empty($base)) {
-            $base = 'sitebase_base';
-        }
-
         if ($mode === 'full') {
+            $base = $app->get_base_from_table($groupBy);
+            if (empty($base)) {
+                $base = 'sitebase_base';
+            }
+
             $sortKey = $sort_field[0] . ucfirst($groupBy);
             $rs = $app->plug($base, $groupBy)->find(
                 ['id' . $groupBy => ['$in' => $first_arr_dist]],

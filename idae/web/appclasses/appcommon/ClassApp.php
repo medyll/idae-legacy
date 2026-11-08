@@ -1826,7 +1826,7 @@ return true;
 		function update(array $vars, array $fields = [], bool $upsert = true): ?array {
 			$table = $this->app_table_one['codeAppscheme'];
 			$vars = MongoCompat::convertFilter($vars);
-			$table_value = (int)$vars[$this->app_field_name_id];
+			$table_value = (int)($vars[$this->app_field_name_id] ?? 0);
 
 			// Validate that ID exists in filter
 			if (empty($table_value)) {
