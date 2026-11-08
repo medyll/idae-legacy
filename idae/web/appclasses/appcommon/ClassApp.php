@@ -33,6 +33,38 @@ require_once __DIR__ . '/ClassAppAgg.php';
 	global $app_conn_nb;
 	global $PERSIST_CON;
 
+    /**
+     * Schema-driven facade; these dynamic handles are assigned by the constructor.
+     *
+     * @property string $table
+     * @property LegacyMongoCollection $appscheme
+     * @property LegacyMongoCollection $appscheme_type
+     * @property LegacyMongoCollection $appscheme_base
+     * @property LegacyMongoCollection $appscheme_field
+     * @property LegacyMongoCollection $appscheme_field_type
+     * @property LegacyMongoCollection $appscheme_field_group
+     * @property LegacyMongoCollection $appscheme_has_field
+     * @property LegacyMongoCollection $appscheme_has_table_field
+     * @property LegacyMongoCollection $APPCACHE
+     * @property string|null $app_field_name_id
+     * @property string|null $app_field_name_id_type
+     * @property string|null $app_field_name_top
+     * @property string|null $app_field_name_actif
+     * @property int|null $idappscheme
+     *
+     * The following values are copied from unvalidated schema documents. Their
+     * names are known, but their value types remain mixed until validation is introduced.
+     * @property mixed $app_field_name_nom
+     * @property mixed $app_field_name_nom_type
+     * @property mixed $codeAppscheme
+     * @property mixed $iconAppscheme
+     * @property mixed $colorAppscheme
+     * @property mixed $nomAppscheme
+     * @property mixed $codeAppscheme_base
+     * @property mixed $app_table_icon
+     * @property mixed $grilleFK
+     * @property mixed $hasImageScheme
+     */
 	#[\AllowDynamicProperties]
 	class App {
 

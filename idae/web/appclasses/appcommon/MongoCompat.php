@@ -343,6 +343,9 @@ class MongoDB {
 
 /**
  * MongoCollection compatibility wrapper
+ *
+ * The native distinct API is forwarded unchanged through __call().
+ * @method array<mixed> distinct(string $fieldName, array<string, mixed> $filter = [], array<string, mixed> $options = [])
  */
 class MongoCollection {
     private $collection;

@@ -263,3 +263,24 @@ la façade déléguée : même SHA-256 de résultat, compte 102/101, six répons
 volume JSON 6 588 517 → 3 303 194 octets et pic PHP 14 → 12 Mio. Le gain concerne
 maintenant les appels de la façade utilisés par l'interface, sur ce jeu synthétique.
 Preuves locales : tmp/modernisation-app-2026-11-08/.
+
+## 2026-11-09 : contrats statiques des collections
+
+Les collections dynamiques réellement créées par le constructeur sont décrites
+explicitement, sans les remplacer par des propriétés déclarées : __get et les
+contrôles d'existence gardent leur comportement. Les noms générés et identifiants
+convertis ont leurs types connus ; les valeurs copiées sans validation depuis les
+documents de schéma restent explicitement mixed. MongoCollection documente son
+API distinct transmise telle quelle au pilote par __call.
+
+Cette étape ne modifie pas la logique exécutable : comparaison des tokens PHP
+hors commentaires/espaces, après normalisation des fins de ligne Git/Windows,
+identique pour ClassApp et MongoCompat. Les 16 tests ciblés passent (27 assertions).
+
+Analyse globale avant/après : 3 243 → 3 108 diagnostics de fichiers, aucun nouveau
+diagnostic après comparaison tenant compte des lignes déplacées et du rendu
+abrégé des messages. App : 345 → 246 ; ClassAppAgg : 14 → 7. Il s'agit d'une
+clarification de contrats et de propriétés existantes, pas de 135 bugs de runtime
+corrigés. Les cinq exclusions historiques inutilisées sont supprimées ; les
+erreurs de configuration passent de 5 à 0. La baseline reste vide et inchangée.
+PHPStan sort toujours avec 1 à cause de la dette restante ; il n'est pas déclaré vert.
