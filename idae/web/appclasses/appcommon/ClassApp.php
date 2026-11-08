@@ -27,6 +27,7 @@ declare(strict_types=1);
 	// MongodbCursorWrapper for ADODB-style getNext() compatibility
 	require_once __DIR__ . '/MongodbCursorWrapper.php';
 require_once __DIR__ . '/ClassAppFk.php';
+require_once __DIR__ . '/ClassAppAgg.php';
 	use AppCommon\MongodbCursorWrapper;
 
 	global $app_conn_nb;
@@ -976,113 +977,32 @@ return true;
 			$this->plug('sitebase_increment', 'auto_increment')->remove(['_id' => $id]);
 		}
 
-		function distinct($groupBy, $vars = [], $limit = 200, $mode = 'full', $field = '', $sort_field = ['nom', 1]) {
-			if (empty($field)) $field = 'id' . $groupBy;
-			// table sur laquelle on bosse
-			$dist = $this->plug($this->app_table_one['codeAppscheme_base'], $this->app_table_one['codeAppscheme']);
-			if (sizeof($vars) != 0) {
-				$first_arr_dist = $dist->distinct($field, $vars);
-			} else {
-				$first_arr_dist = $dist->distinct($field);
-			}
+        /**
+         * @param array<string, mixed> $vars
+         * @param array<int, int|string> $sort_field
+         * @return \AppCommon\MongoCursor|array<mixed>
+         */
+        function distinct($groupBy, $vars = [], $limit = 200, $mode = 'full', $field = '', $sort_field = ['nom', 1]) {
+            return \AppCommon\ClassAppAgg::distinct(
+                $this, (string)$groupBy, $vars, (int)$limit, (string)$mode, (string)$field, $sort_field
+            );
+        }
 
-			if (empty($first_arr_dist)) $first_arr_dist = [];
-
-			//  ! $groupbBy : nom de la table
-			$base = $this->get_base_from_table($groupBy);
-			if (empty($base)) {
-				$base = "sitebase_base";
-			}
-			//
-			if ($mode == 'full'):
-
-				$rs_dist = $this->plug($base, $groupBy)->find(['id' . $groupBy => ['$in' => $first_arr_dist]], ['sort' => [$sort_field[0] . ucfirst($groupBy) => $sort_field[1]], 'limit' => (int)$limit]);
-
-				return $rs_dist;
-			endif;
-
-			return $first_arr_dist;
-		}
-
-		function distinct_rs($vars_dist) {
-			// $groupBy_table, $vars = ['1' => '1'], $limit = 250, $mode = 'full', $field = '', $sort_field = ['nom', 1]
-
-			$groupBy_table = $vars_dist['groupBy_table'];
-			$vars          = empty($vars_dist['vars']) ? [] : $vars_dist['vars'];
-			$limit         = empty($vars_dist['limit']) ? 250 : $vars_dist['limit'];
-			$field         = empty($vars_dist['field']) ? '' : $vars_dist['field'];
-			$sort_field    = empty($vars_dist['sort_field']) ? ['nom', 1] : $vars_dist['sort_field'];
-
-			if (empty($field)) $field = 'id' . $groupBy_table;
-			$idgroupBy_table   = 'id' . $groupBy_table;
-			$arr_collect_rs    = [];
-			$arr_collect       = [];
-			$arr_collect_field = [];
-			$tmp_iddistinct    = [];
-
-			# tri sur table principale $this ou $table_group_by
-			if ($this->has_field($sort_field[0] . ucfirst($this->table))) {
-				$sort_on = $sort_field[0] . ucfirst($this->table);
-			} else {
-				$sort_on = $sort_field[0];
-			}
-
-			// echo "on collecte $field et tri sur " . $this->app_table_one['codeAppscheme'] . ' ' . $sort_field[0] . '<br>';
-			$base_rs  = $this->plug($this->app_table_one['codeAppscheme_base'], $this->app_table_one['codeAppscheme']);
-			$basedist = new App($groupBy_table);
-			// sort field peut etre count +1 ou count -1
-
-			if ($sort_field[0] != 'count') {
-				$rs_basedist = new MongodbCursorWrapper($base_rs->find($vars, array_merge(['_id' => 0], ['limit' => 3000, 'sort' => [$sort_on => $sort_field[1]]])));
-			} else
-				$rs_basedist = new MongodbCursorWrapper($base_rs->find($vars, array_merge(['_id' => 0], ['limit' => 3000, 'sort' => ['nom' . ucfirst($this->table) => 1]])));
-			# boucle dans liste triÃ©e
-
-			while ($arr_basedist = $rs_basedist->getNext()) {
-				//
-				# collecter ids
-				# sauf si dÃ©ja collecter
-
-				$arr_collect_field[$arr_basedist[$field]][] = $arr_basedist[$this->app_field_name_id];
-				if (empty($arr_basedist[$idgroupBy_table])) continue;
-				//	if (empty($arr_basedist[$field])) continue;
-				if (array_key_exists($arr_basedist[$field], $arr_collect)) continue;
-
-				# table de groupby
-				$arr_dist = $basedist->findOne([$idgroupBy_table => (int)$arr_basedist[$idgroupBy_table]], ['_id' => 0]);
-
-				$arr_collect[$arr_basedist[$field]] = $arr_basedist[$field];
-				# charge
-				$arr_collect_rs[$arr_basedist[$field]] = $arr_dist + $arr_basedist + ['nomAppscheme' => $groupBy_table, 'count' => 0, 'groupBy' => $groupBy_table, $field => $arr_basedist[$field], $this->app_field_name_id => (int)$arr_basedist[$this->app_field_name_id], $sort_field[0] => $arr_basedist[$sort_field[0] . ucfirst($this->table)]];
-
-				$tmp_iddistinct[] = (int)$arr_basedist[$this->app_field_name_id];;
-				$rs_base_rs_tmp                                 = new MongodbCursorWrapper($base_rs->find($vars + [$idgroupBy_table => (int)$arr_basedist[$idgroupBy_table]], ['_id' => 0]));
-				$rs_base_rs_count                               = $rs_base_rs_tmp->count();
-				$arr_collect_rs[$arr_basedist[$field]]['count'] = $rs_base_rs_count;
-				//
-				if ($sort_field[0] != 'count') if (sizeof($arr_collect_rs) == $limit) break;
-			}
-			if ($sort_field[0] == 'count') {
-				usort($arr_collect_rs,
-					function ($a, $b) {
-						return (int)$a['count'] < (int)$b['count'];
-					});
-				$arr_collect_rs = array_slice($arr_collect_rs, 0, $limit - 1);
-			} else {
-				global $sort_vars;
-				$sort_vars = $sort_on;
-				usort($arr_collect_rs,
-					function ($a, $b) {
-						global $sort_vars;
-
-						return (int)$a[$sort_vars] > (int)$b[$sort_vars];
-					});
-				$arr_collect_rs = array_slice($arr_collect_rs, 0, $limit - 1);
-			}
-
-			return $arr_collect_rs;
-
-		}
+        /**
+         * @param array<string, mixed> $vars_dist
+         * @return array<int, array<string, mixed>>
+         */
+        function distinct_rs($vars_dist) {
+            // Retain the facade's empty-value defaults, including a zero limit.
+            $options = [
+                'groupBy_table' => (string)($vars_dist['groupBy_table'] ?? ''),
+                'vars' => empty($vars_dist['vars']) ? [] : $vars_dist['vars'],
+                'limit' => empty($vars_dist['limit']) ? 250 : (int)$vars_dist['limit'],
+                'field' => empty($vars_dist['field']) ? '' : (string)$vars_dist['field'],
+                'sort_field' => empty($vars_dist['sort_field']) ? ['nom', 1] : $vars_dist['sort_field'],
+            ];
+            return \AppCommon\ClassAppAgg::distinct_rs($this, $options);
+        }
 
 		function has_field($field) {
 			if (is_array($field)) {
@@ -1988,19 +1908,14 @@ return true;
 			return $str;
 		}
 
-		function distinct_all($groupBy, $vars = [], $limit = 200, $mode = 'full') {
-
-			// table sur laquelle on bosse
-			$dist = $this->plug($this->app_table_one['codeAppscheme_base'], $this->app_table_one['codeAppscheme']);
-
-			if (sizeof($vars) != 0) {
-				$first_arr_dist = $dist->distinct($groupBy, $vars);
-			} else {
-				$first_arr_dist = $dist->distinct($groupBy);
-			}
-
-			return $first_arr_dist;
-		}
+        /**
+         * @param array<string, mixed> $vars
+         * @return array<mixed>
+         */
+        function distinct_all($groupBy, $vars = [], $limit = 200, $mode = 'full') {
+            // $limit and $mode remain unused for compatibility with legacy callers.
+            return \AppCommon\ClassAppAgg::distinct_all($this, (string)$groupBy, $vars);
+        }
 
 		// Modified: 2026-03-06
 		/**

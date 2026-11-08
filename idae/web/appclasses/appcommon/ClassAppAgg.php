@@ -30,7 +30,7 @@ class ClassAppAgg
      * @param string               $mode       'full' returns resolved records; any other value returns raw IDs
      * @param string               $field      Override field name (defaults to 'id'.$groupBy)
      * @param array<int|string>    $sort_field Two-element array [field, direction] e.g. ['nom', 1]
-     * @return \AppCommon\MongodbCursorWrapper|array<mixed>
+     * @return MongoCursor|array<mixed>
      */
     public static function distinct(
         \App $app,
@@ -168,6 +168,8 @@ class ClassAppAgg
                 $app->app_field_name_id => (int)$arr_basedist[$app->app_field_name_id],
                 $sort_field[0]      => $arr_basedist[$sort_field[0] . ucfirst($app->table)] ?? null,
             ];
+            // The facade has always given the computed count priority over stored fields.
+            $arr_collect_rs[$arr_basedist[$field]]['count'] = $row_count;
 
             if ($sort_field[0] !== 'count' && count($arr_collect_rs) === $limit) {
                 break;

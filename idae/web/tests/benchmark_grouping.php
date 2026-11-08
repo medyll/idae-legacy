@@ -22,7 +22,7 @@ $monitor = new class implements \MongoDB\Driver\Monitoring\CommandSubscriber {
     public function commandSucceeded(\MongoDB\Driver\Monitoring\CommandSucceededEvent $event): void
     {
         foreach (debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 30) as $frame) {
-            if (($frame['class'] ?? '') === 'AppCommon\\ClassAppAgg'
+            if (in_array($frame['class'] ?? '', ['App', 'AppCommon\\ClassAppAgg'], true)
                 && ($frame['function'] ?? '') === 'distinct_rs') {
                 $reply = $event->getReply();
                 if (($reply->cursor->ns ?? '') === 'sitebase_pref.produit') {
@@ -51,7 +51,7 @@ try {
     $client->selectDatabase('sitebase_pref')->selectCollection('produit')->insertMany($documents);
     $app = new \App('produit');
     \MongoDB\Driver\Monitoring\addSubscriber($monitor);
-    $rows = \AppCommon\ClassAppAgg::distinct_rs($app, ['groupBy_table' => 'categorie', 'limit' => 50]);
+    $rows = $app->distinct_rs(['groupBy_table' => 'categorie', 'limit' => 50]);
     \MongoDB\Driver\Monitoring\removeSubscriber($monitor);
     $summary = ['rows' => count($rows), 'counts' => array_column($rows, 'count'),
         'result_sha256' => hash('sha256', json_encode($rows, JSON_THROW_ON_ERROR)),

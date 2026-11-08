@@ -236,3 +236,30 @@ Trois tests de caractérisation passent avant et après la modification : compte
 par groupe, filtre source et comptage de 3 007 produits malgré la fenêtre de
 3 000 lignes. Validation complète : 136 tests/328 assertions ; Integration seule
 25 tests/153 assertions ; les deux commandes sortent avec 0.
+
+## Responsabilité des regroupements dans App
+
+L'inspection des appelants révèle que les modules utilisent App::distinct_rs(),
+qui conservait sa propre implémentation : le helper extrait et optimisé était
+encore utilisé uniquement dans les tests. App délègue maintenant distinct(),
+distinct_all() et distinct_rs() à ClassAppAgg. Aucun nouveau service transversal
+n'est introduit et les noms/signatures de la façade sont conservés.
+
+Six tests de caractérisation portent directement sur la façade : filtres,
+résolution triée, limite numérique sous forme de chaîne, options vides et priorité
+du compte calculé sur un champ stocké nommé count. La limite historique limit-1
+et l'ordre numérique existant sont conservés. La référence avant modification
+passe les neuf assertions mais échoue à cause de deux dépréciations de comparateur
+usort booléen ; la délégation les élimine. Le helper est corrigé pour que le
+compte calculé conserve la priorité observée dans l'ancienne façade.
+
+App passe de 2 339 à 2 254 lignes. PHPStan sur App + ClassAppAgg : 384 diagnostics
+avant, 359 après (App : 370 → 345 ; helper : 14 inchangés), aucun nouveau message.
+Suite complète : 142 tests/337 assertions ; Integration seule : 31/162, sorties 0.
+
+Le benchmark appelle désormais App::distinct_rs(). Comparaison exécutée avec
+l'ancienne façade issue de Git dans une arborescence temporaire isolée et avec
+la façade déléguée : même SHA-256 de résultat, compte 102/101, six réponses source,
+volume JSON 6 588 517 → 3 303 194 octets et pic PHP 14 → 12 Mio. Le gain concerne
+maintenant les appels de la façade utilisés par l'interface, sur ce jeu synthétique.
+Preuves locales : tmp/modernisation-app-2026-11-08/.
