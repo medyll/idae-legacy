@@ -2,9 +2,10 @@
   "config":{
     "disable-tls": false,
     "secure-http": true,
-    "platform-check": false
+    "platform-check": true
   },
   "require": {
+    "php": "^8.2",
     "wisembly/elephant.io": "3.1.0",
     "rase/socket.io-emitter": "0.7.0",
     "ddeboer/imap": "0.5.2",

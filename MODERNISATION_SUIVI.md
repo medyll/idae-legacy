@@ -155,3 +155,30 @@ JsonDataRegressionTest. Ils sont déplacés dans la fixture conf_test.php, charg
 uniquement lors de l'appel isolé au service. Preuves sur l'environnement actuel :
 Integration seule, 25 tests/153 assertions ; suite complète, 133 tests/325
 assertions ; les deux commandes sortent avec 0.
+
+## Image PHP compatible avec toutes les exigences Composer
+
+Image candidate construite sur php:8.2-apache-bookworm, qui fournit les en-têtes
+c-client nécessaires à IMAP. IMAP est compilé avec SSL et Kerberos ; le pilote
+MongoDB est fixé à 2.5.2. Le runtime obtenu est PHP 8.2.35. Le manifeste exige
+PHP ^8.2, active platform-check et le Dockerfile installe les dépendances sans
+aucun ignore-platform-req. Le verrou conserve les versions applicatives validées.
+
+Construction finale réussie, image candidate :
+sha256:16fddddc0c8714e08c59a347bb529b16dbbbba0f1b1cc711ae6fc337ab449dde.
+Dans un conteneur éphémère sans montage des sources et sans secrets de connexion,
+sur le réseau du seul MongoDB de test : composer install et check-platform-reqs
+passent ; suite complète 133/325 ; migration 26/0 ; Integration seule 25/153.
+Aucun contournement de plateforme n'est utilisé pour ces commandes.
+
+Déploiement : taguer cette image comme idae-legacy-app puis recréer uniquement
+le service app avec docker compose up -d --no-deps app. Les paramètres de
+connexion comparés à ceux du conteneur existant sont identiques, sans affichage
+de leurs valeurs. Installer les dépendances de développement dans le volume
+local rend les commandes Composer/PHPUnit usuelles disponibles sans /tmp/tools.
+Le Dockerfile de livraison continue à utiliser --no-dev.
+
+Retour arrière d'image : idae-legacy-app:before-imap est conservée. Un retour à
+cette image nécessiterait aussi de régénérer l'autoloader avec
+composer install --ignore-platform-req=ext-imap, car elle ne possède pas IMAP.
+Les fichiers sous /tmp de l'ancien conteneur ne survivent pas à sa recréation.

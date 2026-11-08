@@ -1,5 +1,5 @@
-# PHP 8.2 avec Apache
-FROM php:8.2-apache
+# Bookworm provides the c-client headers required by PHP 8.2's bundled IMAP extension.
+FROM php:8.2-apache-bookworm
 
 # Installation des dépendances système et extensions PHP
 RUN apt-get update \
@@ -13,16 +13,20 @@ RUN apt-get update \
         libxslt1-dev \
         libonig-dev \
         libcurl4-openssl-dev \
+        libc-client2007e-dev \
+        libkrb5-dev \
         unzip \
         curl \
         gnupg \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-configure imap --with-kerberos --with-imap-ssl \
     && docker-php-ext-install -j$(nproc) \
         gd \
         zip \
         intl \
+        imap \
         opcache \
-    && pecl install mongodb \
+    && pecl install mongodb-2.5.2 \
     && docker-php-ext-enable mongodb \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
@@ -79,7 +83,7 @@ RUN chown -R www-data:www-data /var/www/html \
 # Installer les dépendances PHP avec Composer (mongodb/mongodb)
 WORKDIR /var/www/html/idae/web
 RUN if [ -f composer.json ]; then \
-        composer install --no-dev --ignore-platform-reqs --optimize-autoloader; \
+        composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader; \
     fi
 
 WORKDIR /var/www/html
