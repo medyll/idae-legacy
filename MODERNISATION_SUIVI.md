@@ -72,3 +72,38 @@ avertissement ; Unit reste à 108 tests et 172 assertions, sortie 0. Le double
 d'autorisation vérifie l'appel au helper et le refus avant exposition des données,
 pas les règles internes du helper ni une session HTTP complète. Les 3 erreurs
 d'intégration préexistantes restent à traiter séparément.
+
+## Bilan de la première série de correctifs
+
+Lint final : 978 fichiers valides, aucune erreur de syntaxe ; 430 messages de
+dépréciation restent présents. PHPUnit complet : 130 tests, 317 assertions,
+3 erreurs connues, aucun avertissement. PHPStan : toujours 3 267 erreurs de
+fichiers et 5 exclusions inutilisées. Quatre messages changent de formulation
+dans ClassAct/ClassAppSite après la mise à jour des dépendances ; le total stable
+ne constitue pas une preuve de correction de cette dette.
+
+Le cache PHPUnit est dirigé vers tmp/phpunit pour éviter de modifier le cache
+historiquement suivi dans Git à chaque exécution. Aucun changement de ce cache
+généré n'est inclus dans les commits.
+
+Commandes exécutables dans le conteneur courant, depuis /var/www/html/idae/web :
+
+```sh
+MONGO_ENV=test php test_migration.php
+MONGO_ENV=test IDAE_TEST_AUTOLOAD=/tmp/idae-audit-tools/vendor/autoload.php /tmp/idae-audit-tools/vendor/bin/phpunit --testsuite Unit
+IDAE_TEST_AUTOLOAD=/tmp/idae-audit-tools/vendor/autoload.php IDAE_PHPUNIT_BINARY=/tmp/idae-audit-tools/vendor/bin/phpunit php test_integration.php
+/tmp/idae-audit-tools/vendor/bin/phpstan analyse --no-progress --memory-limit=512M
+composer validate --no-check-publish
+composer audit --locked
+```
+
+La suite Integration reste rouge pour les méthodes inexistantes ; elle ne doit
+pas servir de feu vert à un déploiement. L'installation d'outillage dans /tmp est
+temporaire et disparaît avec le conteneur. Son remplacement par un environnement
+de tests reproductible reste une tâche ouverte, liée au traitement IMAP/Smarty.
+
+Prochains travaux indépendants : remettre les tests de contrat en correspondance
+avec les API réellement utilisées, caractériser les droits sur une session HTTP,
+traiter Smarty et IMAP avec leurs parcours effectifs, puis installer des contrôles
+reproductibles avant les extractions structurelles et les benchmarks. Aucun
+déploiement ni changement de secrets n'a été effectué.
