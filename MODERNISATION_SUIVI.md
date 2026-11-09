@@ -316,3 +316,19 @@ sur les deux hôtes virtuels. Les fichiers .env sont exclus du contexte Docker.
 Le contrôle tests/check_http_boundary.php vérifie les refus et l'accès au
 JavaScript public sur les deux hôtes. Il passe dans un conteneur Apache isolé
 et est intégré à la CI. Compose continue de fournir l'environnement au démarrage.
+
+## Préférences utilisateur
+
+App délègue get_settings, set_settings et del_settings à AgentPreferences.
+La classe reçoit la collection agent_pref et le générateur d'identifiants
+historique. Les méthodes publiques d'App conservent leurs signatures.
+
+Les tests par la façade couvrent les clés globales et par table, l'isolation
+entre agents, la suppression et la création suivie d'une mise à jour dans le
+même lot. La référence reproduit l'écrasement de l'identifiant existant et
+l'avertissement PHP à la lecture d'une préférence absente. Chaque écriture
+construit maintenant ses propres champs et une préférence absente renvoie null.
+
+La suite complète passe avec 150 tests et la suite Integration avec 39.
+PHPStan passe de 3 108 à 3 104 diagnostics de fichiers, dont 246 à 242 dans
+App. La comparaison ne relève aucun nouveau diagnostic.

@@ -28,6 +28,7 @@ declare(strict_types=1);
 	require_once __DIR__ . '/MongodbCursorWrapper.php';
 require_once __DIR__ . '/ClassAppFk.php';
 require_once __DIR__ . '/ClassAppAgg.php';
+require_once __DIR__ . '/AgentPreferences.php';
 	use AppCommon\MongodbCursorWrapper;
 
 	global $app_conn_nb;
@@ -594,38 +595,23 @@ require_once __DIR__ . '/ClassAppAgg.php';
 			skelMdl::reloadModule('app/app_gui/app_gui_panel', $table);
 		}
 
-		function get_settings($idagent, $key, $table = '') {
-			$width_table = empty($table) ? '' : '_' . $table;
-			$arr         = $this->plug('sitebase_pref', 'agent_pref')->findOne(['idagent' => (int)$idagent, 'codeAgent_pref' => $key . $width_table]);
+        function get_settings($idagent, $key, $table = '') {
+            return $this->agentPreferences()->get((int)$idagent, (string)$key, (string)$table);
+        }
 
-			return $arr['valeurAgent_pref'];
-		}
+        function set_settings($idagent, $vars) {
+            $this->agentPreferences()->set((int)$idagent, $vars);
+        }
 
-		function set_settings($idagent, $vars) {
-			foreach ($vars as $key => $val) {
-				$out['valeurAgent_pref'] = $val;
-				$out['codeAgent_pref']   = $key;
-				$out['idagent']          = (int)$idagent;
+        function del_settings($idagent, $key, $table = '') {
+            return $this->agentPreferences()->delete((int)$idagent, (string)$key, (string)$table);
+        }
 
-				$arr = $this->plug('sitebase_pref', 'agent_pref')->findOne(['idagent' => (int)$idagent, 'codeAgent_pref' => $key]);
-				if (empty($arr['idagent_pref'])) {
-					$out['idagent_pref'] = (int)$this->getNext('idagent_pref');
-				}
-				$this->plug('sitebase_pref', 'agent_pref')->updateOne(['idagent' => (int)$idagent, 'codeAgent_pref' => $key], ['$set' => $out], ['upsert' => true]);
-			}
-		}
-
-		/** $field_name_raw */
-		/** $table */
-
-		function del_settings($idagent, $key, $table = '') {
-			$width_table = empty($table) ? '' : '_' . $table;
-			$del         = $this->plug('sitebase_pref', 'agent_pref')->remove(['idagent' => (int)$idagent, 'codeAgent_pref' => $key . $width_table]);
-
-			//$del         = $this->plug('sitebase_pref', 'agent_pref')->update(array('idagent' => (int)$idagent), array('$pull' => array('settings.' . $key . $width_table => 1)));
-
-			return $del;
-		}
+        private function agentPreferences(): \AppCommon\AgentPreferences {
+            /** @var LegacyMongoCollection $collection Fixed non-empty database and collection names. */
+            $collection = $this->plug('sitebase_pref', 'agent_pref');
+            return new \AppCommon\AgentPreferences($collection, fn (): int => (int)$this->getNext('idagent_pref'));
+        }
 
 		function is_confident_table($table) {
 			$conf = ['agent_note', 'todo', 'tache'];
