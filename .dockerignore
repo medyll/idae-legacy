@@ -3,6 +3,9 @@
 # into a Linux container — the exact breakage the old `node_modules_socket`
 # named volume existed to avoid.
 **/node_modules
+# Supply environment files through Compose at runtime.
+**/.env
+**/.env.*
 
 # Bind-mounted at runtime (./logs:/var/log/apache2 and ./logs:/logs).
 logs/

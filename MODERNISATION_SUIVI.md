@@ -304,3 +304,15 @@ Validation globale après suppression : 148 tests et suite Integration seule
 passent aussi après adaptation pour accepter de futures réductions de requêtes.
 PHPStan reste à 3 108 diagnostics de fichiers, aucune erreur de configuration.
 Les collections de cette caractérisation sont exclusivement dans mongo-test.
+
+## Accès HTTP aux fichiers internes
+
+Les sondes HEAD anonymes renvoyaient 200 pour app_node/.env, composer.lock,
+tests/ et vendor/ sur la pile locale. Apache refuse désormais l'accès à ces
+répertoires, aux fichiers cachés, aux manifestes Composer, aux lanceurs de tests
+et aux diagnostics inf.php et inf_crfr.php. Les index de répertoire sont désactivés
+sur les deux hôtes virtuels. Les fichiers .env sont exclus du contexte Docker.
+
+Le contrôle tests/check_http_boundary.php vérifie les refus et l'accès au
+JavaScript public sur les deux hôtes. Il passe dans un conteneur Apache isolé
+et est intégré à la CI. Compose continue de fournir l'environnement au démarrage.

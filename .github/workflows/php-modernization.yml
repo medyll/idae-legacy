@@ -44,6 +44,8 @@ jobs:
           docker run --rm --network idae-ci --env MONGO_ENV=test idae-ci:verify \
             sh -eu -c '
               cd /var/www/html/idae/web
+              apachectl -k start
+              php tests/check_http_boundary.php
               composer validate --no-check-publish
               composer install --no-interaction --no-scripts --no-plugins --prefer-dist
               composer check-platform-reqs
