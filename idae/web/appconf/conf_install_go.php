@@ -19,6 +19,8 @@
 
 	$schemes['appscheme_field_type']        = ['fields' => ['code', 'nom', 'icon', 'ordre']];
 	$schemes_values['appscheme_field_type'] = ['bool', 'codification', 'color', 'date', 'email', 'heure', 'icon', 'image', 'phone', 'pourcentage', 'prix', 'prix_precis', 'texte', 'textelibre', 'valeur'];
+	// English aliases (see AppCommon\FieldTypeMap::FR_EN) — added as extra catalog entries, idempotent upsert, no rename of existing French rows.
+	$schemes_values['appscheme_field_type'] = array_merge($schemes_values['appscheme_field_type'], array_values(\AppCommon\FieldTypeMap::FR_EN));
 
 	$schemes['appscheme_has_field']       = ['fields' => ['code', 'nom', 'icon', 'ordre'], 'grilleFK' => ['appscheme', 'appscheme_field']];
 	$schemes['appscheme_has_table_field'] = ['fields' => ['code', 'nom', 'icon', 'ordre'], 'grilleFK' => ['appscheme', 'appscheme_field']];

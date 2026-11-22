@@ -674,17 +674,21 @@ require_once __DIR__ . '/AgentPreferences.php';
 			//if (!empty($value)):
 			switch (strtolower($arrF['codeAppscheme_field_type'] ?? '')):
 				case 'valeur':
+				case 'value':
 					$value = (is_int($value)) ? maskNbre($value, 0) : $value;
 					break;
 				case 'prix':
+				case 'price':
 					if (empty($value)) break;
 					$value = maskNbre((float)$value, 2) . ' â‚¬';
 					break;
 				case 'prix_precis':
+				case 'price_precise':
 					if (empty($value)) break;
 					$value = maskNbre((float)$value, 6) . ' â‚¬';
 					break;
 				case 'pourcentage':
+				case 'percent':
 					$value = (float)$value . ' %';
 					break;
 				case 'date':
@@ -692,6 +696,7 @@ require_once __DIR__ . '/AgentPreferences.php';
 					$value = date_fr($value);
 					break;
 				case 'heure':
+				case 'time':
 					if (empty($value)) break;
 					$value = maskHeure($value);
 					break;
@@ -700,10 +705,12 @@ require_once __DIR__ . '/AgentPreferences.php';
 					$value = "<div class='inline nowrap'>" . maskTel($value) . "</div>";
 					break;
 				case 'textelibre':
+				case 'longtext':
 					if (empty($value)) break;
 					$value = "<div style='max-height:200px;overflow:auto;'>" . nl2br(stripslashes($value)) . "</div>";
 					break;
 				case 'texteformate':
+				case 'richtext':
 					if (empty($value)) break;
 					$value = $value;
 					break;
@@ -776,6 +783,7 @@ require_once __DIR__ . '/AgentPreferences.php';
 					$type  = "date";
 					break;
 				case "heure":
+				case "time":
 					$type  = "time";
 					$class = "heure inputSmall";
 					break;
@@ -787,6 +795,7 @@ require_once __DIR__ . '/AgentPreferences.php';
 					$class = "inputLarge";
 					break;
 				case "codification":
+				case "code":
 					$class = "inputSmall";
 					break;
 				case "localisation":
@@ -797,12 +806,14 @@ require_once __DIR__ . '/AgentPreferences.php';
 					$tag   = 'checkbox';
 					break;
 				case "textelibre":
+				case "longtext":
 					//$value = br2nl(strip_tags($value));
 					$value = br2nl($value);
 					$class = "inputLarge";
 					$tag   = 'textarea';
 					break;
 				case "texteformate":
+				case "richtext":
 					//$value = br2nl(strip_tags($value));
 					$value = br2nl($value);
 					$class = "inputLarge";
@@ -815,16 +826,20 @@ require_once __DIR__ . '/AgentPreferences.php';
 					if (empty($value)) $value = '_';
 					break;
 				case "valeur":
+				case "value":
 					$class = "inputTiny";
 					break;
 				case "texte":
+				case "text":
 					$class = "inputLarge";
 					break;
 				case "prix_precis":
+				case "price_precise":
 					$value = maskNbre((float)$value, 6);
 					$class = "inputSmall";
 					break;
 				case "prix":
+				case "price":
 					$value = maskNbre((float)$value, 2);
 					$class = "inputSmall";
 					break;
