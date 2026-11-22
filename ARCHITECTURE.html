@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Idae — Architecture</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --surface: #f6f7f9;
+    --surface-2: #eef0f3;
+    --border: #d9dde3;
+    --text: #1a1d23;
+    --text-dim: #5b6270;
+    --blue: #2f6fed;    --blue-bg: #eaf1ff;
+    --teal: #0f9d8c;    --teal-bg: #e7faf6;
+    --purple: #7c4de0;  --purple-bg: #f2ecfd;
+    --amber: #b8860b;   --amber-bg: #fff6e2;
+    --green: #2e9e4a;   --green-bg: #eafaee;
+    --red: #d1455b;     --red-bg: #fdeced;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #15171c;
+      --surface: #1c1f26;
+      --surface-2: #232730;
+      --border: #333844;
+      --text: #e7e9ee;
+      --text-dim: #9aa2b1;
+      --blue: #7ea6ff;    --blue-bg: #17233d;
+      --teal: #5fd8c4;    --teal-bg: #10302c;
+      --purple: #b79cf2;  --purple-bg: #241c3b;
+      --amber: #e8c468;   --amber-bg: #392e14;
+      --green: #7fd99a;   --green-bg: #15301e;
+      --red: #f08a98;     --red-bg: #3a1a20;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, Segoe UI, Roboto, system-ui, sans-serif;
+    margin: 0;
+    padding: 24px 16px 60px;
+  }
+  .wrap { max-width: 980px; margin: 0 auto; }
+  h1 { margin-bottom: 4px; font-size: 22px; }
+  h2 { font-size: 17px; margin: 28px 0 8px; }
+  .sub { color: var(--text-dim); margin-top: 0; font-size: 13px; }
+  .layer {
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin-bottom: 4px;
+  }
+  .layer .title { font-weight: 700; margin-bottom: 8px; font-size: 14px; }
+  .row { display: flex; gap: 8px; flex-wrap: wrap; font-size: 12.5px; }
+  .chip {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 6px 10px;
+  }
+  .dim { color: var(--text-dim); }
+  .arrow {
+    text-align: center;
+    color: var(--text-dim);
+    font-size: 20px;
+    line-height: 1.6;
+  }
+  .grid3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    font-size: 12px;
+  }
+  @media (max-width: 640px) {
+    .grid3 { grid-template-columns: 1fr 1fr; }
+  }
+  pre {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px;
+    font-size: 11.5px;
+    overflow: auto;
+    flex: 1;
+    min-width: 260px;
+  }
+  .twocol { display: flex; gap: 16px; flex-wrap: wrap; }
+  .note {
+    margin-top: 16px;
+    font-size: 12px;
+    color: var(--text-dim);
+    border-top: 1px solid var(--border);
+    padding-top: 10px;
+  }
+  code { font-size: 11px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Idae — architecture (PHP + schema-driven MongoDB)</h1>
+  <p class="sub">Flux requête + modèle données (appscheme*)</p>
+
+  <div class="layer" style="border-color: var(--blue); background: var(--blue-bg);">
+    <div class="title" style="color: var(--blue);">Frontend SPA — javascript/</div>
+    <div class="row">
+      <div class="chip">bag.js <span class="dim">(loader, cache IndexedDB)</span></div>
+      <div class="chip">main_bag.js <span class="dim">(require_trame, dyn_require)</span></div>
+      <div class="chip">app_bootstrap.js → schemeLoad()</div>
+      <div class="chip">idae-be.iife.js + 7 shims <span class="dim">(remplace Prototype/Scriptaculous)</span></div>
+      <div class="chip">app_cache.js <span class="dim">(localforage)</span></div>
+    </div>
+    <div class="dim" style="font-size:12px; margin-top:6px;">window.APP.APPSCHEMES / APPFIELDS / CSRF_TOKEN</div>
+  </div>
+
+  <div class="arrow">↓ AJAX (actions.php / postAction.php)</div>
+
+  <div class="layer" style="border-color: var(--teal); background: var(--teal-bg);">
+    <div class="title" style="color: var(--teal);">services/ — endpoints JSON</div>
+    <div class="row">
+      <div class="chip">json_scheme.php <span class="dim">(fieldModel/columnModel/miniModel)</span></div>
+      <div class="chip">json_data.php / json_data_table.php / json_data_search.php <span style="color: var(--amber);">(lecture, non protégée)</span></div>
+      <div class="chip">json_action.php <span class="dim">(écriture, CSRF + droit_table_enforce)</span></div>
+    </div>
+  </div>
+
+  <div class="arrow">↓</div>
+
+  <div class="layer" style="border-color: var(--purple); background: var(--purple-bg);">
+    <div class="title" style="color: var(--purple);">appclasses/ — coeur métier</div>
+    <div class="row">
+      <div class="chip"><b>ClassApp.php</b> <span class="dim">ORM Mongo (CRUD générique)</span></div>
+      <div class="chip"><b>ClassSession.php</b></div>
+      <div class="chip"><b>ClassAppSite.php</b></div>
+      <div class="chip"><b>ClassMongoDb.php</b></div>
+      <div class="chip"><b>appcommon/MongoCompat.php</b> <span class="dim">toObjectId / toRegex / toDate / toFieldName</span></div>
+    </div>
+    <div class="dim" style="font-size:12px; margin-top:8px;">
+      Autorisation — <b>appfunc/function.php</b>: droit_table_enforce() → droit_table() → droit_table_multi() → droit()
+    </div>
+  </div>
+
+  <div class="arrow">↓ mongodb/mongodb v2+</div>
+
+  <div class="layer" style="border-color: var(--amber); background: var(--amber-bg);">
+    <div class="title" style="color: var(--amber);">MongoDB — collections schéma (pilotent l'UI)</div>
+    <div class="grid3">
+      <div class="chip">appscheme <span class="dim">(entités, codeAppscheme)</span></div>
+      <div class="chip">appscheme_field <span class="dim">(catalogue champs)</span></div>
+      <div class="chip">appscheme_has_field <span class="dim">(liaison)</span></div>
+      <div class="chip">appscheme_field_type <span class="dim">(text/number/date/prix/fk)</span></div>
+      <div class="chip">appscheme_field_group <span class="dim">(groupes UI)</span></div>
+      <div class="chip">appscheme_type <span class="dim">(enums)</span></div>
+    </div>
+  </div>
+
+  <div class="arrow">↓ génère les champs de</div>
+
+  <div class="layer" style="border-color: var(--green); background: var(--green-bg); margin-bottom: 24px;">
+    <div class="title" style="color: var(--green);">Collections métier (données réelles)</div>
+    <div class="row">
+      <div class="chip">produit, client, commande… <span class="dim">(PK entier idXxx)</span></div>
+      <div class="chip">agent → agent_groupe → agent_groupe_droit <span class="dim">(droits par table)</span></div>
+    </div>
+  </div>
+
+  <h2>Data skel — convention de nommage des champs</h2>
+  <p class="sub">codeAppscheme_field + ucfirst(codeAppscheme) → nom du champ stocké. Calculé via <code>MongoCompat::toFieldName($code,$table)</code>.</p>
+
+  <div class="twocol">
+<pre>// appscheme
+{ codeAppscheme: "produit", libelle: "Produit" }
+
+// appscheme_field
+{ codeAppschemeField: "nom", libelle: "Nom" }
+
+// appscheme_has_field (liaison)
+{ codeAppscheme: "produit",
+  codeAppschemeField: "nom",
+  idFieldType: "text",
+  idFieldGroup: "identification" }</pre>
+
+<pre>// → document "produit" (collection réelle)
+{ idproduit: 1042,
+  nomProduit: "Vis M6",        // nom + ucfirst(produit)
+  prixProduit: 3.5,
+  dateCreationProduit: ISODate("2026-01-10"),
+  idagentCreation: 7 }
+
+// json_scheme.php assemble, à partir des 6
+// collections appscheme*, le JSON consommé
+// en frontend: fieldModel / columnModel /
+// miniModel / defaultModel → window.APP.APPSCHEMES</pre>
+  </div>
+
+  <div class="note">
+    ⚠ Lecture (json_data*.php, json_scheme.php) pas protégée par droit_table — tout agent authentifié peut lire toute table.
+    Écriture (ClassAction CRUD, json_action.php) protégée + CSRF. Détails: SCHEMA-AUTH.md
+  </div>
+
+</div>
+</body>
+</html>
