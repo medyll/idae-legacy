@@ -27,7 +27,7 @@
   },
   "devDependencies": {
     "@medyll/idae-be": "^1.97.5",
-    "esbuild": "^0.20.2",
+    "esbuild": "^0.28.2",
     "nodemon": "^3.1.14",
     "sass": "^1.108.2"
   },
