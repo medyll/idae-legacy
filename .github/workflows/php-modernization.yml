@@ -19,6 +19,15 @@ jobs:
     steps:
       - name: Check out sources
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          fetch-depth: 2
+
+      - name: Check local dependency specs
+        # Deterministic guard (.github/scripts/check-portable-specs.py): Windows
+        # link:\ paths, local paths in published packages, link: under npm.
+        env:
+          BASE: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
+        run: python3 .github/scripts/check-portable-specs.py . --base "$BASE"
 
       - name: Build the application image
         run: docker build --tag idae-ci:verify .
